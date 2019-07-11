@@ -1,0 +1,9 @@
+Verified+1: Matthew Maurer <mmaurer@google.com>
+Autosubmit+1: Matthew Maurer <mmaurer@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Jeffrey Vander Stoep <jeffv@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Thu, 11 Jul 2019 23:31:47 +0000
+Reviewed-on: https://android-review.googlesource.com/c/toolchain/rustc/+/1014969
+Project: toolchain/rustc
+Branch: refs/heads/master
