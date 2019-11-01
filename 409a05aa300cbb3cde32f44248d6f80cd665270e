@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eace439b_f2f7b1a8",
+        "filename": "Android.bp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1002751
+      },
+      "writtenOn": "2019-11-01T21:09:54Z",
+      "side": 1,
+      "message": "run bpfmt",
+      "revId": "409a05aa300cbb3cde32f44248d6f80cd665270e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
