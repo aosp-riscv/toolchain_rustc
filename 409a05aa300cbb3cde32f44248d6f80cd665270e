@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0e8a5faa_651e0eac",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1416371
+      },
+      "writtenOn": "2019-11-04T18:47:54Z",
+      "side": 1,
+      "message": "Yes, the libraries will be built by Soong rather than by Cargo or build.py. This is needed to ensure that Rust binaries are built against platform Bionic, and to enable modification of the platform sysroot if needed.\n\nThere is not a simple Cargo command to build these libraries. For reference, see Xargo or the section I added to the design doc.",
+      "parentUuid": "b600fc2a_e8c21ec5",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 17
+      },
+      "revId": "409a05aa300cbb3cde32f44248d6f80cd665270e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "eace439b_f2f7b1a8",
         "filename": "Android.bp",
         "patchSetId": 1
