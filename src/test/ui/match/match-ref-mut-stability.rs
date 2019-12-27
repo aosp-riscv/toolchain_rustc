@@ -3,8 +3,11 @@
 
 // run-pass
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(bind_by_move_pattern_guards)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // Test that z always point to the same temporary.
 fn referent_stability() {
     let p;

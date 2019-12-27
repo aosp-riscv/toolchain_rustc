@@ -1,10 +1,14 @@
 error[E0282]: type annotations needed for `std::option::Option<_>`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/issue-42234-unknown-receiver-type.rs:7:5
+=======
+  --> $DIR/issue-42234-unknown-receiver-type.rs:7:7
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     let x: Option<_> = None;
    |         - consider giving `x` the explicit type `std::option::Option<_>`, where the type parameter `T` is specified
 LL |     x.unwrap().method_that_could_exist_on_some_type();
-   |     ^^^^^^^^^^ cannot infer type for `T`
+   |       ^^^^^^ cannot infer type for `T`
    |
    = note: type must be known at this point
 

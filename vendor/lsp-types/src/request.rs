@@ -271,6 +271,27 @@ pub enum GotoDefinitionResponse {
     Scalar(Location),
     Array(Vec<Location>),
     Link(Vec<LocationLink>),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+}
+
+impl From<Location> for GotoDefinitionResponse {
+    fn from(location: Location) -> Self {
+        GotoDefinitionResponse::Scalar(location)
+    }
+}
+
+impl From<Vec<Location>> for GotoDefinitionResponse {
+    fn from(locations: Vec<Location>) -> Self {
+        GotoDefinitionResponse::Array(locations)
+    }
+}
+
+impl From<Vec<LocationLink>> for GotoDefinitionResponse {
+    fn from(locations: Vec<LocationLink>) -> Self {
+        GotoDefinitionResponse::Link(locations)
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// The references request is sent from the client to the server to resolve project-wide references for the

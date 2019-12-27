@@ -189,6 +189,11 @@ cfg_if! {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+pub const ELAST: ::c_int = 96;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 extern {
     // Return type ::c_int was removed in FreeBSD 12
     pub fn setgrent() -> ::c_int;

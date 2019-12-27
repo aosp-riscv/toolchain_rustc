@@ -10,6 +10,7 @@ struct Wrap<T>(T);
 enum Enum {
     A = 0,
 }
+#[repr(C)]
 union TransmuteEnum {
     in1: &'static u8,
     in2: usize,
@@ -35,6 +36,10 @@ enum Enum2 {
     A = 2,
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#[repr(C)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 union TransmuteEnum2 {
     in1: usize,
     in2: &'static u8,
@@ -60,6 +65,7 @@ const BAD_ENUM2_OPTION_PTR: Option<Enum2> = unsafe { TransmuteEnum2 { in2: &0 }.
 
 // Invalid enum field content (mostly to test printing of paths for enum tuple
 // variants and tuples).
+#[repr(C)]
 union TransmuteChar {
     a: u32,
     b: char,

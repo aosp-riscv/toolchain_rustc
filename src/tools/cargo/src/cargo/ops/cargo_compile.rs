@@ -7,7 +7,12 @@
 //! rough outline is:
 //!
 //! - Resolve the dependency graph (see `ops::resolve`).
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! - Download any packages needed (see `PackageSet`).
+=======
+//! - Download any packages needed (see `PackageSet`). Note that dependency
+//!   downloads are deferred until `build_unit_dependencies`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 //! - Generate a list of top-level "units" of work for the targets the user
 //!   requested on the command-line. Each `Unit` corresponds to a compiler
 //!   invocation. This is done in this module (`generate_targets`).
@@ -27,12 +32,21 @@ use std::iter::FromIterator;
 use std::path::PathBuf;
 use std::sync::Arc;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use crate::core::compiler::standard_lib;
+use crate::core::compiler::unit_dependencies::build_unit_dependencies;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::core::compiler::{BuildConfig, BuildContext, Compilation, Context};
 use crate::core::compiler::{CompileMode, Kind, Unit};
 use crate::core::compiler::{DefaultExecutor, Executor, UnitInterner};
 use crate::core::profiles::{Profiles, UnitFor};
 use crate::core::resolver::{Resolve, ResolveOpts};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::core::{Package, Target};
+=======
+use crate::core::{LibKind, Package, PackageSet, Target};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::core::{PackageId, PackageIdSpec, TargetKind, Workspace};
 use crate::ops;
 use crate::util::config::Config;
@@ -103,7 +117,7 @@ impl Packages {
         Ok(match (all, exclude.len(), package.len()) {
             (false, 0, 0) => Packages::Default,
             (false, 0, _) => Packages::Packages(package),
-            (false, _, _) => failure::bail!("--exclude can only be used together with --all"),
+            (false, _, _) => failure::bail!("--exclude can only be used together with --workspace"),
             (true, 0, _) => Packages::All,
             (true, _, _) => Packages::OptOut(exclude),
         })
@@ -297,16 +311,47 @@ pub fn compile_ws<'a>(
         Kind::Host
     };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let specs = spec.to_package_id_specs(ws)?;
     let dev_deps = ws.require_optional_deps() || filter.need_dev_deps(build_config.mode);
     let opts = ResolveOpts::new(dev_deps, features, all_features, !no_default_features);
     let resolve = ops::resolve_ws_with_opts(ws, opts, &specs)?;
     let (packages, resolve_with_overrides) = resolve;
+=======
+    let profiles = ws.profiles();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+    let specs = spec.to_package_id_specs(ws)?;
+    let dev_deps = ws.require_optional_deps() || filter.need_dev_deps(build_config.mode);
+    let opts = ResolveOpts::new(dev_deps, features, all_features, !no_default_features);
+    let resolve = ops::resolve_ws_with_opts(ws, opts, &specs)?;
+    let (mut packages, resolve_with_overrides) = resolve;
+
+    let std_resolve = if let Some(crates) = &config.cli_unstable().build_std {
+        if build_config.requested_target.is_none() {
+            // TODO: This should eventually be fixed. Unfortunately it is not
+            // easy to get the host triple in BuildConfig. Consider changing
+            // requested_target to an enum, or some other approach.
+            failure::bail!("-Zbuild-std requires --target");
+        }
+        let (mut std_package_set, std_resolve) = standard_lib::resolve_std(ws, crates)?;
+        remove_dylib_crate_type(&mut std_package_set)?;
+        packages.add_set(std_package_set);
+        Some(std_resolve)
+    } else {
+        None
+    };
+
+    // Find the packages in the resolver that the user wants to build (those
+    // passed in with `-p` or the defaults from the workspace), and convert
+    // Vec<PackageIdSpec> to a Vec<&PackageId>.
     let to_build_ids = specs
         .iter()
         .map(|s| s.query(resolve_with_overrides.iter()))
         .collect::<CargoResult<Vec<_>>>()?;
+    // Now get the `Package` for each `PackageId`. This may trigger a download
+    // if the user specified `-p` for a dependency that is not downloaded.
+    // Dependencies will be downloaded during build_unit_dependencies.
     let mut to_builds = packages.get_many(to_build_ids)?;
 
     // The ordering here affects some error messages coming out of cargo, so
@@ -315,7 +360,7 @@ pub fn compile_ws<'a>(
     to_builds.sort_by_key(|p| p.package_id());
 
     for pkg in to_builds.iter() {
-        pkg.manifest().print_teapot(ws.config());
+        pkg.manifest().print_teapot(config);
 
         if build_config.mode.is_any_test()
             && !ws.is_member(pkg)
@@ -342,13 +387,15 @@ pub fn compile_ws<'a>(
         );
     }
 
-    let profiles = ws.profiles();
     profiles.validate_packages(&mut config.shell(), &packages)?;
 
     let interner = UnitInterner::new();
     let mut bcx = BuildContext::new(
         ws,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         &resolve_with_overrides,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         &packages,
         config,
         build_config,
@@ -366,6 +413,27 @@ pub fn compile_ws<'a>(
         &bcx,
     )?;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    let std_roots = if let Some(crates) = &config.cli_unstable().build_std {
+        // Only build libtest if it looks like it is needed.
+        let mut crates = crates.clone();
+        if !crates.iter().any(|c| c == "test")
+            && units
+                .iter()
+                .any(|unit| unit.mode.is_rustc_test() && unit.target.harness())
+        {
+            // Only build libtest when libstd is built (libtest depends on libstd)
+            if crates.iter().any(|c| c == "std") {
+                crates.push("test".to_string());
+            }
+        }
+        standard_lib::generate_std_roots(&bcx, &crates, std_resolve.as_ref().unwrap())?
+    } else {
+        Vec::new()
+    };
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     if let Some(args) = extra_args {
         if units.len() != 1 {
             failure::bail!(
@@ -385,9 +453,21 @@ pub fn compile_ws<'a>(
         }
     }
 
+    let unit_dependencies = build_unit_dependencies(
+        &bcx,
+        &resolve_with_overrides,
+        std_resolve.as_ref(),
+        &units,
+        &std_roots,
+    )?;
+
     let ret = {
         let _p = profile::start("compiling");
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let cx = Context::new(config, &bcx)?;
+=======
+        let cx = Context::new(config, &bcx, unit_dependencies)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         cx.compile(&units, export_dir.clone(), exec)?
     };
 
@@ -443,6 +523,12 @@ impl CompileFilter {
         all_bens: bool,
         all_targets: bool,
     ) -> CompileFilter {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        if all_targets {
+            return CompileFilter::new_all_targets();
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let rule_lib = if lib_only {
             LibRule::True
         } else {
@@ -453,18 +539,7 @@ impl CompileFilter {
         let rule_exms = FilterRule::new(exms, all_exms);
         let rule_bens = FilterRule::new(bens, all_bens);
 
-        if all_targets {
-            CompileFilter::Only {
-                all_targets: true,
-                lib: LibRule::Default,
-                bins: FilterRule::All,
-                examples: FilterRule::All,
-                benches: FilterRule::All,
-                tests: FilterRule::All,
-            }
-        } else {
-            CompileFilter::new(rule_lib, rule_bins, rule_tsts, rule_exms, rule_bens)
-        }
+        CompileFilter::new(rule_lib, rule_bins, rule_tsts, rule_exms, rule_bens)
     }
 
     /// Construct a CompileFilter from underlying primitives.
@@ -493,6 +568,17 @@ impl CompileFilter {
             CompileFilter::Default {
                 required_features_filterable: true,
             }
+        }
+    }
+
+    pub fn new_all_targets() -> CompileFilter {
+        CompileFilter::Only {
+            all_targets: true,
+            lib: LibRule::Default,
+            bins: FilterRule::All,
+            examples: FilterRule::All,
+            benches: FilterRule::All,
+            tests: FilterRule::All,
         }
     }
 
@@ -577,7 +663,11 @@ fn generate_targets<'a>(
     packages: &[&'a Package],
     filter: &CompileFilter,
     default_arch_kind: Kind,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     resolve: &Resolve,
+=======
+    resolve: &'a Resolve,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     bcx: &BuildContext<'a, '_>,
 ) -> CargoResult<Vec<Unit<'a>>> {
     // Helper for creating a `Unit` struct.
@@ -649,7 +739,13 @@ fn generate_targets<'a>(
             target_mode,
             bcx.build_config.release,
         );
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         bcx.units.intern(pkg, target, profile, kind, target_mode)
+=======
+        let features = resolve.features_sorted(pkg.package_id());
+        bcx.units
+            .intern(pkg, target, profile, kind, target_mode, features)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     };
 
     // Create a list of proposed targets.
@@ -936,4 +1032,36 @@ fn filter_targets<'a>(
         }
     }
     proposals
+}
+
+/// When using `-Zbuild-std` we're building the standard library, but a
+/// technical detail of the standard library right now is that it builds itself
+/// as both an `rlib` and a `dylib`. We don't actually want to really publicize
+/// the `dylib` and in general it's a pain to work with, so when building libstd
+/// we want to remove the `dylib` crate type.
+///
+/// Cargo doesn't have a fantastic way of doing that right now, so let's hack
+/// around it a bit and (ab)use the fact that we have mutable access to
+/// `PackageSet` here to rewrite downloaded packages. We iterate over all `path`
+/// packages (which should download immediately and not actually cause blocking
+/// here) and edit their manifests to only list one `LibKind` for an `Rlib`.
+fn remove_dylib_crate_type(set: &mut PackageSet<'_>) -> CargoResult<()> {
+    let ids = set
+        .package_ids()
+        .filter(|p| p.source_id().is_path())
+        .collect::<Vec<_>>();
+    set.get_many(ids.iter().cloned())?;
+
+    for id in ids {
+        let pkg = set.lookup_mut(id).expect("should be downloaded now");
+
+        for target in pkg.manifest_mut().targets_mut() {
+            if let TargetKind::Lib(crate_types) = target.kind_mut() {
+                crate_types.truncate(0);
+                crate_types.push(LibKind::Rlib);
+            }
+        }
+    }
+
+    Ok(())
 }

@@ -122,6 +122,17 @@ impl<T: ?Sized> Unique<T> {
     pub unsafe fn as_mut(&mut self) -> &mut T {
         &mut *self.as_ptr()
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+    /// Casts to a pointer of another type.
+    #[inline]
+    pub const fn cast<U>(self) -> Unique<U> {
+        unsafe {
+            Unique::new_unchecked(self.as_ptr() as *mut U)
+        }
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 #[unstable(feature = "ptr_internals", issue = "0")]

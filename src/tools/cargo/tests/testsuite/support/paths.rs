@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::env;
@@ -253,3 +254,5 @@ pub fn get_lib_extension(kind: &str) -> &str {
         _ => unreachable!(),
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

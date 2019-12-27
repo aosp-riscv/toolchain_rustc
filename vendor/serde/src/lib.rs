@@ -73,7 +73,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // Serde types in rustdoc of other crates get linked to here.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![doc(html_root_url = "https://docs.rs/serde/1.0.92")]
+=======
+#![doc(html_root_url = "https://docs.rs/serde/1.0.99")]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // Support using Serde without the standard library!
 #![cfg_attr(not(feature = "std"), no_std)]
 // Unstable functionality only if the user asks for it. For tracking and
@@ -81,8 +85,12 @@
 //
 //    https://github.com/serde-rs/serde/issues/812
 #![cfg_attr(feature = "unstable", feature(specialization, never_type))]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![cfg_attr(feature = "alloc", feature(alloc))]
 #![allow(unknown_lints, bare_trait_objects)]
+=======
+#![allow(unknown_lints, bare_trait_objects, deprecated)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![cfg_attr(feature = "cargo-clippy", allow(renamed_and_removed_lints))]
 #![cfg_attr(feature = "cargo-clippy", deny(clippy, clippy_pedantic))]
 // Ignored clippy and clippy_pedantic lints
@@ -90,13 +98,24 @@
     feature = "cargo-clippy",
     allow(
         // not available in our oldest supported compiler
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         const_static_lifetime,
+=======
+        checked_conversions,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         empty_enum,
         redundant_field_names,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // integer and float ser/de requires these sorts of casts
         cast_possible_truncation,
         cast_possible_wrap,
         cast_precision_loss,
+=======
+        redundant_static_lifetimes,
+        // integer and float ser/de requires these sorts of casts
+        cast_possible_truncation,
+        cast_possible_wrap,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         cast_sign_loss,
         // things are often more readable this way
         cast_lossless,
@@ -213,6 +232,17 @@ mod lib {
     #[cfg(range_inclusive)]
     pub use self::core::ops::RangeInclusive;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    #[cfg(all(feature = "std", std_atomic))]
+    pub use std::sync::atomic::{
+        AtomicBool, AtomicI16, AtomicI32, AtomicI8, AtomicIsize, AtomicU16, AtomicU32, AtomicU8,
+        AtomicUsize, Ordering,
+    };
+    #[cfg(all(feature = "std", std_atomic64))]
+    pub use std::sync::atomic::{AtomicI64, AtomicU64};
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     #[cfg(any(core_duration, feature = "std"))]
     pub use self::core::time::Duration;
 }

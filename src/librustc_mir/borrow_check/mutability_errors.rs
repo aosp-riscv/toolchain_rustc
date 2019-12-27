@@ -3,7 +3,11 @@ use rustc::hir;
 use rustc::hir::Node;
 use rustc::mir::{self, BindingForm, ClearCrossCrate, Local, Location, Body};
 use rustc::mir::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     Mutability, Place, PlaceRef, PlaceBase, Projection, ProjectionElem, Static, StaticKind
+=======
+    Mutability, Place, PlaceRef, PlaceBase, ProjectionElem, Static, StaticKind
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
 use rustc::ty::{self, Ty, TyCtxt};
 use rustc_data_structures::indexed_vec::Idx;
@@ -48,12 +52,20 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
         match the_place_err {
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 item_msg = format!("`{}`", access_place_desc.unwrap());
                 if let Place {
                     base: PlaceBase::Local(_),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     projection: None,
+=======
+                    projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 } = access_place {
                     reason = ", as it is not declared as mutable".to_string();
                 } else {
@@ -66,14 +78,22 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
 
             PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection:
                     Some(box Projection {
                         base,
                         elem: ProjectionElem::Field(upvar_index, _),
                     }),
+=======
+                projection: [proj_base @ .., ProjectionElem::Field(upvar_index, _)],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 debug_assert!(is_closure_or_generator(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Place::ty_from(&the_place_err.base, &base, self.body, self.infcx.tcx).ty
+=======
+                    Place::ty_from(&the_place_err.base, proj_base, self.body, self.infcx.tcx).ty
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ));
 
                 item_msg = format!("`{}`", access_place_desc.unwrap());
@@ -87,6 +107,7 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
 
             PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection:
                     Some(box Projection {
                         base,
@@ -95,6 +116,12 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
             } => {
                 if the_place_err.base == &PlaceBase::Local(Local::new(1)) &&
                     base.is_none() &&
+=======
+                projection: [proj_base @ .., ProjectionElem::Deref],
+            } => {
+                if the_place_err.base == &PlaceBase::Local(Local::new(1)) &&
+                    proj_base.is_empty() &&
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     !self.upvars.is_empty() {
                     item_msg = format!("`{}`", access_place_desc.unwrap());
                     debug_assert!(self.body.local_decls[Local::new(1)].ty.is_region_ptr());
@@ -115,7 +142,11 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
                             ", as `Fn` closures cannot mutate their captured variables".to_string()
                         }
                 } else if {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     if let (PlaceBase::Local(local), None) = (&the_place_err.base, base) {
+=======
+                    if let (PlaceBase::Local(local), []) = (&the_place_err.base, proj_base) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         self.body.local_decls[*local].is_ref_for_guard()
                     } else {
                         false
@@ -126,7 +157,11 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
                 } else {
                     let source = self.borrowed_content_source(PlaceRef {
                         base: the_place_err.base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         projection: base,
+=======
+                        projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     });
                     let pointer_type = source.describe_for_immutable_place();
                     opt_source = Some(source);
@@ -149,15 +184,23 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
             PlaceRef {
                 base:
                     PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         kind: StaticKind::Promoted(_),
                         ..
                     }),
                 projection: None,
+=======
+                        kind: StaticKind::Promoted(..),
+                        ..
+                    }),
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => unreachable!(),
 
             PlaceRef {
                 base:
                     PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         kind: StaticKind::Static(def_id),
                         ..
                     }),
@@ -166,6 +209,17 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
                 if let Place {
                     base: PlaceBase::Static(_),
                     projection: None,
+=======
+                        kind: StaticKind::Static,
+                        def_id,
+                        ..
+                    }),
+                projection: [],
+            } => {
+                if let Place {
+                    base: PlaceBase::Static(_),
+                    projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 } = access_place {
                     item_msg = format!("immutable static item `{}`", access_place_desc.unwrap());
                     reason = String::new();
@@ -178,33 +232,49 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
 
             PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection:
                     Some(box Projection {
                         base: _,
                         elem: ProjectionElem::Index(_),
                     }),
+=======
+                projection: [.., ProjectionElem::Index(_)],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             | PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection:
                     Some(box Projection {
                         base: _,
                         elem: ProjectionElem::ConstantIndex { .. },
                     }),
+=======
+                projection: [.., ProjectionElem::ConstantIndex { .. }],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             | PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: _,
                     elem: ProjectionElem::Subslice { .. },
                 }),
+=======
+                projection: [.., ProjectionElem::Subslice { .. }],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             | PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: _,
                     elem: ProjectionElem::Downcast(..),
                 }),
+=======
+                projection: [.., ProjectionElem::Downcast(..)],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => bug!("Unexpected immutable place."),
         }
 
@@ -262,6 +332,7 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
             // after the field access).
             PlaceRef {
                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: Some(box Projection {
                         base: Some(box Projection {
@@ -272,12 +343,23 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
                     }),
                     elem: ProjectionElem::Deref,
                 }),
+=======
+                projection: [proj_base @ ..,
+                             ProjectionElem::Deref,
+                             ProjectionElem::Field(field, _),
+                             ProjectionElem::Deref,
+                ],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 err.span_label(span, format!("cannot {ACT}", ACT = act));
 
                 if let Some((span, message)) = annotate_struct_field(
                     self.infcx.tcx,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Place::ty_from(&base, &base_proj, self.body, self.infcx.tcx).ty,
+=======
+                    Place::ty_from(base, proj_base, self.body, self.infcx.tcx).ty,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     field,
                 ) {
                     err.span_suggestion(
@@ -292,7 +374,11 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
             // Suggest removing a `&mut` from the use of a mutable reference.
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } if {
                 self.body.local_decls.get(*local).map(|local_decl| {
                     if let ClearCrossCrate::Set(
@@ -328,7 +414,11 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
             // variable) mutations...
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } if self.body.local_decls[*local].can_be_made_mutable() => {
                 // ... but it doesn't make sense to suggest it on
                 // variables that are `ref x`, `ref mut x`, `&self`,
@@ -349,13 +439,21 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
             // Also suggest adding mut for upvars
             PlaceRef {
                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: proj_base,
                     elem: ProjectionElem::Field(upvar_index, _),
                 }),
+=======
+                projection: [proj_base @ .., ProjectionElem::Field(upvar_index, _)],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 debug_assert!(is_closure_or_generator(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Place::ty_from(&base, &proj_base, self.body, self.infcx.tcx).ty
+=======
+                    Place::ty_from(base, proj_base, self.body, self.infcx.tcx).ty
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ));
 
                 err.span_label(span, format!("cannot {ACT}", ACT = act));
@@ -385,7 +483,11 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
             // a local variable, then just suggest the user remove it.
             PlaceRef {
                 base: PlaceBase::Local(_),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } if {
                     if let Ok(snippet) = self.infcx.tcx.sess.source_map().span_to_snippet(span) {
                         snippet.starts_with("&mut ")
@@ -400,10 +502,14 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
 
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: None,
                     elem: ProjectionElem::Deref,
                 }),
+=======
+                projection: [ProjectionElem::Deref],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } if {
                 if let Some(ClearCrossCrate::Set(BindingForm::RefForGuard)) =
                     self.body.local_decls[*local].is_user_variable
@@ -427,10 +533,14 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
             // arbitrary base for the projection?
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: None,
                     elem: ProjectionElem::Deref,
                 }),
+=======
+                projection: [ProjectionElem::Deref],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } if self.body.local_decls[*local].is_user_variable.is_some() =>
             {
                 let local_decl = &self.body.local_decls[*local];
@@ -510,10 +620,14 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
 
             PlaceRef {
                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: None,
                     elem: ProjectionElem::Deref,
                 }),
+=======
+                projection: [ProjectionElem::Deref],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             // FIXME document what is this 1 magic number about
             } if *base == PlaceBase::Local(Local::new(1)) &&
                   !self.upvars.is_empty() =>
@@ -527,10 +641,14 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
 
             PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: _,
                     elem: ProjectionElem::Deref,
                 }),
+=======
+                projection: [.., ProjectionElem::Deref],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 err.span_label(span, format!("cannot {ACT}", ACT = act));
 
@@ -711,10 +829,17 @@ fn annotate_struct_field(
 }
 
 /// If possible, suggest replacing `ref` with `ref mut`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn suggest_ref_mut(tcx: TyCtxt<'_>, binding_span: Span) -> Option<(String)> {
     let hi_src = tcx.sess.source_map().span_to_snippet(binding_span).unwrap();
     if hi_src.starts_with("ref")
         && hi_src["ref".len()..].starts_with(Pattern_White_Space)
+=======
+fn suggest_ref_mut(tcx: TyCtxt<'_>, binding_span: Span) -> Option<String> {
+    let hi_src = tcx.sess.source_map().span_to_snippet(binding_span).ok()?;
+    if hi_src.starts_with("ref")
+        && hi_src["ref".len()..].starts_with(rustc_lexer::is_whitespace)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     {
         let replacement = format!("ref mut{}", &hi_src["ref".len()..]);
         Some(replacement)

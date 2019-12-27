@@ -1,6 +1,7 @@
 error[E0277]: `(dyn Dummy + 'a)` cannot be shared between threads safely
   --> $DIR/kindck-send-object1.rs:10:5
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL |     assert_send::<&'a dyn Dummy>();
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `(dyn Dummy + 'a)` cannot be shared between threads safely
    |
@@ -26,6 +27,29 @@ note: required by `assert_send`
    |
 LL | fn assert_send<T:Send+'static>() { }
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=======
+LL | fn assert_send<T:Send+'static>() { }
+   |    -----------   ---- required by this bound in `assert_send`
+...
+LL |     assert_send::<&'a dyn Dummy>();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `(dyn Dummy + 'a)` cannot be shared between threads safely
+   |
+   = help: the trait `std::marker::Sync` is not implemented for `(dyn Dummy + 'a)`
+   = note: required because of the requirements on the impl of `std::marker::Send` for `&'a (dyn Dummy + 'a)`
+
+error[E0277]: `(dyn Dummy + 'a)` cannot be sent between threads safely
+  --> $DIR/kindck-send-object1.rs:29:5
+   |
+LL | fn assert_send<T:Send+'static>() { }
+   |    -----------   ---- required by this bound in `assert_send`
+...
+LL |     assert_send::<Box<dyn Dummy + 'a>>();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `(dyn Dummy + 'a)` cannot be sent between threads safely
+   |
+   = help: the trait `std::marker::Send` is not implemented for `(dyn Dummy + 'a)`
+   = note: required because of the requirements on the impl of `std::marker::Send` for `std::ptr::Unique<(dyn Dummy + 'a)>`
+   = note: required because it appears within the type `std::boxed::Box<(dyn Dummy + 'a)>`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 2 previous errors
 

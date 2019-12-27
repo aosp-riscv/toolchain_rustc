@@ -8,7 +8,9 @@ use std::hash::Hash;
 use rustc::mir;
 use rustc::mir::interpret::truncate;
 use rustc::ty::{self, Ty};
-use rustc::ty::layout::{self, Size, Align, LayoutOf, TyLayout, HasDataLayout, VariantIdx};
+use rustc::ty::layout::{
+    self, Size, Align, LayoutOf, TyLayout, HasDataLayout, VariantIdx, PrimitiveExt
+};
 use rustc::ty::TypeFoldable;
 
 use super::{
@@ -45,7 +47,7 @@ pub enum Place<Tag=(), Id=AllocId> {
 
 #[derive(Copy, Clone, Debug)]
 pub struct PlaceTy<'tcx, Tag=()> {
-    place: Place<Tag>,
+    place: Place<Tag>, // Keep this private, it helps enforce invariants
     pub layout: TyLayout<'tcx>,
 }
 
@@ -277,6 +279,13 @@ where
 {
     /// Take a value, which represents a (thin or fat) reference, and make it a place.
     /// Alignment is just based on the type.  This is the inverse of `MemPlace::to_ref()`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    ///
+    /// Only call this if you are sure the place is "valid" (aligned and inbounds), or do not
+    /// want to ever use the place for memory access!
+    /// Generally prefer `deref_operand`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn ref_to_mplace(
         &self,
         val: ImmTy<'tcx, M::PointerTag>,
@@ -304,6 +313,7 @@ where
     ) -> InterpResult<'tcx, MPlaceTy<'tcx, M::PointerTag>> {
         let val = self.read_immediate(src)?;
         trace!("deref to {} on {:?}", val.layout.ty, *val);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.ref_to_mplace(val)
     }
 
@@ -334,9 +344,62 @@ where
         mut place: MPlaceTy<'tcx, M::PointerTag>,
     ) -> InterpResult<'tcx, MPlaceTy<'tcx, M::PointerTag>> {
         place.mplace.ptr = self.force_ptr(place.mplace.ptr)?.into();
+=======
+        let place = self.ref_to_mplace(val)?;
+        self.mplace_access_checked(place)
+    }
+
+    /// Check if the given place is good for memory access with the given
+    /// size, falling back to the layout's size if `None` (in the latter case,
+    /// this must be a statically sized type).
+    ///
+    /// On success, returns `None` for zero-sized accesses (where nothing else is
+    /// left to do) and a `Pointer` to use for the actual access otherwise.
+    #[inline]
+    pub fn check_mplace_access(
+        &self,
+        place: MPlaceTy<'tcx, M::PointerTag>,
+        size: Option<Size>,
+    ) -> InterpResult<'tcx, Option<Pointer<M::PointerTag>>> {
+        let size = size.unwrap_or_else(|| {
+            assert!(!place.layout.is_unsized());
+            assert!(place.meta.is_none());
+            place.layout.size
+        });
+        self.memory.check_ptr_access(place.ptr, size, place.align)
+    }
+
+    /// Return the "access-checked" version of this `MPlace`, where for non-ZST
+    /// this is definitely a `Pointer`.
+    pub fn mplace_access_checked(
+        &self,
+        mut place: MPlaceTy<'tcx, M::PointerTag>,
+    ) -> InterpResult<'tcx, MPlaceTy<'tcx, M::PointerTag>> {
+        let (size, align) = self.size_and_align_of_mplace(place)?
+            .unwrap_or((place.layout.size, place.layout.align.abi));
+        assert!(place.mplace.align <= align, "dynamic alignment less strict than static one?");
+        place.mplace.align = align; // maximally strict checking
+        // When dereferencing a pointer, it must be non-NULL, aligned, and live.
+        if let Some(ptr) = self.check_mplace_access(place, Some(size))? {
+            place.mplace.ptr = ptr.into();
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         Ok(place)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    /// Force `place.ptr` to a `Pointer`.
+    /// Can be helpful to avoid lots of `force_ptr` calls later, if this place is used a lot.
+    pub fn force_mplace_ptr(
+        &self,
+        mut place: MPlaceTy<'tcx, M::PointerTag>,
+    ) -> InterpResult<'tcx, MPlaceTy<'tcx, M::PointerTag>> {
+        place.mplace.ptr = self.force_ptr(place.mplace.ptr)?.into();
+        Ok(place)
+    }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Offset a pointer to project to a field. Unlike `place_field`, this is always
     /// possible without allocating, so it can take `&self`. Also return the field's layout.
     /// This supports both struct and array fields.
@@ -563,19 +626,29 @@ where
         use rustc::mir::StaticKind;
 
         Ok(match place_static.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             StaticKind::Promoted(promoted) => {
                 let instance = self.frame().instance;
+=======
+            StaticKind::Promoted(promoted, promoted_substs) => {
+                let substs = self.subst_from_frame_and_normalize_erasing_regions(promoted_substs);
+                let instance = ty::Instance::new(place_static.def_id, substs);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.const_eval_raw(GlobalId {
                     instance,
                     promoted: Some(promoted),
                 })?
             }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             StaticKind::Static(def_id) => {
+=======
+            StaticKind::Static => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let ty = place_static.ty;
                 assert!(!ty.needs_subst());
                 let layout = self.layout_of(ty)?;
-                let instance = ty::Instance::mono(*self.tcx, def_id);
+                let instance = ty::Instance::mono(*self.tcx, place_static.def_id);
                 let cid = GlobalId {
                     instance,
                     promoted: None
@@ -606,10 +679,15 @@ where
     /// place; for reading, a more efficient alternative is `eval_place_for_read`.
     pub fn eval_place(
         &mut self,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         mir_place: &mir::Place<'tcx>,
+=======
+        place: &mir::Place<'tcx>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     ) -> InterpResult<'tcx, PlaceTy<'tcx, M::PointerTag>> {
         use rustc::mir::PlaceBase;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         mir_place.iterate(|place_base, place_projection| {
             let mut place = match place_base {
                 PlaceBase::Local(mir::RETURN_PLACE) => match self.frame().return_place {
@@ -642,6 +720,41 @@ where
             self.dump_place(place.place);
             Ok(place)
         })
+=======
+        let mut place_ty = match &place.base {
+            PlaceBase::Local(mir::RETURN_PLACE) => match self.frame().return_place {
+                Some(return_place) => {
+                    // We use our layout to verify our assumption; caller will validate
+                    // their layout on return.
+                    PlaceTy {
+                        place: *return_place,
+                        layout: self.layout_of(
+                            self.subst_from_frame_and_normalize_erasing_regions(
+                                self.frame().body.return_ty()
+                            )
+                        )?,
+                    }
+                }
+                None => throw_unsup!(InvalidNullPointerUsage),
+            },
+            PlaceBase::Local(local) => PlaceTy {
+                // This works even for dead/uninitialized locals; we check further when writing
+                place: Place::Local {
+                    frame: self.cur_frame(),
+                    local: *local,
+                },
+                layout: self.layout_of_local(self.frame(), *local, None)?,
+            },
+            PlaceBase::Static(place_static) => self.eval_static_to_mplace(&place_static)?.into(),
+        };
+
+        for elem in place.projection.iter() {
+            place_ty = self.place_projection(place_ty, elem)?
+        }
+
+        self.dump_place(place_ty.place);
+        Ok(place_ty)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Write a scalar to a place
@@ -750,7 +863,13 @@ where
         // to handle padding properly, which is only correct if we never look at this data with the
         // wrong type.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let ptr = match self.check_mplace_access(dest, None)? {
+=======
+        let ptr = match self.check_mplace_access(dest, None)
+            .expect("places should be checked on creation")
+        {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             Some(ptr) => ptr,
             None => return Ok(()), // zero-sized access
         };
@@ -853,8 +972,15 @@ where
         });
         assert_eq!(src.meta, dest.meta, "Can only copy between equally-sized instances");
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let src = self.check_mplace_access(src, Some(size))?;
         let dest = self.check_mplace_access(dest, Some(size))?;
+=======
+        let src = self.check_mplace_access(src, Some(size))
+            .expect("places should be checked on creation");
+        let dest = self.check_mplace_access(dest, Some(size))
+            .expect("places should be checked on creation");
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let (src_ptr, dest_ptr) = match (src, dest) {
             (Some(src_ptr), Some(dest_ptr)) => (src_ptr, dest_ptr),
             (None, None) => return Ok(()), // zero-sized copy
@@ -999,7 +1125,11 @@ where
             }
             layout::Variants::Multiple {
                 discr_kind: layout::DiscriminantKind::Tag,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 ref discr,
+=======
+                discr: ref discr_layout,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 discr_index,
                 ..
             } => {
@@ -1010,7 +1140,7 @@ where
                 // raw discriminants for enums are isize or bigger during
                 // their computation, but the in-memory tag is the smallest possible
                 // representation
-                let size = discr.value.size(self);
+                let size = discr_layout.value.size(self);
                 let discr_val = truncate(discr_val, size);
 
                 let discr_dest = self.place_field(dest, discr_index as u64)?;
@@ -1022,6 +1152,10 @@ where
                     ref niche_variants,
                     niche_start,
                 },
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+                discr: ref discr_layout,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 discr_index,
                 ..
             } => {
@@ -1029,6 +1163,7 @@ where
                     variant_index.as_usize() < dest.layout.ty.ty_adt_def().unwrap().variants.len(),
                 );
                 if variant_index != dataful_variant {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let niche_dest =
                         self.place_field(dest, discr_index as u64)?;
                     let niche_value = variant_index.as_u32() - niche_variants.start().as_u32();
@@ -1037,7 +1172,26 @@ where
                     self.write_scalar(
                         Scalar::from_uint(niche_value, niche_dest.layout.size),
                         niche_dest
+=======
+                    let variants_start = niche_variants.start().as_u32();
+                    let variant_index_relative = variant_index.as_u32()
+                        .checked_sub(variants_start)
+                        .expect("overflow computing relative variant idx");
+                    // We need to use machine arithmetic when taking into account `niche_start`:
+                    // discr_val = variant_index_relative + niche_start_val
+                    let discr_layout = self.layout_of(discr_layout.value.to_int_ty(*self.tcx))?;
+                    let niche_start_val = ImmTy::from_uint(niche_start, discr_layout);
+                    let variant_index_relative_val =
+                        ImmTy::from_uint(variant_index_relative, discr_layout);
+                    let discr_val = self.binary_op(
+                        mir::BinOp::Add,
+                        variant_index_relative_val,
+                        niche_start_val,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     )?;
+                    // Write result.
+                    let niche_dest = self.place_field(dest, discr_index as u64)?;
+                    self.write_immediate(*discr_val, niche_dest)?;
                 }
             }
         }

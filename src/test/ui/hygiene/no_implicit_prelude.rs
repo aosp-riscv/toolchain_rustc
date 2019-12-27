@@ -13,7 +13,11 @@ mod bar {
     }
     fn f() {
         ::foo::m!();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         assert_eq!(0, 0); //~ ERROR cannot find macro `panic!` in this scope
+=======
+        assert_eq!(0, 0); //~ ERROR cannot find macro `panic` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 

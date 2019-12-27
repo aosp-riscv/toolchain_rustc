@@ -8,7 +8,10 @@
 #![feature(nll)]
 #![feature(proc_macro_internals)]
 #![feature(proc_macro_quote)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(rustc_diagnostic_macros)]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(rustc_private)]
 #![feature(slice_patterns)]
 #![feature(specialization)]
@@ -23,7 +26,11 @@ extern crate rustc;
 #[macro_use]
 extern crate rustc_data_structures;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 mod error_codes;
+=======
+pub mod error_codes;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 mod index;
 mod encoder;
@@ -68,5 +75,3 @@ pub fn validate_crate_name(
         sess.unwrap().abort_if_errors();
     }
 }
-
-__build_diagnostic_array! { librustc_metadata, DIAGNOSTICS }

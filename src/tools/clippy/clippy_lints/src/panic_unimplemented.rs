@@ -69,8 +69,15 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for PanicUnimplemented {
 
 fn get_outer_span(expr: &Expr) -> Span {
     if_chain! {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if let Some(first) = expr.span.ctxt().outer_expn_info();
         if let Some(second) = first.call_site.ctxt().outer_expn_info();
+=======
+        if expr.span.from_expansion();
+        let first = expr.span.ctxt().outer_expn_data();
+        if first.call_site.from_expansion();
+        let second = first.call_site.ctxt().outer_expn_data();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         then {
             second.call_site
         } else {

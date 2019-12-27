@@ -137,6 +137,7 @@ sub name_synopsis()
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 # Check if SECTION is located before BEFORE
 sub check_section_location()
 {
@@ -148,6 +149,19 @@ sub check_section_location()
     return unless $contents =~ /=head1 $section/
         and $contents =~ /=head1 $before/;
     print "$filename: $section should be placed before $before section\n"
+=======
+# Check if SECTION ($3) is located before BEFORE ($4)
+sub check_section_location()
+{
+    my $id = shift;
+    my $contents = shift;
+    my $section = shift;
+    my $before = shift;
+
+    return
+        unless $contents =~ /=head1 $section/ and $contents =~ /=head1 $before/;
+    print "$id $section should be placed before $before section\n"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         if $contents =~ /=head1 $before.*=head1 $section/ms;
 }
 
@@ -173,6 +187,13 @@ sub check()
 
     my $id = "${filename}:1:";
 
+    # Check ordering of some sections in man3
+    if ( $filename =~ m|man3/| ) {
+        &check_section_location($id, $contents, "RETURN VALUES", "EXAMPLES");
+        &check_section_location($id, $contents, "SEE ALSO", "HISTORY");
+        &check_section_location($id, $contents, "EXAMPLES", "SEE ALSO");
+    }
+
     &name_synopsis($id, $filename, $contents)
         unless $contents =~ /=for comment generic/
             or $filename =~ m@man[157]/@;
@@ -183,6 +204,10 @@ sub check()
         if $contents !~ /=cut\n$/;
     print "$id more than one cut line.\n"
         if $contents =~ /=cut.*=cut/ms;
+    print "$id EXAMPLE not EXAMPLES section.\n"
+        if $contents =~ /=head1 EXAMPLE[^S]/;
+    print "$id WARNING not WARNINGS section.\n"
+        if $contents =~ /=head1 WARNING[^S]/;
     print "$id missing copyright\n"
         if $contents !~ /Copyright .* The OpenSSL Project Authors/;
     print "$id copyright not last\n"

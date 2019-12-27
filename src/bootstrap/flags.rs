@@ -36,7 +36,11 @@ pub struct Flags {
     // This overrides the deny-warnings configuation option,
     // which passes -Dwarnings to the compiler invocations.
     //
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // true => deny, false => allow
+=======
+    // true => deny, false => warn
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub deny_warnings: Option<bool>,
 }
 
@@ -556,10 +560,17 @@ fn split(s: &[String]) -> Vec<String> {
 fn parse_deny_warnings(matches: &getopts::Matches) -> Option<bool> {
     match matches.opt_str("warnings").as_ref().map(|v| v.as_str()) {
         Some("deny") => Some(true),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Some("allow") => Some(false),
         Some(value) => {
             eprintln!(
                 r#"invalid value for --warnings: {:?}, expected "allow" or "deny""#,
+=======
+        Some("warn") => Some(false),
+        Some(value) => {
+            eprintln!(
+                r#"invalid value for --warnings: {:?}, expected "warn" or "deny""#,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 value,
                 );
             process::exit(1);

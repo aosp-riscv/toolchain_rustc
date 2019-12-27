@@ -64,7 +64,19 @@ mod bit;
 mod cache;
 
 cfg_if! {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
+=======
+    if #[cfg(miri)] {
+        // When running under miri all target-features that are not enabled at
+        // compile-time are reported as disabled at run-time.
+        //
+        // For features for which `cfg(target_feature)` returns true,
+        // this run-time detection logic is never called.
+        #[path = "os/other.rs"]
+        mod os;
+    } else if #[cfg(any(target_arch = "x86", target_arch = "x86_64"))] {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // On x86/x86_64 no OS specific functionality is required.
         #[path = "os/x86.rs"]
         mod os;

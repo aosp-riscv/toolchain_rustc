@@ -12,9 +12,12 @@ pub mod derived_property {
 }
 pub mod conversions {
     pub use crate::unicode::tables::conversions::{to_lower, to_upper};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 }
 
 // For use in libsyntax
 pub mod property {
     pub use crate::unicode::tables::property::Pattern_White_Space;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

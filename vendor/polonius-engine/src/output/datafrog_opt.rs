@@ -11,14 +11,23 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::time::Instant;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use crate::output::initialization;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::output::liveness;
 use crate::output::Output;
 
 use datafrog::{Iteration, Relation, RelationLeaper};
 use facts::{AllFacts, Atom};
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub(super) fn compute<Region: Atom, Loan: Atom, Point: Atom, Variable: Atom>(
+=======
+pub(super) fn compute<Region: Atom, Loan: Atom, Point: Atom, Variable: Atom, MovePath: Atom>(
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     dump_enabled: bool,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     all_facts: AllFacts<Region, Loan, Point, Variable>,
 ) -> Output<Region, Loan, Point, Variable> {
     let mut result = Output::new(dump_enabled);
@@ -31,6 +40,30 @@ pub(super) fn compute<Region: Atom, Loan: Atom, Point: Atom, Variable: Atom>(
         all_facts.var_initialized_on_exit,
         &all_facts.cfg_edge,
         all_facts.region_live_at,
+=======
+    all_facts: AllFacts<Region, Loan, Point, Variable, MovePath>,
+) -> Output<Region, Loan, Point, Variable, MovePath> {
+    let mut result = Output::new(dump_enabled);
+
+    let var_maybe_initialized_on_exit = initialization::init_var_maybe_initialized_on_exit(
+        all_facts.child,
+        all_facts.path_belongs_to_var,
+        all_facts.initialized_at,
+        all_facts.moved_out_at,
+        all_facts.path_accessed_at,
+        &all_facts.cfg_edge,
+        &mut result,
+    );
+
+    let region_live_at = liveness::init_region_live_at(
+        all_facts.var_used,
+        all_facts.var_drop_used,
+        all_facts.var_defined,
+        all_facts.var_uses_region,
+        all_facts.var_drops_region,
+        var_maybe_initialized_on_exit,
+        &all_facts.cfg_edge,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         all_facts.universal_region,
         &mut result,
     );

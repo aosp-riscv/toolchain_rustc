@@ -11,8 +11,13 @@ crate-type = ["dylib"]
 
 [dependencies]
 graphviz = { path = "../libgraphviz" }
+lazy_static = "1.0"
 log = "0.4"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 env_logger = { version = "0.5", default-features = false }
+=======
+env_logger = { version = "0.6", default-features = false }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 rustc = { path = "../librustc" }
 rustc_target = { path = "../librustc_target" }
 rustc_ast_borrowck = { path = "../librustc_ast_borrowck" }
@@ -20,6 +25,11 @@ rustc_data_structures = { path = "../librustc_data_structures" }
 errors = { path = "../librustc_errors", package = "rustc_errors" }
 rustc_metadata = { path = "../librustc_metadata" }
 rustc_mir = { path = "../librustc_mir" }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+rustc_plugin = { path = "../librustc_plugin/deprecated" } # To get this in the sysroot
+rustc_plugin_impl = { path = "../librustc_plugin" }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 rustc_save_analysis = { path = "../librustc_save_analysis" }
 rustc_codegen_utils = { path = "../librustc_codegen_utils" }
 rustc_interface = { path = "../librustc_interface" }

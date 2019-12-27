@@ -30,6 +30,7 @@ fn rustfmt(args: &[&str]) -> (String, String) {
 }
 
 macro_rules! assert_that {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ($args:expr, $check:ident $check_args:tt) => {
         let (stdout, stderr) = rustfmt($args);
         if !stdout.$check$check_args && !stderr.$check$check_args {
@@ -75,4 +76,75 @@ fn print_config() {
         stderr
     );
     remove_file("minimal-config").unwrap();
+=======
+    ($args:expr, $($check:ident $check_args:tt)&&+) => {
+        let (stdout, stderr) = rustfmt($args);
+        if $(!stdout.$check$check_args && !stderr.$check$check_args)||* {
+            panic!(
+                "Output not expected for rustfmt {:?}\n\
+                 expected: {}\n\
+                 actual stdout:\n{}\n\
+                 actual stderr:\n{}",
+                $args,
+                stringify!($( $check$check_args )&&*),
+                stdout,
+                stderr
+            );
+        }
+    };
+}
+
+#[ignore]
+#[test]
+fn print_config() {
+    assert_that!(
+        &["--print-config", "unknown"],
+        starts_with("Unknown print-config option")
+    );
+    assert_that!(&["--print-config", "default"], contains("max_width = 100"));
+    assert_that!(&["--print-config", "minimal"], contains("PATH required"));
+    assert_that!(
+        &["--print-config", "minimal", "minimal-config"],
+        contains("doesn't work with standard input.")
+    );
+
+    let (stdout, stderr) = rustfmt(&[
+        "--print-config",
+        "minimal",
+        "minimal-config",
+        "src/shape.rs",
+    ]);
+    assert!(
+        Path::new("minimal-config").exists(),
+        "stdout:\n{}\nstderr:\n{}",
+        stdout,
+        stderr
+    );
+    remove_file("minimal-config").unwrap();
+}
+
+#[ignore]
+#[test]
+fn inline_config() {
+    // single invocation
+    assert_that!(
+        &[
+            "--print-config",
+            "current",
+            ".",
+            "--config=color=Never,edition=2018"
+        ],
+        contains("color = \"Never\"") && contains("edition = \"2018\"")
+    );
+
+    // multiple overriding invocations
+    assert_that!(
+        &["--print-config", "current", ".",
+        "--config", "color=never,edition=2018",
+        "--config", "color=always,format_strings=true"],
+        contains("color = \"Always\"") &&
+        contains("edition = \"2018\"") &&
+        contains("format_strings = true")
+    );
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

@@ -48,6 +48,7 @@ pub struct UnitInner<'a> {
     pub kind: Kind,
     /// The "mode" this unit is being compiled for. See [`CompileMode`] for more details.
     pub mode: CompileMode,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 }
 
 impl UnitInner<'_> {
@@ -146,6 +147,112 @@ impl<'a> UnitInterner<'a> {
             profile,
             kind,
             mode,
+=======
+    /// The `cfg` features to enable for this unit.
+    /// This must be sorted.
+    pub features: Vec<&'a str>,
+}
+
+impl UnitInner<'_> {
+    /// Returns whether compilation of this unit requires all upstream artifacts
+    /// to be available.
+    ///
+    /// This effectively means that this unit is a synchronization point (if the
+    /// return value is `true`) that all previously pipelined units need to
+    /// finish in their entirety before this one is started.
+    pub fn requires_upstream_objects(&self) -> bool {
+        self.mode.is_any_test() || self.target.kind().requires_upstream_objects()
+    }
+}
+
+impl<'a> Unit<'a> {
+    pub fn buildkey(&self) -> String {
+        format!("{}-{}", self.pkg.name(), short_hash(self))
+    }
+}
+
+// Just hash the pointer for fast hashing
+impl<'a> Hash for Unit<'a> {
+    fn hash<H: Hasher>(&self, hasher: &mut H) {
+        (self.inner as *const UnitInner<'a>).hash(hasher)
+    }
+}
+
+// Just equate the pointer since these are interned
+impl<'a> PartialEq for Unit<'a> {
+    fn eq(&self, other: &Unit<'a>) -> bool {
+        self.inner as *const UnitInner<'a> == other.inner as *const UnitInner<'a>
+    }
+}
+
+impl<'a> Eq for Unit<'a> {}
+
+impl<'a> Deref for Unit<'a> {
+    type Target = UnitInner<'a>;
+
+    fn deref(&self) -> &UnitInner<'a> {
+        self.inner
+    }
+}
+
+impl<'a> fmt::Debug for Unit<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Unit")
+            .field("pkg", &self.pkg)
+            .field("target", &self.target)
+            .field("profile", &self.profile)
+            .field("kind", &self.kind)
+            .field("mode", &self.mode)
+            .field("features", &self.features)
+            .finish()
+    }
+}
+
+/// A small structure used to "intern" `Unit` values.
+///
+/// A `Unit` is just a thin pointer to an internal `UnitInner`. This is done to
+/// ensure that `Unit` itself is quite small as well as enabling a very
+/// efficient hash/equality implementation for `Unit`. All units are
+/// manufactured through an interner which guarantees that each equivalent value
+/// is only produced once.
+pub struct UnitInterner<'a> {
+    state: RefCell<InternerState<'a>>,
+}
+
+struct InternerState<'a> {
+    cache: HashSet<Box<UnitInner<'a>>>,
+}
+
+impl<'a> UnitInterner<'a> {
+    /// Creates a new blank interner
+    pub fn new() -> UnitInterner<'a> {
+        UnitInterner {
+            state: RefCell::new(InternerState {
+                cache: HashSet::new(),
+            }),
+        }
+    }
+
+    /// Creates a new `unit` from its components. The returned `Unit`'s fields
+    /// will all be equivalent to the provided arguments, although they may not
+    /// be the exact same instance.
+    pub fn intern(
+        &'a self,
+        pkg: &'a Package,
+        target: &'a Target,
+        profile: Profile,
+        kind: Kind,
+        mode: CompileMode,
+        features: Vec<&'a str>,
+    ) -> Unit<'a> {
+        let inner = self.intern_inner(&UnitInner {
+            pkg,
+            target,
+            profile,
+            kind,
+            mode,
+            features,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         });
         Unit { inner }
     }

@@ -1,8 +1,16 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0005]: refutable pattern in local binding: `std::i32::MIN..=-1i32` not covered
+=======
+error[E0005]: refutable pattern in local binding: `std::i32::MIN..=-1i32` and `1i32..=std::i32::MAX` not covered
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/const-match-check.rs:31:24
    |
 LL |     let x: [i32; { let 0 = 0; 0 }] = [];
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                        ^ pattern `std::i32::MIN..=-1i32` not covered
+=======
+   |                        ^ patterns `std::i32::MIN..=-1i32` and `1i32..=std::i32::MAX` not covered
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

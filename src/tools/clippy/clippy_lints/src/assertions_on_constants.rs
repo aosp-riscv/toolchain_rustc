@@ -1,11 +1,17 @@
-use if_chain::if_chain;
 use rustc::hir::{Expr, ExprKind};
 use rustc::lint::{LateContext, LateLintPass, LintArray, LintPass};
 use rustc::{declare_lint_pass, declare_tool_lint};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax_pos::Span;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use crate::consts::{constant, Constant};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, is_direct_expn_of, span_help_and_lint};
+=======
+use crate::utils::{is_direct_expn_of, is_expn_of, span_help_and_lint};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 declare_clippy_lint! {
     /// **What it does:** Checks for `assert!(true)` and `assert!(false)` calls.
@@ -33,6 +39,7 @@ declare_lint_pass!(AssertionsOnConstants => [ASSERTIONS_ON_CONSTANTS]);
 
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for AssertionsOnConstants {
     fn check_expr(&mut self, cx: &LateContext<'a, 'tcx>, e: &'tcx Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut is_debug_assert = false;
         let debug_assert_not_in_macro_or_desugar = |span: Span| {
             is_debug_assert = true;
@@ -67,8 +74,41 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for AssertionsOnConstants {
                         );
                     },
                     _ => (),
+=======
+        let lint_assert_cb = |is_debug_assert: bool| {
+            if let ExprKind::Unary(_, ref lit) = e.node {
+                if let Some((Constant::Bool(is_true), _)) = constant(cx, cx.tables, lit) {
+                    if is_true {
+                        span_help_and_lint(
+                            cx,
+                            ASSERTIONS_ON_CONSTANTS,
+                            e.span,
+                            "`assert!(true)` will be optimized out by the compiler",
+                            "remove it",
+                        );
+                    } else if !is_debug_assert {
+                        span_help_and_lint(
+                            cx,
+                            ASSERTIONS_ON_CONSTANTS,
+                            e.span,
+                            "`assert!(false)` should probably be replaced",
+                            "use `panic!()` or `unreachable!()`",
+                        );
+                    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             }
+        };
+        if let Some(debug_assert_span) = is_expn_of(e.span, "debug_assert") {
+            if debug_assert_span.from_expansion() {
+                return;
+            }
+            lint_assert_cb(true);
+        } else if let Some(assert_span) = is_direct_expn_of(e.span, "assert") {
+            if assert_span.from_expansion() {
+                return;
+            }
+            lint_assert_cb(false);
         }
     }
 }

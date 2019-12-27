@@ -76,6 +76,7 @@ declare_clippy_lint! {
 }
 
 declare_clippy_lint! {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// **What it does:** Checks for calls to `cx.outer().expn_info()` and suggests to use
     /// the `cx.outer_expn_info()`
     ///
@@ -96,6 +97,28 @@ declare_clippy_lint! {
     pub OUTER_EXPN_EXPN_INFO,
     internal,
     "using `cx.outer_expn().expn_info()` instead of `cx.outer_expn_info()`"
+=======
+    /// **What it does:** Checks for calls to `cx.outer().expn_data()` and suggests to use
+    /// the `cx.outer_expn_data()`
+    ///
+    /// **Why is this bad?** `cx.outer_expn_data()` is faster and more concise.
+    ///
+    /// **Known problems:** None.
+    ///
+    /// **Example:**
+    /// Bad:
+    /// ```rust,ignore
+    /// expr.span.ctxt().outer().expn_data()
+    /// ```
+    ///
+    /// Good:
+    /// ```rust,ignore
+    /// expr.span.ctxt().outer_expn_data()
+    /// ```
+    pub OUTER_EXPN_EXPN_DATA,
+    internal,
+    "using `cx.outer_expn().expn_data()` instead of `cx.outer_expn_data()`"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 declare_lint_pass!(ClippyLintsInternal => [CLIPPY_LINTS_INTERNAL]);
@@ -180,11 +203,15 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for LintWithoutLintPass {
             // not able to capture the error.
             // Therefore, we need to climb the macro expansion tree and find the
             // actual span that invoked `declare_tool_lint!`:
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let lint_span = lint_span
                 .ctxt()
                 .outer_expn_info()
                 .map(|ei| ei.call_site)
                 .expect("unable to get call_site");
+=======
+            let lint_span = lint_span.ctxt().outer_expn_data().call_site;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
             if !self.registered_lints.contains(lint_name) {
                 span_lint(
@@ -278,6 +305,7 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for CompilerLintFunctions {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub struct OuterExpnInfoPass;
 
 impl_lint_pass!(OuterExpnInfoPass => [OUTER_EXPN_EXPN_INFO]);
@@ -302,6 +330,32 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for OuterExpnInfoPass {
                     "usage of `outer_expn().expn_info()`",
                     "try",
                     ".outer_expn_info()".to_string(),
+=======
+pub struct OuterExpnDataPass;
+
+impl_lint_pass!(OuterExpnDataPass => [OUTER_EXPN_EXPN_DATA]);
+
+impl<'a, 'tcx> LateLintPass<'a, 'tcx> for OuterExpnDataPass {
+    fn check_expr(&mut self, cx: &LateContext<'a, 'tcx>, expr: &'tcx hir::Expr) {
+        let (method_names, arg_lists, spans) = method_calls(expr, 2);
+        let method_names: Vec<LocalInternedString> = method_names.iter().map(|s| s.as_str()).collect();
+        let method_names: Vec<&str> = method_names.iter().map(std::convert::AsRef::as_ref).collect();
+        if_chain! {
+            if let ["expn_data", "outer_expn"] = method_names.as_slice();
+            let args = arg_lists[1];
+            if args.len() == 1;
+            let self_arg = &args[0];
+            let self_ty = walk_ptrs_ty(cx.tables.expr_ty(self_arg));
+            if match_type(cx, self_ty, &paths::SYNTAX_CONTEXT);
+            then {
+                span_lint_and_sugg(
+                    cx,
+                    OUTER_EXPN_EXPN_DATA,
+                    spans[1].with_hi(expr.span.hi()),
+                    "usage of `outer_expn().expn_data()`",
+                    "try",
+                    "outer_expn_data()".to_string(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     Applicability::MachineApplicable,
                 );
             }

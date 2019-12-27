@@ -4,7 +4,11 @@
 use crate::dataflow::{DataFlowContext, BitwiseOperator, DataFlowOperator, KillFrom};
 
 use crate::borrowck::*;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::cfg;
+=======
+use crate::cfg;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::ty::{self, TyCtxt};
 use rustc::util::nodemap::FxHashMap;
 

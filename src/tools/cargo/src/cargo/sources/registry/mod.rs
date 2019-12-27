@@ -219,17 +219,18 @@ pub struct RegistryConfig {
 
 #[derive(Deserialize)]
 pub struct RegistryPackage<'a> {
-    name: Cow<'a, str>,
+    name: InternedString,
     vers: Version,
+    #[serde(borrow)]
     deps: Vec<RegistryDependency<'a>>,
-    features: BTreeMap<Cow<'a, str>, Vec<Cow<'a, str>>>,
+    features: BTreeMap<InternedString, Vec<InternedString>>,
     cksum: String,
     yanked: Option<bool>,
-    links: Option<Cow<'a, str>>,
+    links: Option<InternedString>,
 }
 
 #[test]
-fn escaped_cher_in_json() {
+fn escaped_char_in_json() {
     let _: RegistryPackage<'_> = serde_json::from_str(
         r#"{"name":"a","vers":"0.0.1","deps":[],"cksum":"bae3","features":{}}"#,
     )
@@ -275,15 +276,20 @@ enum Field {
 
 #[derive(Deserialize)]
 struct RegistryDependency<'a> {
-    name: Cow<'a, str>,
+    name: InternedString,
+    #[serde(borrow)]
     req: Cow<'a, str>,
-    features: Vec<Cow<'a, str>>,
+    features: Vec<InternedString>,
     optional: bool,
     default_features: bool,
     target: Option<Cow<'a, str>>,
     kind: Option<Cow<'a, str>>,
     registry: Option<Cow<'a, str>>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     package: Option<Cow<'a, str>>,
+=======
+    package: Option<InternedString>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     public: Option<bool>,
 }
 
@@ -309,10 +315,9 @@ impl<'a> RegistryDependency<'a> {
             default
         };
 
-        let mut dep =
-            Dependency::parse_no_deprecated(package.as_ref().unwrap_or(&name), Some(&req), id)?;
+        let mut dep = Dependency::parse_no_deprecated(package.unwrap_or(name), Some(&req), id)?;
         if package.is_some() {
-            dep.set_explicit_name_in_toml(&name);
+            dep.set_explicit_name_in_toml(name);
         }
         let kind = match kind.as_ref().map(|s| &s[..]).unwrap_or("") {
             "dev" => Kind::Development,

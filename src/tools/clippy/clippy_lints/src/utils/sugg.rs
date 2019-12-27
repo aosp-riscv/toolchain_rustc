@@ -1,7 +1,11 @@
 //! Contains utility functions to generate suggestions.
 #![deny(clippy::missing_docs_in_private_items)]
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{higher, in_macro_or_desugar, snippet, snippet_opt, snippet_with_macro_callsite};
+=======
+use crate::utils::{higher, snippet, snippet_opt, snippet_with_macro_callsite};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use matches::matches;
 use rustc::hir;
 use rustc::lint::{EarlyContext, LateContext, LintContext};
@@ -69,7 +73,11 @@ impl<'a> Sugg<'a> {
         default: &'a str,
         applicability: &mut Applicability,
     ) -> Self {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if *applicability != Applicability::Unspecified && in_macro_or_desugar(expr.span) {
+=======
+        if *applicability != Applicability::Unspecified && expr.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             *applicability = Applicability::MaybeIncorrect;
         }
         Self::hir_opt(cx, expr).unwrap_or_else(|| {

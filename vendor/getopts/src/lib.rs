@@ -95,10 +95,15 @@
 #![doc(
     html_logo_url = "https://www.rust-lang.org/logos/rust-logo-128x128-blk-v2.png",
     html_favicon_url = "https://www.rust-lang.org/favicon.ico",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     html_root_url = "https://docs.rs/getopts/0.2.19"
+=======
+    html_root_url = "https://docs.rs/getopts/0.2.20"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 )]
 #![deny(missing_docs)]
 #![cfg_attr(test, deny(warnings))]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![cfg_attr(rust_build, feature(staged_api))]
 #![cfg_attr(rust_build, staged_api)]
 #![cfg_attr(
@@ -108,6 +113,8 @@
         reason = "use the crates.io `getopts` library instead"
     )
 )]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #[cfg(test)]
 #[macro_use]
@@ -363,7 +370,12 @@ impl Options {
                     .to_str()
                     .ok_or_else(|| Fail::UnrecognizedOption(format!("{:?}", i.as_ref())))
                     .map(|s| s.to_owned())
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             }).collect::<::std::result::Result<Vec<_>, _>>()?;
+=======
+            })
+            .collect::<::std::result::Result<Vec<_>, _>>()?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let mut args = args.into_iter().peekable();
         let mut arg_pos = 0;
         while let Some(cur) = args.next() {
@@ -514,7 +526,11 @@ impl Options {
 
     /// Derive a custom formatted message from a set of options. The formatted options provided to
     /// a closure as an iterator.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn usage_with_format<F: FnMut(&mut Iterator<Item = String>) -> String>(
+=======
+    pub fn usage_with_format<F: FnMut(&mut dyn Iterator<Item = String>) -> String>(
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         &self,
         mut formatter: F,
     ) -> String {
@@ -522,7 +538,11 @@ impl Options {
     }
 
     /// Derive usage items from a set of options.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn usage_items<'a>(&'a self) -> Box<Iterator<Item = String> + 'a> {
+=======
+    fn usage_items<'a>(&'a self) -> Box<dyn Iterator<Item = String> + 'a> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let desc_sep = format!("\n{}", repeat(" ").take(24).collect::<String>());
 
         let any_short = self.grps.iter().any(|optref| !optref.short_name.is_empty());
@@ -848,7 +868,12 @@ impl Matches {
             .filter_map(|nm| match self.opt_val(&nm) {
                 Some(Val(s)) => Some(s),
                 _ => None,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             }).next()
+=======
+            })
+            .next()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Returns a vector of the arguments provided to all matches of the given
@@ -861,6 +886,7 @@ impl Matches {
             .filter_map(|(_, v)| match v {
                 Val(s) => Some(s),
                 _ => None,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             }).collect()
     }
 
@@ -875,6 +901,24 @@ impl Matches {
                 Val(s) => Some((p, s)),
                 _ => None,
             }).collect()
+=======
+            })
+            .collect()
+    }
+
+    /// Returns a vector of the arguments provided to all matches of the given
+    /// option, together with their positions.
+    ///
+    /// Used when an option accepts multiple values.
+    pub fn opt_strs_pos(&self, nm: &str) -> Vec<(usize, String)> {
+        self.opt_vals(nm)
+            .into_iter()
+            .filter_map(|(p, v)| match v {
+                Val(s) => Some((p, s)),
+                _ => None,
+            })
+            .collect()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Returns the string argument supplied to a matching option or `None`.
@@ -1022,7 +1066,12 @@ fn each_split_within(desc: &str, lim: usize) -> Vec<String> {
                 else {
                     (words, a, idx)
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             }).0;
+=======
+            })
+            .0;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         let mut row = String::new();
         for word in words.iter() {

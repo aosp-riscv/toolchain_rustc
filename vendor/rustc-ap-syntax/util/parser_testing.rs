@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::ast::{self, Ident};
 use crate::source_map::FilePathMapping;
 use crate::parse::{ParseSess, PResult, source_file_to_stream};
@@ -158,3 +159,5 @@ mod tests {
         assert_eq!(matches_codepattern("a  \u{3000}b","ab"), false);
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

@@ -37,17 +37,13 @@ LL |     false == 0 < 2;
    = note: expected type `bool`
               found type `{integer}`
 
-error[E0369]: binary operation `<` cannot be applied to type `fn() {f::<_>}`
-  --> $DIR/require-parens-for-chained-comparison.rs:13:6
-   |
-LL |     f<X>();
-   |     -^- X
-   |     |
-   |     fn() {f::<_>}
-   |
-   = note: an implementation of `std::cmp::PartialOrd` might be missing for `fn() {f::<_>}`
+error: aborting due to 5 previous errors
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: aborting due to 6 previous errors
 
 Some errors have detailed explanations: E0308, E0369.
 For more information about an error, try `rustc --explain E0308`.
+=======
+For more information about this error, try `rustc --explain E0308`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

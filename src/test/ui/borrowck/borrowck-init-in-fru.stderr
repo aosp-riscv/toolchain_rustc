@@ -1,8 +1,16 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: use of possibly uninitialized variable: `origin`
   --> $DIR/borrowck-init-in-fru.rs:9:5
    |
 LL |     origin = Point { x: 10, ..origin };
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ use of possibly uninitialized `origin.y`
+=======
+error[E0381]: use of possibly-uninitialized variable: `origin`
+  --> $DIR/borrowck-init-in-fru.rs:9:5
+   |
+LL |     origin = Point { x: 10, ..origin };
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ use of possibly-uninitialized `origin.y`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

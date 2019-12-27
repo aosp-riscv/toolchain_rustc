@@ -14,6 +14,7 @@ fn want_foo<T>()
 {
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 ///////////////////////////////////////////////////////////////////////////
 // Expressed as a where clause
 
@@ -31,6 +32,23 @@ fn one() {
 }
 
 ///////////////////////////////////////////////////////////////////////////
+=======
+// Expressed as a where clause
+
+struct SomeStruct<X> {
+    x: X
+}
+
+impl<'a,X> Foo<&'a isize> for SomeStruct<X>
+    where X : 'a
+{
+}
+
+fn one() {
+    want_foo::<SomeStruct<usize>>();
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // Expressed as shorthand
 
 struct AnotherStruct<X> {

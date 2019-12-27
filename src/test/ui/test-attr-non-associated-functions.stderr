@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: `#[test]` attribute is only allowed on non associated functions
   --> $DIR/test-attr-non-associated-functions.rs:9:5
    |
@@ -8,3 +9,5 @@ LL | |     }
 
 error: aborting due to previous error
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

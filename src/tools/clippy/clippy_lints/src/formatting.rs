@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{differing_macro_contexts, in_macro_or_desugar, snippet_opt, span_note_and_lint};
+=======
+use crate::utils::{differing_macro_contexts, snippet_opt, span_note_and_lint};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use if_chain::if_chain;
 use rustc::lint::{in_external_macro, EarlyContext, EarlyLintPass, LintArray, LintPass};
 use rustc::{declare_lint_pass, declare_tool_lint};
@@ -107,7 +111,11 @@ impl EarlyLintPass for Formatting {
 /// Implementation of the `SUSPICIOUS_ASSIGNMENT_FORMATTING` lint.
 fn check_assign(cx: &EarlyContext<'_>, expr: &Expr) {
     if let ExprKind::Assign(ref lhs, ref rhs) = expr.node {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if !differing_macro_contexts(lhs.span, rhs.span) && !in_macro_or_desugar(lhs.span) {
+=======
+        if !differing_macro_contexts(lhs.span, rhs.span) && !lhs.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let eq_span = lhs.span.between(rhs.span);
             if let ExprKind::Unary(op, ref sub_rhs) = rhs.node {
                 if let Some(eq_snippet) = snippet_opt(cx, eq_span) {
@@ -139,7 +147,11 @@ fn check_else(cx: &EarlyContext<'_>, expr: &Expr) {
         if let ExprKind::If(_, then, Some(else_)) = &expr.node;
         if is_block(else_) || is_if(else_);
         if !differing_macro_contexts(then.span, else_.span);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if !in_macro_or_desugar(then.span) && !in_external_macro(cx.sess, expr.span);
+=======
+        if !then.span.from_expansion() && !in_external_macro(cx.sess, expr.span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         // workaround for rust-lang/rust#43081
         if expr.span.lo().0 != 0 && expr.span.hi().0 != 0;
@@ -205,7 +217,11 @@ fn check_array(cx: &EarlyContext<'_>, expr: &Expr) {
 
 fn check_missing_else(cx: &EarlyContext<'_>, first: &Expr, second: &Expr) {
     if !differing_macro_contexts(first.span, second.span)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         && !in_macro_or_desugar(first.span)
+=======
+        && !first.span.from_expansion()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         && is_if(first)
         && (is_block(second) || is_if(second))
     {

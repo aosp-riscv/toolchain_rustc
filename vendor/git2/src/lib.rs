@@ -63,7 +63,11 @@
 //! source `Repository`, to ensure that they do not outlive the repository
 //! itself.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![doc(html_root_url = "https://docs.rs/git2/0.9")]
+=======
+#![doc(html_root_url = "https://docs.rs/git2/0.10")]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![allow(trivial_numeric_casts, trivial_casts)]
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]

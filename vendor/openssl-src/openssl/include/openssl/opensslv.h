@@ -39,8 +39,13 @@ extern "C" {
  * (Prior to 0.9.5a beta1, a different scheme was used: MMNNFFRBB for
  *  major minor fix final patch/beta)
  */
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 # define OPENSSL_VERSION_NUMBER  0x1010103fL
 # define OPENSSL_VERSION_TEXT    "OpenSSL 1.1.1c  28 May 2019"
+=======
+# define OPENSSL_VERSION_NUMBER  0x1010104fL
+# define OPENSSL_VERSION_TEXT    "OpenSSL 1.1.1d  10 Sep 2019"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /*-
  * The macros below are to be used for shared library (.so, .dll, ...)

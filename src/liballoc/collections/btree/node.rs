@@ -106,8 +106,13 @@ impl<K, V> LeafNode<K, V> {
         LeafNode {
             // As a general policy, we leave fields uninitialized if they can be, as this should
             // be both slightly faster and easier to track in Valgrind.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             keys: uninit_array![_; CAPACITY],
             vals: uninit_array![_; CAPACITY],
+=======
+            keys: [MaybeUninit::UNINIT; CAPACITY],
+            vals: [MaybeUninit::UNINIT; CAPACITY],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             parent: ptr::null(),
             parent_idx: MaybeUninit::uninit(),
             len: 0
@@ -159,7 +164,11 @@ impl<K, V> InternalNode<K, V> {
     unsafe fn new() -> Self {
         InternalNode {
             data: LeafNode::new(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             edges: uninit_array![_; 2*B],
+=======
+            edges: [MaybeUninit::UNINIT; 2*B]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 }

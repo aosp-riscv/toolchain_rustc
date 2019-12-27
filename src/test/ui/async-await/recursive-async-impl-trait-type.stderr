@@ -1,10 +1,19 @@
 error[E0733]: recursion in an `async fn` requires boxing
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/recursive-async-impl-trait-type.rs:7:40
    |
 LL | async fn recursive_async_function() -> () {
    |                                        ^^ an `async fn` cannot invoke itself directly
    |
    = note: a recursive `async fn` must be rewritten to return a boxed future.
+=======
+  --> $DIR/recursive-async-impl-trait-type.rs:5:40
+   |
+LL | async fn recursive_async_function() -> () {
+   |                                        ^^ recursive `async fn`
+   |
+   = note: a recursive `async fn` must be rewritten to return a boxed `dyn Future`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

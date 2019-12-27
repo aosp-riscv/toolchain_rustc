@@ -1,5 +1,9 @@
 error[E0658]: unions in const fn are unstable
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/feature-gate-const_fn_union.rs:11:5
+=======
+  --> $DIR/feature-gate-const_fn_union.rs:12:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     Foo { u }.i
    |     ^^^^^^^^^^^

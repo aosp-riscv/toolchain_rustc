@@ -10,7 +10,10 @@
 #![feature(core_intrinsics)]
 #![feature(never_type)]
 #![feature(nll)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(rustc_diagnostic_macros)]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(in_band_lifetimes)]
 
 #![recursion_limit="256"]

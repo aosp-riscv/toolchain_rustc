@@ -50,7 +50,11 @@ impl<'cx, 'tcx> crate::borrow_check::MirBorrowckCtxt<'cx, 'tcx> {
             self,
             span,
             E0381,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "{} of possibly uninitialized variable: `{}`",
+=======
+            "{} of possibly-uninitialized variable: `{}`",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             verb,
             desc,
         )

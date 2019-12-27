@@ -19,7 +19,11 @@ releases are updated less frequently.
 
 ## Requirements
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 Building the book requires [mdBook], ideally the same 0.2.x version that
+=======
+Building the book requires [mdBook], ideally the same 0.3.x version that
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 rust-lang/rust uses in [this file][rust-mdbook]. To get it:
 
 [mdBook]: https://github.com/rust-lang-nursery/mdBook

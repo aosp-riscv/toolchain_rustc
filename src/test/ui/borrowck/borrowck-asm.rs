@@ -57,7 +57,11 @@ mod test_cases {
     fn indirect_is_not_init() {
         let x: i32;
         unsafe {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             asm!("nop" : "=*r"(x)); //~ ERROR use of possibly uninitialized variable
+=======
+            asm!("nop" : "=*r"(x)); //~ ERROR use of possibly-uninitialized variable
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 

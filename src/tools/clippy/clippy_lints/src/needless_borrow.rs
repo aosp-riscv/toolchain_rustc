@@ -2,7 +2,11 @@
 //!
 //! This lint is **warn** by default
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, snippet_opt, span_lint_and_then};
+=======
+use crate::utils::{snippet_opt, span_lint_and_then};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use if_chain::if_chain;
 use rustc::hir::{BindingAnnotation, Expr, ExprKind, HirId, Item, MutImmutable, Pat, PatKind};
 use rustc::lint::{LateContext, LateLintPass, LintArray, LintPass};
@@ -38,7 +42,11 @@ impl_lint_pass!(NeedlessBorrow => [NEEDLESS_BORROW]);
 
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NeedlessBorrow {
     fn check_expr(&mut self, cx: &LateContext<'a, 'tcx>, e: &'tcx Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(e.span) || self.derived_item.is_some() {
+=======
+        if e.span.from_expansion() || self.derived_item.is_some() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
         if let ExprKind::AddrOf(MutImmutable, ref inner) = e.node {
@@ -76,7 +84,11 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NeedlessBorrow {
         }
     }
     fn check_pat(&mut self, cx: &LateContext<'a, 'tcx>, pat: &'tcx Pat) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(pat.span) || self.derived_item.is_some() {
+=======
+        if pat.span.from_expansion() || self.derived_item.is_some() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
         if_chain! {

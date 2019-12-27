@@ -57,3 +57,7 @@ LL | fn nested<'x>(x: &'x isize) {
 
 error: aborting due to 2 previous errors
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+For more information about this error, try `rustc --explain E0312`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

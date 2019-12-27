@@ -522,9 +522,7 @@ fn compute_metadata<'a, 'cfg>(
 
     // Also mix in enabled features to our metadata. This'll ensure that
     // when changing feature sets each lib is separately cached.
-    bcx.resolve
-        .features_sorted(unit.pkg.package_id())
-        .hash(&mut hasher);
+    unit.features.hash(&mut hasher);
 
     // Mix in the target-metadata of all the dependencies of this target.
     {
@@ -542,6 +540,7 @@ fn compute_metadata<'a, 'cfg>(
     // settings like debuginfo and whatnot.
     unit.profile.hash(&mut hasher);
     unit.mode.hash(&mut hasher);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
     // Throw in the rustflags we're compiling with.
     // This helps when the target directory is a shared cache for projects with different cargo configs,
@@ -572,6 +571,8 @@ fn compute_metadata<'a, 'cfg>(
         bcx.rustflags_args(unit)
     };
     hash_flags(flags);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     // Artifacts compiled for the host should have a different metadata
     // piece than those compiled for the target, so make sure we throw in

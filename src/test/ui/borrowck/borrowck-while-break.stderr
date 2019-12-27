@@ -1,8 +1,12 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: borrow of possibly uninitialized variable: `v`
+=======
+error[E0381]: borrow of possibly-uninitialized variable: `v`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/borrowck-while-break.rs:7:20
    |
 LL |     println!("{}", v);
-   |                    ^ use of possibly uninitialized `v`
+   |                    ^ use of possibly-uninitialized `v`
 
 error: aborting due to previous error
 

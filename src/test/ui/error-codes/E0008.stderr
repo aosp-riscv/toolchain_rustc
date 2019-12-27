@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0008]: cannot bind by-move into a pattern guard
   --> $DIR/E0008.rs:3:14
    |
@@ -9,3 +10,5 @@ LL |         Some(s) if s.len() == 0 => {},
 error: aborting due to previous error
 
 For more information about this error, try `rustc --explain E0008`.
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

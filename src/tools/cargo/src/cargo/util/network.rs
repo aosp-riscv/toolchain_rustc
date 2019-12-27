@@ -51,6 +51,10 @@ fn maybe_spurious(err: &Error) -> bool {
                 || curl_err.is_operation_timedout()
                 || curl_err.is_recv_error()
                 || curl_err.is_http2_stream_error()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+                || curl_err.is_ssl_connect_error()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             {
                 return true;
             }

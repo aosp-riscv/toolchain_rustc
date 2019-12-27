@@ -37,6 +37,7 @@ fn functions(input: TokenStream, dirs: &[&str]) -> TokenStream {
 
     let mut functions = Vec::new();
     for &mut (ref mut file, ref path) in &mut files {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         for item in file.items.drain(..) {
             if let syn::Item::Fn(f) = item {
                 functions.push((f, path))
@@ -93,6 +94,94 @@ fn functions(input: TokenStream, dirs: &[&str]) -> TokenStream {
                     instrs: &[#(#instrs),*],
                     file: stringify!(#path),
                     required_const: &[#(#required_const),*],
+=======
+        for mut item in file.items.drain(..) {
+            match item {
+                syn::Item::Fn(f) => functions.push((f, path)),
+                syn::Item::Mod(ref mut m) => {
+                    if let Some(ref mut m) = m.content {
+                        for i in m.1.drain(..) {
+                            if let syn::Item::Fn(f) = i {
+                                functions.push((f, path))
+                            }
+                        }
+                    }
+                }
+                _ => (),
+            }
+        }
+    }
+    assert!(!functions.is_empty());
+
+    let mut tests = std::collections::HashSet::<String>::new();
+    for f in &functions {
+        let id = format!("{}", f.0.ident);
+        if id.starts_with("test_") {
+            tests.insert(id);
+        }
+    }
+    assert!(!tests.is_empty());
+
+    functions.retain(|&(ref f, _)| {
+        if let syn::Visibility::Public(_) = f.vis {
+            if f.unsafety.is_some() {
+                return true;
+            }
+        }
+        false
+    });
+    assert!(!functions.is_empty());
+
+    let input = proc_macro2::TokenStream::from(input);
+
+    let functions = functions
+        .iter()
+        .map(|&(ref f, path)| {
+            let name = &f.ident;
+            // println!("{}", name);
+            let mut arguments = Vec::new();
+            for input in f.decl.inputs.iter() {
+                let ty = match *input {
+                    syn::FnArg::Captured(ref c) => &c.ty,
+                    _ => panic!("invalid argument on {}", name),
+                };
+                arguments.push(to_type(ty));
+            }
+            let ret = match f.decl.output {
+                syn::ReturnType::Default => quote! { None },
+                syn::ReturnType::Type(_, ref t) => {
+                    let ty = to_type(t);
+                    quote! { Some(#ty) }
+                }
+            };
+            let instrs = find_instrs(&f.attrs);
+            let target_feature = if let Some(i) = find_target_feature(&f.attrs) {
+                quote! { Some(#i) }
+            } else {
+                quote! { None }
+            };
+            let required_const = find_required_const(&f.attrs);
+
+            // strip leading underscore from fn name when building a test
+            // _mm_foo -> mm_foo such that the test name is test_mm_foo.
+            let test_name_string = format!("{}", name);
+            let mut test_name_id = test_name_string.as_str();
+            while test_name_id.starts_with('_') {
+                test_name_id = &test_name_id[1..];
+            }
+            let has_test = tests.contains(&format!("test_{}", test_name_id));
+
+            quote! {
+                Function {
+                    name: stringify!(#name),
+                    arguments: &[#(#arguments),*],
+                    ret: #ret,
+                    target_feature: #target_feature,
+                    instrs: &[#(#instrs),*],
+                    file: stringify!(#path),
+                    required_const: &[#(#required_const),*],
+                    has_test: #has_test,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             }
         })

@@ -34,6 +34,12 @@ pub use self::visitor::{ValueVisitor, MutValueVisitor};
 
 pub use self::validity::RefTracking;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub(super) use self::intrinsics::type_name;
 
 pub use self::intern::intern_const_alloc_recursive;
+=======
+pub use self::intern::intern_const_alloc_recursive;
+
+crate use self::intrinsics::eval_nullary_intrinsic;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

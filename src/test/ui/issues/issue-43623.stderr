@@ -1,6 +1,7 @@
 error[E0631]: type mismatch in function arguments
   --> $DIR/issue-43623.rs:14:5
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL |     break_me::<Type, fn(_)>;
    |     ^^^^^^^^^^^^^^^^^^^^^^^
    |     |
@@ -36,6 +37,29 @@ LL | |
 LL | |
 LL | | }
    | |_^
+=======
+LL | pub fn break_me<T, F>(f: F)
+   |        --------
+LL | where T: for<'b> Trait<'b>,
+LL |       F: for<'b> FnMut(<T as Trait<'b>>::Assoc) {
+   |          -------------------------------------- required by this bound in `break_me`
+LL |     break_me::<Type, fn(_)>;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^
+   |     |
+   |     expected signature of `for<'b> fn(<Type as Trait<'b>>::Assoc) -> _`
+   |     found signature of `fn(_) -> _`
+
+error[E0271]: type mismatch resolving `for<'b> <fn(_) as std::ops::FnOnce<(<Type as Trait<'b>>::Assoc,)>>::Output == ()`
+  --> $DIR/issue-43623.rs:14:5
+   |
+LL | pub fn break_me<T, F>(f: F)
+   |        --------
+LL | where T: for<'b> Trait<'b>,
+LL |       F: for<'b> FnMut(<T as Trait<'b>>::Assoc) {
+   |                  ------------------------------ required by this bound in `break_me`
+LL |     break_me::<Type, fn(_)>;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^ expected bound lifetime parameter 'b, found concrete lifetime
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 2 previous errors
 

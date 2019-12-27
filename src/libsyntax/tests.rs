@@ -9,6 +9,7 @@ use crate::with_default_globals;
 use errors::emitter::EmitterWriter;
 use errors::Handler;
 use rustc_data_structures::sync::Lrc;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax_pos::{BytePos, NO_EXPANSION, Span, MultiSpan};
 
 use std::io;
@@ -170,6 +171,169 @@ fn make_span(file_text: &str, start: &Position, end: &Position) -> Span {
     let end = make_pos(file_text, end) + end.string.len(); // just after matching thing ends
     assert!(start <= end);
     Span::new(BytePos(start as u32), BytePos(end as u32), NO_EXPANSION)
+=======
+use syntax_pos::{BytePos, Span, MultiSpan};
+
+use std::io;
+use std::io::prelude::*;
+use std::iter::Peekable;
+use std::path::{Path, PathBuf};
+use std::str;
+use std::sync::{Arc, Mutex};
+
+/// Map string to parser (via tts).
+fn string_to_parser(ps: &ParseSess, source_str: String) -> Parser<'_> {
+    new_parser_from_source_str(ps, PathBuf::from("bogofile").into(), source_str)
+}
+
+crate fn with_error_checking_parse<'a, T, F>(s: String, ps: &'a ParseSess, f: F) -> T where
+    F: FnOnce(&mut Parser<'a>) -> PResult<'a, T>,
+{
+    let mut p = string_to_parser(&ps, s);
+    let x = panictry!(f(&mut p));
+    p.sess.span_diagnostic.abort_if_errors();
+    x
+}
+
+/// Maps a string to tts, using a made-up filename.
+crate fn string_to_stream(source_str: String) -> TokenStream {
+    let ps = ParseSess::new(FilePathMapping::empty());
+    source_file_to_stream(
+        &ps,
+        ps.source_map().new_source_file(PathBuf::from("bogofile").into(),
+        source_str,
+    ), None).0
+}
+
+/// Parses a string, returns a crate.
+crate fn string_to_crate(source_str : String) -> ast::Crate {
+    let ps = ParseSess::new(FilePathMapping::empty());
+    with_error_checking_parse(source_str, &ps, |p| {
+        p.parse_crate_mod()
+    })
+}
+
+/// Does the given string match the pattern? whitespace in the first string
+/// may be deleted or replaced with other whitespace to match the pattern.
+/// This function is relatively Unicode-ignorant; fortunately, the careful design
+/// of UTF-8 mitigates this ignorance. It doesn't do NKF-normalization(?).
+crate fn matches_codepattern(a : &str, b : &str) -> bool {
+    let mut a_iter = a.chars().peekable();
+    let mut b_iter = b.chars().peekable();
+
+    loop {
+        let (a, b) = match (a_iter.peek(), b_iter.peek()) {
+            (None, None) => return true,
+            (None, _) => return false,
+            (Some(&a), None) => {
+                if rustc_lexer::is_whitespace(a) {
+                    break // Trailing whitespace check is out of loop for borrowck.
+                } else {
+                    return false
+                }
+            }
+            (Some(&a), Some(&b)) => (a, b)
+        };
+
+        if rustc_lexer::is_whitespace(a) && rustc_lexer::is_whitespace(b) {
+            // Skip whitespace for `a` and `b`.
+            scan_for_non_ws_or_end(&mut a_iter);
+            scan_for_non_ws_or_end(&mut b_iter);
+        } else if rustc_lexer::is_whitespace(a) {
+            // Skip whitespace for `a`.
+            scan_for_non_ws_or_end(&mut a_iter);
+        } else if a == b {
+            a_iter.next();
+            b_iter.next();
+        } else {
+            return false
+        }
+    }
+
+    // Check if a has *only* trailing whitespace.
+    a_iter.all(rustc_lexer::is_whitespace)
+}
+
+/// Advances the given peekable `Iterator` until it reaches a non-whitespace character.
+fn scan_for_non_ws_or_end<I: Iterator<Item = char>>(iter: &mut Peekable<I>) {
+    while iter.peek().copied().map(|c| rustc_lexer::is_whitespace(c)) == Some(true) {
+        iter.next();
+    }
+}
+
+/// Identifies a position in the text by the n'th occurrence of a string.
+struct Position {
+    string: &'static str,
+    count: usize,
+}
+
+struct SpanLabel {
+    start: Position,
+    end: Position,
+    label: &'static str,
+}
+
+struct Shared<T: Write> {
+    data: Arc<Mutex<T>>,
+}
+
+impl<T: Write> Write for Shared<T> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.data.lock().unwrap().write(buf)
+    }
+
+    fn flush(&mut self) -> io::Result<()> {
+        self.data.lock().unwrap().flush()
+    }
+}
+
+fn test_harness(file_text: &str, span_labels: Vec<SpanLabel>, expected_output: &str) {
+    with_default_globals(|| {
+        let output = Arc::new(Mutex::new(Vec::new()));
+
+        let source_map = Lrc::new(SourceMap::new(FilePathMapping::empty()));
+        source_map.new_source_file(Path::new("test.rs").to_owned().into(), file_text.to_owned());
+
+        let primary_span = make_span(&file_text, &span_labels[0].start, &span_labels[0].end);
+        let mut msp = MultiSpan::from_span(primary_span);
+        for span_label in span_labels {
+            let span = make_span(&file_text, &span_label.start, &span_label.end);
+            msp.push_span_label(span, span_label.label.to_string());
+            println!("span: {:?} label: {:?}", span, span_label.label);
+            println!("text: {:?}", source_map.span_to_snippet(span));
+        }
+
+        let emitter = EmitterWriter::new(
+            Box::new(Shared { data: output.clone() }),
+            Some(source_map.clone()),
+            false,
+            false,
+            false,
+            None,
+            false,
+        );
+        let handler = Handler::with_emitter(true, None, Box::new(emitter));
+        handler.span_err(msp, "foo");
+
+        assert!(expected_output.chars().next() == Some('\n'),
+                "expected output should begin with newline");
+        let expected_output = &expected_output[1..];
+
+        let bytes = output.lock().unwrap();
+        let actual_output = str::from_utf8(&bytes).unwrap();
+        println!("expected output:\n------\n{}------", expected_output);
+        println!("actual output:\n------\n{}------", actual_output);
+
+        assert!(expected_output == actual_output)
+    })
+}
+
+fn make_span(file_text: &str, start: &Position, end: &Position) -> Span {
+    let start = make_pos(file_text, start);
+    let end = make_pos(file_text, end) + end.string.len(); // just after matching thing ends
+    assert!(start <= end);
+    Span::with_root_ctxt(BytePos(start as u32), BytePos(end as u32))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 fn make_pos(file_text: &str, pos: &Position) -> usize {

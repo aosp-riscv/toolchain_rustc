@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::source_map::{SourceMap, FilePathMapping};
 use crate::with_default_globals;
 
@@ -1162,3 +1163,5 @@ error: foo
 
 "#);
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

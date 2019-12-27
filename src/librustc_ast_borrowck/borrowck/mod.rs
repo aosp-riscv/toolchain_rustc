@@ -9,6 +9,7 @@ use InteriorKind::*;
 
 use rustc::hir::HirId;
 use rustc::hir::Node;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::cfg;
 use rustc::middle::borrowck::{BorrowCheckResult, SignalledError};
 use rustc::hir::def_id::{DefId, LocalDefId};
@@ -28,6 +29,27 @@ use log::debug;
 
 use rustc::hir;
 
+=======
+use rustc::middle::borrowck::{BorrowCheckResult, SignalledError};
+use rustc::hir::def_id::{DefId, LocalDefId};
+use rustc::middle::mem_categorization as mc;
+use rustc::middle::mem_categorization::Categorization;
+use rustc::middle::region;
+use rustc::middle::free_region::RegionRelations;
+use rustc::ty::{self, Ty, TyCtxt};
+use rustc::ty::query::Providers;
+
+use std::borrow::Cow;
+use std::cell::{Cell};
+use std::fmt;
+use std::rc::Rc;
+use std::hash::{Hash, Hasher};
+use log::debug;
+
+use rustc::hir;
+
+use crate::cfg;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::dataflow::{DataFlowContext, BitwiseOperator, DataFlowOperator, KillFrom};
 
 pub mod check_loans;

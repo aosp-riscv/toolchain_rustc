@@ -9,6 +9,10 @@ use std::ops::{Add, Deref, Sub, Mul, AddAssign, Range, RangeInclusive};
 use rustc_data_structures::newtype_index;
 use rustc_data_structures::indexed_vec::{Idx, IndexVec};
 use syntax_pos::symbol::{sym, Symbol};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use syntax_pos::Span;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 pub mod call;
 
@@ -113,6 +117,7 @@ impl TargetDataLayout {
                 [p] if p.starts_with("P") => {
                     dl.instruction_address_space = parse_address_space(&p[1..], "P")?
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 // FIXME: Ping cfg(bootstrap) -- Use `ref a @ ..` with new bootstrap compiler.
                 ["a", ..] => {
                     let a = &spec_parts[1..]; // FIXME inline into pattern.
@@ -128,11 +133,27 @@ impl TargetDataLayout {
                 }
                 [p @ "p", s, ..] | [p @ "p0", s, ..] => {
                     let a = &spec_parts[2..]; // FIXME inline into pattern.
+=======
+                ["a", ref a @ ..] => {
+                    dl.aggregate_align = align(a, "a")?
+                }
+                ["f32", ref a @ ..] => {
+                    dl.f32_align = align(a, "f32")?
+                }
+                ["f64", ref a @ ..] => {
+                    dl.f64_align = align(a, "f64")?
+                }
+                [p @ "p", s, ref a @ ..] | [p @ "p0", s, ref a @ ..] => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     dl.pointer_size = size(s, p)?;
                     dl.pointer_align = align(a, p)?;
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 [s, ..] if s.starts_with("i") => {
                     let a = &spec_parts[1..]; // FIXME inline into pattern.
+=======
+                [s, ref a @ ..] if s.starts_with("i") => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     let bits = match s[1..].parse::<u64>() {
                         Ok(bits) => bits,
                         Err(_) => {
@@ -156,8 +177,12 @@ impl TargetDataLayout {
                         dl.i128_align = a;
                     }
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 [s, ..] if s.starts_with("v") => {
                     let a = &spec_parts[1..]; // FIXME inline into pattern.
+=======
+                [s, ref a @ ..] if s.starts_with("v") => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     let v_size = size(&s[1..], "v")?;
                     let a = align(a, s)?;
                     if let Some(v) = dl.vector_align.iter_mut().find(|v| v.0 == v_size) {
@@ -1012,6 +1037,31 @@ pub trait LayoutOf {
     type TyLayout;
 
     fn layout_of(&self, ty: Self::Ty) -> Self::TyLayout;
+    fn spanned_layout_of(&self, ty: Self::Ty, _span: Span) -> Self::TyLayout {
+        self.layout_of(ty)
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq)]
+pub enum PointerKind {
+    /// Most general case, we know no restrictions to tell LLVM.
+    Shared,
+
+    /// `&T` where `T` contains no `UnsafeCell`, is `noalias` and `readonly`.
+    Frozen,
+
+    /// `&mut T`, when we know `noalias` is safe for LLVM.
+    UniqueBorrowed,
+
+    /// `Box<T>`, unlike `UniqueBorrowed`, it also has `noalias` on returns.
+    UniqueOwned
+}
+
+#[derive(Copy, Clone)]
+pub struct PointeeInfo {
+    pub size: Size,
+    pub align: Align,
+    pub safe: Option<PointerKind>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq)]

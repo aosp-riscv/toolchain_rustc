@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use super::{ErrorCodes, LangString, Markdown, MarkdownHtml, IdMap};
 use super::plain_summary_line;
 use std::cell::RefCell;
@@ -67,6 +68,79 @@ fn test_lang_string_parse() {
     t("text,no_run",           false,         true,    false,   false, false, false, false, v(), None);
     t("edition2015",           false,         false,   false,   true,  false, false, false, v(), Some(Edition::Edition2015));
     t("edition2018",           false,         false,   false,   true,  false, false, false, v(), Some(Edition::Edition2018));
+=======
+use super::{ErrorCodes, LangString, Markdown, MarkdownHtml, IdMap, Ignore};
+use super::plain_summary_line;
+use std::cell::RefCell;
+use syntax::edition::{Edition, DEFAULT_EDITION};
+
+#[test]
+fn test_unique_id() {
+    let input = ["foo", "examples", "examples", "method.into_iter","examples",
+                 "method.into_iter", "foo", "main", "search", "methods",
+                 "examples", "method.into_iter", "assoc_type.Item", "assoc_type.Item"];
+    let expected = ["foo", "examples", "examples-1", "method.into_iter", "examples-2",
+                    "method.into_iter-1", "foo-1", "main", "search", "methods",
+                    "examples-3", "method.into_iter-2", "assoc_type.Item", "assoc_type.Item-1"];
+
+    let map = RefCell::new(IdMap::new());
+    let test = || {
+        let mut map = map.borrow_mut();
+        let actual: Vec<String> = input.iter().map(|s| map.derive(s.to_string())).collect();
+        assert_eq!(&actual[..], expected);
+    };
+    test();
+    map.borrow_mut().reset();
+    test();
+}
+
+#[test]
+fn test_lang_string_parse() {
+    fn t(s: &str,
+        should_panic: bool, no_run: bool, ignore: Ignore, rust: bool, test_harness: bool,
+        compile_fail: bool, allow_fail: bool, error_codes: Vec<String>,
+        edition: Option<Edition>) {
+        assert_eq!(LangString::parse(s, ErrorCodes::Yes, true), LangString {
+            should_panic,
+            no_run,
+            ignore,
+            rust,
+            test_harness,
+            compile_fail,
+            error_codes,
+            original: s.to_owned(),
+            allow_fail,
+            edition,
+        })
+    }
+    let ignore_foo = Ignore::Some(vec!("foo".to_string()));
+
+    fn v() -> Vec<String> {
+        Vec::new()
+    }
+
+    // ignore-tidy-linelength
+    // marker                | should_panic | no_run | ignore | rust | test_harness
+    //                       | compile_fail | allow_fail | error_codes | edition
+    t("",                      false,         false,   Ignore::None,   true,  false, false, false, v(), None);
+    t("rust",                  false,         false,   Ignore::None,   true,  false, false, false, v(), None);
+    t("sh",                    false,         false,   Ignore::None,   false, false, false, false, v(), None);
+    t("ignore",                false,         false,   Ignore::All,    true,  false, false, false, v(), None);
+    t("ignore-foo",            false,         false,   ignore_foo,     true,  false, false, false, v(), None);
+    t("should_panic",          true,          false,   Ignore::None,   true,  false, false, false, v(), None);
+    t("no_run",                false,         true,    Ignore::None,   true,  false, false, false, v(), None);
+    t("test_harness",          false,         false,   Ignore::None,   true,  true,  false, false, v(), None);
+    t("compile_fail",          false,         true,    Ignore::None,   true,  false, true,  false, v(), None);
+    t("allow_fail",            false,         false,   Ignore::None,   true,  false, false, true,  v(), None);
+    t("{.no_run .example}",    false,         true,    Ignore::None,   true,  false, false, false, v(), None);
+    t("{.sh .should_panic}",   true,          false,   Ignore::None,   false, false, false, false, v(), None);
+    t("{.example .rust}",      false,         false,   Ignore::None,   true,  false, false, false, v(), None);
+    t("{.test_harness .rust}", false,         false,   Ignore::None,   true,  true,  false, false, v(), None);
+    t("text, no_run",          false,         true,    Ignore::None,   false, false, false, false, v(), None);
+    t("text,no_run",           false,         true,    Ignore::None,   false, false, false, false, v(), None);
+    t("edition2015",           false,         false,   Ignore::None,   true,  false, false, false, v(), Some(Edition::Edition2015));
+    t("edition2018",           false,         false,   Ignore::None,   true,  false, false, false, v(), Some(Edition::Edition2018));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 #[test]

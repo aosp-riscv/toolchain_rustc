@@ -7,17 +7,30 @@
 
 #include "config.h"
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #include "filebuf.h"
 #include "sysdir.h"
 #include "buffer.h"
 #include "buf_text.h"
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #include "git2/config.h"
 #include "git2/sys/config.h"
 #include "git2/types.h"
-#include "strmap.h"
+
 #include "array.h"
-#include "config_parse.h"
+#include "buf_text.h"
+#include "buffer.h"
+#include "config_backend.h"
 #include "config_entries.h"
+#include "config_parse.h"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+#include "config_entries.h"
+=======
+#include "filebuf.h"
+#include "strmap.h"
+#include "sysdir.h"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #include "wildmatch.h"
 
 #include <ctype.h>
@@ -26,24 +39,28 @@
 /* Max depth for [include] directives */
 #define MAX_INCLUDE_DEPTH 10
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 typedef struct diskfile {
 	git_futils_filestamp stamp;
 	git_oid checksum;
 	char *path;
 	git_array_t(struct diskfile) includes;
 } diskfile;
+=======
+typedef struct config_file {
+	git_futils_filestamp stamp;
+	git_oid checksum;
+	char *path;
+	git_array_t(struct config_file) includes;
+} config_file;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 typedef struct {
 	git_config_backend parent;
-	/* mutex to coordinate accessing the values */
 	git_mutex values_mutex;
 	git_config_entries *entries;
 	const git_repository *repo;
 	git_config_level_t level;
-} diskfile_header;
-
-typedef struct {
-	diskfile_header header;
 
 	git_array_t(git_config_parser) readers;
 
@@ -51,6 +68,7 @@ typedef struct {
 	git_filebuf locked_buf;
 	git_buf locked_content;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile file;
 } diskfile_backend;
 
@@ -59,20 +77,35 @@ typedef struct {
 
 	diskfile_backend *snapshot_from;
 } diskfile_readonly_backend;
+=======
+	config_file file;
+} config_file_backend;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 typedef struct {
 	const git_repository *repo;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile *file;
+=======
+	config_file *file;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_entries *entries;
 	git_config_level_t level;
 	unsigned int depth;
-} diskfile_parse_state;
+} config_file_parse_data;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static int config_read(git_config_entries *entries, const git_repository *repo, diskfile *file, git_config_level_t level, int depth);
 static int config_read_buffer(git_config_entries *entries, const git_repository *repo, diskfile *file, git_config_level_t level, int depth, const char *buf, size_t buflen);
 static int config_write(diskfile_backend *cfg, const char *orig_key, const char *key, const p_regex_t *preg, const char *value);
+=======
+static int config_read(git_config_entries *entries, const git_repository *repo, config_file *file, git_config_level_t level, int depth);
+static int config_read_buffer(git_config_entries *entries, const git_repository *repo, config_file *file, git_config_level_t level, int depth, const char *buf, size_t buflen);
+static int config_write(config_file_backend *cfg, const char *orig_key, const char *key, const p_regex_t *preg, const char *value);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 static char *escape_value(const char *ptr);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static int config_snapshot(git_config_backend **out, git_config_backend *in);
 
 static int config_error_readonly(void)
@@ -81,31 +114,53 @@ static int config_error_readonly(void)
 	return -1;
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /**
  * Take the current values map from the backend and increase its
  * refcount. This is its own function to make sure we use the mutex to
  * avoid the map pointer from changing under us.
  */
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static git_config_entries *diskfile_entries_take(diskfile_header *h)
+=======
+static git_config_entries *diskfile_entries_take(config_file_backend *b)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 {
 	git_config_entries *entries;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	if (git_mutex_lock(&h->values_mutex) < 0) {
+=======
+	if (git_mutex_lock(&b->values_mutex) < 0) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	    git_error_set(GIT_ERROR_OS, "failed to lock config backend");
 	    return NULL;
 	}
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	entries = h->entries;
+=======
+	entries = b->entries;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_entries_incref(entries);
 
-	git_mutex_unlock(&h->values_mutex);
+	git_mutex_unlock(&b->values_mutex);
 
 	return entries;
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static void config_file_clear(diskfile *file)
+=======
+static void config_file_clear(config_file *file)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile *include;
+=======
+	config_file *include;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	uint32_t i;
 
 	if (file == NULL)
@@ -121,29 +176,51 @@ static void config_file_clear(diskfile *file)
 
 static int config_open(git_config_backend *cfg, git_config_level_t level, const git_repository *repo)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *b = GIT_CONTAINER_OF(cfg, diskfile_backend, header.parent);
+=======
+	config_file_backend *b = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	int res;
 
-	b->header.level = level;
-	b->header.repo = repo;
+	b->level = level;
+	b->repo = repo;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	if ((res = git_config_entries_new(&b->header.entries)) < 0)
+=======
+	if ((res = git_config_entries_new(&b->entries)) < 0)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 		return res;
 
 	if (!git_path_exists(b->file.path))
 		return 0;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	if (res < 0 || (res = config_read(b->header.entries, repo, &b->file, level, 0)) < 0) {
 		git_config_entries_free(b->header.entries);
 		b->header.entries = NULL;
+=======
+	if (res < 0 || (res = config_read(b->entries, repo, &b->file, level, 0)) < 0) {
+		git_config_entries_free(b->entries);
+		b->entries = NULL;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	}
 
 	return res;
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static int config_is_modified(int *modified, diskfile *file)
+=======
+static int config_is_modified(int *modified, config_file *file)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile *include;
+=======
+	config_file *include;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_buf buf = GIT_BUF_INIT;
 	git_oid hash;
 	uint32_t i;
@@ -178,16 +255,76 @@ out:
 }
 
 static int config_set_entries(git_config_backend *cfg, git_config_entries *entries)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 {
+	config_file_backend *b = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+	git_config_entries *old = NULL;
+	config_file *include;
+	int error;
+	uint32_t i;
+
+	if (b->parent.readonly) {
+		git_error_set(GIT_ERROR_CONFIG, "this backend is read-only");
+		return -1;
+	}
+
+	git_array_foreach(b->file.includes, i, include)
+		config_file_clear(include);
+	git_array_clear(b->file.includes);
+
+	if ((error = git_mutex_lock(&b->values_mutex)) < 0) {
+		git_error_set(GIT_ERROR_OS, "failed to lock config backend");
+		goto out;
+	}
+
+	old = b->entries;
+	b->entries = entries;
+
+	git_mutex_unlock(&b->values_mutex);
+
+out:
+	git_config_entries_free(old);
+	return error;
+}
+
+static int config_refresh_from_buffer(git_config_backend *cfg, const char *buf, size_t buflen)
+{
+	config_file_backend *b = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+	git_config_entries *entries = NULL;
+	int error;
+
+	if ((error = git_config_entries_new(&entries)) < 0 ||
+	    (error = config_read_buffer(entries, b->repo, &b->file,
+					b->level, 0, buf, buflen)) < 0 ||
+	    (error = config_set_entries(cfg, entries)) < 0)
+		goto out;
+
+	entries = NULL;
+out:
+	git_config_entries_free(entries);
+	return error;
+}
+
+static int config_refresh(git_config_backend *cfg)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *b = GIT_CONTAINER_OF(cfg, diskfile_backend, header.parent);
 	git_config_entries *old = NULL;
 	diskfile *include;
 	int error;
 	uint32_t i;
+=======
+	config_file_backend *b = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+	git_config_entries *entries = NULL;
+	int error, modified;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-	if (b->header.parent.readonly)
-		return config_error_readonly();
+	if (cfg->readonly)
+		return 0;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	git_array_foreach(b->file.includes, i, include)
 		config_file_clear(include);
 	git_array_clear(b->file.includes);
@@ -234,6 +371,8 @@ static int config_refresh(git_config_backend *cfg)
 	if (cfg->readonly)
 		return 0;
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	if ((error = config_is_modified(&modified, &b->file)) < 0 && error != GIT_ENOTFOUND)
 		goto out;
 
@@ -241,7 +380,11 @@ static int config_refresh(git_config_backend *cfg)
 		return 0;
 
 	if ((error = git_config_entries_new(&entries)) < 0 ||
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	    (error = config_read(entries, b->header.repo, &b->file, b->header.level, 0)) < 0 ||
+=======
+	    (error = config_read(entries, b->repo, &b->file, b->level, 0)) < 0 ||
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	    (error = config_set_entries(cfg, entries)) < 0)
 		goto out;
 
@@ -254,14 +397,23 @@ out:
 
 static void backend_free(git_config_backend *_backend)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *backend = GIT_CONTAINER_OF(_backend, diskfile_backend, header.parent);
+=======
+	config_file_backend *backend = GIT_CONTAINER_OF(_backend, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 	if (backend == NULL)
 		return;
 
 	config_file_clear(&backend->file);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	git_config_entries_free(backend->header.entries);
 	git_mutex_free(&backend->header.values_mutex);
+=======
+	git_config_entries_free(backend->entries);
+	git_mutex_free(&backend->values_mutex);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git__free(backend);
 }
 
@@ -269,12 +421,20 @@ static int config_iterator_new(
 	git_config_iterator **iter,
 	struct git_config_backend *backend)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_header *bh = GIT_CONTAINER_OF(backend, diskfile_header, parent);
+=======
+	config_file_backend *b = GIT_CONTAINER_OF(backend, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_entries *entries = NULL;
 	int error;
 
 	if ((error = config_refresh(backend)) < 0 ||
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	    (error = git_config_entries_dup(&entries, bh->entries)) < 0 ||
+=======
+	    (error = git_config_entries_dup(&entries, b->entries)) < 0 ||
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	    (error = git_config_entries_iterator_new(iter, entries)) < 0)
 		goto out;
 
@@ -286,7 +446,11 @@ out:
 
 static int config_set(git_config_backend *cfg, const char *name, const char *value)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *b = GIT_CONTAINER_OF(cfg, diskfile_backend, header.parent);
+=======
+	config_file_backend *b = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_entries *entries;
 	git_config_entry *existing;
 	char *key, *esc_value = NULL;
@@ -295,7 +459,7 @@ static int config_set(git_config_backend *cfg, const char *name, const char *val
 	if ((error = git_config__normalize_name(name, &key)) < 0)
 		return error;
 
-	if ((entries = diskfile_entries_take(&b->header)) == NULL)
+	if ((entries = diskfile_entries_take(b)) == NULL)
 		return -1;
 
 	/* Check whether we'd be modifying an included or multivar key */
@@ -338,7 +502,11 @@ static void free_diskfile_entry(git_config_entry *entry)
  */
 static int config_get(git_config_backend *cfg, const char *key, git_config_entry **out)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_header *h = GIT_CONTAINER_OF(cfg, diskfile_header, parent);
+=======
+	config_file_backend *h = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_entries *entries = NULL;
 	git_config_entry *entry;
 	int error = 0;
@@ -364,7 +532,11 @@ static int config_get(git_config_backend *cfg, const char *key, git_config_entry
 static int config_set_multivar(
 	git_config_backend *cfg, const char *name, const char *regexp, const char *value)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *b = GIT_CONTAINER_OF(cfg, diskfile_backend, header.parent);
+=======
+	config_file_backend *b = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	char *key;
 	p_regex_t preg;
 	int result;
@@ -394,7 +566,11 @@ out:
 
 static int config_delete(git_config_backend *cfg, const char *name)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *b = GIT_CONTAINER_OF(cfg, diskfile_backend, header.parent);
+=======
+	config_file_backend *b = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_entries *entries = NULL;
 	git_config_entry *entry;
 	char *key = NULL;
@@ -403,7 +579,11 @@ static int config_delete(git_config_backend *cfg, const char *name)
 	if ((error = git_config__normalize_name(name, &key)) < 0)
 		goto out;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	if ((entries = diskfile_entries_take(&b->header)) == NULL)
+=======
+	if ((entries = diskfile_entries_take(b)) == NULL)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 		goto out;
 
 	/* Check whether we'd be modifying an included or multivar key */
@@ -424,7 +604,11 @@ out:
 
 static int config_delete_multivar(git_config_backend *cfg, const char *name, const char *regexp)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *b = GIT_CONTAINER_OF(cfg, diskfile_backend, header.parent);
+=======
+	config_file_backend *b = GIT_CONTAINER_OF(cfg, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_entries *entries = NULL;
 	git_config_entry *entry = NULL;
 	p_regex_t preg = { 0 };
@@ -434,7 +618,11 @@ static int config_delete_multivar(git_config_backend *cfg, const char *name, con
 	if ((result = git_config__normalize_name(name, &key)) < 0)
 		goto out;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	if ((entries = diskfile_entries_take(&b->header)) == NULL) {
+=======
+	if ((entries = diskfile_entries_take(b)) == NULL) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 		result = -1;
 		goto out;
 	}
@@ -463,7 +651,11 @@ out:
 
 static int config_lock(git_config_backend *_cfg)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *cfg = GIT_CONTAINER_OF(_cfg, diskfile_backend, header.parent);
+=======
+	config_file_backend *cfg = GIT_CONTAINER_OF(_cfg, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	int error;
 
 	if ((error = git_filebuf_open(&cfg->locked_buf, cfg->file.path, 0, GIT_CONFIG_FILE_MODE)) < 0)
@@ -482,7 +674,11 @@ static int config_lock(git_config_backend *_cfg)
 
 static int config_unlock(git_config_backend *_cfg, int success)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile_backend *cfg = GIT_CONTAINER_OF(_cfg, diskfile_backend, header.parent);
+=======
+	config_file_backend *cfg = GIT_CONTAINER_OF(_cfg, config_file_backend, parent);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	int error = 0;
 
 	if (success) {
@@ -499,18 +695,23 @@ static int config_unlock(git_config_backend *_cfg, int success)
 
 int git_config_backend_from_file(git_config_backend **out, const char *path)
 {
-	diskfile_backend *backend;
+	config_file_backend *backend;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	backend = git__calloc(1, sizeof(diskfile_backend));
+=======
+	backend = git__calloc(1, sizeof(config_file_backend));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	GIT_ERROR_CHECK_ALLOC(backend);
 
-	backend->header.parent.version = GIT_CONFIG_BACKEND_VERSION;
-	git_mutex_init(&backend->header.values_mutex);
+	backend->parent.version = GIT_CONFIG_BACKEND_VERSION;
+	git_mutex_init(&backend->values_mutex);
 
 	backend->file.path = git__strdup(path);
 	GIT_ERROR_CHECK_ALLOC(backend->file.path);
 	git_array_init(backend->file.includes);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	backend->header.parent.open = config_open;
 	backend->header.parent.get = config_get;
 	backend->header.parent.set = config_set;
@@ -638,6 +839,19 @@ static int config_snapshot(git_config_backend **out, git_config_backend *in)
 	backend->header.parent.lock = config_lock_readonly;
 	backend->header.parent.unlock = config_unlock_readonly;
 	backend->header.parent.free = backend_readonly_free;
+=======
+	backend->parent.open = config_open;
+	backend->parent.get = config_get;
+	backend->parent.set = config_set;
+	backend->parent.set_multivar = config_set_multivar;
+	backend->parent.del = config_delete;
+	backend->parent.del_multivar = config_delete_multivar;
+	backend->parent.iterator = config_iterator_new;
+	backend->parent.snapshot = git_config_backend_snapshot;
+	backend->parent.lock = config_lock;
+	backend->parent.unlock = config_unlock;
+	backend->parent.free = backend_free;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 	*out = &backend->header.parent;
 
@@ -685,9 +899,17 @@ static char *escape_value(const char *ptr)
 	return git_buf_detach(&buf);
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static int parse_include(diskfile_parse_state *parse_data, const char *file)
+=======
+static int parse_include(config_file_parse_data *parse_data, const char *file)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile *include;
+=======
+	config_file *include;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_buf path = GIT_BUF_INIT;
 	char *dir;
 	int result;
@@ -790,7 +1012,11 @@ static const struct {
 	{ "gitdir/i:", conditional_match_gitdir_i }
 };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static int parse_conditional_include(diskfile_parse_state *parse_data, const char *section, const char *file)
+=======
+static int parse_conditional_include(config_file_parse_data *parse_data, const char *section, const char *file)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 {
 	char *condition;
 	size_t i;
@@ -831,7 +1057,7 @@ static int read_on_variable(
 	size_t line_len,
 	void *data)
 {
-	diskfile_parse_state *parse_data = (diskfile_parse_state *)data;
+	config_file_parse_data *parse_data = (config_file_parse_data *)data;
 	git_buf buf = GIT_BUF_INIT;
 	git_config_entry *entry;
 	const char *c;
@@ -881,13 +1107,17 @@ static int read_on_variable(
 static int config_read_buffer(
 	git_config_entries *entries,
 	const git_repository *repo,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile *file,
+=======
+	config_file *file,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_level_t level,
 	int depth,
 	const char *buf,
 	size_t buflen)
 {
-	diskfile_parse_state parse_data;
+	config_file_parse_data parse_data;
 	git_config_parser reader;
 	int error;
 
@@ -921,7 +1151,11 @@ out:
 static int config_read(
 	git_config_entries *entries,
 	const git_repository *repo,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	diskfile *file,
+=======
+	config_file *file,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	git_config_level_t level,
 	int depth)
 {
@@ -1173,7 +1407,11 @@ static int write_on_eof(
 /*
  * This is pretty much the parsing, except we write out anything we don't have
  */
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static int config_write(diskfile_backend *cfg, const char *orig_key, const char *key, const p_regex_t *preg, const char* value)
+=======
+static int config_write(config_file_backend *cfg, const char *orig_key, const char *key, const p_regex_t *preg, const char* value)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 {
 	char *orig_section = NULL, *section = NULL, *orig_name, *name, *ldot;
 	git_buf buf = GIT_BUF_INIT, contents = GIT_BUF_INIT;
@@ -1233,7 +1471,11 @@ static int config_write(diskfile_backend *cfg, const char *orig_key, const char 
 		if ((error = git_filebuf_commit(&file)) < 0)
 			goto done;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 		if ((error = config_refresh_from_buffer(&cfg->header.parent, buf.ptr, buf.size)) < 0)
+=======
+		if ((error = config_refresh_from_buffer(&cfg->parent, buf.ptr, buf.size)) < 0)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 			goto done;
 	}
 

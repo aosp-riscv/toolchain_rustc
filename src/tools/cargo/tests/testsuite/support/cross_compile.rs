@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::env;
 use std::process::Command;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -136,3 +137,5 @@ pub fn host() -> String {
     };
     format!("{}-{}", arch, platform)
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

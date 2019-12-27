@@ -108,18 +108,30 @@ impl Index<'tcx> {
         position.write_to_bytes_at(positions, array_index)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn write_index(&self, buf: &mut Encoder) -> LazySeq<Self> {
+=======
+    pub fn write_index(&self, buf: &mut Encoder) -> Lazy<[Self]> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let pos = buf.position();
 
         // First we write the length of the lower range ...
         buf.emit_raw_bytes(&(self.positions.len() as u32 / 4).to_le_bytes());
         // ... then the values.
         buf.emit_raw_bytes(&self.positions);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         LazySeq::with_position_and_length(pos as usize, self.positions.len() / 4 + 1)
+=======
+        Lazy::from_position_and_meta(pos as usize, self.positions.len() / 4 + 1)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl LazySeq<Index<'tcx>> {
+=======
+impl Lazy<[Index<'tcx>]> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Given the metadata, extract out the offset of a particular
     /// DefIndex (if any).
     #[inline(never)]
@@ -127,7 +139,11 @@ impl LazySeq<Index<'tcx>> {
         let bytes = &bytes[self.position..];
         debug!("Index::lookup: index={:?} len={:?}",
                def_index,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                self.len);
+=======
+               self.meta);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         let position = u32::read_from_bytes_at(bytes, 1 + def_index.index());
         if position == u32::MAX {
@@ -135,7 +151,7 @@ impl LazySeq<Index<'tcx>> {
             None
         } else {
             debug!("Index::lookup: position={:?}", position);
-            Some(Lazy::with_position(position as usize))
+            Some(Lazy::from_position(position as usize))
         }
     }
 }

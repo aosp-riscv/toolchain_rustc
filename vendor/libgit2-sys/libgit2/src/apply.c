@@ -23,9 +23,12 @@
 #include "zstream.h"
 #include "reader.h"
 #include "index.h"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 #define apply_err(...) \
 	( git_error_set(GIT_ERROR_PATCH, __VA_ARGS__), GIT_EAPPLYFAIL )
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 typedef struct {
 	/* The lines that we allocate ourself are allocated out of the pool.
@@ -34,6 +37,18 @@ typedef struct {
 	git_pool pool;
 	git_vector lines;
 } patch_image;
+
+static int apply_err(const char *fmt, ...) GIT_FORMAT_PRINTF(1, 2);
+static int apply_err(const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	git_error_vset(GIT_ERROR_PATCH, fmt, ap);
+	va_end(ap);
+
+	return GIT_EAPPLYFAIL;
+}
 
 static void patch_line_init(
 	git_diff_line *out,

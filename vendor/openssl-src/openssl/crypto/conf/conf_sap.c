@@ -42,7 +42,11 @@ void OPENSSL_config(const char *appname)
 
 int openssl_config_int(const OPENSSL_INIT_SETTINGS *settings)
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     int ret;
+=======
+    int ret = 0;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     const char *filename;
     const char *appname;
     unsigned long flags;

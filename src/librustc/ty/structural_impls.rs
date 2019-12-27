@@ -748,6 +748,10 @@ impl<'a, 'tcx> Lift<'tcx> for ty::error::TypeError<'a> {
             Sorts(ref x) => return tcx.lift(x).map(Sorts),
             ExistentialMismatch(ref x) => return tcx.lift(x).map(ExistentialMismatch),
             ConstMismatch(ref x) => return tcx.lift(x).map(ConstMismatch),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            IntrinsicCast => IntrinsicCast,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         })
     }
 }
@@ -1338,6 +1342,10 @@ EnumTypeFoldableImpl! {
         (ty::error::TypeError::Sorts)(x),
         (ty::error::TypeError::ExistentialMismatch)(x),
         (ty::error::TypeError::ConstMismatch)(x),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        (ty::error::TypeError::IntrinsicCast),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 

@@ -51,6 +51,10 @@ x = bo(5,7);
 [_Type_]: ../types.md#type-expressions
 [`extern`]: ../items/external-blocks.md
 [closures]: closure.md
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 [extern function]: ../items/functions.md#extern-functions
+=======
+[extern function]: ../items/functions.md#extern-function-qualifier
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 [function items]: function-item.md
 [unsafe function]: ../unsafe-functions.md

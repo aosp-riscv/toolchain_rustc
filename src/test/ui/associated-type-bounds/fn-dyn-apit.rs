@@ -1,6 +1,10 @@
 // run-pass
 // aux-build:fn-dyn-aux.rs
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![allow(unused)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(associated_type_bounds)]
 
 extern crate fn_dyn_aux;

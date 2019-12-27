@@ -53,6 +53,7 @@ if [ "$REPLACE_CC" = "1" ]; then
     for exec in cpp c++ g++; do
         ln -s $TARGET-g++ /usr/local/bin/$exec
     done
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fi
 
 export CC=$TARGET-gcc
@@ -64,7 +65,10 @@ LLVM=70
 if [ ! -d libunwind-release_$LLVM ]; then
   curl -L https://github.com/llvm-mirror/llvm/archive/release_$LLVM.tar.gz | tar xzf -
   curl -L https://github.com/llvm-mirror/libunwind/archive/release_$LLVM.tar.gz | tar xzf -
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 fi
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 # fixme(mati865): Replace it with https://github.com/rust-lang/rust/pull/59089
 mkdir libunwind-build
@@ -80,3 +84,5 @@ cmake ../libunwind-release_$LLVM \
 hide_output make -j$(nproc)
 cp lib/libunwind.a $OUTPUT/$TARGET/lib
 cd - && rm -rf libunwind-build
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

@@ -15,6 +15,10 @@
         - [Using `compiletest` + commands to control test execution](./compiletest.md)
     - [Walkthrough: a typical contribution](./walkthrough.md)
     - [Implementing new features](./implementing_new_features.md)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    - [Stability attributes](./stability.md)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     - [Stabilizing Features](./stabilization_guide.md)
     - [Debugging the Compiler](./compiler-debugging.md)
     - [Profiling the compiler](./profiling.md)
@@ -64,7 +68,11 @@
     - [Type checking](./type-checking.md)
         - [Method Lookup](./method-lookup.md)
         - [Variance](./variance.md)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         - [Existential Types](./existential-types.md)
+=======
+        - [Opaque Types](./opaque-types-type-alias-impl-trait.md)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     - [The MIR (Mid-level IR)](./mir/index.md)
         - [MIR construction](./mir/construction.md)
         - [MIR visitor and traversal](./mir/visitor.md)

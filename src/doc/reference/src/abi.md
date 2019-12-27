@@ -88,7 +88,11 @@ pub fn name_in_rust() { }
 [_MetaNameValueStr_]: attributes.md#meta-item-attribute-syntax
 [`static` items]: items/static-items.md
 [attribute]: attributes.md
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 [extern functions]: items/functions.md#extern-functions
+=======
+[extern functions]: items/functions.md#extern-function-qualifier
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 [external blocks]: items/external-blocks.md
 [function]: items/functions.md
 [item]: items.md

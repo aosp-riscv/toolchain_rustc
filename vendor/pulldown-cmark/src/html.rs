@@ -160,6 +160,7 @@ where
                     escape_html(&mut self.writer, &text)?;
                     self.write("</code>")?;
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 Html(html) | InlineHtml(html) => {
                     self.write(&html)?;
                 }
@@ -168,6 +169,23 @@ where
                 }
                 HardBreak => {
                     self.write("<br />\n")?;
+=======
+                Html(html) => {
+                    self.write(&html)?;
+                }
+                SoftBreak => {
+                    self.write_newline()?;
+                }
+                HardBreak => {
+                    self.write("<br />\n")?;
+                }
+                Rule => {
+                    if self.end_newline {
+                        self.write("<hr />\n")?;
+                    } else {
+                        self.write("\n<hr />\n")?;
+                    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
                 FootnoteReference(name) => {
                     let len = self.numbers.len() + 1;
@@ -199,6 +217,7 @@ where
                     self.write("\n<p>")
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Tag::Rule => {
                 if self.end_newline {
                     self.write("<hr />\n")
@@ -207,6 +226,9 @@ where
                 }
             }
             Tag::Header(level) => {
+=======
+            Tag::Heading(level) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if self.end_newline {
                     self.end_newline = false;
                     write!(&mut self.writer, "<h{}>", level)
@@ -347,8 +369,12 @@ where
             Tag::Paragraph => {
                 self.write("</p>\n")?;
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Tag::Rule => (),
             Tag::Header(level) => {
+=======
+            Tag::Heading(level) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.write("</h")?;
                 write!(&mut self.writer, "{}", level)?;
                 self.write(">\n")?;
@@ -405,7 +431,10 @@ where
             Tag::FootnoteDefinition(_) => {
                 self.write("</div>\n")?;
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Tag::HtmlBlock => {}
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         Ok(())
     }
@@ -422,12 +451,20 @@ where
                     }
                     nest -= 1;
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 Html(_) => (),
                 InlineHtml(text) | Code(text) | Text(text) => {
+=======
+                Html(text) | Code(text) | Text(text) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     escape_html(&mut self.writer, &text)?;
                     self.end_newline = text.ends_with('\n');
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 SoftBreak | HardBreak => {
+=======
+                SoftBreak | HardBreak | Rule => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     self.write(" ")?;
                 }
                 FootnoteReference(name) => {

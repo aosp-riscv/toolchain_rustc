@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0658]: use of unstable library feature '__rust_unstable_column': internal implementation detail of the `panic` macro
   --> $DIR/rust-unstable-column-gated.rs:2:20
    |
@@ -9,3 +10,5 @@ LL |     println!("{}", __rust_unstable_column!());
 error: aborting due to previous error
 
 For more information about this error, try `rustc --explain E0658`.
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

@@ -7,10 +7,10 @@ use std::path::{Path, PathBuf};
 use std::thread;
 use std::time::SystemTime;
 
-use crate::support::paths::{self, CargoPathExt};
-use crate::support::registry::Package;
-use crate::support::sleep_ms;
-use crate::support::{basic_manifest, is_coarse_mtime, project};
+use cargo_test_support::paths::{self, CargoPathExt};
+use cargo_test_support::registry::Package;
+use cargo_test_support::sleep_ms;
+use cargo_test_support::{basic_manifest, is_coarse_mtime, project};
 
 #[cargo_test]
 fn modifying_and_moving() {
@@ -1134,7 +1134,7 @@ fn reuse_shared_build_dep() {
         .file("bar/build.rs", "fn main() {}")
         .build();
 
-    p.cargo("build --all").run();
+    p.cargo("build --workspace").run();
     // This should not recompile!
     p.cargo("build -p foo -v")
         .with_stderr(
@@ -1151,13 +1151,22 @@ fn reuse_shared_build_dep() {
 fn changing_rustflags_is_cached() {
     let p = project().file("src/lib.rs", "").build();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     p.cargo("build").run();
     p.cargo("build")
         .env("RUSTFLAGS", "-C linker=cc")
         .with_stderr(
             "\
+=======
+    // This isn't ever cached, we always have to recompile
+    for _ in 0..2 {
+        p.cargo("build")
+            .with_stderr(
+                "\
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 [COMPILING] foo v0.0.1 ([..])
 [FINISHED] dev [unoptimized + debuginfo] target(s) in [..]",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         )
         .run();
     // This should not recompile!
@@ -1168,6 +1177,19 @@ fn changing_rustflags_is_cached() {
         .env("RUSTFLAGS", "-C linker=cc")
         .with_stderr("[FINISHED] dev [unoptimized + debuginfo] target(s) in [..]")
         .run();
+=======
+            )
+            .run();
+        p.cargo("build")
+            .env("RUSTFLAGS", "-C linker=cc")
+            .with_stderr(
+                "\
+[COMPILING] foo v0.0.1 ([..])
+[FINISHED] dev [unoptimized + debuginfo] target(s) in [..]",
+            )
+            .run();
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 #[cargo_test]
@@ -1257,6 +1279,9 @@ fn fingerprint_cleaner_does_not_rebuild() {
 
             [dependencies]
             bar = { path = "bar" }
+
+            [features]
+            a = []
         "#,
         )
         .file("src/lib.rs", "")
@@ -1267,12 +1292,14 @@ fn fingerprint_cleaner_does_not_rebuild() {
     p.cargo("build -Z mtime-on-use")
         .masquerade_as_nightly_cargo()
         .run();
-    p.cargo("build -Z mtime-on-use")
+    p.cargo("build -Z mtime-on-use --features a")
         .masquerade_as_nightly_cargo()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         .env("RUSTFLAGS", "-C linker=cc")
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         .with_stderr(
             "\
-[COMPILING] bar v0.0.1 ([..])
 [COMPILING] foo v0.0.1 ([..])
 [FINISHED] dev [unoptimized + debuginfo] target(s) in [..]",
         )
@@ -1285,16 +1312,22 @@ fn fingerprint_cleaner_does_not_rebuild() {
         sleep_ms(1000);
     }
     // This does not make new files, but it does update the mtime.
-    p.cargo("build -Z mtime-on-use")
+    p.cargo("build -Z mtime-on-use --features a")
         .masquerade_as_nightly_cargo()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         .env("RUSTFLAGS", "-C linker=cc")
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         .with_stderr("[FINISHED] dev [unoptimized + debuginfo] target(s) in [..]")
         .run();
     fingerprint_cleaner(p.target_debug_dir(), timestamp);
     // This should not recompile!
-    p.cargo("build -Z mtime-on-use")
+    p.cargo("build -Z mtime-on-use --features a")
         .masquerade_as_nightly_cargo()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         .env("RUSTFLAGS", "-C linker=cc")
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         .with_stderr("[FINISHED] dev [unoptimized + debuginfo] target(s) in [..]")
         .run();
     // But this should be cleaned and so need a rebuild
@@ -1302,7 +1335,6 @@ fn fingerprint_cleaner_does_not_rebuild() {
         .masquerade_as_nightly_cargo()
         .with_stderr(
             "\
-[COMPILING] bar v0.0.1 ([..])
 [COMPILING] foo v0.0.1 ([..])
 [FINISHED] dev [unoptimized + debuginfo] target(s) in [..]",
         )
@@ -2049,3 +2081,77 @@ fn move_target_directory_with_path_deps() {
         .with_stderr("[FINISHED] [..]")
         .run();
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+#[cargo_test]
+fn rerun_if_changes() {
+    let p = project()
+        .file(
+            "build.rs",
+            r#"
+                fn main() {
+                    println!("cargo:rerun-if-env-changed=FOO");
+                    if std::env::var("FOO").is_ok() {
+                        println!("cargo:rerun-if-env-changed=BAR");
+                    }
+                }
+            "#,
+        )
+        .file("src/lib.rs", "")
+        .build();
+
+    p.cargo("build").run();
+    p.cargo("build").with_stderr("[FINISHED] [..]").run();
+
+    p.cargo("build -v")
+        .env("FOO", "1")
+        .with_stderr(
+            "\
+[COMPILING] foo [..]
+[RUNNING] `[..]build-script-build`
+[RUNNING] `rustc [..]
+[FINISHED] [..]
+",
+        )
+        .run();
+    p.cargo("build")
+        .env("FOO", "1")
+        .with_stderr("[FINISHED] [..]")
+        .run();
+
+    p.cargo("build -v")
+        .env("FOO", "1")
+        .env("BAR", "1")
+        .with_stderr(
+            "\
+[COMPILING] foo [..]
+[RUNNING] `[..]build-script-build`
+[RUNNING] `rustc [..]
+[FINISHED] [..]
+",
+        )
+        .run();
+    p.cargo("build")
+        .env("FOO", "1")
+        .env("BAR", "1")
+        .with_stderr("[FINISHED] [..]")
+        .run();
+
+    p.cargo("build -v")
+        .env("BAR", "2")
+        .with_stderr(
+            "\
+[COMPILING] foo [..]
+[RUNNING] `[..]build-script-build`
+[RUNNING] `rustc [..]
+[FINISHED] [..]
+",
+        )
+        .run();
+    p.cargo("build")
+        .env("BAR", "2")
+        .with_stderr("[FINISHED] [..]")
+        .run();
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

@@ -2,21 +2,26 @@
 ///
 /// For details, see `std::macros`.
 #[macro_export]
-#[allow_internal_unstable(core_panic, __rust_unstable_column)]
+#[allow_internal_unstable(core_panic)]
 #[stable(feature = "core", since = "1.6.0")]
 macro_rules! panic {
     () => (
         $crate::panic!("explicit panic")
     );
     ($msg:expr) => ({
-        $crate::panicking::panic(&($msg, file!(), line!(), __rust_unstable_column!()))
+        $crate::panicking::panic(&($msg, $crate::file!(), $crate::line!(), $crate::column!()))
     });
     ($msg:expr,) => (
         $crate::panic!($msg)
     );
     ($fmt:expr, $($arg:tt)+) => ({
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         $crate::panicking::panic_fmt(format_args!($fmt, $($arg)+),
                                      &(file!(), line!(), __rust_unstable_column!()))
+=======
+        $crate::panicking::panic_fmt($crate::format_args!($fmt, $($arg)+),
+                                     &($crate::file!(), $crate::line!(), $crate::column!()))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     });
 }
 
@@ -70,7 +75,7 @@ macro_rules! assert_eq {
                     panic!(r#"assertion failed: `(left == right)`
   left: `{:?}`,
  right: `{:?}`: {}"#, &*left_val, &*right_val,
-                           format_args!($($arg)+))
+                           $crate::format_args!($($arg)+))
                 }
             }
         }
@@ -127,7 +132,7 @@ macro_rules! assert_ne {
                     panic!(r#"assertion failed: `(left != right)`
   left: `{:?}`,
  right: `{:?}`: {}"#, &*left_val, &*right_val,
-                           format_args!($($arg)+))
+                           $crate::format_args!($($arg)+))
                 }
             }
         }
@@ -181,7 +186,7 @@ macro_rules! assert_ne {
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
 macro_rules! debug_assert {
-    ($($arg:tt)*) => (if cfg!(debug_assertions) { assert!($($arg)*); })
+    ($($arg:tt)*) => (if $crate::cfg!(debug_assertions) { $crate::assert!($($arg)*); })
 }
 
 /// Asserts that two expressions are equal to each other.
@@ -208,7 +213,11 @@ macro_rules! debug_assert {
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
 macro_rules! debug_assert_eq {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ($($arg:tt)*) => (if cfg!(debug_assertions) { $crate::assert_eq!($($arg)*); })
+=======
+    ($($arg:tt)*) => (if $crate::cfg!(debug_assertions) { $crate::assert_eq!($($arg)*); })
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// Asserts that two expressions are not equal to each other.
@@ -235,7 +244,11 @@ macro_rules! debug_assert_eq {
 #[macro_export]
 #[stable(feature = "assert_ne", since = "1.13.0")]
 macro_rules! debug_assert_ne {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ($($arg:tt)*) => (if cfg!(debug_assertions) { $crate::assert_ne!($($arg)*); })
+=======
+    ($($arg:tt)*) => (if $crate::cfg!(debug_assertions) { $crate::assert_ne!($($arg)*); })
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// Unwraps a result or propagates its error.
@@ -386,7 +399,7 @@ macro_rules! r#try {
 #[macro_export]
 #[stable(feature = "rust1", since = "1.0.0")]
 macro_rules! write {
-    ($dst:expr, $($arg:tt)*) => ($dst.write_fmt(format_args!($($arg)*)))
+    ($dst:expr, $($arg:tt)*) => ($dst.write_fmt($crate::format_args!($($arg)*)))
 }
 
 /// Write formatted data into a buffer, with a newline appended.
@@ -446,7 +459,7 @@ macro_rules! writeln {
         $crate::writeln!($dst)
     );
     ($dst:expr, $($arg:tt)*) => (
-        $dst.write_fmt(format_args_nl!($($arg)*))
+        $dst.write_fmt($crate::format_args_nl!($($arg)*))
     );
 }
 
@@ -515,7 +528,7 @@ macro_rules! unreachable {
         $crate::unreachable!($msg)
     });
     ($fmt:expr, $($arg:tt)*) => ({
-        panic!(concat!("internal error: entered unreachable code: ", $fmt), $($arg)*)
+        panic!($crate::concat!("internal error: entered unreachable code: ", $fmt), $($arg)*)
     });
 }
 
@@ -573,7 +586,11 @@ macro_rules! unreachable {
 #[stable(feature = "rust1", since = "1.0.0")]
 macro_rules! unimplemented {
     () => (panic!("not yet implemented"));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ($($arg:tt)+) => (panic!("not yet implemented: {}", format_args!($($arg)+)));
+=======
+    ($($arg:tt)+) => (panic!("not yet implemented: {}", $crate::format_args!($($arg)+)));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// Indicates unfinished code.
@@ -632,11 +649,16 @@ macro_rules! unimplemented {
 #[unstable(feature = "todo_macro", issue = "59277")]
 macro_rules! todo {
     () => (panic!("not yet implemented"));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ($($arg:tt)+) => (panic!("not yet implemented: {}", format_args!($($arg)+)));
+=======
+    ($($arg:tt)+) => (panic!("not yet implemented: {}", $crate::format_args!($($arg)+)));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
-/// Creates an array of [`MaybeUninit`].
+/// Definitions of built-in macros.
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// This macro constructs an uninitialized array of the type `[MaybeUninit<K>; N]`.
 /// It exists solely because bootstrap does not yet support const array-init expressions.
 ///
@@ -675,6 +697,11 @@ macro_rules! uninit_array {
 /// with exception of expansion functions transforming macro inputs into outputs,
 /// those functions are provided by the compiler.
 #[cfg(not(bootstrap))]
+=======
+/// Most of the macro properties (stability, visibility, etc.) are taken from the source code here,
+/// with exception of expansion functions transforming macro inputs into outputs,
+/// those functions are provided by the compiler.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub(crate) mod builtin {
 
     /// Causes compilation to fail with the given error message when encountered.
@@ -769,7 +796,10 @@ pub(crate) mod builtin {
     #[allow_internal_unstable(fmt_internals)]
     #[rustc_builtin_macro]
     #[macro_export]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[rustc_macro_transparency = "opaque"]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     macro_rules! format_args {
         ($fmt:expr) => ({ /* compiler built-in */ });
         ($fmt:expr, $($args:tt)*) => ({ /* compiler built-in */ })
@@ -782,7 +812,10 @@ pub(crate) mod builtin {
     #[allow_internal_unstable(fmt_internals)]
     #[rustc_builtin_macro]
     #[macro_export]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[rustc_macro_transparency = "opaque"]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     macro_rules! format_args_nl {
         ($fmt:expr) => ({ /* compiler built-in */ });
         ($fmt:expr, $($args:tt)*) => ({ /* compiler built-in */ })
@@ -962,6 +995,7 @@ pub(crate) mod builtin {
     #[macro_export]
     macro_rules! column { () => { /* compiler built-in */ } }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Same as `column`, but less likely to be shadowed.
     #[unstable(feature = "__rust_unstable_column", issue = "0",
                reason = "internal implementation detail of the `panic` macro")]
@@ -969,6 +1003,8 @@ pub(crate) mod builtin {
     #[macro_export]
     macro_rules! __rust_unstable_column { () => { /* compiler built-in */ } }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Expands to the file name in which it was invoked.
     ///
     /// With [`line!`] and [`column!`], these macros provide debugging information for
@@ -1277,6 +1313,7 @@ pub(crate) mod builtin {
     #[stable(feature = "rust1", since = "1.0.0")]
     #[allow_internal_unstable(test, rustc_attrs)]
     #[rustc_builtin_macro]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[rustc_macro_transparency = "semitransparent"]
     pub macro test($item:item) { /* compiler built-in */ }
 
@@ -1315,6 +1352,40 @@ pub(crate) mod builtin {
     /// Unstable implementation detail of the `rustc` compiler, do not use.
     #[rustc_builtin_macro]
     #[rustc_macro_transparency = "semitransparent"]
+=======
+    pub macro test($item:item) { /* compiler built-in */ }
+
+    /// Attribute macro applied to a function to turn it into a benchmark test.
+    #[cfg_attr(not(bootstrap), unstable(soft, feature = "test", issue = "50297",
+               reason = "`bench` is a part of custom test frameworks which are unstable"))]
+    #[cfg_attr(bootstrap, unstable(feature = "test", issue = "50297",
+               reason = "`bench` is a part of custom test frameworks which are unstable"))]
+    #[allow_internal_unstable(test, rustc_attrs)]
+    #[rustc_builtin_macro]
+    pub macro bench($item:item) { /* compiler built-in */ }
+
+    /// An implementation detail of the `#[test]` and `#[bench]` macros.
+    #[unstable(feature = "custom_test_frameworks", issue = "50297",
+               reason = "custom test frameworks are an unstable feature")]
+    #[allow_internal_unstable(test, rustc_attrs)]
+    #[rustc_builtin_macro]
+    pub macro test_case($item:item) { /* compiler built-in */ }
+
+    /// Attribute macro applied to a static to register it as a global allocator.
+    #[stable(feature = "global_allocator", since = "1.28.0")]
+    #[allow_internal_unstable(rustc_attrs)]
+    #[rustc_builtin_macro]
+    pub macro global_allocator($item:item) { /* compiler built-in */ }
+
+    /// Unstable implementation detail of the `rustc` compiler, do not use.
+    #[rustc_builtin_macro]
+    #[stable(feature = "rust1", since = "1.0.0")]
+    #[allow_internal_unstable(core_intrinsics, libstd_sys_internals)]
+    pub macro RustcDecodable($item:item) { /* compiler built-in */ }
+
+    /// Unstable implementation detail of the `rustc` compiler, do not use.
+    #[rustc_builtin_macro]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     #[stable(feature = "rust1", since = "1.0.0")]
     #[allow_internal_unstable(core_intrinsics)]
     pub macro RustcEncodable($item:item) { /* compiler built-in */ }

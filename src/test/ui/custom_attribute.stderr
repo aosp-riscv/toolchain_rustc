@@ -1,16 +1,28 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `foo` in this scope
+=======
+error: cannot find attribute `foo` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/custom_attribute.rs:3:3
    |
 LL | #[foo]
    |   ^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `foo` in this scope
+=======
+error: cannot find attribute `foo` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/custom_attribute.rs:5:7
    |
 LL |     #[foo]
    |       ^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `foo` in this scope
+=======
+error: cannot find attribute `foo` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/custom_attribute.rs:7:7
    |
 LL |     #[foo]

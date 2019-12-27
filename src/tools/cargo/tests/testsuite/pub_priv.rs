@@ -1,5 +1,10 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::support::registry::Package;
 use crate::support::{is_nightly, project};
+=======
+use cargo_test_support::registry::Package;
+use cargo_test_support::{is_nightly, project};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #[cargo_test]
 fn exported_priv_warning() {

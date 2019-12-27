@@ -32,6 +32,7 @@ pub enum ReferenceLabel<'a> {
 
 pub type LinkLabel<'a> = UniCase<CowStr<'a>>;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// Returns number of bytes (including brackets) and label on success.
 pub(crate) fn scan_link_label(text: &str) -> Option<(usize, ReferenceLabel<'_>)> {
     if text.len() < 2 || text.as_bytes()[0] != b'[' {
@@ -138,5 +139,107 @@ mod test {
     fn return_carriage_linefeed_ok() {
         let input = "hello\r\nworld\r\n]";
         assert!(scan_link_label_rest(input).is_some());
+=======
+/// Assumes the opening bracket has already been scanned.
+/// Returns the number of bytes read (including closing bracket) and label on success.
+pub(crate) fn scan_link_label_rest<F>(
+    text: &str,
+    start: usize,
+    linebreak_handler: F,
+) -> Option<(usize, CowStr<'_>)>
+where
+    // Takes a _global_ index into the document string, returns how many bytes to skip
+    F: Fn(usize) -> Option<usize>,
+{
+    let bytes = text.as_bytes();
+    let mut ix = start;
+    let mut only_white_space = true;
+    let mut codepoints = 0;
+    // no worries, doesnt allocate until we push things onto it
+    let mut label = String::new();
+    let mut mark = start;
+
+    loop {
+        if codepoints >= 1000 {
+            return None;
+        }
+        match *bytes.get(ix)? {
+            b'[' => return None,
+            b']' => break,
+            b'\\' => {
+                ix += 2;
+                codepoints += 2;
+                only_white_space = false;
+            }
+            b if is_ascii_whitespace(b) => {
+                // normalize labels by collapsing whitespaces, including linebreaks
+                let mut whitespaces = 0;
+                let mut linebreaks = 0;
+                let whitespace_start = ix;
+
+                while ix < bytes.len() && is_ascii_whitespace(bytes[ix]) {
+                    if let Some(eol_bytes) = scan_eol(&bytes[ix..]) {
+                        linebreaks += 1;
+                        if linebreaks > 1 {
+                            return None;
+                        }
+                        ix += eol_bytes;
+                        ix += linebreak_handler(ix)?;
+                        whitespaces += 2; // indicate that we need to replace
+                    } else {
+                        whitespaces += if bytes[ix] == b' ' { 1 } else { 2 };
+                        ix += 1;
+                    }
+                }
+                if whitespaces > 1 {
+                    label.push_str(&text[mark..whitespace_start]);
+                    label.push(' ');
+                    mark = ix;
+                    codepoints += ix - whitespace_start;
+                } else {
+                    codepoints += 1;
+                }
+            }
+            b => {
+                only_white_space = false;
+                ix += 1;
+                if b & 0b1000_0000 != 0 {
+                    codepoints += 1;
+                }
+            }
+        }
+    }
+
+    if only_white_space {
+        None
+    } else {
+        let cow = if mark == 0 {
+            text[start..ix].into()
+        } else {
+            label.push_str(&text[mark..ix]);
+            label.into()
+        };
+        Some((ix + 1 - start, cow))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::scan_link_label_rest;
+
+    #[test]
+    fn whitespace_normalization() {
+        let input = "«\t\tBlurry Eyes\t\t»][blurry_eyes]";
+        let expected_output = "« Blurry Eyes »"; // regular spaces!
+
+        let (_bytes, normalized_label) = scan_link_label_rest(input, 0, |_| None).unwrap();
+        assert_eq!(expected_output, normalized_label.as_ref());
+    }
+
+    #[test]
+    fn return_carriage_linefeed_ok() {
+        let input = "hello\r\nworld\r\n]";
+        assert!(scan_link_label_rest(input, 0, |_| Some(0)).is_some());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }

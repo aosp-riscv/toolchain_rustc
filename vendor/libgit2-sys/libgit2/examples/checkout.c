@@ -195,7 +195,11 @@ int lg2_checkout(git_repository *repo, int argc, char **argv)
 		fprintf(stderr, "unhandled\n");
 		err = -1;
 		goto cleanup;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 	} else if (strcmp("--", args.argv[args.pos])) {
+=======
+	} else if (!strcmp("--", args.argv[args.pos])) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 		/**
 		 * Try to checkout the given path
 		 */

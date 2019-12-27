@@ -170,13 +170,21 @@ impl<'a, 'tcx> Cx<'a, 'tcx> {
                         method_name: Symbol,
                         self_ty: Ty<'tcx>,
                         params: &[Kind<'tcx>])
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         -> (Ty<'tcx>, &'tcx ty::Const<'tcx>) {
+=======
+                        -> &'tcx ty::Const<'tcx> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let substs = self.tcx.mk_substs_trait(self_ty, params);
         for item in self.tcx.associated_items(trait_def_id) {
             if item.kind == ty::AssocKind::Method && item.ident.name == method_name {
                 let method_ty = self.tcx.type_of(item.def_id);
                 let method_ty = method_ty.subst(self.tcx, substs);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 return (method_ty, ty::Const::zero_sized(self.tcx, method_ty));
+=======
+                return ty::Const::zero_sized(self.tcx, method_ty);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
 

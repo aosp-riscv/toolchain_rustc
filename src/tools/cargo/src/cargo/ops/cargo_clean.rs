@@ -2,6 +2,10 @@ use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use crate::core::compiler::unit_dependencies;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::core::compiler::UnitInterner;
 use crate::core::compiler::{BuildConfig, BuildContext, CompileMode, Context, Kind};
 use crate::core::profiles::UnitFor;
@@ -56,7 +60,10 @@ pub fn clean(ws: &Workspace<'_>, opts: &CleanOptions<'_>) -> CargoResult<()> {
     build_config.release = opts.release;
     let bcx = BuildContext::new(
         ws,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         &resolve,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         &packages,
         opts.config,
         &build_config,
@@ -93,14 +100,28 @@ pub fn clean(ws: &Workspace<'_>, opts: &CleanOptions<'_>) -> CargoResult<()> {
                                 opts.release,
                             )
                         };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         units.push(bcx.units.intern(pkg, target, profile, *kind, *mode));
+=======
+                        let features = resolve.features_sorted(pkg.package_id());
+                        units.push(
+                            bcx.units
+                                .intern(pkg, target, profile, *kind, *mode, features),
+                        );
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     }
                 }
             }
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let mut cx = Context::new(config, &bcx)?;
+=======
+    let unit_dependencies =
+        unit_dependencies::build_unit_dependencies(&bcx, &resolve, None, &units, &[])?;
+    let mut cx = Context::new(config, &bcx, unit_dependencies)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     cx.prepare_units(None, &units)?;
 
     for unit in units.iter() {

@@ -701,7 +701,7 @@ impl Binding for IndexEntry {
 mod tests {
     use std::fs::{self, File};
     use std::path::Path;
-    use tempdir::TempDir;
+    use tempfile::TempDir;
 
     use crate::{Index, IndexEntry, IndexTime, Oid, Repository, ResetType};
 
@@ -797,7 +797,11 @@ mod tests {
         let obj = repo.find_object(commit, None).unwrap();
         repo.reset(&obj, ResetType::Hard, None).unwrap();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let td2 = TempDir::new("git").unwrap();
+=======
+        let td2 = TempDir::new().unwrap();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let url = crate::test::path2url(&root);
         let repo = Repository::clone(&url, td2.path()).unwrap();
         let obj = repo.find_object(commit, None).unwrap();

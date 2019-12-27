@@ -890,6 +890,7 @@ pub(crate) mod derived_property {
         Uppercase_table.lookup(c)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     const XID_Continue_table: &super::BoolTrie = &super::BoolTrie {
         r1: [
             0x03ff000000000000, 0x07fffffe87fffffe, 0x04a0040000000000, 0xff7fffffff7fffff,
@@ -1248,9 +1249,12 @@ pub(crate) mod derived_property {
         XID_Start_table.lookup(c)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 pub(crate) mod property {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     const Pattern_White_Space_table: &super::SmallBoolTrie = &super::SmallBoolTrie {
         r1: &[
             0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -1268,6 +1272,8 @@ pub(crate) mod property {
         Pattern_White_Space_table.lookup(c)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     const White_Space_table: &super::SmallBoolTrie = &super::SmallBoolTrie {
         r1: &[
             0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

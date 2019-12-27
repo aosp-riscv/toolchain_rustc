@@ -1,4 +1,4 @@
-use errors::{Diagnostic, DiagnosticBuilder};
+use errors::Diagnostic;
 use rustc_data_structures::stable_hasher::{HashStable, StableHasher};
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::indexed_vec::{Idx, IndexVec};
@@ -819,11 +819,13 @@ impl DepGraph {
             let handle = tcx.sess.diagnostic();
 
             for diagnostic in diagnostics {
-                DiagnosticBuilder::new_diagnostic(handle, diagnostic).emit();
+                handle.emit_diagnostic(&diagnostic);
             }
 
             // Mark the node as green now that diagnostics are emitted
             data.colors.insert(prev_dep_node_index, DepNodeColor::Green(dep_node_index));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 
             // Remove the node from the set
             data.emitting_diagnostics.lock().remove(&dep_node_index);
@@ -832,7 +834,19 @@ impl DepGraph {
             data.emitting_diagnostics_cond_var.notify_all();
         } else {
             // We must wait for the other thread to finish emitting the diagnostic
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+            // Remove the node from the set
+            data.emitting_diagnostics.lock().remove(&dep_node_index);
+
+            // Wake up waiters
+            data.emitting_diagnostics_cond_var.notify_all();
+        } else {
+            // We must wait for the other thread to finish emitting the diagnostic
+
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             loop {
                 data.emitting_diagnostics_cond_var.wait(&mut emitting);
                 if data.colors

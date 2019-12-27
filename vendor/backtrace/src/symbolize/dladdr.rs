@@ -63,7 +63,13 @@ cfg_if::cfg_if! {
                 inner: mem::zeroed(),
                 _marker: marker::PhantomData,
             };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if libc::dladdr(addr as *mut _, &mut info.inner) != 0 {
+=======
+            // Skip null addresses to avoid calling into libc and having it do
+            // things with the dynamic symbol table for no reason.
+            if !addr.is_null() && libc::dladdr(addr as *mut _, &mut info.inner) != 0 {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 cb(info)
             }
         }

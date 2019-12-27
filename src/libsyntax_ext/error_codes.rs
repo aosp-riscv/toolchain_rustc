@@ -1,9 +1,17 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax::register_long_diagnostics;
 
 // Error messages for EXXXX errors.
 // Each message should start and end with a new line, and be wrapped to 80 characters.
 // In vim you can `:set tw=80` and use `gq` to wrap paragraphs. Use `:set tw=0` to disable.
 register_long_diagnostics! {
+=======
+// Error messages for EXXXX errors.
+// Each message should start and end with a new line, and be wrapped to 80
+// characters.  In vim you can `:set tw=80` and use `gq` to wrap paragraphs. Use
+// `:set tw=0` to disable.
+syntax::register_diagnostics! {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 E0660: r##"
 The argument to the `asm` macro is not well-formed.
 

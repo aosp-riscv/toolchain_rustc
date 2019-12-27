@@ -4,6 +4,11 @@
 //! etc. This is run by default on `make check` and as part of the auto
 //! builders.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![deny(warnings)]
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use tidy::*;
 
 use std::process;

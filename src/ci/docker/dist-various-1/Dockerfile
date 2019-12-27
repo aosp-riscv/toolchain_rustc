@@ -132,7 +132,7 @@ ENV CC_mipsel_unknown_linux_musl=mipsel-openwrt-linux-gcc \
     CC_thumbv7neon_unknown_linux_gnueabihf=arm-linux-gnueabihf-gcc \
     AR_thumbv7neon_unknown_linux_gnueabihf=arm-linux-gnueabihf-ar \
     CXX_thumbv7neon_unknown_linux_gnueabihf=arm-linux-gnueabihf-g++
-    
+
 ENV RUST_CONFIGURE_ARGS \
       --musl-root-armv5te=/musl-armv5te \
       --musl-root-arm=/musl-arm \

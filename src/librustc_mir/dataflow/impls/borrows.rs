@@ -208,7 +208,11 @@ impl<'a, 'tcx> Borrows<'a, 'tcx> {
             // If the borrowed place is a local with no projections, all other borrows of this
             // local must conflict. This is purely an optimization so we don't have to call
             // `places_conflict` for every borrow.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if place.projection.is_none() {
+=======
+            if place.projection.is_empty() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 trans.kill_all(other_borrows_of_local);
                 return;
             }
@@ -268,12 +272,17 @@ impl<'a, 'tcx> BitDenotation<'tcx> for Borrows<'a, 'tcx> {
 
         debug!("Borrows::statement_effect: stmt={:?}", stmt);
         match stmt.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             mir::StatementKind::Assign(ref lhs, ref rhs) => {
                 // Make sure there are no remaining borrows for variables
                 // that are assigned over.
                 self.kill_borrows_on_place(trans, lhs);
 
                 if let mir::Rvalue::Ref(_, _, ref place) = **rhs {
+=======
+            mir::StatementKind::Assign(box(ref lhs, ref rhs)) => {
+                if let mir::Rvalue::Ref(_, _, ref place) = *rhs {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     if place.ignore_borrow(
                         self.tcx,
                         self.body,
@@ -287,6 +296,10 @@ impl<'a, 'tcx> BitDenotation<'tcx> for Borrows<'a, 'tcx> {
 
                     trans.gen(*index);
                 }
+
+                // Make sure there are no remaining borrows for variables
+                // that are assigned over.
+                self.kill_borrows_on_place(trans, lhs);
             }
 
             mir::StatementKind::StorageDead(local) => {

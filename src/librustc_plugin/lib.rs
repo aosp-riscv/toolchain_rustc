@@ -16,12 +16,15 @@
 //! #![feature(plugin_registrar)]
 //! #![feature(rustc_private)]
 //!
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! extern crate rustc_plugin;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 //! extern crate rustc_driver;
 //! extern crate syntax;
 //! extern crate syntax_pos;
 //!
-//! use rustc_plugin::Registry;
+//! use rustc_driver::plugin::Registry;
 //! use syntax::ext::base::{ExtCtxt, MacResult};
 //! use syntax_pos::Span;
 //! use syntax::tokenstream::TokenTree;
@@ -55,15 +58,16 @@
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/")]
 
 #![feature(nll)]
-#![feature(rustc_diagnostic_macros)]
 
 #![recursion_limit="256"]
 
 pub use registry::Registry;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 mod error_codes;
+=======
+pub mod error_codes;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub mod registry;
 pub mod load;
 pub mod build;
-
-__build_diagnostic_array! { librustc_plugin, DIAGNOSTICS }

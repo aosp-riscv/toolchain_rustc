@@ -1,5 +1,12 @@
 // RUN: %clang_cc1 -triple avr-unknown-unknown -emit-llvm -o - %s | FileCheck %s
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+// Check that the parameter types match. This verifies pr43309.
+// RUN: %clang_cc1 -triple avr-unknown-unknown -Wconversion -verify %s
+// expected-no-diagnostics
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 unsigned char bitrev8(unsigned char data) {
     return __builtin_bitreverse8(data);
 }

@@ -20,38 +20,77 @@
 
 //! Tree-based two pass parser.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::cmp::min;
+=======
+use std::cmp::{max, min};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::collections::{HashMap, VecDeque};
 use std::ops::{Index, Range};
 
 use unicase::UniCase;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::linklabel::{scan_link_label, scan_link_label_rest, LinkLabel, ReferenceLabel};
 use crate::scanners::*;
 use crate::strings::CowStr;
 use crate::tree::{Tree, TreeIndex, TreePointer};
 
+=======
+use crate::linklabel::{scan_link_label_rest, LinkLabel, ReferenceLabel};
+use crate::scanners::*;
+use crate::strings::CowStr;
+use crate::tree::{Tree, TreeIndex, TreePointer};
+
+// Allowing arbitrary depth nested parentheses inside link destinations
+// can create denial of service vulnerabilities if we're not careful.
+// The simplest countermeasure is to limit their depth, which is
+// explicitly allowed by the spec as long as the limit is at least 3:
+// https://spec.commonmark.org/0.29/#link-destination
+const LINK_MAX_NESTED_PARENS: usize = 5;
+
+/// Tags for elements that can contain other elements.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[derive(Clone, Debug, PartialEq)]
 pub enum Tag<'a> {
-    // block-level tags
+    /// A paragraph of text and other inline elements.
     Paragraph,
-    Rule,
 
     /// A heading. The field indicates the level of the heading.
-    Header(i32),
+    Heading(u32),
 
     BlockQuote,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    /// A code block. The value contained in the tag describes the language of the code,
+    /// which may be empty.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     CodeBlock(CowStr<'a>),
 
     /// A list. If the list is ordered the field indicates the number of the first item.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     List(Option<usize>), // TODO: add delim and tight for ast (not needed for html)
+=======
+    /// Contains only list items.
+    List(Option<u64>), // TODO: add delim and tight for ast (not needed for html)
+    /// A list item.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Item,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     FootnoteDefinition(CowStr<'a>),
     HtmlBlock,
+=======
+    /// A footnote definition. The value contained is the footnote's label by which it can
+    /// be referred to.
+    FootnoteDefinition(CowStr<'a>),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-    // tables
+    /// A table. Contains a vector describing the text-alignment for each of its columns.
     Table(Vec<Alignment>),
+    /// A table header. Contains only `TableRow`s. Note that the table body starts immediately
+    /// after the closure of the `TableHead` tag. There is no `TableBody` tag.
     TableHead,
+    /// A table row. Is used both for header rows as body rows. Contains only `TableCell`s.
     TableRow,
     TableCell,
 
@@ -60,9 +99,14 @@ pub enum Tag<'a> {
     Strong,
     Strikethrough,
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// A link. The first field is the link type, the second the destination URL and the third is a title
+=======
+    /// A link. The first field is the link type, the second the destination URL and the third is a title.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Link(LinkType, CowStr<'a>, CowStr<'a>),
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// An image. The first field is the link type, the second the destination URL and the third is a title
     Image(LinkType, CowStr<'a>, CowStr<'a>),
 }
@@ -98,25 +142,93 @@ impl LinkType {
             _ => unreachable!(),
         }
     }
+=======
+    /// An image. The first field is the link type, the second the destination URL and the third is a title.
+    Image(LinkType, CowStr<'a>, CowStr<'a>),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
+/// Type specifier for inline links. See [the Tag::Link](enum.Tag.html#variant.Link) for more information.
+#[derive(Clone, Debug, PartialEq, Copy)]
+pub enum LinkType {
+    /// Inline link like `[foo](bar)`
+    Inline,
+    /// Reference link like `[foo][bar]`
+    Reference,
+    /// Reference without destination in the document, but resolved by the broken_link_callback
+    ReferenceUnknown,
+    /// Collapsed link like `[foo][]`
+    Collapsed,
+    /// Collapsed link without destination in the document, but resolved by the broken_link_callback
+    CollapsedUnknown,
+    /// Shortcut link like `[foo]`
+    Shortcut,
+    /// Shortcut without destination in the document, but resolved by the broken_link_callback
+    ShortcutUnknown,
+    /// Autolink like `<http://foo.bar/baz>`
+    Autolink,
+    /// Email address in autolink like `<john@example.org>`
+    Email,
+}
+
+impl LinkType {
+    fn to_unknown(self) -> Self {
+        match self {
+            LinkType::Reference => LinkType::ReferenceUnknown,
+            LinkType::Collapsed => LinkType::CollapsedUnknown,
+            LinkType::Shortcut => LinkType::ShortcutUnknown,
+            _ => unreachable!(),
+        }
+    }
+}
+
+/// Markdown events that are generated in a preorder traversal of the document
+/// tree, with additional `End` events whenever all of an inner node's children
+/// have been visited.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Event<'a> {
+    /// Start of a tagged element. Events that are yielded after this event
+    /// and before its corresponding `End` event are inside this element.
+    /// Start and end events are guaranteed to be balanced.
     Start(Tag<'a>),
+    /// End of a tagged element.
     End(Tag<'a>),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     Text(CowStr<'a>),
     Code(CowStr<'a>),
     Html(CowStr<'a>),
     InlineHtml(CowStr<'a>),
     FootnoteReference(CowStr<'a>),
+=======
+    /// A text node.
+    Text(CowStr<'a>),
+    /// An inline code node.
+    Code(CowStr<'a>),
+    /// An HTML node.
+    Html(CowStr<'a>),
+    /// A reference to a footnote with given label, which may or may not be defined
+    /// by an event with a `Tag::FootnoteDefinition` tag. Definitions and references to them may
+    /// occur in any order.
+    FootnoteReference(CowStr<'a>),
+    /// A soft line break.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     SoftBreak,
+    /// A hard line break.
     HardBreak,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// A task list marker, rendered as a checkbox in HTML. Contains a true when it is checked
+=======
+    /// A horizontal ruler.
+    Rule,
+    /// A task list marker, rendered as a checkbox in HTML. Contains a true when it is checked.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     TaskListMarker(bool),
 }
 
+/// Table column text alignment.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum Alignment {
+    /// Default text alignment.
     None,
     Left,
     Center,
@@ -124,8 +236,9 @@ pub enum Alignment {
 }
 
 bitflags! {
+    /// Option struct containing flags for enabling extra features
+    /// that are not part of the CommonMark spec.
     pub struct Options: u32 {
-        const FIRST_PASS = 1 << 0;
         const ENABLE_TABLES = 1 << 1;
         const ENABLE_FOOTNOTES = 1 << 2;
         const ENABLE_STRIKETHROUGH = 1 << 3;
@@ -162,6 +275,7 @@ enum ItemBody {
     Strong,
     Strikethrough,
     Code(CowIndex),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     InlineHtml,
     Link(LinkIndex),
     Image(LinkIndex),
@@ -177,6 +291,21 @@ enum ItemBody {
     BlockQuote,
     List(bool, u8, usize), // is_tight, list character, list start index
     ListItem(usize),       // indent level
+=======
+    Link(LinkIndex),
+    Image(LinkIndex),
+    FootnoteReference(CowIndex),
+    TaskListMarker(bool), // true for checked
+
+    Rule,
+    Heading(u32), // heading level
+    FencedCodeBlock(CowIndex),
+    IndentCodeBlock,
+    Html,
+    BlockQuote,
+    List(bool, u8, u64), // is_tight, list character, list start index
+    ListItem(usize),     // indent level
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     SynthesizeText(CowIndex),
     FootnoteDefinition(CowIndex),
 
@@ -239,7 +368,11 @@ impl<'a> FirstPass<'a> {
     fn new(text: &'a str, options: Options) -> FirstPass {
         // This is a very naive heuristic for the number of nodes
         // we'll need.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let start_capacity = std::cmp::max(128, text.len() / 32);
+=======
+        let start_capacity = max(128, text.len() / 32);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let tree = Tree::with_capacity(start_capacity);
         let begin_list_item = false;
         let last_line_blank = false;
@@ -369,6 +502,7 @@ impl<'a> FirstPass<'a> {
         let ix = start_ix + line_start.bytes_scanned();
 
         // HTML Blocks
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if self.text.as_bytes()[ix] == b'<' {
             // Types 1-5 are all detected by one function and all end with the same
             // pattern
@@ -400,6 +534,42 @@ impl<'a> FirstPass<'a> {
         if let Some((bytecount, label, link_def)) = self.parse_refdef_total(ix) {
             self.allocs.refdefs.entry(label).or_insert(link_def);
             return ix + bytecount;
+=======
+        if bytes[ix] == b'<' {
+            // Types 1-5 are all detected by one function and all end with the same
+            // pattern
+            if let Some(html_end_tag) = get_html_end_tag(&bytes[(ix + 1)..]) {
+                return self.parse_html_block_type_1_to_5(ix, html_end_tag, remaining_space);
+            }
+
+            // Detect type 6
+            let possible_tag = scan_html_block_tag(&bytes[(ix + 1)..]).1;
+            if is_html_tag(possible_tag) {
+                return self.parse_html_block_type_6_or_7(ix, remaining_space);
+            }
+
+            // Detect type 7
+            if let Some(_html_bytes) = scan_html_type_7(&bytes[(ix + 1)..]) {
+                return self.parse_html_block_type_6_or_7(ix, remaining_space);
+            }
+        }
+
+        if let Ok(n) = scan_hrule(&bytes[ix..]) {
+            return self.parse_hrule(n, ix);
+        }
+
+        if let Some(atx_size) = scan_atx_heading(&bytes[ix..]) {
+            return self.parse_atx_heading(ix, atx_size);
+        }
+
+        // parse refdef
+        if let Some((bytecount, label, link_def)) = self.parse_refdef_total(ix) {
+            self.allocs.refdefs.entry(label).or_insert(link_def);
+            let ix = ix + bytecount;
+            // try to read trailing whitespace or it will register as a completely blank line
+            // TODO: shouldn't we do this for all block level items?
+            return ix + scan_blank_line(&bytes[ix..]).unwrap_or(0);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
 
         if let Some((n, fence_ch)) = scan_code_fence(&bytes[ix..]) {
@@ -597,7 +767,11 @@ impl<'a> FirstPass<'a> {
     fn parse_setext_heading(&mut self, ix: usize, node_ix: TreeIndex) -> Option<usize> {
         let bytes = self.text.as_bytes();
         let (n, level) = scan_setext_heading(&bytes[ix..])?;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.tree[node_ix].item.body = ItemBody::Header(level);
+=======
+        self.tree[node_ix].item.body = ItemBody::Heading(level);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         // strip trailing whitespace
         if let TreePointer::Valid(cur_ix) = self.tree.cur() {
@@ -819,6 +993,8 @@ impl<'a> FirstPass<'a> {
                     }
                 }
                 _ => LoopInstruction::ContinueAndSkip(0),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
             }
         });
 
@@ -840,6 +1016,430 @@ impl<'a> FirstPass<'a> {
         })
     }
 
+    /// When start_ix is at the beginning of an HTML block of type 1 to 5,
+    /// this will find the end of the block, adding the block itself to the
+    /// tree and also keeping track of the lines of HTML within the block.
+    ///
+    /// The html_end_tag is the tag that must be found on a line to end the block.
+    fn parse_html_block_type_1_to_5(
+        &mut self,
+        start_ix: usize,
+        html_end_tag: &str,
+        mut remaining_space: usize,
+    ) -> usize {
+        let bytes = self.text.as_bytes();
+        let mut ix = start_ix;
+        loop {
+            let line_start_ix = ix;
+            ix += scan_nextline(&bytes[ix..]);
+            self.append_html_line(remaining_space, line_start_ix, ix);
+
+            let mut line_start = LineStart::new(&bytes[ix..]);
+            let n_containers = self.scan_containers(&mut line_start);
+            if n_containers < self.tree.spine_len() {
+                break;
+            }
+
+            if (&self.text[line_start_ix..ix]).contains(html_end_tag) {
+                break;
+            }
+
+            let next_line_ix = ix + line_start.bytes_scanned();
+            if next_line_ix == self.text.len() {
+                break;
+            }
+            ix = next_line_ix;
+            remaining_space = line_start.remaining_space();
+        }
+        ix
+    }
+
+    /// When start_ix is at the beginning of an HTML block of type 6 or 7,
+    /// this will consume lines until there is a blank line and keep track of
+    /// the HTML within the block.
+    fn parse_html_block_type_6_or_7(
+        &mut self,
+        start_ix: usize,
+        mut remaining_space: usize,
+    ) -> usize {
+        let bytes = self.text.as_bytes();
+        let mut ix = start_ix;
+        loop {
+            let line_start_ix = ix;
+            ix += scan_nextline(&bytes[ix..]);
+            self.append_html_line(remaining_space, line_start_ix, ix);
+
+            let mut line_start = LineStart::new(&bytes[ix..]);
+            let n_containers = self.scan_containers(&mut line_start);
+            if n_containers < self.tree.spine_len() || line_start.is_at_eol() {
+                break;
+            }
+
+            let next_line_ix = ix + line_start.bytes_scanned();
+            if next_line_ix == self.text.len() || scan_blank_line(&bytes[next_line_ix..]).is_some()
+            {
+                break;
+            }
+            ix = next_line_ix;
+            remaining_space = line_start.remaining_space();
+        }
+        ix
+    }
+
+    fn parse_indented_code_block(&mut self, start_ix: usize, mut remaining_space: usize) -> usize {
+        self.tree.append(Item {
+            start: start_ix,
+            end: 0, // will get set later
+            body: ItemBody::IndentCodeBlock,
+        });
+        self.tree.push();
+        let bytes = self.text.as_bytes();
+        let mut last_nonblank_child = TreePointer::Nil;
+        let mut last_nonblank_ix = 0;
+        let mut end_ix = 0;
+        let mut last_line_blank = false;
+
+        let mut ix = start_ix;
+        loop {
+            let line_start_ix = ix;
+            ix += scan_nextline(&bytes[ix..]);
+            self.append_code_text(remaining_space, line_start_ix, ix);
+            // TODO(spec clarification): should we synthesize newline at EOF?
+
+            if !last_line_blank {
+                last_nonblank_child = self.tree.cur();
+                last_nonblank_ix = ix;
+                end_ix = ix;
+            }
+
+            let mut line_start = LineStart::new(&bytes[ix..]);
+            let n_containers = self.scan_containers(&mut line_start);
+            if n_containers < self.tree.spine_len()
+                || !(line_start.scan_space(4) || line_start.is_at_eol())
+            {
+                break;
+            }
+            let next_line_ix = ix + line_start.bytes_scanned();
+            if next_line_ix == self.text.len() {
+                break;
+            }
+            ix = next_line_ix;
+            remaining_space = line_start.remaining_space();
+            last_line_blank = scan_blank_line(&bytes[ix..]).is_some();
+        }
+
+        // Trim trailing blank lines.
+        if let TreePointer::Valid(child) = last_nonblank_child {
+            self.tree[child].next = TreePointer::Nil;
+            self.tree[child].item.end = last_nonblank_ix;
+        }
+        self.pop(end_ix);
+        ix
+    }
+
+    fn parse_fenced_code_block(
+        &mut self,
+        start_ix: usize,
+        indent: usize,
+        fence_ch: u8,
+        n_fence_char: usize,
+    ) -> usize {
+        let bytes = self.text.as_bytes();
+        let mut info_start = start_ix + n_fence_char;
+        info_start += scan_whitespace_no_nl(&bytes[info_start..]);
+        // TODO: info strings are typically very short. wouldnt it be faster
+        // to just do a forward scan here?
+        let mut ix = info_start + scan_nextline(&bytes[info_start..]);
+        let info_end = ix - scan_rev_while(&bytes[info_start..ix], is_ascii_whitespace);
+        let info_string = unescape(&self.text[info_start..info_end]);
+        self.tree.append(Item {
+            start: start_ix,
+            end: 0, // will get set later
+            body: ItemBody::FencedCodeBlock(self.allocs.allocate_cow(info_string)),
+        });
+        self.tree.push();
+        loop {
+            let mut line_start = LineStart::new(&bytes[ix..]);
+            let n_containers = self.scan_containers(&mut line_start);
+            if n_containers < self.tree.spine_len() {
+                break;
+            }
+            line_start.scan_space(indent);
+            let mut close_line_start = line_start.clone();
+            if !close_line_start.scan_space(4) {
+                let close_ix = ix + close_line_start.bytes_scanned();
+                if let Some(n) = scan_closing_code_fence(&bytes[close_ix..], fence_ch, n_fence_char)
+                {
+                    ix = close_ix + n;
+                    break;
+                }
+            }
+            let remaining_space = line_start.remaining_space();
+            ix += line_start.bytes_scanned();
+            let next_ix = ix + scan_nextline(&bytes[ix..]);
+            self.append_code_text(remaining_space, ix, next_ix);
+            ix = next_ix;
+        }
+
+        self.pop(ix);
+
+        // try to read trailing whitespace or it will register as a completely blank line
+        ix + scan_blank_line(&bytes[ix..]).unwrap_or(0)
+    }
+
+    fn append_code_text(&mut self, remaining_space: usize, start: usize, end: usize) {
+        if remaining_space > 0 {
+            let cow_ix = self.allocs.allocate_cow("   "[..remaining_space].into());
+            self.tree.append(Item {
+                start,
+                end: start,
+                body: ItemBody::SynthesizeText(cow_ix),
+            });
+        }
+        if self.text.as_bytes()[end - 2] == b'\r' {
+            // Normalize CRLF to LF
+            self.tree.append_text(start, end - 2);
+            self.tree.append_text(end - 1, end);
+        } else {
+            self.tree.append_text(start, end);
+        }
+    }
+
+    /// Appends a line of HTML to the tree.
+    fn append_html_line(&mut self, remaining_space: usize, start: usize, end: usize) {
+        if remaining_space > 0 {
+            let cow_ix = self.allocs.allocate_cow("   "[..remaining_space].into());
+            self.tree.append(Item {
+                start,
+                end: start,
+                // TODO: maybe this should synthesize to html rather than text?
+                body: ItemBody::SynthesizeText(cow_ix),
+            });
+        }
+        if self.text.as_bytes()[end - 2] == b'\r' {
+            // Normalize CRLF to LF
+            self.tree.append(Item {
+                start,
+                end: end - 2,
+                body: ItemBody::Html,
+            });
+            self.tree.append(Item {
+                start: end - 1,
+                end,
+                body: ItemBody::Html,
+            });
+        } else {
+            self.tree.append(Item {
+                start,
+                end,
+                body: ItemBody::Html,
+            });
+        }
+    }
+
+    /// Returns number of containers scanned.
+    fn scan_containers(&self, line_start: &mut LineStart) -> usize {
+        let mut i = 0;
+        for &node_ix in self.tree.walk_spine() {
+            match self.tree[node_ix].item.body {
+                ItemBody::BlockQuote => {
+                    let save = line_start.clone();
+                    if !line_start.scan_blockquote_marker() {
+                        *line_start = save;
+                        break;
+                    }
+                }
+                ItemBody::ListItem(indent) => {
+                    if !line_start.is_at_eol() {
+                        let save = line_start.clone();
+                        if !line_start.scan_space(indent) {
+                            *line_start = save;
+                            break;
+                        }
+                    }
+                }
+                _ => (),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+            }
+        });
+
+        if brk.is_none() {
+            // need to close text at eof
+            self.tree.append_text(begin_text, final_ix);
+        }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+        (final_ix, brk)
+=======
+        i
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+    }
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+    /// Check whether we should allow a paragraph interrupt by lists. Only non-empty
+    /// lists are allowed.
+    fn interrupt_paragraph_by_list(&self, suffix: &[u8]) -> bool {
+        scan_listitem(suffix).map_or(false, |(ix, delim, index, _)| {
+            self.list_nesting > 0 ||
+            // we don't allow interruption by either empty lists or
+            // numbered lists starting at an index other than 1
+            !scan_empty_list(&suffix[ix..]) && (delim == b'*' || delim == b'-' || index == 1)
+=======
+    /// Pop a container, setting its end.
+    fn pop(&mut self, ix: usize) {
+        let cur_ix = self.tree.pop().unwrap();
+        self.tree[cur_ix].item.end = ix;
+        if let ItemBody::List(true, _, _) = self.tree[cur_ix].item.body {
+            surgerize_tight_list(&mut self.tree, cur_ix);
+        }
+    }
+
+    /// Close a list if it's open. Also set loose if last line was blank
+    fn finish_list(&mut self, ix: usize) {
+        if let Some(node_ix) = self.tree.peek_up() {
+            if let ItemBody::List(_, _, _) = self.tree[node_ix].item.body {
+                self.pop(ix);
+                self.list_nesting -= 1;
+            }
+        }
+        if self.last_line_blank {
+            if let Some(node_ix) = self.tree.peek_grandparent() {
+                if let ItemBody::List(ref mut is_tight, _, _) = self.tree[node_ix].item.body {
+                    *is_tight = false;
+                }
+            }
+            self.last_line_blank = false;
+        }
+    }
+
+    /// Continue an existing list or start a new one if there's not an open
+    /// list that matches.
+    fn continue_list(&mut self, start: usize, ch: u8, index: u64) {
+        if let Some(node_ix) = self.tree.peek_up() {
+            if let ItemBody::List(ref mut is_tight, existing_ch, _) = self.tree[node_ix].item.body {
+                if existing_ch == ch {
+                    if self.last_line_blank {
+                        *is_tight = false;
+                        self.last_line_blank = false;
+                    }
+                    return;
+                }
+            }
+            // TODO: this is not the best choice for end; maybe get end from last list item.
+            self.finish_list(start);
+        }
+        self.tree.append(Item {
+            start,
+            end: 0, // will get set later
+            body: ItemBody::List(true, ch, index),
+        });
+        self.list_nesting += 1;
+        self.tree.push();
+        self.last_line_blank = false;
+    }
+
+    /// Parse a thematic break.
+    ///
+    /// Returns index of start of next line.
+    fn parse_hrule(&mut self, hrule_size: usize, ix: usize) -> usize {
+        self.tree.append(Item {
+            start: ix,
+            end: ix + hrule_size,
+            body: ItemBody::Rule,
+        });
+        ix + hrule_size
+    }
+
+    /// Parse an ATX heading.
+    ///
+    /// Returns index of start of next line.
+    fn parse_atx_heading(&mut self, mut ix: usize, atx_size: usize) -> usize {
+        self.tree.append(Item {
+            start: ix,
+            end: 0, // set later
+            body: ItemBody::Heading(atx_size as u32),
+        });
+        ix += atx_size;
+        // next char is space or scan_eol
+        // (guaranteed by scan_atx_heading)
+        let bytes = self.text.as_bytes();
+        if let Some(eol_bytes) = scan_eol(&bytes[ix..]) {
+            return ix + eol_bytes;
+        }
+        // skip leading spaces
+        let skip_spaces = scan_whitespace_no_nl(&bytes[ix..]);
+        ix += skip_spaces;
+
+        // now handle the header text
+        let header_start = ix;
+        let header_node_idx = self.tree.push(); // so that we can set the endpoint later
+        ix = self.parse_line(ix, TableParseMode::Disabled).0;
+        self.tree[header_node_idx].item.end = ix;
+
+        // remove trailing matter from header text
+        if let TreePointer::Valid(cur_ix) = self.tree.cur() {
+            let header_text = &bytes[header_start..ix];
+            let mut limit = header_text
+                .iter()
+                .rposition(|&b| !(b == b'\n' || b == b'\r' || b == b' '))
+                .map_or(0, |i| i + 1);
+            let closer = header_text[..limit]
+                .iter()
+                .rposition(|&b| b != b'#')
+                .map_or(0, |i| i + 1);
+            if closer == 0 {
+                limit = closer;
+            } else {
+                let spaces = scan_rev_while(&header_text[..closer], |b| b == b' ');
+                if spaces > 0 {
+                    limit = closer - spaces;
+                }
+            }
+            self.tree[cur_ix].item.end = limit + header_start;
+        }
+
+        self.tree.pop();
+        ix
+    }
+
+    /// Returns the number of bytes scanned on success.
+    fn parse_footnote(&mut self, start: usize) -> Option<usize> {
+        let bytes = &self.text.as_bytes()[start..];
+        if !bytes.starts_with(b"[^") {
+            return None;
+        }
+        let (mut i, label) = self.parse_refdef_label(start + 2)?;
+        i += 2;
+        if scan_ch(&bytes[i..], b':') == 0 {
+            return None;
+        }
+        i += 1;
+        self.tree.append(Item {
+            start,
+            end: 0, // will get set later
+            body: ItemBody::FootnoteDefinition(self.allocs.allocate_cow(label)), // TODO: check whether the label here is strictly necessary
+        });
+        self.tree.push();
+        Some(i)
+    }
+
+    fn parse_refdef_label(&self, start: usize) -> Option<(usize, CowStr<'a>)> {
+        let bytes = self.text.as_bytes();
+        scan_link_label_rest(self.text, start, |ix| {
+            let mut line_start = LineStart::new(&bytes[ix..]);
+            let _n_containers = self.scan_containers(&mut line_start);
+            // first check for non-empty lists, then for other interrupts
+            let bytes_scanned = line_start.bytes_scanned();
+            let suffix = &bytes[(ix + bytes_scanned)..];
+            if self.interrupt_paragraph_by_list(suffix) || scan_paragraph_interrupt(suffix) {
+                None
+            } else {
+                Some(bytes_scanned)
+            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+        })
+    }
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// When start_ix is at the beginning of an HTML block of type 1 to 5,
     /// this will find the end of the block, adding the block itself to the
     /// tree and also keeping track of the lines of HTML within the block.
@@ -1235,8 +1835,15 @@ impl<'a> FirstPass<'a> {
     fn parse_footnote(&mut self, start: usize) -> Option<usize> {
         let bytes = &self.text.as_bytes()[start..];
         if !bytes.starts_with(b"[^") {
+=======
+    /// Returns number of bytes scanned, label and definition on success.
+    fn parse_refdef_total(&mut self, start: usize) -> Option<(usize, LinkLabel<'a>, LinkDef<'a>)> {
+        let bytes = &self.text.as_bytes()[start..];
+        if scan_ch(bytes, b'[') == 0 {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return None;
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let (mut i, label) = scan_link_label_rest(&self.text[(start + 2)..])?;
         i += 2;
         if scan_ch(&bytes[i..], b':') == 0 {
@@ -1250,8 +1857,19 @@ impl<'a> FirstPass<'a> {
         });
         self.tree.push();
         Some(i)
+=======
+        let (mut i, label) = self.parse_refdef_label(start + 1)?;
+        i += 1;
+        if scan_ch(&bytes[i..], b':') == 0 {
+            return None;
+        }
+        i += 1;
+        let (bytecount, link_def) = self.scan_refdef(start + i)?;
+        Some((bytecount + i, UniCase::new(label), link_def))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Returns number of bytes scanned, label and definition on success.
     fn parse_refdef_total(&mut self, start: usize) -> Option<(usize, LinkLabel<'a>, LinkDef<'a>)> {
         let bytes = &self.text.as_bytes()[start..];
@@ -1268,6 +1886,8 @@ impl<'a> FirstPass<'a> {
         Some((bytecount + i, UniCase::new(label), link_def))
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Returns number of bytes and number of newlines
     fn scan_refdef_space(&self, bytes: &[u8], mut i: usize) -> Option<(usize, usize)> {
         let mut newlines = 0;
@@ -1459,6 +2079,7 @@ fn scan_paragraph_interrupt(bytes: &[u8]) -> bool {
             || is_html_tag(scan_html_block_tag(&bytes[1..]).1))
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static HTML_END_TAGS: &[&str; 7] = &["</pre>", "</style>", "</script>", "-->", "?>", "]]>", ">"];
 
 /// Returns an index into HTML_END_TAGS.
@@ -2533,6 +3154,1238 @@ fn item_to_event<'a>(item: Item, text: &'a str, allocs: &Allocations<'a>) -> Eve
         }
         ItemBody::ListItem(_) => Tag::Item,
         ItemBody::HtmlBlock(_) => Tag::HtmlBlock,
+=======
+/// Assumes `text_bytes` is preceded by `<`.
+fn get_html_end_tag(text_bytes: &[u8]) -> Option<&'static str> {
+    static BEGIN_TAGS: &[&[u8]; 3] = &[b"pre", b"style", b"script"];
+    static ST_BEGIN_TAGS: &[&[u8]; 3] = &[b"!--", b"?", b"![CDATA["];
+
+    for (beg_tag, end_tag) in BEGIN_TAGS
+        .iter()
+        .zip(["</pre>", "</style>", "</script>"].into_iter())
+    {
+        let tag_len = beg_tag.len();
+
+        if text_bytes.len() < tag_len {
+            // begin tags are increasing in size
+            break;
+        }
+
+        if !text_bytes[..tag_len].eq_ignore_ascii_case(beg_tag) {
+            continue;
+        }
+
+        // Must either be the end of the line...
+        if text_bytes.len() == tag_len {
+            return Some(end_tag);
+        }
+
+        // ...or be followed by whitespace, newline, or '>'.
+        let s = text_bytes[tag_len];
+        if is_ascii_whitespace(s) || s == b'>' {
+            return Some(end_tag);
+        }
+    }
+
+    for (beg_tag, end_tag) in ST_BEGIN_TAGS.iter().zip(["-->", "?>", "]]>"].into_iter()) {
+        if text_bytes.starts_with(beg_tag) {
+            return Some(end_tag);
+        }
+    }
+
+    if text_bytes.len() > 1
+        && text_bytes[0] == b'!'
+        && text_bytes[1] >= b'A'
+        && text_bytes[1] <= b'Z'
+    {
+        Some(">")
+    } else {
+        None
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+struct InlineEl {
+    start: TreeIndex, // offset of tree node
+    count: usize,
+    c: u8,      // b'*' or b'_'
+    both: bool, // can both open and close
+}
+
+#[derive(Debug, Clone, Default)]
+struct InlineStack {
+    stack: Vec<InlineEl>,
+    // Lower bounds for matching indices in the stack. For example
+    // a strikethrough delimiter will never match with any element
+    // in the stack with index smaller than
+    // `lower_bounds[InlineStack::TILDES]`.
+    lower_bounds: [usize; 7],
+}
+
+impl InlineStack {
+    /// These are indices into the lower bounds array.
+    /// Not both refers to the property that the delimiter can not both
+    /// be opener as a closer.
+    const UNDERSCORE_NOT_BOTH: usize = 0;
+    const ASTERISK_NOT_BOTH: usize = 1;
+    const ASTERISK_BASE: usize = 2;
+    const TILDES: usize = 5;
+    const UNDERSCORE_BOTH: usize = 6;
+
+    fn pop_all(&mut self, tree: &mut Tree<Item>) {
+        for el in self.stack.drain(..) {
+            for i in 0..el.count {
+                tree[el.start + i].item.body = ItemBody::Text;
+            }
+        }
+        self.lower_bounds = [0; 7];
+    }
+
+    fn get_lowerbound(&self, c: u8, count: usize, both: bool) -> usize {
+        if c == b'_' {
+            if both {
+                self.lower_bounds[InlineStack::UNDERSCORE_BOTH]
+            } else {
+                self.lower_bounds[InlineStack::UNDERSCORE_NOT_BOTH]
+            }
+        } else if c == b'*' {
+            let mod3_lower = self.lower_bounds[InlineStack::ASTERISK_BASE + count % 3];
+            if both {
+                mod3_lower
+            } else {
+                min(
+                    mod3_lower,
+                    self.lower_bounds[InlineStack::ASTERISK_NOT_BOTH],
+                )
+            }
+        } else {
+            self.lower_bounds[InlineStack::TILDES]
+        }
+    }
+
+    fn set_lowerbound(&mut self, c: u8, count: usize, both: bool, new_bound: usize) {
+        if c == b'_' {
+            if both {
+                self.lower_bounds[InlineStack::UNDERSCORE_BOTH] = new_bound;
+            } else {
+                self.lower_bounds[InlineStack::UNDERSCORE_NOT_BOTH] = new_bound;
+            }
+        } else if c == b'*' {
+            self.lower_bounds[InlineStack::ASTERISK_BASE + count % 3] = new_bound;
+            if !both {
+                self.lower_bounds[InlineStack::ASTERISK_NOT_BOTH] = new_bound;
+            }
+        } else {
+            self.lower_bounds[InlineStack::TILDES] = new_bound;
+        }
+    }
+
+    fn find_match(
+        &mut self,
+        tree: &mut Tree<Item>,
+        c: u8,
+        count: usize,
+        both: bool,
+    ) -> Option<InlineEl> {
+        let lowerbound = min(self.stack.len(), self.get_lowerbound(c, count, both));
+        let res = self.stack[lowerbound..]
+            .iter()
+            .cloned()
+            .enumerate()
+            .rfind(|(_, el)| {
+                el.c == c && (!both && !el.both || (count + el.count) % 3 != 0 || count % 3 == 0)
+            });
+
+        if let Some((matching_ix, matching_el)) = res {
+            let matching_ix = matching_ix + lowerbound;
+            for el in &self.stack[(matching_ix + 1)..] {
+                for i in 0..el.count {
+                    tree[el.start + i].item.body = ItemBody::Text;
+                }
+            }
+            self.stack.truncate(matching_ix);
+            Some(matching_el)
+        } else {
+            self.set_lowerbound(c, count, both, self.stack.len());
+            None
+        }
+    }
+
+    fn push(&mut self, el: InlineEl) {
+        self.stack.push(el)
+    }
+}
+
+#[derive(Debug, Clone)]
+enum RefScan<'a> {
+    // label, next node index
+    LinkLabel(CowStr<'a>, TreePointer),
+    // contains next node index
+    Collapsed(TreePointer),
+    Failed,
+}
+
+fn scan_nodes_to_ix(tree: &Tree<Item>, mut node: TreePointer, ix: usize) -> TreePointer {
+    while let TreePointer::Valid(node_ix) = node {
+        if tree[node_ix].item.end <= ix {
+            node = tree[node_ix].next;
+        } else {
+            break;
+        }
+    }
+    node
+}
+
+/// Returns number of bytes (including brackets) and label on success.
+fn scan_link_label<'text, 'tree>(
+    tree: &'tree Tree<Item>,
+    // must be global text
+    text: &'text str,
+    start: usize,
+    node: TreePointer,
+) -> Option<(usize, ReferenceLabel<'text>)> {
+    let bytes = &text.as_bytes()[start..];
+    if bytes.len() < 2 || bytes[0] != b'[' {
+        return None;
+    }
+    let linebreak_handler = |ix: usize| -> Option<usize> {
+        if let TreePointer::Valid(node_ix) = scan_nodes_to_ix(tree, node, ix) {
+            Some(tree[node_ix].item.start - ix)
+        } else {
+            None
+        }
+    };
+    let pair = if b'^' == bytes[1] {
+        let (byte_index, cow) = scan_link_label_rest(text, start + 2, linebreak_handler)?;
+        (byte_index + 2, ReferenceLabel::Footnote(cow))
+    } else {
+        let (byte_index, cow) = scan_link_label_rest(text, start + 1, linebreak_handler)?;
+        (byte_index + 1, ReferenceLabel::Link(cow))
+    };
+    Some(pair)
+}
+
+fn scan_reference<'a, 'b>(tree: &'a Tree<Item>, text: &'b str, cur: TreePointer) -> RefScan<'b> {
+    let cur_ix = match cur {
+        TreePointer::Nil => return RefScan::Failed,
+        TreePointer::Valid(cur_ix) => cur_ix,
+    };
+    let start = tree[cur_ix].item.start;
+    let tail = &text.as_bytes()[start..];
+
+    if tail.starts_with(b"[]") {
+        let closing_node = tree[cur_ix].next.unwrap();
+        RefScan::Collapsed(tree[closing_node].next)
+    } else if let Some((ix, ReferenceLabel::Link(label))) = scan_link_label(tree, text, start, cur)
+    {
+        let next_node = scan_nodes_to_ix(tree, cur, start + ix);
+        RefScan::LinkLabel(label, next_node)
+    } else {
+        RefScan::Failed
+    }
+}
+
+#[derive(Clone, Default)]
+struct LinkStack {
+    inner: Vec<LinkStackEl>,
+    disabled_ix: usize,
+}
+
+impl LinkStack {
+    fn push(&mut self, el: LinkStackEl) {
+        self.inner.push(el);
+    }
+
+    fn pop(&mut self) -> Option<LinkStackEl> {
+        let el = self.inner.pop();
+        self.disabled_ix = std::cmp::min(self.disabled_ix, self.inner.len());
+        el
+    }
+
+    fn clear(&mut self) {
+        self.inner.clear();
+        self.disabled_ix = 0;
+    }
+
+    fn disable_all_links(&mut self) {
+        for el in &mut self.inner[self.disabled_ix..] {
+            if el.ty == LinkStackTy::Link {
+                el.ty = LinkStackTy::Disabled;
+            }
+        }
+        self.disabled_ix = self.inner.len();
+    }
+}
+
+#[derive(Clone, Debug)]
+struct LinkStackEl {
+    node: TreeIndex,
+    ty: LinkStackTy,
+}
+
+#[derive(PartialEq, Clone, Debug)]
+enum LinkStackTy {
+    Link,
+    Image,
+    Disabled,
+}
+
+#[derive(Clone)]
+struct LinkDef<'a> {
+    dest: CowStr<'a>,
+    title: Option<CowStr<'a>>,
+}
+
+/// Tracks tree indices of code span delimiters of each length. It should prevent
+/// quadratic scanning behaviours by providing (amortized) constant time lookups.
+struct CodeDelims {
+    inner: HashMap<usize, VecDeque<TreeIndex>>,
+    seen_first: bool,
+}
+
+impl CodeDelims {
+    fn new() -> Self {
+        Self {
+            inner: Default::default(),
+            seen_first: false,
+        }
+    }
+
+    fn insert(&mut self, count: usize, ix: TreeIndex) {
+        if self.seen_first {
+            self.inner
+                .entry(count)
+                .or_insert_with(Default::default)
+                .push_back(ix);
+        } else {
+            // Skip the first insert, since that delimiter will always
+            // be an opener and not a closer.
+            self.seen_first = true;
+        }
+    }
+
+    fn is_populated(&self) -> bool {
+        !self.inner.is_empty()
+    }
+
+    fn find(&mut self, open_ix: TreeIndex, count: usize) -> Option<TreeIndex> {
+        while let Some(ix) = self.inner.get_mut(&count)?.pop_front() {
+            if ix > open_ix {
+                return Some(ix);
+            }
+        }
+        None
+    }
+
+    fn clear(&mut self) {
+        self.inner.clear();
+        self.seen_first = false;
+    }
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+struct LinkIndex(usize);
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+struct CowIndex(usize);
+
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+struct AlignmentIndex(usize);
+
+#[derive(Clone)]
+struct Allocations<'a> {
+    refdefs: HashMap<LinkLabel<'a>, LinkDef<'a>>,
+    links: Vec<(LinkType, CowStr<'a>, CowStr<'a>)>,
+    cows: Vec<CowStr<'a>>,
+    alignments: Vec<Vec<Alignment>>,
+}
+
+impl<'a> Allocations<'a> {
+    fn new() -> Self {
+        Self {
+            refdefs: HashMap::new(),
+            links: Vec::with_capacity(128),
+            cows: Vec::new(),
+            alignments: Vec::new(),
+        }
+    }
+
+    fn allocate_cow(&mut self, cow: CowStr<'a>) -> CowIndex {
+        let ix = self.cows.len();
+        self.cows.push(cow);
+        CowIndex(ix)
+    }
+
+    fn allocate_link(&mut self, ty: LinkType, url: CowStr<'a>, title: CowStr<'a>) -> LinkIndex {
+        let ix = self.links.len();
+        self.links.push((ty, url, title));
+        LinkIndex(ix)
+    }
+
+    fn allocate_alignment(&mut self, alignment: Vec<Alignment>) -> AlignmentIndex {
+        let ix = self.alignments.len();
+        self.alignments.push(alignment);
+        AlignmentIndex(ix)
+    }
+}
+
+impl<'a> Index<CowIndex> for Allocations<'a> {
+    type Output = CowStr<'a>;
+
+    fn index(&self, ix: CowIndex) -> &Self::Output {
+        self.cows.index(ix.0)
+    }
+}
+
+impl<'a> Index<LinkIndex> for Allocations<'a> {
+    type Output = (LinkType, CowStr<'a>, CowStr<'a>);
+
+    fn index(&self, ix: LinkIndex) -> &Self::Output {
+        self.links.index(ix.0)
+    }
+}
+
+impl<'a> Index<AlignmentIndex> for Allocations<'a> {
+    type Output = Vec<Alignment>;
+
+    fn index(&self, ix: AlignmentIndex) -> &Self::Output {
+        self.alignments.index(ix.0)
+    }
+}
+
+/// A struct containing information on the reachability of certain inline HTML
+/// elements. In particular, for cdata elements (`<![CDATA[`), processing
+/// elements (`<?`) and declarations (`<!DECLARATION`). The respectives usizes
+/// represent the indices before which a scan will always fail and can hence
+/// be skipped.
+#[derive(Clone, Default)]
+pub(crate) struct HtmlScanGuard {
+    pub cdata: usize,
+    pub processing: usize,
+    pub declaration: usize,
+}
+
+/// Markdown event iterator.
+#[derive(Clone)]
+pub struct Parser<'a> {
+    text: &'a str,
+    tree: Tree<Item>,
+    allocs: Allocations<'a>,
+    broken_link_callback: Option<&'a dyn Fn(&str, &str) -> Option<(String, String)>>,
+    html_scan_guard: HtmlScanGuard,
+
+    // used by inline passes. store them here for reuse
+    inline_stack: InlineStack,
+    link_stack: LinkStack,
+}
+
+impl<'a> Parser<'a> {
+    /// Creates a new event iterator for a markdown string without any options enabled.
+    pub fn new(text: &'a str) -> Parser<'a> {
+        Parser::new_ext(text, Options::empty())
+    }
+
+    /// Creates a new event iteratorfor a markdown string with given options.
+    pub fn new_ext(text: &'a str, options: Options) -> Parser<'a> {
+        Parser::new_with_broken_link_callback(text, options, None)
+    }
+
+    /// In case the parser encounters any potential links that have a broken
+    /// reference (e.g `[foo]` when there is no `[foo]: ` entry at the bottom)
+    /// the provided callback will be called with the reference name,
+    /// and the returned pair will be used as the link name and title if it is not
+    /// `None`.
+    pub fn new_with_broken_link_callback(
+        text: &'a str,
+        options: Options,
+        broken_link_callback: Option<&'a dyn Fn(&str, &str) -> Option<(String, String)>>,
+    ) -> Parser<'a> {
+        let first_pass = FirstPass::new(text, options);
+        let (mut tree, allocs) = first_pass.run();
+        tree.reset();
+        let inline_stack = Default::default();
+        let link_stack = Default::default();
+        let html_scan_guard = Default::default();
+        Parser {
+            text,
+            tree,
+            allocs,
+            broken_link_callback,
+            inline_stack,
+            link_stack,
+            html_scan_guard,
+        }
+    }
+
+    /// Handle inline markup.
+    ///
+    /// When the parser encounters any item indicating potential inline markup, all
+    /// inline markup passes are run on the remainder of the chain.
+    ///
+    /// Note: there's some potential for optimization here, but that's future work.
+    fn handle_inline(&mut self) {
+        self.handle_inline_pass1();
+        self.handle_emphasis();
+    }
+
+    /// Handle inline HTML, code spans, and links.
+    ///
+    /// This function handles both inline HTML and code spans, because they have
+    /// the same precedence. It also handles links, even though they have lower
+    /// precedence, because the URL of links must not be processed.
+    fn handle_inline_pass1(&mut self) {
+        let mut code_delims = CodeDelims::new();
+        let mut cur = self.tree.cur();
+        let mut prev = TreePointer::Nil;
+
+        let block_end = self.tree[self.tree.peek_up().unwrap()].item.end;
+        let block_text = &self.text[..block_end];
+
+        while let TreePointer::Valid(mut cur_ix) = cur {
+            match self.tree[cur_ix].item.body {
+                ItemBody::MaybeHtml => {
+                    let next = self.tree[cur_ix].next;
+                    let autolink = if let TreePointer::Valid(next_ix) = next {
+                        scan_autolink(block_text, self.tree[next_ix].item.start)
+                    } else {
+                        None
+                    };
+
+                    if let Some((ix, uri, link_type)) = autolink {
+                        let node = scan_nodes_to_ix(&self.tree, next, ix);
+                        let text_node = self.tree.create_node(Item {
+                            start: self.tree[cur_ix].item.start + 1,
+                            end: ix - 1,
+                            body: ItemBody::Text,
+                        });
+                        let link_ix = self.allocs.allocate_link(link_type, uri, "".into());
+                        self.tree[cur_ix].item.body = ItemBody::Link(link_ix);
+                        self.tree[cur_ix].item.end = ix;
+                        self.tree[cur_ix].next = node;
+                        self.tree[cur_ix].child = TreePointer::Valid(text_node);
+                        prev = cur;
+                        cur = node;
+                        if let TreePointer::Valid(node_ix) = cur {
+                            self.tree[node_ix].item.start = max(self.tree[node_ix].item.start, ix);
+                        }
+                        continue;
+                    } else {
+                        let inline_html = if let TreePointer::Valid(next_ix) = next {
+                            scan_inline_html(
+                                block_text.as_bytes(),
+                                self.tree[next_ix].item.start,
+                                &mut self.html_scan_guard,
+                            )
+                        } else {
+                            None
+                        };
+                        if let Some(ix) = inline_html {
+                            let node = scan_nodes_to_ix(&self.tree, next, ix);
+                            self.tree[cur_ix].item.body = ItemBody::Html;
+                            self.tree[cur_ix].item.end = ix;
+                            self.tree[cur_ix].next = node;
+                            prev = cur;
+                            cur = node;
+                            if let TreePointer::Valid(node_ix) = cur {
+                                self.tree[node_ix].item.start =
+                                    max(self.tree[node_ix].item.start, ix);
+                            }
+                            continue;
+                        }
+                    }
+                    self.tree[cur_ix].item.body = ItemBody::Text;
+                }
+                ItemBody::MaybeCode(mut search_count, preceded_by_backslash) => {
+                    if preceded_by_backslash {
+                        search_count -= 1;
+                        if search_count == 0 {
+                            self.tree[cur_ix].item.body = ItemBody::Text;
+                            prev = cur;
+                            cur = self.tree[cur_ix].next;
+                            continue;
+                        }
+                    }
+
+                    if code_delims.is_populated() {
+                        // we have previously scanned all codeblock delimiters,
+                        // so we can reuse that work
+                        if let Some(scan_ix) = code_delims.find(cur_ix, search_count) {
+                            self.make_code_span(cur_ix, scan_ix, preceded_by_backslash);
+                        } else {
+                            self.tree[cur_ix].item.body = ItemBody::Text;
+                        }
+                    } else {
+                        // we haven't previously scanned all codeblock delimiters,
+                        // so walk the AST
+                        let mut scan = if search_count > 0 {
+                            self.tree[cur_ix].next
+                        } else {
+                            TreePointer::Nil
+                        };
+                        while let TreePointer::Valid(scan_ix) = scan {
+                            if let ItemBody::MaybeCode(delim_count, _) =
+                                self.tree[scan_ix].item.body
+                            {
+                                if search_count == delim_count {
+                                    self.make_code_span(cur_ix, scan_ix, preceded_by_backslash);
+                                    code_delims.clear();
+                                    break;
+                                } else {
+                                    code_delims.insert(delim_count, scan_ix);
+                                }
+                            }
+                            scan = self.tree[scan_ix].next;
+                        }
+                        if scan == TreePointer::Nil {
+                            self.tree[cur_ix].item.body = ItemBody::Text;
+                        }
+                    }
+                }
+                ItemBody::MaybeLinkOpen => {
+                    self.tree[cur_ix].item.body = ItemBody::Text;
+                    self.link_stack.push(LinkStackEl {
+                        node: cur_ix,
+                        ty: LinkStackTy::Link,
+                    });
+                }
+                ItemBody::MaybeImage => {
+                    self.tree[cur_ix].item.body = ItemBody::Text;
+                    self.link_stack.push(LinkStackEl {
+                        node: cur_ix,
+                        ty: LinkStackTy::Image,
+                    });
+                }
+                ItemBody::MaybeLinkClose => {
+                    if let Some(tos) = self.link_stack.pop() {
+                        if tos.ty == LinkStackTy::Disabled {
+                            self.tree[cur_ix].item.body = ItemBody::Text;
+                            continue;
+                        }
+                        let next = self.tree[cur_ix].next;
+                        if let Some((next_ix, url, title)) =
+                            self.scan_inline_link(block_text, self.tree[cur_ix].item.end, next)
+                        {
+                            let next_node = scan_nodes_to_ix(&self.tree, next, next_ix);
+                            if let TreePointer::Valid(prev_ix) = prev {
+                                self.tree[prev_ix].next = TreePointer::Nil;
+                            }
+                            cur = TreePointer::Valid(tos.node);
+                            cur_ix = tos.node;
+                            let link_ix = self.allocs.allocate_link(LinkType::Inline, url, title);
+                            self.tree[cur_ix].item.body = if tos.ty == LinkStackTy::Image {
+                                ItemBody::Image(link_ix)
+                            } else {
+                                ItemBody::Link(link_ix)
+                            };
+                            self.tree[cur_ix].child = self.tree[cur_ix].next;
+                            self.tree[cur_ix].next = next_node;
+                            self.tree[cur_ix].item.end = next_ix;
+                            if let TreePointer::Valid(next_node_ix) = next_node {
+                                self.tree[next_node_ix].item.start =
+                                    max(self.tree[next_node_ix].item.start, next_ix);
+                            }
+
+                            if tos.ty == LinkStackTy::Link {
+                                self.link_stack.disable_all_links();
+                            }
+                        } else {
+                            // ok, so its not an inline link. maybe it is a reference
+                            // to a defined link?
+                            let scan_result = scan_reference(&self.tree, block_text, next);
+                            let label_node = self.tree[tos.node].next;
+                            let node_after_link = match scan_result {
+                                RefScan::LinkLabel(_, next_node) => next_node,
+                                RefScan::Collapsed(next_node) => next_node,
+                                RefScan::Failed => next,
+                            };
+                            let link_type = match &scan_result {
+                                RefScan::LinkLabel(..) => LinkType::Reference,
+                                RefScan::Collapsed(..) => LinkType::Collapsed,
+                                RefScan::Failed => LinkType::Shortcut,
+                            };
+                            let label: Option<ReferenceLabel<'a>> = match scan_result {
+                                RefScan::LinkLabel(l, ..) => Some(ReferenceLabel::Link(l)),
+                                RefScan::Collapsed(..) | RefScan::Failed => {
+                                    // No label? maybe it is a shortcut reference
+                                    scan_link_label(
+                                        &self.tree,
+                                        &self.text[..self.tree[cur_ix].item.end],
+                                        self.tree[tos.node].item.end - 1,
+                                        TreePointer::Valid(tos.node),
+                                    )
+                                    .map(|(_ix, label)| label)
+                                }
+                            };
+
+                            // see if it's a footnote reference
+                            if let Some(ReferenceLabel::Footnote(l)) = label {
+                                self.tree[tos.node].next = node_after_link;
+                                self.tree[tos.node].child = TreePointer::Nil;
+                                self.tree[tos.node].item.body =
+                                    ItemBody::FootnoteReference(self.allocs.allocate_cow(l));
+                                prev = TreePointer::Valid(tos.node);
+                                cur = node_after_link;
+                                self.link_stack.clear();
+                                continue;
+                            } else if let Some(ReferenceLabel::Link(link_label)) = label {
+                                let type_url_title = self
+                                    .allocs
+                                    .refdefs
+                                    .get(&UniCase::new(link_label.as_ref().into()))
+                                    .map(|matching_def| {
+                                        // found a matching definition!
+                                        let title = matching_def
+                                            .title
+                                            .as_ref()
+                                            .cloned()
+                                            .unwrap_or_else(|| "".into());
+                                        let url = matching_def.dest.clone();
+                                        (link_type, url, title)
+                                    })
+                                    .or_else(|| {
+                                        self.broken_link_callback
+                                            .and_then(|callback| {
+                                                // looked for matching definition, but didn't find it. try to fix
+                                                // link with callback, if it is defined
+                                                callback(link_label.as_ref(), link_label.as_ref())
+                                            })
+                                            .map(|(url, title)| {
+                                                (link_type.to_unknown(), url.into(), title.into())
+                                            })
+                                    });
+
+                                if let Some((def_link_type, url, title)) = type_url_title {
+                                    let link_ix =
+                                        self.allocs.allocate_link(def_link_type, url, title);
+                                    self.tree[tos.node].item.body = if tos.ty == LinkStackTy::Image
+                                    {
+                                        ItemBody::Image(link_ix)
+                                    } else {
+                                        ItemBody::Link(link_ix)
+                                    };
+
+                                    // lets do some tree surgery to add the link to the tree
+                                    // 1st: skip the label node and close node
+                                    self.tree[tos.node].next = node_after_link;
+
+                                    // then, add the label node as a child to the link node
+                                    self.tree[tos.node].child = label_node;
+
+                                    // finally: disconnect list of children
+                                    if let TreePointer::Valid(prev_ix) = prev {
+                                        self.tree[prev_ix].next = TreePointer::Nil;
+                                    }
+
+                                    // set up cur so next node will be node_after_link
+                                    cur = TreePointer::Valid(tos.node);
+                                    cur_ix = tos.node;
+
+                                    if tos.ty == LinkStackTy::Link {
+                                        self.link_stack.disable_all_links();
+                                    }
+                                } else {
+                                    self.tree[cur_ix].item.body = ItemBody::Text;
+                                }
+                            } else {
+                                self.tree[cur_ix].item.body = ItemBody::Text;
+                            }
+                        }
+                    } else {
+                        self.tree[cur_ix].item.body = ItemBody::Text;
+                    }
+                }
+                _ => (),
+            }
+            prev = cur;
+            cur = self.tree[cur_ix].next;
+        }
+        self.link_stack.clear();
+    }
+
+    fn handle_emphasis(&mut self) {
+        let mut prev = TreePointer::Nil;
+        let mut prev_ix: TreeIndex;
+        let mut cur = self.tree.cur();
+        while let TreePointer::Valid(mut cur_ix) = cur {
+            if let ItemBody::MaybeEmphasis(mut count, can_open, can_close) =
+                self.tree[cur_ix].item.body
+            {
+                let c = self.text.as_bytes()[self.tree[cur_ix].item.start];
+                let both = can_open && can_close;
+                if can_close {
+                    while let Some(el) =
+                        self.inline_stack.find_match(&mut self.tree, c, count, both)
+                    {
+                        // have a match!
+                        if let TreePointer::Valid(prev_ix) = prev {
+                            self.tree[prev_ix].next = TreePointer::Nil;
+                        }
+                        let match_count = min(count, el.count);
+                        // start, end are tree node indices
+                        let mut end = cur_ix - 1;
+                        let mut start = el.start + el.count;
+
+                        // work from the inside out
+                        while start > el.start + el.count - match_count {
+                            let (inc, ty) = if c == b'~' {
+                                (2, ItemBody::Strikethrough)
+                            } else if start > el.start + el.count - match_count + 1 {
+                                (2, ItemBody::Strong)
+                            } else {
+                                (1, ItemBody::Emphasis)
+                            };
+
+                            let root = start - inc;
+                            end = end + inc;
+                            self.tree[root].item.body = ty;
+                            self.tree[root].item.end = self.tree[end].item.end;
+                            self.tree[root].child = TreePointer::Valid(start);
+                            self.tree[root].next = TreePointer::Nil;
+                            start = root;
+                        }
+
+                        // set next for top most emph level
+                        prev_ix = el.start + el.count - match_count;
+                        prev = TreePointer::Valid(prev_ix);
+                        cur = self.tree[cur_ix + match_count - 1].next;
+                        self.tree[prev_ix].next = cur;
+
+                        if el.count > match_count {
+                            self.inline_stack.push(InlineEl {
+                                start: el.start,
+                                count: el.count - match_count,
+                                c: el.c,
+                                both,
+                            })
+                        }
+                        count -= match_count;
+                        if count > 0 {
+                            cur_ix = cur.unwrap();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                if count > 0 {
+                    if can_open {
+                        self.inline_stack.push(InlineEl {
+                            start: cur_ix,
+                            count,
+                            c,
+                            both,
+                        });
+                    } else {
+                        for i in 0..count {
+                            self.tree[cur_ix + i].item.body = ItemBody::Text;
+                        }
+                    }
+                    prev_ix = cur_ix + count - 1;
+                    prev = TreePointer::Valid(prev_ix);
+                    cur = self.tree[prev_ix].next;
+                }
+            } else {
+                prev = cur;
+                cur = self.tree[cur_ix].next;
+            }
+        }
+        self.inline_stack.pop_all(&mut self.tree);
+    }
+
+    /// Returns next byte index, url and title.
+    fn scan_inline_link(
+        &self,
+        underlying: &'a str,
+        start_ix: usize,
+        node: TreePointer,
+    ) -> Option<(usize, CowStr<'a>, CowStr<'a>)> {
+        let mut ix = start_ix;
+        if scan_ch(&underlying.as_bytes()[ix..], b'(') == 0 {
+            return None;
+        }
+        ix += 1;
+        ix += scan_while(&underlying.as_bytes()[ix..], is_ascii_whitespace);
+
+        let (dest_length, dest) = scan_link_dest(underlying, ix, LINK_MAX_NESTED_PARENS)?;
+        let dest = unescape(dest);
+        ix += dest_length;
+
+        ix += scan_while(&underlying.as_bytes()[ix..], is_ascii_whitespace);
+
+        let title = if let Some((bytes_scanned, t)) = self.scan_link_title(underlying, ix, node) {
+            ix += bytes_scanned;
+            ix += scan_while(&underlying.as_bytes()[ix..], is_ascii_whitespace);
+            t
+        } else {
+            "".into()
+        };
+        if scan_ch(&underlying.as_bytes()[ix..], b')') == 0 {
+            return None;
+        }
+        ix += 1;
+
+        Some((ix, dest, title))
+    }
+
+    // returns (bytes scanned, title cow)
+    fn scan_link_title(
+        &self,
+        text: &'a str,
+        start_ix: usize,
+        node: TreePointer,
+    ) -> Option<(usize, CowStr<'a>)> {
+        let bytes = text.as_bytes();
+        let open = match bytes.get(start_ix) {
+            Some(b @ b'\'') | Some(b @ b'\"') | Some(b @ b'(') => *b,
+            _ => return None,
+        };
+        let close = if open == b'(' { b')' } else { open };
+
+        let mut title = String::new();
+        let mut mark = start_ix + 1;
+        let mut i = start_ix + 1;
+
+        while i < bytes.len() {
+            let c = bytes[i];
+
+            if c == close {
+                let cow = if mark == 1 {
+                    (i - start_ix + 1, text[mark..i].into())
+                } else {
+                    title.push_str(&text[mark..i]);
+                    (i - start_ix + 1, title.into())
+                };
+
+                return Some(cow);
+            }
+            if c == open {
+                return None;
+            }
+
+            if c == b'\n' || c == b'\r' {
+                if let TreePointer::Valid(node_ix) = scan_nodes_to_ix(&self.tree, node, i + 1) {
+                    if self.tree[node_ix].item.start > i {
+                        title.push_str(&text[mark..i]);
+                        title.push('\n');
+                        i = self.tree[node_ix].item.start;
+                        mark = i;
+                        continue;
+                    }
+                }
+            }
+            if c == b'&' {
+                if let (n, Some(value)) = scan_entity(&bytes[i..]) {
+                    title.push_str(&text[mark..i]);
+                    title.push_str(&value);
+                    i += n;
+                    mark = i;
+                    continue;
+                }
+            }
+            if c == b'\\' && i + 1 < bytes.len() && is_ascii_punctuation(bytes[i + 1]) {
+                title.push_str(&text[mark..i]);
+                i += 1;
+                mark = i;
+            }
+
+            i += 1;
+        }
+
+        None
+    }
+
+    /// Make a code span.
+    ///
+    /// Both `open` and `close` are matching MaybeCode items.
+    fn make_code_span(&mut self, open: TreeIndex, close: TreeIndex, preceding_backslash: bool) {
+        let first_ix = open + 1;
+        let last_ix = close - 1;
+        let bytes = self.text.as_bytes();
+        let mut span_start = self.tree[open].item.end;
+        let mut span_end = self.tree[close].item.start;
+        let mut buf: Option<String> = None;
+
+        // detect all-space sequences, since they are kept as-is as of commonmark 0.29
+        if !bytes[span_start..span_end].iter().all(|&b| b == b' ') {
+            let opening = match bytes[span_start] {
+                b' ' | b'\r' | b'\n' => true,
+                _ => false,
+            };
+            let closing = match bytes[span_end - 1] {
+                b' ' | b'\r' | b'\n' => true,
+                _ => false,
+            };
+            let drop_enclosing_whitespace = opening && closing;
+
+            if drop_enclosing_whitespace {
+                span_start += 1;
+                if span_start < span_end {
+                    span_end -= 1;
+                }
+            }
+
+            let mut ix = first_ix;
+
+            while ix < close {
+                if let ItemBody::HardBreak | ItemBody::SoftBreak = self.tree[ix].item.body {
+                    if drop_enclosing_whitespace {
+                        // check whether break should be ignored
+                        if ix == first_ix {
+                            ix = ix + 1;
+                            span_start = min(span_end, self.tree[ix].item.start);
+                            continue;
+                        } else if ix == last_ix && last_ix > first_ix {
+                            ix = ix + 1;
+                            continue;
+                        }
+                    }
+
+                    let end = bytes[self.tree[ix].item.start..]
+                        .iter()
+                        .position(|&b| b == b'\r' || b == b'\n')
+                        .unwrap()
+                        + self.tree[ix].item.start;
+                    if let Some(ref mut buf) = buf {
+                        buf.push_str(&self.text[self.tree[ix].item.start..end]);
+                        buf.push(' ');
+                    } else {
+                        let mut new_buf = String::with_capacity(span_end - span_start);
+                        new_buf.push_str(&self.text[span_start..end]);
+                        new_buf.push(' ');
+                        buf = Some(new_buf);
+                    }
+                } else if let Some(ref mut buf) = buf {
+                    let end = if ix == last_ix {
+                        span_end
+                    } else {
+                        self.tree[ix].item.end
+                    };
+                    buf.push_str(&self.text[self.tree[ix].item.start..end]);
+                }
+                ix = ix + 1;
+            }
+        }
+
+        let cow = if let Some(buf) = buf {
+            buf.into()
+        } else {
+            self.text[span_start..span_end].into()
+        };
+        if preceding_backslash {
+            self.tree[open].item.body = ItemBody::Text;
+            self.tree[open].item.end = self.tree[open].item.start + 1;
+            self.tree[open].next = TreePointer::Valid(close);
+            self.tree[close].item.body = ItemBody::Code(self.allocs.allocate_cow(cow));
+            self.tree[close].item.start = self.tree[open].item.start + 1;
+        } else {
+            self.tree[open].item.body = ItemBody::Code(self.allocs.allocate_cow(cow));
+            self.tree[open].item.end = self.tree[close].item.end;
+            self.tree[open].next = self.tree[close].next;
+        }
+    }
+
+    /// Consumes the event iterator and produces an iterator that produces
+    /// `(Event, Range)` pairs, where the `Range` value maps to the corresponding
+    /// range in the markdown source.
+    pub fn into_offset_iter(self) -> OffsetIter<'a> {
+        OffsetIter { inner: self }
+    }
+}
+
+pub(crate) enum LoopInstruction<T> {
+    /// Continue looking for more special bytes, but skip next few bytes.
+    ContinueAndSkip(usize),
+    /// Break looping immediately, returning with the given index and value.
+    BreakAtWith(usize, T),
+}
+
+/// This function walks the byte slices from the given index and
+/// calls the callback function on all bytes (and their indices) that are in the following set:
+/// `` ` ``, `\`, `&`, `*`, `_`, `~`, `!`, `<`, `[`, `]`, `|`, `\r`, `\n`
+/// It is guaranteed not call the callback on other bytes.
+/// Whenever `callback(ix, byte)` returns a `ContinueAndSkip(n)` value, the callback
+/// will not be called with an index that is less than `ix + n + 1`.
+/// When the callback returns a `BreakAtWith(end_ix, opt+val)`, no more callbacks will be
+/// called and the function returns immediately with the return value `(end_ix, opt_val)`.
+/// If `BreakAtWith(..)` is never returned, this function will return the first
+/// index that is outside the byteslice bound and a `None` value.
+fn iterate_special_bytes<F, T>(bytes: &[u8], ix: usize, callback: F) -> (usize, Option<T>)
+where
+    F: FnMut(usize, u8) -> LoopInstruction<Option<T>>,
+{
+    #[cfg(all(target_arch = "x86_64", feature = "simd"))]
+    {
+        crate::simd::iterate_special_bytes(bytes, ix, callback)
+    }
+    #[cfg(not(all(target_arch = "x86_64", feature = "simd")))]
+    {
+        scalar_iterate_special_bytes(bytes, ix, callback)
+    }
+}
+
+const fn special_bytes() -> [bool; 256] {
+    let mut bytes = [false; 256];
+    bytes[b'<' as usize] = true;
+    bytes[b'!' as usize] = true;
+    bytes[b'[' as usize] = true;
+    bytes[b'~' as usize] = true;
+    bytes[b'`' as usize] = true;
+    bytes[b'|' as usize] = true;
+    bytes[b'\\' as usize] = true;
+    bytes[b'*' as usize] = true;
+    bytes[b'_' as usize] = true;
+    bytes[b'\r' as usize] = true;
+    bytes[b'\n' as usize] = true;
+    bytes[b']' as usize] = true;
+    bytes[b'&' as usize] = true;
+    bytes
+}
+
+pub(crate) fn scalar_iterate_special_bytes<F, T>(
+    bytes: &[u8],
+    mut ix: usize,
+    mut callback: F,
+) -> (usize, Option<T>)
+where
+    F: FnMut(usize, u8) -> LoopInstruction<Option<T>>,
+{
+    let special_bytes = special_bytes();
+
+    while ix < bytes.len() {
+        let b = bytes[ix];
+        if special_bytes[b as usize] {
+            match callback(ix, b) {
+                LoopInstruction::ContinueAndSkip(skip) => {
+                    ix += skip;
+                }
+                LoopInstruction::BreakAtWith(ix, val) => {
+                    return (ix, val);
+                }
+            }
+        }
+        ix += 1;
+    }
+
+    (ix, None)
+}
+
+/// Markdown event and source range iterator.
+///
+/// Generates tuples where the first element is the markdown event and the second
+/// is a the corresponding range in the source string.
+///
+/// Constructed from a `Parser` using its
+/// [`into_offset_iter`](struct.Parser.html#method.into_offset_iter) method.
+pub struct OffsetIter<'a> {
+    inner: Parser<'a>,
+}
+
+impl<'a> Iterator for OffsetIter<'a> {
+    type Item = (Event<'a>, Range<usize>);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.inner.tree.cur() {
+            TreePointer::Nil => {
+                let ix = self.inner.tree.pop()?;
+                let tag = item_to_tag(&self.inner.tree[ix].item, &self.inner.allocs);
+                self.inner.tree.next_sibling(ix);
+                Some((
+                    Event::End(tag),
+                    self.inner.tree[ix].item.start..self.inner.tree[ix].item.end,
+                ))
+            }
+            TreePointer::Valid(cur_ix) => {
+                if self.inner.tree[cur_ix].item.body.is_inline() {
+                    self.inner.handle_inline();
+                }
+
+                let node = self.inner.tree[cur_ix];
+                let item = node.item;
+                let event = item_to_event(item, self.inner.text, &self.inner.allocs);
+                if let Event::Start(..) = event {
+                    self.inner.tree.push();
+                } else {
+                    self.inner.tree.next_sibling(cur_ix);
+                }
+                Some((event, item.start..item.end))
+            }
+        }
+    }
+}
+
+fn item_to_tag<'a>(item: &Item, allocs: &Allocations<'a>) -> Tag<'a> {
+    match item.body {
+        ItemBody::Paragraph => Tag::Paragraph,
+        ItemBody::Emphasis => Tag::Emphasis,
+        ItemBody::Strong => Tag::Strong,
+        ItemBody::Strikethrough => Tag::Strikethrough,
+        ItemBody::Link(link_ix) => {
+            let &(ref link_type, ref url, ref title) = allocs.index(link_ix);
+            Tag::Link(*link_type, url.clone(), title.clone())
+        }
+        ItemBody::Image(link_ix) => {
+            let &(ref link_type, ref url, ref title) = allocs.index(link_ix);
+            Tag::Image(*link_type, url.clone(), title.clone())
+        }
+        ItemBody::Heading(level) => Tag::Heading(level),
+        ItemBody::FencedCodeBlock(cow_ix) => Tag::CodeBlock(allocs[cow_ix].clone()),
+        ItemBody::IndentCodeBlock => Tag::CodeBlock("".into()),
+        ItemBody::BlockQuote => Tag::BlockQuote,
+        ItemBody::List(_, c, listitem_start) => {
+            if c == b'.' || c == b')' {
+                Tag::List(Some(listitem_start))
+            } else {
+                Tag::List(None)
+            }
+        }
+        ItemBody::ListItem(_) => Tag::Item,
+        ItemBody::TableHead => Tag::TableHead,
+        ItemBody::TableCell => Tag::TableCell,
+        ItemBody::TableRow => Tag::TableRow,
+        ItemBody::Table(alignment_ix) => Tag::Table(allocs[alignment_ix].clone()),
+        ItemBody::FootnoteDefinition(cow_ix) => Tag::FootnoteDefinition(allocs[cow_ix].clone()),
+        _ => panic!("unexpected item body {:?}", item.body),
+    }
+}
+
+fn item_to_event<'a>(item: Item, text: &'a str, allocs: &Allocations<'a>) -> Event<'a> {
+    let tag = match item.body {
+        ItemBody::Text => return Event::Text(text[item.start..item.end].into()),
+        ItemBody::Code(cow_ix) => return Event::Code(allocs[cow_ix].clone()),
+        ItemBody::SynthesizeText(cow_ix) => return Event::Text(allocs[cow_ix].clone()),
+        ItemBody::Html => return Event::Html(text[item.start..item.end].into()),
+        ItemBody::SoftBreak => return Event::SoftBreak,
+        ItemBody::HardBreak => return Event::HardBreak,
+        ItemBody::FootnoteReference(cow_ix) => {
+            return Event::FootnoteReference(allocs[cow_ix].clone())
+        }
+        ItemBody::TaskListMarker(checked) => return Event::TaskListMarker(checked),
+        ItemBody::Rule => return Event::Rule,
+
+        ItemBody::Paragraph => Tag::Paragraph,
+        ItemBody::Emphasis => Tag::Emphasis,
+        ItemBody::Strong => Tag::Strong,
+        ItemBody::Strikethrough => Tag::Strikethrough,
+        ItemBody::Link(link_ix) => {
+            let &(ref link_type, ref url, ref title) = allocs.index(link_ix);
+            Tag::Link(*link_type, url.clone(), title.clone())
+        }
+        ItemBody::Image(link_ix) => {
+            let &(ref link_type, ref url, ref title) = allocs.index(link_ix);
+            Tag::Image(*link_type, url.clone(), title.clone())
+        }
+        ItemBody::Heading(level) => Tag::Heading(level),
+        ItemBody::FencedCodeBlock(cow_ix) => Tag::CodeBlock(allocs[cow_ix].clone()),
+        ItemBody::IndentCodeBlock => Tag::CodeBlock("".into()),
+        ItemBody::BlockQuote => Tag::BlockQuote,
+        ItemBody::List(_, c, listitem_start) => {
+            if c == b'.' || c == b')' {
+                Tag::List(Some(listitem_start))
+            } else {
+                Tag::List(None)
+            }
+        }
+        ItemBody::ListItem(_) => Tag::Item,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         ItemBody::TableHead => Tag::TableHead,
         ItemBody::TableCell => Tag::TableCell,
         ItemBody::TableRow => Tag::TableRow,
@@ -2596,7 +4449,10 @@ impl<'a> Iterator for Parser<'a> {
             TreePointer::Nil => {
                 let ix = self.tree.pop()?;
                 let tag = item_to_tag(&self.tree[ix].item, &self.allocs);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.offset = self.tree[ix].item.end;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.tree.next_sibling(ix);
                 Some(Event::End(tag))
             }
@@ -2609,6 +4465,7 @@ impl<'a> Iterator for Parser<'a> {
                 let item = node.item;
                 let event = item_to_event(item, self.text, &self.allocs);
                 if let Event::Start(..) = event {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     self.offset = if let TreePointer::Valid(child_ix) = node.child {
                         self.tree[child_ix].item.start
                     } else {
@@ -2617,6 +4474,10 @@ impl<'a> Iterator for Parser<'a> {
                     self.tree.push();
                 } else {
                     self.offset = item.end;
+=======
+                    self.tree.push();
+                } else {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     self.tree.next_sibling(cur_ix);
                 }
                 Some(event)
@@ -2749,6 +4610,19 @@ mod test {
         assert_eq!(expected_offsets, event_offsets);
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    #[test]
+    fn offset_iter_issue_378() {
+        let event_offsets: Vec<_> = Parser::new("a [b](c) d")
+            .into_offset_iter()
+            .map(|(_ev, range)| range)
+            .collect();
+        let expected_offsets = vec![(0..10), (0..2), (2..8), (3..4), (2..8), (8..10), (0..10)];
+        assert_eq!(expected_offsets, event_offsets);
+    }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     // FIXME: add this one regression suite
     #[test]
     fn link_def_at_eof() {

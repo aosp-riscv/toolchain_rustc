@@ -10,7 +10,10 @@ use std::cmp::{Ord, Ordering};
 
 use syntax::{ast, attr, source_map::Span, symbol::sym};
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::attr::filter_inline_attrs;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::config::Config;
 use crate::imports::{merge_use_trees, UseTree};
 use crate::items::{is_mod_decl, rewrite_extern_crate, rewrite_mod};
@@ -149,10 +152,14 @@ fn rewrite_reorderable_items(
 }
 
 fn contains_macro_use_attr(item: &ast::Item) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     attr::contains_name(
         &filter_inline_attrs(&item.attrs, item.span()),
         sym::macro_use,
     )
+=======
+    attr::contains_name(&item.attrs, sym::macro_use)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// A simplified version of `ast::ItemKind`.

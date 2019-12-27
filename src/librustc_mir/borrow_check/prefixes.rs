@@ -19,6 +19,7 @@ pub trait IsPrefixOf<'cx, 'tcx> {
 
 impl<'cx, 'tcx> IsPrefixOf<'cx, 'tcx> for PlaceRef<'cx, 'tcx> {
     fn is_prefix_of(&self, other: PlaceRef<'cx, 'tcx>) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut cursor = other.projection;
         loop {
             if self.projection == cursor {
@@ -30,6 +31,11 @@ impl<'cx, 'tcx> IsPrefixOf<'cx, 'tcx> for PlaceRef<'cx, 'tcx> {
                 Some(proj) => cursor = &proj.base,
             }
         }
+=======
+        self.base == other.base
+            && self.projection.len() <= other.projection.len()
+            && self.projection == &other.projection[..self.projection.len()]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
@@ -81,6 +87,7 @@ impl<'cx, 'tcx> Iterator for Prefixes<'cx, 'tcx> {
         // downcasts here, but may return a base of a downcast).
 
         'cursor: loop {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let proj = match &cursor {
                 PlaceRef {
                     base: PlaceBase::Local(_),
@@ -90,16 +97,58 @@ impl<'cx, 'tcx> Iterator for Prefixes<'cx, 'tcx> {
                 PlaceRef {
                     base: PlaceBase::Static(_),
                     projection: None,
+=======
+            match &cursor {
+                PlaceRef {
+                    base: PlaceBase::Local(_),
+                    projection: [],
+                }
+                | // search yielded this leaf
+                PlaceRef {
+                    base: PlaceBase::Static(_),
+                    projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 } => {
                     self.next = None;
                     return Some(cursor);
                 }
                 PlaceRef {
                     base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     projection: Some(proj),
                 } => proj,
             };
+=======
+                    projection: [proj_base @ .., elem],
+                } => {
+                    match elem {
+                        ProjectionElem::Field(_ /*field*/, _ /*ty*/) => {
+                            // FIXME: add union handling
+                            self.next = Some(PlaceRef {
+                                base: cursor.base,
+                                projection: proj_base,
+                            });
+                            return Some(cursor);
+                        }
+                        ProjectionElem::Downcast(..) |
+                        ProjectionElem::Subslice { .. } |
+                        ProjectionElem::ConstantIndex { .. } |
+                        ProjectionElem::Index(_) => {
+                            cursor = PlaceRef {
+                                base: cursor.base,
+                                projection: proj_base,
+                            };
+                            continue 'cursor;
+                        }
+                        ProjectionElem::Deref => {
+                            // (handled below)
+                        }
+                    }
 
+                    assert_eq!(*elem, ProjectionElem::Deref);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             match proj.elem {
                 ProjectionElem::Field(_ /*field*/, _ /*ty*/) => {
                     // FIXME: add union handling
@@ -123,9 +172,36 @@ impl<'cx, 'tcx> Iterator for Prefixes<'cx, 'tcx> {
                     // (handled below)
                 }
             }
+=======
+                    match self.kind {
+                        PrefixSet::Shallow => {
+                            // Shallow prefixes are found by stripping away
+                            // fields, but stop at *any* dereference.
+                            // So we can just stop the traversal now.
+                            self.next = None;
+                            return Some(cursor);
+                        }
+                        PrefixSet::All => {
+                            // All prefixes: just blindly enqueue the base
+                            // of the projection.
+                            self.next = Some(PlaceRef {
+                                base: cursor.base,
+                                projection: proj_base,
+                            });
+                            return Some(cursor);
+                        }
+                        PrefixSet::Supporting => {
+                            // Fall through!
+                        }
+                    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-            assert_eq!(proj.elem, ProjectionElem::Deref);
+                    assert_eq!(self.kind, PrefixSet::Supporting);
+                    // Supporting prefixes: strip away fields and
+                    // derefs, except we stop at the deref of a shared
+                    // reference.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             match self.kind {
                 PrefixSet::Shallow => {
                     // shallow prefixes are found by stripping away
@@ -147,12 +223,35 @@ impl<'cx, 'tcx> Iterator for Prefixes<'cx, 'tcx> {
                     // fall through!
                 }
             }
+=======
+                    let ty = Place::ty_from(cursor.base, proj_base, self.body, self.tcx).ty;
+                    match ty.sty {
+                        ty::RawPtr(_) |
+                        ty::Ref(
+                            _, /*rgn*/
+                            _, /*ty*/
+                            hir::MutImmutable
+                            ) => {
+                            // don't continue traversing over derefs of raw pointers or shared
+                            // borrows.
+                            self.next = None;
+                            return Some(cursor);
+                        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-            assert_eq!(self.kind, PrefixSet::Supporting);
-            // supporting prefixes: strip away fields and
-            // derefs, except we stop at the deref of a shared
-            // reference.
+                        ty::Ref(
+                            _, /*rgn*/
+                            _, /*ty*/
+                            hir::MutMutable,
+                            ) => {
+                            self.next = Some(PlaceRef {
+                                base: cursor.base,
+                                projection: proj_base,
+                            });
+                            return Some(cursor);
+                        }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let ty = Place::ty_from(cursor.base, &proj.base, self.body, self.tcx).ty;
             match ty.sty {
                 ty::RawPtr(_) |
@@ -164,7 +263,20 @@ impl<'cx, 'tcx> Iterator for Prefixes<'cx, 'tcx> {
                     // don't continue traversing over derefs of raw pointers or shared borrows.
                     self.next = None;
                     return Some(cursor);
+=======
+                        ty::Adt(..) if ty.is_box() => {
+                            self.next = Some(PlaceRef {
+                                base: cursor.base,
+                                projection: proj_base,
+                            });
+                            return Some(cursor);
+                        }
+
+                        _ => panic!("unknown type fed to Projection Deref."),
+                    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
                 ty::Ref(
                     _, /*rgn*/
@@ -187,6 +299,8 @@ impl<'cx, 'tcx> Iterator for Prefixes<'cx, 'tcx> {
                 }
 
                 _ => panic!("unknown type fed to Projection Deref."),
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
     }

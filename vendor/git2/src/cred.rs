@@ -438,12 +438,12 @@ mod test {
     use std::fs::File;
     use std::io::prelude::*;
     use std::path::Path;
-    use tempdir::TempDir;
+    use tempfile::TempDir;
 
     use crate::{Config, ConfigLevel, Cred, CredentialHelper};
 
     macro_rules! test_cfg( ($($k:expr => $v:expr),*) => ({
-        let td = TempDir::new("git2-rs").unwrap();
+        let td = TempDir::new().unwrap();
         let mut cfg = Config::new().unwrap();
         cfg.add_file(&td.path().join("cfg"), ConfigLevel::Highest, false).unwrap();
         $(cfg.set_str($k, $v).unwrap();)*
@@ -498,7 +498,11 @@ mod test {
             return;
         } // shell scripts don't work on Windows
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let td = TempDir::new("git2-rs").unwrap();
+=======
+        let td = TempDir::new().unwrap();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let path = td.path().join("script");
         File::create(&path)
             .unwrap()
@@ -528,7 +532,11 @@ echo username=c
         if cfg!(windows) {
             return;
         } // shell scripts don't work on Windows
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let td = TempDir::new("git2-rs").unwrap();
+=======
+        let td = TempDir::new().unwrap();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let path = td.path().join("git-credential-script");
         File::create(&path)
             .unwrap()
@@ -574,7 +582,11 @@ echo username=c
         if cfg!(windows) {
             return;
         } // shell scripts don't work on Windows
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let td = TempDir::new("git2-rs").unwrap();
+=======
+        let td = TempDir::new().unwrap();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let path = td.path().join("script");
         File::create(&path)
             .unwrap()

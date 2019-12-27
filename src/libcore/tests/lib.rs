@@ -1,3 +1,7 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![feature(bool_to_option)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(bound_cloned)]
 #![feature(box_syntax)]
 #![feature(cell_update)]
@@ -32,6 +36,11 @@
 #![feature(const_fn)]
 #![feature(iter_partition_in_place)]
 #![feature(iter_is_partitioned)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![feature(iter_order_by)]
+#![feature(cmp_min_max_by)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 extern crate test;
 
@@ -40,6 +49,7 @@ mod any;
 mod array;
 mod ascii;
 mod atomic;
+mod bool;
 mod cell;
 mod char;
 mod clone;

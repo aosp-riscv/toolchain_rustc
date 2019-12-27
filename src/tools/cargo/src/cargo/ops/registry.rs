@@ -114,16 +114,39 @@ fn verify_dependencies(
     registry_src: SourceId,
 ) -> CargoResult<()> {
     for dep in pkg.dependencies().iter() {
-        if dep.source_id().is_path() {
+        if dep.source_id().is_path() || dep.source_id().is_git() {
             if !dep.specified_req() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 bail!(
                     "all path dependencies must have a version specified \
                      when publishing.\ndependency `{}` does not specify \
                      a version",
                     dep.package_name()
+=======
+                let which = if dep.source_id().is_path() {
+                    "path"
+                } else {
+                    "git"
+                };
+                let dep_version_source = dep.registry_id().map_or_else(
+                    || "crates.io".to_string(),
+                    |registry_id| registry_id.display_registry_name(),
+                );
+                bail!(
+                    "all dependencies must have a version specified when publishing.\n\
+                     dependency `{}` does not specify a version\n\
+                     Note: The published dependency will use the version from {},\n\
+                     the `{}` specification will be removed from the dependency declaration.",
+                    dep.package_name(),
+                    dep_version_source,
+                    which,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )
             }
+        // TomlManifest::prepare_for_publish will rewrite the dependency
+        // to be just the `version` field.
         } else if dep.source_id() != registry_src {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if dep.source_id().is_registry() {
                 // Block requests to send to crates.io with alt-registry deps.
                 // This extra hostname check is mostly to assist with testing,
@@ -149,6 +172,25 @@ fn verify_dependencies(
                     dep.package_name(),
                     dep.source_id()
                 );
+=======
+            if !dep.source_id().is_registry() {
+                // Consider making SourceId::kind a public type that we can
+                // exhaustively match on. Using match can help ensure that
+                // every kind is properly handled.
+                panic!("unexpected source kind for dependency {:?}", dep);
+            }
+            // Block requests to send to crates.io with alt-registry deps.
+            // This extra hostname check is mostly to assist with testing,
+            // but also prevents someone using `--index` to specify
+            // something that points to crates.io.
+            if registry_src.is_default_registry() || registry.host_is_crates_io() {
+                bail!("crates cannot be published to crates.io with dependencies sourced from other\n\
+                       registries. `{}` needs to be published to crates.io before publishing this crate.\n\
+                       (crate `{}` is pulled from {})",
+                      dep.package_name(),
+                      dep.package_name(),
+                      dep.source_id());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
     }
@@ -345,6 +387,13 @@ fn registry(
     } = registry_configuration(config, registry.clone())?;
     let token = token.or(token_config);
     let sid = get_source_id(config, index_config.or(index), registry)?;
+    if !sid.is_remote_registry() {
+        bail!(
+            "{} does not support API commands.\n\
+             Check for a source-replacement in .cargo/config.",
+            sid
+        );
+    }
     let api_host = {
         let _lock = config.acquire_package_cache_lock()?;
         let mut src = RegistrySource::remote(sid, &HashSet::new(), config);

@@ -19,6 +19,7 @@ const DEFAULT_UNEXPECTED_INNER_ATTR_ERR_MSG: &str = "an inner attribute is not \
                                                      permitted in this context";
 
 impl<'a> Parser<'a> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     crate fn parse_arg_attributes(&mut self) -> PResult<'a, Vec<ast::Attribute>> {
         let attrs = self.parse_outer_attributes()?;
         attrs.iter().for_each(|a|
@@ -28,6 +29,16 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse attributes that appear before an item
+=======
+    crate fn parse_param_attributes(&mut self) -> PResult<'a, Vec<ast::Attribute>> {
+        let attrs = self.parse_outer_attributes()?;
+        self.sess.gated_spans.param_attrs.borrow_mut()
+            .extend(attrs.iter().map(|a| a.span));
+        Ok(attrs)
+    }
+
+    /// Parses attributes that appear before an item.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     crate fn parse_outer_attributes(&mut self) -> PResult<'a, Vec<ast::Attribute>> {
         let mut attrs: Vec<ast::Attribute> = Vec::new();
         let mut just_parsed_doc_comment = false;
@@ -53,7 +64,11 @@ impl<'a> Parser<'a> {
                     just_parsed_doc_comment = false;
                 }
                 token::DocComment(s) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let attr = attr::mk_sugared_doc_attr(attr::mk_attr_id(), s, self.token.span);
+=======
+                    let attr = attr::mk_sugared_doc_attr(s, self.token.span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     if attr.style != ast::AttrStyle::Outer {
                         let mut err = self.fatal("expected outer doc comment");
                         err.note("inner doc comments like this (starting with \
@@ -70,10 +85,10 @@ impl<'a> Parser<'a> {
         Ok(attrs)
     }
 
-    /// Matches `attribute = # ! [ meta_item ]`
+    /// Matches `attribute = # ! [ meta_item ]`.
     ///
-    /// If permit_inner is true, then a leading `!` indicates an inner
-    /// attribute
+    /// If `permit_inner` is `true`, then a leading `!` indicates an inner
+    /// attribute.
     pub fn parse_attribute(&mut self, permit_inner: bool) -> PResult<'a, ast::Attribute> {
         debug!("parse_attribute: permit_inner={:?} self.token={:?}",
                permit_inner,
@@ -168,16 +183,20 @@ impl<'a> Parser<'a> {
         })
     }
 
-    /// Parse an inner part of attribute - path and following tokens.
+    /// Parses an inner part of an attribute (the path and following tokens).
     /// The tokens must be either a delimited token stream, or empty token stream,
     /// or the "legacy" key-value form.
-    /// PATH `(` TOKEN_STREAM `)`
-    /// PATH `[` TOKEN_STREAM `]`
-    /// PATH `{` TOKEN_STREAM `}`
-    /// PATH
-    /// PATH `=` TOKEN_TREE
+    ///     PATH `(` TOKEN_STREAM `)`
+    ///     PATH `[` TOKEN_STREAM `]`
+    ///     PATH `{` TOKEN_STREAM `}`
+    ///     PATH
+    ///     PATH `=` TOKEN_TREE
     /// The delimiters or `=` are still put into the resulting token stream.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     crate fn parse_meta_item_unrestricted(&mut self) -> PResult<'a, (ast::Path, TokenStream)> {
+=======
+    pub fn parse_meta_item_unrestricted(&mut self) -> PResult<'a, (ast::Path, TokenStream)> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let meta = match self.token.kind {
             token::Interpolated(ref nt) => match **nt {
                 Nonterminal::NtMeta(ref meta) => Some(meta.clone()),
@@ -218,11 +237,11 @@ impl<'a> Parser<'a> {
         })
     }
 
-    /// Parse attributes that appear after the opening of an item. These should
+    /// Parses attributes that appear after the opening of an item. These should
     /// be preceded by an exclamation mark, but we accept and warn about one
     /// terminated by a semicolon.
-
-    /// matches inner_attrs*
+    ///
+    /// Matches `inner_attrs*`.
     crate fn parse_inner_attributes(&mut self) -> PResult<'a, Vec<ast::Attribute>> {
         let mut attrs: Vec<ast::Attribute> = vec![];
         loop {
@@ -238,8 +257,13 @@ impl<'a> Parser<'a> {
                     attrs.push(attr);
                 }
                 token::DocComment(s) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     // we need to get the position of this token before we bump.
                     let attr = attr::mk_sugared_doc_attr(attr::mk_attr_id(), s, self.token.span);
+=======
+                    // We need to get the position of this token before we bump.
+                    let attr = attr::mk_sugared_doc_attr(s, self.token.span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     if attr.style == ast::AttrStyle::Inner {
                         attrs.push(attr);
                         self.bump();
@@ -269,10 +293,10 @@ impl<'a> Parser<'a> {
         Ok(lit)
     }
 
-    /// Per RFC#1559, matches the following grammar:
+    /// Matches the following grammar (per RFC 1559).
     ///
-    /// meta_item : IDENT ( '=' UNSUFFIXED_LIT | '(' meta_item_inner? ')' )? ;
-    /// meta_item_inner : (meta_item | UNSUFFIXED_LIT) (',' meta_item_inner)? ;
+    ///     meta_item : IDENT ( '=' UNSUFFIXED_LIT | '(' meta_item_inner? ')' )? ;
+    ///     meta_item_inner : (meta_item | UNSUFFIXED_LIT) (',' meta_item_inner)? ;
     pub fn parse_meta_item(&mut self) -> PResult<'a, ast::MetaItem> {
         let nt_meta = match self.token.kind {
             token::Interpolated(ref nt) => match **nt {
@@ -304,7 +328,7 @@ impl<'a> Parser<'a> {
         })
     }
 
-    /// matches meta_item_inner : (meta_item | UNSUFFIXED_LIT) ;
+    /// Matches `meta_item_inner : (meta_item | UNSUFFIXED_LIT) ;`.
     fn parse_meta_item_inner(&mut self) -> PResult<'a, ast::NestedMetaItem> {
         match self.parse_unsuffixed_lit() {
             Ok(lit) => {
@@ -325,7 +349,7 @@ impl<'a> Parser<'a> {
         Err(self.diagnostic().struct_span_err(self.token.span, &msg))
     }
 
-    /// matches meta_seq = ( COMMASEP(meta_item_inner) )
+    /// Matches `meta_seq = ( COMMASEP(meta_item_inner) )`.
     fn parse_meta_seq(&mut self) -> PResult<'a, Vec<ast::NestedMetaItem>> {
         self.parse_seq_to_end(&token::CloseDelim(token::Paren),
                               SeqSep::trailing_allowed(token::Comma),

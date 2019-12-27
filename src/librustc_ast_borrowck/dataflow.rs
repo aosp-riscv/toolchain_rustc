@@ -3,6 +3,7 @@
 //! and thus uses bitvectors. Your job is simply to specify the so-called
 //! GEN and KILL bits for each expression.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::cfg;
 use rustc::cfg::CFGIndex;
 use rustc::ty::TyCtxt;
@@ -188,6 +189,192 @@ fn build_local_id_to_index(body: Option<&hir::Body>,
         let mut formals = Formals { entry: entry, index: index };
         for arg in &body.arguments {
             formals.visit_pat(&arg.pat);
+=======
+use crate::cfg::{self, CFGIndex};
+use std::mem;
+use std::usize;
+use log::debug;
+
+use rustc_data_structures::graph::implementation::OUTGOING;
+
+use rustc::util::nodemap::FxHashMap;
+use rustc::hir;
+use rustc::hir::intravisit;
+use rustc::hir::print as pprust;
+use rustc::ty::TyCtxt;
+
+#[derive(Copy, Clone, Debug)]
+pub enum EntryOrExit {
+    Entry,
+    Exit,
+}
+
+#[derive(Clone)]
+pub struct DataFlowContext<'tcx, O> {
+    tcx: TyCtxt<'tcx>,
+
+    /// a name for the analysis using this dataflow instance
+    analysis_name: &'static str,
+
+    /// the data flow operator
+    oper: O,
+
+    /// number of bits to propagate per id
+    bits_per_id: usize,
+
+    /// number of words we will use to store bits_per_id.
+    /// equal to bits_per_id/usize::BITS rounded up.
+    words_per_id: usize,
+
+    // mapping from node to cfg node index
+    // FIXME (#6298): Shouldn't this go with CFG?
+    local_id_to_index: FxHashMap<hir::ItemLocalId, Vec<CFGIndex>>,
+
+    // Bit sets per cfg node.  The following three fields (`gens`, `kills`,
+    // and `on_entry`) all have the same structure. For each id in
+    // `id_range`, there is a range of words equal to `words_per_id`.
+    // So, to access the bits for any given id, you take a slice of
+    // the full vector (see the method `compute_id_range()`).
+    /// bits generated as we exit the cfg node. Updated by `add_gen()`.
+    gens: Vec<usize>,
+
+    /// bits killed as we exit the cfg node, or non-locally jump over
+    /// it. Updated by `add_kill(KillFrom::ScopeEnd)`.
+    scope_kills: Vec<usize>,
+
+    /// bits killed as we exit the cfg node directly; if it is jumped
+    /// over, e.g., via `break`, the kills are not reflected in the
+    /// jump's effects. Updated by `add_kill(KillFrom::Execution)`.
+    action_kills: Vec<usize>,
+
+    /// bits that are valid on entry to the cfg node. Updated by
+    /// `propagate()`.
+    on_entry: Vec<usize>,
+}
+
+pub trait BitwiseOperator {
+    /// Joins two predecessor bits together, typically either `|` or `&`
+    fn join(&self, succ: usize, pred: usize) -> usize;
+}
+
+/// Parameterization for the precise form of data flow that is used.
+pub trait DataFlowOperator : BitwiseOperator {
+    /// Specifies the initial value for each bit in the `on_entry` set
+    fn initial_value(&self) -> bool;
+}
+
+struct PropagationContext<'a, 'tcx, O> {
+    dfcx: &'a mut DataFlowContext<'tcx, O>,
+    changed: bool,
+}
+
+fn get_cfg_indices(id: hir::ItemLocalId,
+                   index: &FxHashMap<hir::ItemLocalId, Vec<CFGIndex>>)
+                   -> &[CFGIndex] {
+    index.get(&id).map_or(&[], |v| &v[..])
+}
+
+impl<'tcx, O: DataFlowOperator> DataFlowContext<'tcx, O> {
+    fn has_bitset_for_local_id(&self, n: hir::ItemLocalId) -> bool {
+        assert!(n != hir::DUMMY_ITEM_LOCAL_ID);
+        self.local_id_to_index.contains_key(&n)
+    }
+}
+
+impl<'tcx, O: DataFlowOperator> pprust::PpAnn for DataFlowContext<'tcx, O> {
+    fn nested(&self, state: &mut pprust::State<'_>, nested: pprust::Nested) {
+        pprust::PpAnn::nested(self.tcx.hir(), state, nested)
+    }
+    fn pre(&self,
+           ps: &mut pprust::State<'_>,
+           node: pprust::AnnNode<'_>) {
+        let id = match node {
+            pprust::AnnNode::Name(_) => return,
+            pprust::AnnNode::Expr(expr) => expr.hir_id.local_id,
+            pprust::AnnNode::Block(blk) => blk.hir_id.local_id,
+            pprust::AnnNode::Item(_) |
+            pprust::AnnNode::SubItem(_) => return,
+            pprust::AnnNode::Pat(pat) => pat.hir_id.local_id,
+            pprust::AnnNode::Arm(arm) => arm.hir_id.local_id,
+        };
+
+        if !self.has_bitset_for_local_id(id) {
+            return;
+        }
+
+        assert!(self.bits_per_id > 0);
+        let indices = get_cfg_indices(id, &self.local_id_to_index);
+        for &cfgidx in indices {
+            let (start, end) = self.compute_id_range(cfgidx);
+            let on_entry = &self.on_entry[start.. end];
+            let entry_str = bits_to_string(on_entry);
+
+            let gens = &self.gens[start.. end];
+            let gens_str = if gens.iter().any(|&u| u != 0) {
+                format!(" gen: {}", bits_to_string(gens))
+            } else {
+                String::new()
+            };
+
+            let action_kills = &self.action_kills[start .. end];
+            let action_kills_str = if action_kills.iter().any(|&u| u != 0) {
+                format!(" action_kill: {}", bits_to_string(action_kills))
+            } else {
+                String::new()
+            };
+
+            let scope_kills = &self.scope_kills[start .. end];
+            let scope_kills_str = if scope_kills.iter().any(|&u| u != 0) {
+                format!(" scope_kill: {}", bits_to_string(scope_kills))
+            } else {
+                String::new()
+            };
+
+            ps.synth_comment(
+                format!("id {}: {}{}{}{}", id.as_usize(), entry_str,
+                        gens_str, action_kills_str, scope_kills_str));
+            ps.s.space();
+        }
+    }
+}
+
+fn build_local_id_to_index(body: Option<&hir::Body>,
+                           cfg: &cfg::CFG)
+                           -> FxHashMap<hir::ItemLocalId, Vec<CFGIndex>> {
+    let mut index = FxHashMap::default();
+
+    // FIXME(#15020) Would it be better to fold formals from decl
+    // into cfg itself?  i.e., introduce a fn-based flow-graph in
+    // addition to the current block-based flow-graph, rather than
+    // have to put traversals like this here?
+    if let Some(body) = body {
+        add_entries_from_fn_body(&mut index, body, cfg.entry);
+    }
+
+    cfg.graph.each_node(|node_idx, node| {
+        if let cfg::CFGNodeData::AST(id) = node.data {
+            index.entry(id).or_default().push(node_idx);
+        }
+        true
+    });
+
+    return index;
+
+    /// Adds mappings from the ast nodes for the formal bindings to
+    /// the entry-node in the graph.
+    fn add_entries_from_fn_body(index: &mut FxHashMap<hir::ItemLocalId, Vec<CFGIndex>>,
+                                body: &hir::Body,
+                                entry: CFGIndex) {
+        use rustc::hir::intravisit::Visitor;
+
+        struct Formals<'a> {
+            entry: CFGIndex,
+            index: &'a mut FxHashMap<hir::ItemLocalId, Vec<CFGIndex>>,
+        }
+        let mut formals = Formals { entry: entry, index: index };
+        for param in &body.params {
+            formals.visit_pat(&param.pat);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         impl<'a, 'v> Visitor<'v> for Formals<'a> {
             fn nested_visit_map<'this>(&'this mut self) -> intravisit::NestedVisitorMap<'this, 'v> {

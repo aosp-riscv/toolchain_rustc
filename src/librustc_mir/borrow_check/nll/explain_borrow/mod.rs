@@ -274,7 +274,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     if let Some((WriteKind::StorageDeadOrDrop, place)) = kind_place {
                         if let Place {
                             base: PlaceBase::Local(borrowed_local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             projection: None,
+=======
+                            projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         } = place {
                              if body.local_decls[*borrowed_local].name.is_some()
                                 && local != *borrowed_local
@@ -457,7 +461,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
     /// True if an edge `source -> target` is a backedge -- in other words, if the target
     /// dominates the source.
     fn is_back_edge(&self, source: Location, target: Location) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         target.dominates(source, &self.body.dominators())
+=======
+        target.dominates(source, &self.dominators)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Determine how the borrow was later used.
@@ -495,11 +503,19 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                             Operand::Constant(c) => c.span,
                             Operand::Copy(Place {
                                 base: PlaceBase::Local(l),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: None,
                             }) |
                             Operand::Move(Place {
                                 base: PlaceBase::Local(l),
                                 projection: None,
+=======
+                                projection: box [],
+                            }) |
+                            Operand::Move(Place {
+                                base: PlaceBase::Local(l),
+                                projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             }) => {
                                 let local_decl = &self.body.local_decls[*l];
                                 if local_decl.name.is_none() {
@@ -541,10 +557,17 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         // it which simplifies the termination logic.
         let mut queue = vec![location];
         let mut target = if let Some(&Statement {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             kind: StatementKind::Assign(Place {
                 base: PlaceBase::Local(local),
                 projection: None,
             }, _),
+=======
+            kind: StatementKind::Assign(box(Place {
+                base: PlaceBase::Local(local),
+                projection: box [],
+            }, _)),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             ..
         }) = stmt
         {
@@ -567,7 +590,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 debug!("was_captured_by_trait_object: stmt={:?}", stmt);
 
                 // The only kind of statement that we care about is assignments...
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if let StatementKind::Assign(place, box rvalue) = &stmt.kind {
+=======
+                if let StatementKind::Assign(box(place, rvalue)) = &stmt.kind {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     let into = match place.local_or_deref_local() {
                         Some(into) => into,
                         None => {
@@ -583,11 +610,19 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         Rvalue::Use(operand) => match operand {
                             Operand::Copy(Place {
                                 base: PlaceBase::Local(from),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: None,
                             })
                             | Operand::Move(Place {
                                 base: PlaceBase::Local(from),
                                 projection: None,
+=======
+                                projection: box [],
+                            })
+                            | Operand::Move(Place {
+                                base: PlaceBase::Local(from),
+                                projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             })
                                 if *from == target =>
                             {
@@ -602,11 +637,19 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         ) => match operand {
                             Operand::Copy(Place {
                                 base: PlaceBase::Local(from),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: None,
                             })
                             | Operand::Move(Place {
                                 base: PlaceBase::Local(from),
                                 projection: None,
+=======
+                                projection: box [],
+                            })
+                            | Operand::Move(Place {
+                                base: PlaceBase::Local(from),
+                                projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             })
                                 if *from == target =>
                             {
@@ -639,7 +682,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 if let TerminatorKind::Call {
                     destination: Some((Place {
                         base: PlaceBase::Local(dest),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         projection: None,
+=======
+                        projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     }, block)),
                     args,
                     ..
@@ -653,7 +700,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     let found_target = args.iter().any(|arg| {
                         if let Operand::Move(Place {
                             base: PlaceBase::Local(potential),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             projection: None,
+=======
+                            projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         }) = arg {
                             *potential == target
                         } else {

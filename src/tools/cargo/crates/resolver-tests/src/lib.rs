@@ -171,7 +171,11 @@ pub fn resolve_with_config_raw(
         pkg_id("root"),
         deps,
         &BTreeMap::<String, Vec<String>>::new(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         None::<String>,
+=======
+        None::<&String>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         false,
     )
     .unwrap();

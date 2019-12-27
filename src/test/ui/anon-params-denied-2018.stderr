@@ -1,8 +1,12 @@
-error: expected one of `:` or `@`, found `)`
+error: expected one of `:`, `@`, or `|`, found `)`
   --> $DIR/anon-params-denied-2018.rs:6:15
    |
 LL |     fn foo(i32);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |               ^ expected one of `:` or `@` here
+=======
+   |               ^ expected one of `:`, `@`, or `|` here
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = note: anonymous parameters are removed in the 2018 edition (see RFC 1685)
 help: if this was a parameter name, give it a type
@@ -14,11 +18,15 @@ help: if this is a type, explicitly ignore the parameter name
 LL |     fn foo(_: i32);
    |            ^^^^^^
 
-error: expected one of `:` or `@`, found `,`
+error: expected one of `:`, `@`, or `|`, found `,`
   --> $DIR/anon-params-denied-2018.rs:8:36
    |
 LL |     fn bar_with_default_impl(String, String) {}
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                                    ^ expected one of `:` or `@` here
+=======
+   |                                    ^ expected one of `:`, `@`, or `|` here
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = note: anonymous parameters are removed in the 2018 edition (see RFC 1685)
 help: if this was a parameter name, give it a type
@@ -30,6 +38,7 @@ help: if this is a type, explicitly ignore the parameter name
 LL |     fn bar_with_default_impl(_: String, String) {}
    |                              ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: expected one of `:` or `@`, found `)`
   --> $DIR/anon-params-denied-2018.rs:8:44
    |
@@ -51,6 +60,29 @@ error: expected one of `:` or `@`, found `,`
    |
 LL |     fn baz(a:usize, b, c: usize) -> usize {
    |                      ^ expected one of `:` or `@` here
+=======
+error: expected one of `:`, `@`, or `|`, found `)`
+  --> $DIR/anon-params-denied-2018.rs:8:44
+   |
+LL |     fn bar_with_default_impl(String, String) {}
+   |                                            ^ expected one of `:`, `@`, or `|` here
+   |
+   = note: anonymous parameters are removed in the 2018 edition (see RFC 1685)
+help: if this was a parameter name, give it a type
+   |
+LL |     fn bar_with_default_impl(String, String: TypeName) {}
+   |                                      ^^^^^^^^^^^^^^^^
+help: if this is a type, explicitly ignore the parameter name
+   |
+LL |     fn bar_with_default_impl(String, _: String) {}
+   |                                      ^^^^^^^^^
+
+error: expected one of `:`, `@`, or `|`, found `,`
+  --> $DIR/anon-params-denied-2018.rs:13:22
+   |
+LL |     fn baz(a:usize, b, c: usize) -> usize {
+   |                      ^ expected one of `:`, `@`, or `|` here
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = note: anonymous parameters are removed in the 2018 edition (see RFC 1685)
 help: if this was a parameter name, give it a type

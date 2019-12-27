@@ -5,12 +5,19 @@
 // when deriving Debug on an empty enum
 
 #[derive(Debug)]
-enum Void {} //~ WARN never used
+enum Void {}
 
 #[derive(Debug)]
-enum Foo { //~ WARN never used
+enum Foo {
     Bar(u8),
-    Void(Void),
+    Void(Void), //~ WARN never used
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn main() {}
+=======
+fn main() {
+    let x = Foo::Bar(42);
+    println!("{:?}", x);
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

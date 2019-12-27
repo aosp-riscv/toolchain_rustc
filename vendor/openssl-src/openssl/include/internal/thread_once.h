@@ -72,7 +72,11 @@
  * function defined via DEFINE_ONCE_STATIC where both functions use the same
  * CRYPTO_ONCE object to synchronise. Where an alternative initialiser function
  * is used only one of the primary or the alternative initialiser function will
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
  * ever be called - and that function will be called exactly once. Definitition
+=======
+ * ever be called - and that function will be called exactly once. Definition
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
  * of an alternative initialiser function MUST occur AFTER the definition of the
  * primary initialiser function.
  *

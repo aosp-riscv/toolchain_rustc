@@ -1,5 +1,9 @@
 use std::fmt::{self, Display};
-use crate::borrow_check::nll::region_infer::RegionInferenceContext;
+
+use crate::borrow_check::nll::region_infer::{
+    RegionInferenceContext,
+    error_reporting::ErrorReportingCtx,
+};
 use crate::borrow_check::nll::universal_regions::DefiningTy;
 use crate::borrow_check::nll::ToRegionVid;
 use crate::borrow_check::Upvar;
@@ -13,27 +17,81 @@ use rustc::ty::{self, RegionKind, RegionVid, Ty, TyCtxt};
 use rustc::ty::print::RegionHighlightMode;
 use rustc_errors::DiagnosticBuilder;
 use syntax::symbol::kw;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax_pos::Span;
 use syntax_pos::symbol::InternedString;
+=======
+use rustc_data_structures::fx::FxHashMap;
+use syntax_pos::{Span, symbol::InternedString};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-#[derive(Debug)]
+/// A name for a particular region used in emitting diagnostics. This name could be a generated
+/// name like `'1`, a name used by the user like `'a`, or a name like `'static`.
+#[derive(Debug, Clone)]
 crate struct RegionName {
+    /// The name of the region (interned).
     crate name: InternedString,
+    /// Where the region comes from.
     crate source: RegionNameSource,
 }
 
-#[derive(Debug)]
+/// Denotes the source of a region that is named by a `RegionName`. For example, a free region that
+/// was named by the user would get `NamedFreeRegion` and `'static` lifetime would get `Static`.
+/// This helps to print the right kinds of diagnostics.
+#[derive(Debug, Clone)]
 crate enum RegionNameSource {
+    /// A bound (not free) region that was substituted at the def site (not an HRTB).
     NamedEarlyBoundRegion(Span),
+    /// A free region that the user has a name (`'a`) for.
     NamedFreeRegion(Span),
+    /// The `'static` region.
     Static,
+    /// The free region corresponding to the environment of a closure.
     SynthesizedFreeEnvRegion(Span, String),
+    /// The region name corresponds to a region where the type annotation is completely missing
+    /// from the code, e.g. in a closure arguments `|x| { ... }`, where `x` is a reference.
     CannotMatchHirTy(Span, String),
+    /// The region name corresponds a reference that was found by traversing the type in the HIR.
     MatchedHirTy(Span),
+    /// A region name from the generics list of a struct/enum/union.
     MatchedAdtAndSegment(Span),
+    /// The region corresponding to a closure upvar.
     AnonRegionFromUpvar(Span, String),
+    /// The region corresponding to the return type of a closure.
     AnonRegionFromOutput(Span, String, String),
     AnonRegionFromYieldTy(Span, String),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+}
+
+/// Records region names that have been assigned before so that we can use the same ones in later
+/// diagnostics.
+#[derive(Debug, Clone)]
+crate struct RegionErrorNamingCtx {
+    /// Record the region names generated for each region in the given
+    /// MIR def so that we can reuse them later in help/error messages.
+    renctx: FxHashMap<RegionVid, RegionName>,
+
+    /// The counter for generating new region names.
+    counter: usize,
+}
+
+impl RegionErrorNamingCtx {
+    crate fn new() -> Self {
+        Self {
+            counter: 1,
+            renctx: FxHashMap::default(),
+        }
+    }
+
+    crate fn get(&self, region: &RegionVid) -> Option<&RegionName> {
+        self.renctx.get(region)
+    }
+
+    crate fn insert(&mut self, region: RegionVid, name: RegionName) {
+        self.renctx.insert(region, name);
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 impl RegionName {
@@ -63,43 +121,40 @@ impl RegionName {
         self.name
     }
 
-    crate fn highlight_region_name(
-        &self,
-        diag: &mut DiagnosticBuilder<'_>
-    ) {
+    crate fn highlight_region_name(&self, diag: &mut DiagnosticBuilder<'_>) {
         match &self.source {
-            RegionNameSource::NamedFreeRegion(span) |
-            RegionNameSource::NamedEarlyBoundRegion(span) => {
-                diag.span_label(
-                    *span,
-                    format!("lifetime `{}` defined here", self),
-                );
-            },
+            RegionNameSource::NamedFreeRegion(span)
+            | RegionNameSource::NamedEarlyBoundRegion(span) => {
+                diag.span_label(*span, format!("lifetime `{}` defined here", self));
+            }
             RegionNameSource::SynthesizedFreeEnvRegion(span, note) => {
                 diag.span_label(
                     *span,
                     format!("lifetime `{}` represents this closure's body", self),
                 );
                 diag.note(&note);
-            },
+            }
             RegionNameSource::CannotMatchHirTy(span, type_name) => {
                 diag.span_label(*span, format!("has type `{}`", type_name));
-            },
+            }
             RegionNameSource::MatchedHirTy(span) => {
                 diag.span_label(
                     *span,
                     format!("let's call the lifetime of this reference `{}`", self),
                 );
-            },
+            }
             RegionNameSource::MatchedAdtAndSegment(span) => {
                 diag.span_label(*span, format!("let's call this `{}`", self));
-            },
+            }
             RegionNameSource::AnonRegionFromUpvar(span, upvar_name) => {
                 diag.span_label(
                     *span,
-                    format!("lifetime `{}` appears in the type of `{}`", self, upvar_name),
+                    format!(
+                        "lifetime `{}` appears in the type of `{}`",
+                        self, upvar_name
+                    ),
                 );
-            },
+            }
             RegionNameSource::AnonRegionFromOutput(span, mir_description, type_name) => {
                 diag.span_label(
                     *span,
@@ -151,38 +206,72 @@ impl<'tcx> RegionInferenceContext<'tcx> {
     /// and then return the name `'1` for us to use.
     crate fn give_region_a_name(
         &self,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         infcx: &InferCtxt<'_, 'tcx>,
         body: &Body<'tcx>,
         upvars: &[Upvar],
         mir_def_id: DefId,
+=======
+        errctx: &ErrorReportingCtx<'_, '_, 'tcx>,
+        renctx: &mut RegionErrorNamingCtx,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         fr: RegionVid,
-        counter: &mut usize,
     ) -> Option<RegionName> {
-        debug!("give_region_a_name(fr={:?}, counter={})", fr, counter);
+        let ErrorReportingCtx {
+            infcx, body, mir_def_id, upvars, ..
+        } = errctx;
+
+        debug!("give_region_a_name(fr={:?}, counter={:?})", fr, renctx.counter);
 
         assert!(self.universal_regions.is_universal_region(fr));
 
-        let value = self.give_name_from_error_region(infcx.tcx, mir_def_id, fr, counter)
+        if let Some(value) = renctx.get(&fr) {
+            return Some(value.clone());
+        }
+
+        let value = self
+            .give_name_from_error_region(infcx.tcx, *mir_def_id, fr, renctx)
             .or_else(|| {
                 self.give_name_if_anonymous_region_appears_in_arguments(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     infcx, body, mir_def_id, fr, counter,
+=======
+                    infcx, body, *mir_def_id, fr, renctx,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )
             })
             .or_else(|| {
                 self.give_name_if_anonymous_region_appears_in_upvars(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     infcx.tcx, upvars, fr, counter,
+=======
+                    infcx.tcx, upvars, fr, renctx
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )
             })
             .or_else(|| {
                 self.give_name_if_anonymous_region_appears_in_output(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     infcx, body, mir_def_id, fr, counter,
                 )
             })
             .or_else(|| {
                 self.give_name_if_anonymous_region_appears_in_yield_ty(
                     infcx, body, mir_def_id, fr, counter,
+=======
+                    infcx, body, *mir_def_id, fr, renctx,
+                )
+            })
+            .or_else(|| {
+                self.give_name_if_anonymous_region_appears_in_yield_ty(
+                    infcx, body, *mir_def_id, fr, renctx,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )
             });
+
+        if let Some(ref value) = value {
+            renctx.insert(fr, value.clone());
+        }
 
         debug!("give_region_a_name: gave name {:?}", value);
         value
@@ -197,7 +286,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         tcx: TyCtxt<'tcx>,
         mir_def_id: DefId,
         fr: RegionVid,
-        counter: &mut usize,
+        renctx: &mut RegionErrorNamingCtx,
     ) -> Option<RegionName> {
         let error_region = self.to_error_region(fr)?;
 
@@ -208,7 +297,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                     let span = self.get_named_span(tcx, error_region, ebr.name);
                     Some(RegionName {
                         name: ebr.name,
-                        source: RegionNameSource::NamedEarlyBoundRegion(span)
+                        source: RegionNameSource::NamedEarlyBoundRegion(span),
                     })
                 } else {
                     None
@@ -227,12 +316,16 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                         name,
                         source: RegionNameSource::NamedFreeRegion(span),
                     })
-                },
+                }
 
                 ty::BoundRegion::BrEnv => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let mir_hir_id = tcx.hir()
                                         .as_local_hir_id(mir_def_id)
                                         .expect("non-local mir");
+=======
+                    let mir_hir_id = tcx.hir().as_local_hir_id(mir_def_id).expect("non-local mir");
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     let def_ty = self.universal_regions.defining_ty;
 
                     if let DefiningTy::Closure(def_id, substs) = def_ty {
@@ -243,7 +336,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                         } else {
                             bug!("Closure is not defined by a closure expr");
                         };
-                        let region_name = self.synthesize_region_name(counter);
+                        let region_name = self.synthesize_region_name(renctx);
 
                         let closure_kind_ty = substs.closure_kind_ty(def_id, tcx);
                         let note = match closure_kind_ty.to_opt_closure_kind() {
@@ -265,7 +358,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                             name: region_name,
                             source: RegionNameSource::SynthesizedFreeEnvRegion(
                                 args_span,
-                                note.to_string()
+                                note.to_string(),
                             ),
                         })
                     } else {
@@ -335,7 +428,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         body: &Body<'tcx>,
         mir_def_id: DefId,
         fr: RegionVid,
-        counter: &mut usize,
+        renctx: &mut RegionErrorNamingCtx,
     ) -> Option<RegionName> {
         let implicit_inputs = self.universal_regions.defining_ty.implicit_inputs();
         let argument_index = self.get_argument_index_for_region(infcx.tcx, fr)?;
@@ -349,12 +442,16 @@ impl<'tcx> RegionInferenceContext<'tcx> {
             fr,
             arg_ty,
             argument_index,
-            counter,
+            renctx,
         ) {
             return Some(region_name);
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.give_name_if_we_cannot_match_hir_ty(infcx, body, fr, arg_ty, counter)
+=======
+        self.give_name_if_we_cannot_match_hir_ty(infcx, body, fr, arg_ty, renctx)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn give_name_if_we_can_match_hir_ty_from_argument(
@@ -365,7 +462,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         needle_fr: RegionVid,
         argument_ty: Ty<'tcx>,
         argument_index: usize,
-        counter: &mut usize,
+        renctx: &mut RegionErrorNamingCtx,
     ) -> Option<RegionName> {
         let mir_hir_id = infcx.tcx.hir().as_local_hir_id(mir_def_id)?;
         let fn_decl = infcx.tcx.hir().fn_decl_by_hir_id(mir_hir_id)?;
@@ -379,7 +476,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                 body,
                 needle_fr,
                 argument_ty,
-                counter,
+                renctx,
             ),
 
             _ => self.give_name_if_we_can_match_hir_ty(
@@ -387,7 +484,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                 needle_fr,
                 argument_ty,
                 argument_hir_ty,
-                counter,
+                renctx,
             ),
         }
     }
@@ -409,11 +506,12 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         body: &Body<'tcx>,
         needle_fr: RegionVid,
         argument_ty: Ty<'tcx>,
-        counter: &mut usize,
+        renctx: &mut RegionErrorNamingCtx,
     ) -> Option<RegionName> {
+        let counter = renctx.counter;
         let mut highlight = RegionHighlightMode::default();
-        highlight.highlighting_region_vid(needle_fr, *counter);
-        let type_name = infcx.extract_type_name(&argument_ty, Some(highlight));
+        highlight.highlighting_region_vid(needle_fr, counter);
+        let type_name = infcx.extract_type_name(&argument_ty, Some(highlight)).0;
 
         debug!(
             "give_name_if_we_cannot_match_hir_ty: type_name={:?} needle_fr={:?}",
@@ -428,7 +526,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                 // This counter value will already have been used, so this function will increment
                 // it so the next value will be used next and return the region name that would
                 // have been used.
-                name: self.synthesize_region_name(counter),
+                name: self.synthesize_region_name(renctx),
                 source: RegionNameSource::CannotMatchHirTy(span, type_name),
             })
         } else {
@@ -455,7 +553,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
     /// type. Once we find that, we can use the span of the `hir::Ty`
     /// to add the highlight.
     ///
-    /// This is a somewhat imperfect process, so long the way we also
+    /// This is a somewhat imperfect process, so along the way we also
     /// keep track of the **closest** type we've found. If we fail to
     /// find the exact `&` or `'_` to highlight, then we may fall back
     /// to highlighting that closest type instead.
@@ -465,7 +563,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         needle_fr: RegionVid,
         argument_ty: Ty<'tcx>,
         argument_hir_ty: &hir::Ty,
-        counter: &mut usize,
+        renctx: &mut RegionErrorNamingCtx,
     ) -> Option<RegionName> {
         let search_stack: &mut Vec<(Ty<'tcx>, &hir::Ty)> =
             &mut vec![(argument_ty, argument_hir_ty)];
@@ -483,7 +581,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                     hir::TyKind::Rptr(_lifetime, referent_hir_ty),
                 ) => {
                     if region.to_region_vid() == needle_fr {
-                        let region_name = self.synthesize_region_name(counter);
+                        let region_name = self.synthesize_region_name(renctx);
 
                         // Just grab the first character, the `&`.
                         let source_map = tcx.sess.source_map();
@@ -515,7 +613,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                                 substs,
                                 needle_fr,
                                 last_segment,
-                                counter,
+                                renctx,
                                 search_stack,
                             ) {
                                 return Some(name);
@@ -559,18 +657,19 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         substs: SubstsRef<'tcx>,
         needle_fr: RegionVid,
         last_segment: &'hir hir::PathSegment,
-        counter: &mut usize,
+        renctx: &mut RegionErrorNamingCtx,
         search_stack: &mut Vec<(Ty<'tcx>, &'hir hir::Ty)>,
     ) -> Option<RegionName> {
         // Did the user give explicit arguments? (e.g., `Foo<..>`)
         let args = last_segment.args.as_ref()?;
-        let lifetime = self.try_match_adt_and_generic_args(substs, needle_fr, args, search_stack)?;
+        let lifetime =
+            self.try_match_adt_and_generic_args(substs, needle_fr, args, search_stack)?;
         match lifetime.name {
             hir::LifetimeName::Param(_)
             | hir::LifetimeName::Error
             | hir::LifetimeName::Static
             | hir::LifetimeName::Underscore => {
-                let region_name = self.synthesize_region_name(counter);
+                let region_name = self.synthesize_region_name(renctx);
                 let ampersand_span = lifetime.span;
                 Some(RegionName {
                     name: region_name,
@@ -578,7 +677,8 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                 })
             }
 
-            hir::LifetimeName::Implicit => {
+            hir::LifetimeName::ImplicitObjectLifetimeDefault
+            | hir::LifetimeName::Implicit => {
                 // In this case, the user left off the lifetime; so
                 // they wrote something like:
                 //
@@ -656,12 +756,16 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         tcx: TyCtxt<'tcx>,
         upvars: &[Upvar],
         fr: RegionVid,
-        counter: &mut usize,
+        renctx: &mut RegionErrorNamingCtx,
     ) -> Option<RegionName> {
         let upvar_index = self.get_upvar_index_for_region(tcx, fr)?;
         let (upvar_name, upvar_span) =
             self.get_upvar_name_and_span_for_region(tcx, upvars, upvar_index);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let region_name = self.synthesize_region_name(counter);
+=======
+        let region_name = self.synthesize_region_name(renctx);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         Some(RegionName {
             name: region_name,
@@ -679,7 +783,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         body: &Body<'tcx>,
         mir_def_id: DefId,
         fr: RegionVid,
-        counter: &mut usize,
+        renctx: &mut RegionErrorNamingCtx,
     ) -> Option<RegionName> {
         let tcx = infcx.tcx;
 
@@ -693,8 +797,8 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         }
 
         let mut highlight = RegionHighlightMode::default();
-        highlight.highlighting_region_vid(fr, *counter);
-        let type_name = infcx.extract_type_name(&return_ty, Some(highlight));
+        highlight.highlighting_region_vid(fr, renctx.counter);
+        let type_name = infcx.extract_type_name(&return_ty, Some(highlight)).0;
 
         let mir_hir_id = tcx.hir().as_local_hir_id(mir_def_id).expect("non-local mir");
 
@@ -724,11 +828,11 @@ impl<'tcx> RegionInferenceContext<'tcx> {
             // This counter value will already have been used, so this function will increment it
             // so the next value will be used next and return the region name that would have been
             // used.
-            name: self.synthesize_region_name(counter),
+            name: self.synthesize_region_name(renctx),
             source: RegionNameSource::AnonRegionFromOutput(
                 return_span,
                 mir_description.to_string(),
-                type_name
+                type_name,
             ),
         })
     }
@@ -739,6 +843,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         body: &Body<'tcx>,
         mir_def_id: DefId,
         fr: RegionVid,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         counter: &mut usize,
     ) -> Option<RegionName> {
         // Note: generators from `async fn` yield `()`, so we don't have to
@@ -789,7 +894,61 @@ impl<'tcx> RegionInferenceContext<'tcx> {
     fn synthesize_region_name(&self, counter: &mut usize) -> InternedString {
         let c = *counter;
         *counter += 1;
+=======
+        renctx: &mut RegionErrorNamingCtx,
+    ) -> Option<RegionName> {
+        // Note: generators from `async fn` yield `()`, so we don't have to
+        // worry about them here.
+        let yield_ty = self.universal_regions.yield_ty?;
+        debug!(
+            "give_name_if_anonymous_region_appears_in_yield_ty: yield_ty = {:?}",
+            yield_ty,
+        );
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        let tcx = infcx.tcx;
+
+        if !tcx.any_free_region_meets(&yield_ty, |r| r.to_region_vid() == fr) {
+            return None;
+        }
+
+        let mut highlight = RegionHighlightMode::default();
+        highlight.highlighting_region_vid(fr, renctx.counter);
+        let type_name = infcx.extract_type_name(&yield_ty, Some(highlight)).0;
+
+        let mir_hir_id = tcx.hir().as_local_hir_id(mir_def_id).expect("non-local mir");
+
+        let yield_span = match tcx.hir().get(mir_hir_id) {
+            hir::Node::Expr(hir::Expr {
+                node: hir::ExprKind::Closure(_, _, _, span, _),
+                ..
+            }) => (
+                tcx.sess.source_map().end_point(*span)
+            ),
+            _ => body.span,
+        };
+
+        debug!(
+            "give_name_if_anonymous_region_appears_in_yield_ty: \
+             type_name = {:?}, yield_span = {:?}",
+            yield_span,
+            type_name,
+        );
+
+        Some(RegionName {
+            name: self.synthesize_region_name(renctx),
+            source: RegionNameSource::AnonRegionFromYieldTy(yield_span, type_name),
+        })
+    }
+
+    /// Creates a synthetic region named `'1`, incrementing the counter.
+    fn synthesize_region_name(&self, renctx: &mut RegionErrorNamingCtx) -> InternedString {
+        let c = renctx.counter;
+        renctx.counter += 1;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         InternedString::intern(&format!("'{:?}", c))
     }
 }

@@ -1,7 +1,11 @@
 // run-pass
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // ignore-cloudabi no processes
 // ignore-emscripten no processes
 // ignore-sgx no processes
+=======
+// check-run-results
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 // Tests ensuring that `dbg!(expr)` has the expected run-time behavior.
 // as well as some compile time properties we expect.
@@ -18,7 +22,7 @@ struct Point<T> {
 #[derive(Debug, PartialEq)]
 struct NoCopy(usize);
 
-fn test() {
+fn main() {
     let a: Unit = dbg!(Unit);
     let _: Unit = dbg!(a);
     // We can move `a` because it's Copy.
@@ -55,6 +59,7 @@ fn test() {
         7331
     }));
     assert_eq!(foo, 42);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
     // Test trailing comma:
     assert_eq!(("Yeah",), dbg!(("Yeah",)));
@@ -67,13 +72,27 @@ fn test() {
     assert_eq!((1u8, 2u32, "Yeah"), dbg!(1u8, 2u32,
                                          "Yeah",));
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn validate_stderr(stderr: Vec<String>) {
     assert_eq!(stderr, &[
         ":22] Unit = Unit",
+=======
+    // Test trailing comma:
+    assert_eq!(("Yeah",), dbg!(("Yeah",)));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         ":23] a = Unit",
+=======
+    // Test multiple arguments:
+    assert_eq!((1u8, 2u32), dbg!(1,
+                                 2));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         ":29] Point{x: 42, y: 24,} = Point {",
         "    x: 42,",
         "    y: 24,",
@@ -144,4 +163,9 @@ fn main() {
 
         validate_stderr(stderr);
     }
+=======
+    // Test multiple arguments + trailing comma:
+    assert_eq!((1u8, 2u32, "Yeah"), dbg!(1u8, 2u32,
+                                         "Yeah",));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

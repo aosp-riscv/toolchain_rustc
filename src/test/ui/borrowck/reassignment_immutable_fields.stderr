@@ -1,14 +1,30 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `x`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/reassignment_immutable_fields.rs:7:5
    |
 LL |     x.0 = 1;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |     ^^^^^^^ use of possibly uninitialized `x`
+=======
+   |     ^^^^^^^ use of possibly-uninitialized `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `x`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/reassignment_immutable_fields.rs:15:5
    |
 LL |     x.0 = 1;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |     ^^^^^^^ use of possibly uninitialized `x`
+=======
+   |     ^^^^^^^ use of possibly-uninitialized `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 2 previous errors
 

@@ -8,9 +8,14 @@ use rustc::infer::InferCtxt;
 use rustc::mir::visit::TyContext;
 use rustc::mir::visit::Visitor;
 use rustc::mir::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     BasicBlock, BasicBlockData, Body, Local, Location, Place, PlaceBase, Projection,
     ProjectionElem, Rvalue, SourceInfo, Statement, StatementKind, Terminator, TerminatorKind,
     UserTypeProjection,
+=======
+    BasicBlock, BasicBlockData, Body, Local, Location, Place, PlaceBase, ProjectionElem, Rvalue,
+    SourceInfo, Statement, StatementKind, Terminator, TerminatorKind, UserTypeProjection,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
 use rustc::ty::fold::TypeFoldable;
 use rustc::ty::{self, ClosureSubsts, GeneratorSubsts, RegionVid, Ty};
@@ -229,6 +234,7 @@ impl<'cx, 'cg, 'tcx> ConstraintGeneration<'cx, 'cg, 'tcx> {
             match place {
                 Place {
                     base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     projection: None,
                 } |
                 Place {
@@ -262,6 +268,38 @@ impl<'cx, 'cg, 'tcx> ConstraintGeneration<'cx, 'cg, 'tcx> {
                 Place {
                     base: PlaceBase::Local(local),
                     projection: Some(_),
+=======
+                    projection: box [],
+                } |
+                Place {
+                    base: PlaceBase::Local(local),
+                    projection: box [ProjectionElem::Deref],
+                } => {
+                    debug!(
+                        "Recording `killed` facts for borrows of local={:?} at location={:?}",
+                        local, location
+                    );
+
+                    record_killed_borrows_for_local(
+                        all_facts,
+                        self.borrow_set,
+                        self.location_table,
+                        local,
+                        location,
+                    );
+                }
+
+                Place {
+                    base: PlaceBase::Static(_),
+                    ..
+                } => {
+                    // Ignore kills of static or static mut variables.
+                }
+
+                Place {
+                    base: PlaceBase::Local(local),
+                    projection: box [.., _],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 } => {
                     // Kill conflicting borrows of the innermost local.
                     debug!(

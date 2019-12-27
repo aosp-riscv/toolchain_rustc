@@ -68,6 +68,10 @@ rustc-workspace-hack = { path = 'src/tools/rustc-workspace-hack' }
 # here
 rustc-std-workspace-core = { path = 'src/tools/rustc-std-workspace-core' }
 rustc-std-workspace-alloc = { path = 'src/tools/rustc-std-workspace-alloc' }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+rustc-std-workspace-std = { path = 'src/tools/rustc-std-workspace-std' }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 [patch."https://github.com/rust-lang/rust-clippy"]
 clippy_lints = { path = "src/tools/clippy/clippy_lints" }

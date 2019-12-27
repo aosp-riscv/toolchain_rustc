@@ -18,6 +18,7 @@ struct Function {
     instrs: &'static [&'static str],
     file: &'static str,
     required_const: &'static [usize],
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 }
 
 static F16: Type = Type::PrimFloat(16);
@@ -197,6 +198,337 @@ fn verify_all_signatures() {
 
     let mut all_valid = true;
     'outer: for rust in FUNCTIONS {
+=======
+    has_test: bool,
+}
+
+static F16: Type = Type::PrimFloat(16);
+static F32: Type = Type::PrimFloat(32);
+static F64: Type = Type::PrimFloat(64);
+static I16: Type = Type::PrimSigned(16);
+static I32: Type = Type::PrimSigned(32);
+static I64: Type = Type::PrimSigned(64);
+static I8: Type = Type::PrimSigned(8);
+static U16: Type = Type::PrimUnsigned(16);
+static U32: Type = Type::PrimUnsigned(32);
+static U64: Type = Type::PrimUnsigned(64);
+static U8: Type = Type::PrimUnsigned(8);
+static NEVER: Type = Type::Never;
+
+static F16X4: Type = Type::F(16, 4, 1);
+static F16X4X2: Type = Type::F(16, 4, 2);
+static F16X4X3: Type = Type::F(16, 4, 3);
+static F16X4X4: Type = Type::F(16, 4, 4);
+static F16X8: Type = Type::F(16, 8, 1);
+static F16X8X2: Type = Type::F(16, 8, 2);
+static F16X8X3: Type = Type::F(16, 8, 3);
+static F16X8X4: Type = Type::F(16, 8, 4);
+static F32X2: Type = Type::F(32, 2, 1);
+static F32X2X2: Type = Type::F(32, 2, 2);
+static F32X2X3: Type = Type::F(32, 2, 3);
+static F32X2X4: Type = Type::F(32, 2, 4);
+static F32X4: Type = Type::F(32, 4, 1);
+static F32X4X2: Type = Type::F(32, 4, 2);
+static F32X4X3: Type = Type::F(32, 4, 3);
+static F32X4X4: Type = Type::F(32, 4, 4);
+static F64X1: Type = Type::F(64, 1, 1);
+static F64X1X2: Type = Type::F(64, 1, 2);
+static F64X1X3: Type = Type::F(64, 1, 3);
+static F64X1X4: Type = Type::F(64, 1, 4);
+static F64X2: Type = Type::F(64, 2, 1);
+static F64X2X2: Type = Type::F(64, 2, 2);
+static F64X2X3: Type = Type::F(64, 2, 3);
+static F64X2X4: Type = Type::F(64, 2, 4);
+static I16X2: Type = Type::I(16, 2, 1);
+static I16X4: Type = Type::I(16, 4, 1);
+static I16X4X2: Type = Type::I(16, 4, 2);
+static I16X4X3: Type = Type::I(16, 4, 3);
+static I16X4X4: Type = Type::I(16, 4, 4);
+static I16X8: Type = Type::I(16, 8, 1);
+static I16X8X2: Type = Type::I(16, 8, 2);
+static I16X8X3: Type = Type::I(16, 8, 3);
+static I16X8X4: Type = Type::I(16, 8, 4);
+static I32X2: Type = Type::I(32, 2, 1);
+static I32X2X2: Type = Type::I(32, 2, 2);
+static I32X2X3: Type = Type::I(32, 2, 3);
+static I32X2X4: Type = Type::I(32, 2, 4);
+static I32X4: Type = Type::I(32, 4, 1);
+static I32X4X2: Type = Type::I(32, 4, 2);
+static I32X4X3: Type = Type::I(32, 4, 3);
+static I32X4X4: Type = Type::I(32, 4, 4);
+static I64X1: Type = Type::I(64, 1, 1);
+static I64X1X2: Type = Type::I(64, 1, 2);
+static I64X1X3: Type = Type::I(64, 1, 3);
+static I64X1X4: Type = Type::I(64, 1, 4);
+static I64X2: Type = Type::I(64, 2, 1);
+static I64X2X2: Type = Type::I(64, 2, 2);
+static I64X2X3: Type = Type::I(64, 2, 3);
+static I64X2X4: Type = Type::I(64, 2, 4);
+static I8X16: Type = Type::I(8, 16, 1);
+static I8X16X2: Type = Type::I(8, 16, 2);
+static I8X16X3: Type = Type::I(8, 16, 3);
+static I8X16X4: Type = Type::I(8, 16, 4);
+static I8X4: Type = Type::I(8, 4, 1);
+static I8X8: Type = Type::I(8, 8, 1);
+static I8X8X2: Type = Type::I(8, 8, 2);
+static I8X8X3: Type = Type::I(8, 8, 3);
+static I8X8X4: Type = Type::I(8, 8, 4);
+static P128: Type = Type::PrimPoly(128);
+static P16: Type = Type::PrimPoly(16);
+static P16X4X2: Type = Type::P(16, 4, 2);
+static P16X4X3: Type = Type::P(16, 4, 3);
+static P16X4X4: Type = Type::P(16, 4, 4);
+static P16X8X2: Type = Type::P(16, 8, 2);
+static P16X8X3: Type = Type::P(16, 8, 3);
+static P16X8X4: Type = Type::P(16, 8, 4);
+static P64: Type = Type::PrimPoly(64);
+static P64X1X2: Type = Type::P(64, 1, 2);
+static P64X1X3: Type = Type::P(64, 1, 3);
+static P64X1X4: Type = Type::P(64, 1, 4);
+static P64X2X2: Type = Type::P(64, 2, 2);
+static P64X2X3: Type = Type::P(64, 2, 3);
+static P64X2X4: Type = Type::P(64, 2, 4);
+static P8: Type = Type::PrimPoly(8);
+static POLY16X4: Type = Type::P(16, 4, 1);
+static POLY16X8: Type = Type::P(16, 8, 1);
+static POLY64X1: Type = Type::P(64, 1, 1);
+static POLY64X2: Type = Type::P(64, 2, 1);
+static POLY8X16: Type = Type::P(8, 16, 1);
+static POLY8X16X2: Type = Type::P(8, 16, 2);
+static POLY8X16X3: Type = Type::P(8, 16, 3);
+static POLY8X16X4: Type = Type::P(8, 16, 4);
+static POLY8X8: Type = Type::P(8, 8, 1);
+static POLY8X8X2: Type = Type::P(8, 8, 2);
+static POLY8X8X3: Type = Type::P(8, 8, 3);
+static POLY8X8X4: Type = Type::P(8, 8, 4);
+static U16X4: Type = Type::U(16, 4, 1);
+static U16X4X2: Type = Type::U(16, 4, 2);
+static U16X4X3: Type = Type::U(16, 4, 3);
+static U16X4X4: Type = Type::U(16, 4, 4);
+static U16X8: Type = Type::U(16, 8, 1);
+static U16X8X2: Type = Type::U(16, 8, 2);
+static U16X8X3: Type = Type::U(16, 8, 3);
+static U16X8X4: Type = Type::U(16, 8, 4);
+static U32X2: Type = Type::U(32, 2, 1);
+static U32X2X2: Type = Type::U(32, 2, 2);
+static U32X2X3: Type = Type::U(32, 2, 3);
+static U32X2X4: Type = Type::U(32, 2, 4);
+static U32X4: Type = Type::U(32, 4, 1);
+static U32X4X2: Type = Type::U(32, 4, 2);
+static U32X4X3: Type = Type::U(32, 4, 3);
+static U32X4X4: Type = Type::U(32, 4, 4);
+static U64X1: Type = Type::U(64, 1, 1);
+static U64X1X2: Type = Type::U(64, 1, 2);
+static U64X1X3: Type = Type::U(64, 1, 3);
+static U64X1X4: Type = Type::U(64, 1, 4);
+static U64X2: Type = Type::U(64, 2, 1);
+static U64X2X2: Type = Type::U(64, 2, 2);
+static U64X2X3: Type = Type::U(64, 2, 3);
+static U64X2X4: Type = Type::U(64, 2, 4);
+static U8X16: Type = Type::U(8, 16, 1);
+static U8X16X2: Type = Type::U(8, 16, 2);
+static U8X16X3: Type = Type::U(8, 16, 3);
+static U8X16X4: Type = Type::U(8, 16, 4);
+static U8X8: Type = Type::U(8, 8, 1);
+static U8X8X2: Type = Type::U(8, 8, 2);
+static U8X8X3: Type = Type::U(8, 8, 3);
+static U8X8X4: Type = Type::U(8, 8, 4);
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+enum Type {
+    PrimFloat(u8),
+    PrimSigned(u8),
+    PrimUnsigned(u8),
+    PrimPoly(u8),
+    MutPtr(&'static Type),
+    ConstPtr(&'static Type),
+    I(u8, u8, u8),
+    U(u8, u8, u8),
+    P(u8, u8, u8),
+    F(u8, u8, u8),
+    Never,
+}
+
+stdarch_verify::arm_functions!(static FUNCTIONS);
+
+macro_rules! bail {
+    ($($t:tt)*) => (return Err(format!($($t)*)))
+}
+
+#[test]
+fn verify_all_signatures() {
+    // This is a giant HTML blob downloaded from
+    // https://developer.arm.com/technologies/neon/intrinsics which contains all
+    // NEON intrinsics at least. We do manual HTML parsing below.
+    let html = include_bytes!("../arm-intrinsics.html");
+    let mut html = &html[..];
+    let opts = ParseOpts {
+        tree_builder: TreeBuilderOpts {
+            drop_doctype: true,
+            ..Default::default()
+        },
+        ..Default::default()
+    };
+    let dom = parse_document(RcDom::default(), opts)
+        .from_utf8()
+        .read_from(&mut html)
+        .unwrap();
+
+    let accordion = find_accordion(&dom.document).unwrap();
+    let map = parse_intrinsics(&accordion);
+
+    let mut all_valid = true;
+    'outer: for rust in FUNCTIONS {
+        if !rust.has_test {
+            let skip = [
+                "vaddq_s64",
+                "vaddq_u64",
+                "vrsqrte_f32",
+                "vtbl1_s8",
+                "vtbl1_u8",
+                "vtbl1_p8",
+                "vtbl2_s8",
+                "vtbl2_u8",
+                "vtbl2_p8",
+                "vtbl3_s8",
+                "vtbl3_u8",
+                "vtbl3_p8",
+                "vtbl4_s8",
+                "vtbl4_u8",
+                "vtbl4_p8",
+                "vtbx1_s8",
+                "vtbx1_u8",
+                "vtbx1_p8",
+                "vtbx2_s8",
+                "vtbx2_u8",
+                "vtbx2_p8",
+                "vtbx3_s8",
+                "vtbx3_u8",
+                "vtbx3_p8",
+                "vtbx4_s8",
+                "vtbx4_u8",
+                "vtbx4_p8",
+                "udf",
+                "_clz_u8",
+                "_clz_u16",
+                "_clz_u32",
+                "_rbit_u32",
+                "_rev_u16",
+                "_rev_u32",
+                "__breakpoint",
+                "vpminq_f32",
+                "vpminq_f64",
+                "vpmaxq_f32",
+                "vpmaxq_f64",
+                "vcombine_s8",
+                "vcombine_s16",
+                "vcombine_s32",
+                "vcombine_s64",
+                "vcombine_u8",
+                "vcombine_u16",
+                "vcombine_u32",
+                "vcombine_u64",
+                "vcombine_p64",
+                "vcombine_f32",
+                "vcombine_p8",
+                "vcombine_p16",
+                "vcombine_f64",
+                "vtbl1_s8",
+                "vtbl1_u8",
+                "vtbl1_p8",
+                "vtbl2_s8",
+                "vtbl2_u8",
+                "vtbl2_p8",
+                "vtbl3_s8",
+                "vtbl3_u8",
+                "vtbl3_p8",
+                "vtbl4_s8",
+                "vtbl4_u8",
+                "vtbl4_p8",
+                "vtbx1_s8",
+                "vtbx1_u8",
+                "vtbx1_p8",
+                "vtbx2_s8",
+                "vtbx2_u8",
+                "vtbx2_p8",
+                "vtbx3_s8",
+                "vtbx3_u8",
+                "vtbx3_p8",
+                "vtbx4_s8",
+                "vtbx4_u8",
+                "vtbx4_p8",
+                "vqtbl1_s8",
+                "vqtbl1q_s8",
+                "vqtbl1_u8",
+                "vqtbl1q_u8",
+                "vqtbl1_p8",
+                "vqtbl1q_p8",
+                "vqtbx1_s8",
+                "vqtbx1q_s8",
+                "vqtbx1_u8",
+                "vqtbx1q_u8",
+                "vqtbx1_p8",
+                "vqtbx1q_p8",
+                "vqtbl2_s8",
+                "vqtbl2q_s8",
+                "vqtbl2_u8",
+                "vqtbl2q_u8",
+                "vqtbl2_p8",
+                "vqtbl2q_p8",
+                "vqtbx2_s8",
+                "vqtbx2q_s8",
+                "vqtbx2_u8",
+                "vqtbx2q_u8",
+                "vqtbx2_p8",
+                "vqtbx2q_p8",
+                "vqtbl3_s8",
+                "vqtbl3q_s8",
+                "vqtbl3_u8",
+                "vqtbl3q_u8",
+                "vqtbl3_p8",
+                "vqtbl3q_p8",
+                "vqtbx3_s8",
+                "vqtbx3q_s8",
+                "vqtbx3_u8",
+                "vqtbx3q_u8",
+                "vqtbx3_p8",
+                "vqtbx3q_p8",
+                "vqtbl4_s8",
+                "vqtbl4q_s8",
+                "vqtbl4_u8",
+                "vqtbl4q_u8",
+                "vqtbl4_p8",
+                "vqtbl4q_p8",
+                "vqtbx4_s8",
+                "vqtbx4q_s8",
+                "vqtbx4_u8",
+                "vqtbx4q_u8",
+                "vqtbx4_p8",
+                "vqtbx4q_p8",
+                "brk",
+                "_rev_u64",
+                "_clz_u64",
+                "_rbit_u64",
+                "_cls_u32",
+                "_cls_u64",
+            ];
+            if !skip.contains(&rust.name) {
+                println!(
+                    "missing run-time test named `test_{}` for `{}`",
+                    {
+                        let mut id = rust.name;
+                        while id.starts_with('_') {
+                            id = &id[1..];
+                        }
+                        id
+                    },
+                    rust.name
+                );
+                all_valid = false;
+            }
+        }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // Skip some intrinsics that aren't NEON and are located in different
         // places than the whitelists below.
         match rust.name {

@@ -169,8 +169,13 @@ impl<'ast> visit::Visitor<'ast> for PatBindVisitor {
         // don't visit the RHS or block of an 'if let' or 'for' stmt
         match &ex.node {
             ExprKind::If(let_stmt, ..) | ExprKind::While(let_stmt, ..) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if let ExprKind::Let(pats, ..) = &let_stmt.node {
                     pats.iter().for_each(|pat| self.visit_pat(pat))
+=======
+                if let ExprKind::Let(pat, ..) = &let_stmt.node {
+                    self.visit_pat(pat);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             }
             ExprKind::ForLoop(pat, ..) => self.visit_pat(pat),
@@ -292,6 +297,8 @@ fn destructure_pattern_to_ty(
             for (i, p) in children.iter().enumerate() {
                 if point_is_in_span(point, &p.span) {
                     return typeinf::get_tuplestruct_field_type(i, &m, session)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
                         .and_then(|ty| {
                             // if context ty is a match, use its generics
                             if let Some(Ty::Match(ref contextm)) = contextty {
@@ -308,6 +315,37 @@ fn destructure_pattern_to_ty(
                 }
             }
             None
+        }
+        PatKind::Struct(ref path, ref children, _) => {
+            let m = resolve_ast_path(path, &scope.filepath, scope.point, session)?;
+            let contextty = path_to_match(ty.clone(), session);
+            for child in children {
+                if point_is_in_span(point, &child.span) {
+                    return typeinf::get_struct_field_type(&child.ident.name.as_str(), &m, session)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+                        .and_then(|ty| {
+                            // if context ty is a match, use its generics
+                            if let Some(Ty::Match(ref contextm)) = contextty {
+                                path_to_match_including_generics(
+                                    ty,
+                                    contextm.to_generics(),
+                                    session,
+                                )
+                            } else {
+                                path_to_match(ty, session)
+                            }
+                        })
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+                        .and_then(|ty| destructure_pattern_to_ty(p, point, &ty, scope, session));
+=======
+                        .and_then(|ty| {
+                            destructure_pattern_to_ty(&child.pat, point, &ty, scope, session)
+                        });
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+                }
+            }
+            None
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         }
         PatKind::Struct(ref path, ref children, _) => {
             let m = resolve_ast_path(path, &scope.filepath, scope.point, session)?;
@@ -332,6 +370,8 @@ fn destructure_pattern_to_ty(
                 }
             }
             None
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         _ => {
             debug!("Could not destructure pattern {:?}", pat);
@@ -385,24 +425,17 @@ impl<'c, 's, 'ast> visit::Visitor<'ast> for MatchTypeVisitor<'c, 's> {
             debug!("PHIL sub type is {:?}", v.result);
 
             for arm in arms {
-                for pattern in &arm.pats {
-                    if point_is_in_span(self.pos, &pattern.span) {
-                        debug!("PHIL point is in pattern |{:?}|", pattern);
-                        self.result = v
-                            .result
-                            .as_ref()
-                            .and_then(|ty| {
-                                destructure_pattern_to_ty(
-                                    pattern,
-                                    self.pos,
-                                    ty,
-                                    &self.scope,
-                                    self.session,
-                                )
-                            })
-                            .and_then(|ty| path_to_match(ty, self.session));
-                    }
+                if !point_is_in_span(self.pos, &arm.pat.span) {
+                    continue;
                 }
+                debug!("PHIL point is in pattern |{:?}|", arm.pat);
+                self.result = v
+                    .result
+                    .as_ref()
+                    .and_then(|ty| {
+                        destructure_pattern_to_ty(&arm.pat, self.pos, ty, &self.scope, self.session)
+                    })
+                    .and_then(|ty| path_to_match(ty, self.session));
             }
         }
     }
@@ -745,7 +778,7 @@ impl<'c, 's, 'ast> visit::Visitor<'ast> for ExprTypeVisitor<'c, 's> {
                 }
             }
             ExprKind::Mac(ref m) => {
-                if let Some(name) = m.node.path.segments.last().map(|seg| seg.ident) {
+                if let Some(name) = m.path.segments.last().map(|seg| seg.ident) {
                     // use some ad-hoc rules
                     if name.as_str() == "vec" {
                         let path = RacerPath::from_iter(
@@ -865,14 +898,7 @@ struct StructVisitor {
 }
 
 impl<'ast> visit::Visitor<'ast> for StructVisitor {
-    fn visit_variant_data(
-        &mut self,
-        struct_definition: &ast::VariantData,
-        _: ast::Ident,
-        _: &ast::Generics,
-        _: ast::NodeId,
-        _: Span,
-    ) {
+    fn visit_variant_data(&mut self, struct_definition: &ast::VariantData) {
         for field in struct_definition.fields() {
             let ty = Ty::from_ast(&field.ty, &self.scope);
             let name = match field.ident {
@@ -894,7 +920,7 @@ pub struct TypeVisitor<'s> {
 
 impl<'ast, 's> visit::Visitor<'ast> for TypeVisitor<'s> {
     fn visit_item(&mut self, item: &ast::Item) {
-        if let ItemKind::Ty(ref ty, _) = item.node {
+        if let ItemKind::TyAlias(ref ty, _) = item.node {
             self.name = Some(item.ident.name.to_string());
             self.type_ = Ty::from_ast(&ty, self.scope);
             debug!("typevisitor type is {:?}", self.type_);
@@ -1000,8 +1026,7 @@ impl<'ast> visit::Visitor<'ast> for EnumVisitor {
 
             for variant in &enum_definition.variants {
                 let source_map::BytePos(point) = variant.span.lo();
-                self.values
-                    .push((variant.node.ident.to_string(), point.into()));
+                self.values.push((variant.ident.to_string(), point.into()));
             }
         }
     }
@@ -1317,6 +1342,7 @@ impl<'ast, 'r, 's> visit::Visitor<'ast> for IfLetVisitor<'r, 's> {
     fn visit_expr(&mut self, ex: &'ast ast::Expr) {
         match &ex.node {
             ExprKind::If(let_stmt, ..) | ExprKind::While(let_stmt, ..) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if let ExprKind::Let(pats, expr) = &let_stmt.node {
                     if let Some(pat) = pats.get(0) {
                         self.let_pat = Some(Pat::from_ast(&pat.node, &self.scope));
@@ -1325,6 +1351,13 @@ impl<'ast, 'r, 's> visit::Visitor<'ast> for IfLetVisitor<'r, 's> {
                         expr_visitor.visit_expr(expr);
                         self.rh_expr = expr_visitor.result;
                     }
+=======
+                if let ExprKind::Let(pat, expr) = &let_stmt.node {
+                    self.let_pat = Some(Pat::from_ast(&pat.node, &self.scope));
+                    let mut expr_visitor = ExprTypeVisitor::new(self.scope.clone(), self.session);
+                    expr_visitor.visit_expr(expr);
+                    self.rh_expr = expr_visitor.result;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             }
             _ => {}

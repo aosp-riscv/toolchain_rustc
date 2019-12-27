@@ -27,7 +27,11 @@ pub trait EncodableWithShorthand: Clone + Eq + Hash {
     fn variant(&self) -> &Self::Variant;
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg_attr(not(bootstrap), allow(rustc::usage_of_ty_tykind))]
+=======
+#[allow(rustc::usage_of_ty_tykind)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 impl<'tcx> EncodableWithShorthand for Ty<'tcx> {
     type Variant = ty::TyKind<'tcx>;
     fn variant(&self) -> &Self::Variant {
@@ -160,7 +164,11 @@ where
     Ok(decoder.map_encoded_cnum_to_current(cnum))
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg_attr(not(bootstrap), allow(rustc::usage_of_ty_tykind))]
+=======
+#[allow(rustc::usage_of_ty_tykind)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[inline]
 pub fn decode_ty<D>(decoder: &mut D) -> Result<Ty<'tcx>, D::Error>
 where
@@ -284,9 +292,44 @@ where
 #[macro_export]
 macro_rules! __impl_decoder_methods {
     ($($name:ident -> $ty:ty;)*) => {
-        $(fn $name(&mut self) -> Result<$ty, Self::Error> {
-            self.opaque.$name()
-        })*
+        $(
+            fn $name(&mut self) -> Result<$ty, Self::Error> {
+                self.opaque.$name()
+            }
+        )*
+    }
+}
+
+#[macro_export]
+macro_rules! impl_arena_allocatable_decoder {
+    ([]$args:tt) => {};
+    ([decode $(, $attrs:ident)*]
+     [[$DecoderName:ident [$($typaram:tt),*]], [$name:ident: $ty:ty], $tcx:lifetime]) => {
+        impl<$($typaram),*> SpecializedDecoder<&$tcx $ty> for $DecoderName<$($typaram),*> {
+            #[inline]
+            fn specialized_decode(&mut self) -> Result<&$tcx $ty, Self::Error> {
+                decode_arena_allocable(self)
+            }
+        }
+
+        impl<$($typaram),*> SpecializedDecoder<&$tcx [$ty]> for $DecoderName<$($typaram),*> {
+            #[inline]
+            fn specialized_decode(&mut self) -> Result<&$tcx [$ty], Self::Error> {
+                decode_arena_allocable_slice(self)
+            }
+        }
+    };
+    ([$ignore:ident $(, $attrs:ident)*]$args:tt) => {
+        impl_arena_allocatable_decoder!([$($attrs),*]$args);
+    };
+}
+
+#[macro_export]
+macro_rules! impl_arena_allocatable_decoders {
+    ($args:tt, [$($a:tt $name:ident: $ty:ty,)*], $tcx:lifetime) => {
+        $(
+            impl_arena_allocatable_decoder!($a [$args, [$name: $ty], $tcx]);
+        )*
     }
 }
 
@@ -327,14 +370,22 @@ macro_rules! impl_arena_allocatable_decoders {
 macro_rules! implement_ty_decoder {
     ($DecoderName:ident <$($typaram:tt),*>) => {
         mod __ty_decoder_impl {
-            use super::$DecoderName;
+            use std::borrow::Cow;
+
+            use rustc_serialize::{Decoder, SpecializedDecoder};
+
             use $crate::infer::canonical::CanonicalVarInfos;
             use $crate::ty;
             use $crate::ty::codec::*;
             use $crate::ty::subst::SubstsRef;
             use $crate::hir::def_id::{CrateNum};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             use rustc_serialize::{Decoder, SpecializedDecoder};
             use std::borrow::Cow;
+=======
+
+            use super::$DecoderName;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
             impl<$($typaram ),*> Decoder for $DecoderName<$($typaram),*> {
                 type Error = String;
@@ -368,8 +419,8 @@ macro_rules! implement_ty_decoder {
                 }
             }
 
-            // FIXME(#36588) These impls are horribly unsound as they allow
-            // the caller to pick any lifetime for 'tcx, including 'static,
+            // FIXME(#36588): These impls are horribly unsound as they allow
+            // the caller to pick any lifetime for `'tcx`, including `'static`,
             // by using the unspecialized proxies to them.
 
             arena_types!(impl_arena_allocatable_decoders, [$DecoderName [$($typaram),*]], 'tcx);

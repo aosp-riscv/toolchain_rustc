@@ -116,9 +116,14 @@ pub trait Default: Sized {
 }
 
 /// Derive macro generating an impl of the trait `Default`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg(not(bootstrap))]
 #[rustc_builtin_macro]
 #[rustc_macro_transparency = "semitransparent"]
+=======
+#[rustc_builtin_macro]
+#[cfg_attr(bootstrap, rustc_macro_transparency = "semitransparent")]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow_internal_unstable(core_intrinsics)]
 pub macro Default($item:item) { /* compiler built-in */ }

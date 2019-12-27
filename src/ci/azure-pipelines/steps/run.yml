@@ -147,6 +147,7 @@ steps:
     git clone --depth=1 https://github.com/rust-lang-nursery/rust-toolstate.git
     cd rust-toolstate
     python2.7 "$BUILD_SOURCESDIRECTORY/src/tools/publish_toolstate.py" "$(git rev-parse HEAD)" "$(git log --format=%s -n1 HEAD)" "" ""
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     cd ..
     rm -rf rust-toolstate
   condition: and(succeeded(), not(variables.SKIP_JOB), eq(variables['IMAGE'], 'mingw-check'))
@@ -202,6 +203,70 @@ steps:
 # execute this step in case we want to inspect failed builds, but don't let
 # errors here ever fail the build since this is just informational.
 - bash: aws s3 cp --acl public-read cpu-usage.csv s3://$DEPLOY_BUCKET/rustc-builds/$BUILD_SOURCEVERSION/cpu-$SYSTEM_JOBNAME.csv
+=======
+    # Only check maintainers if this build is supposed to publish toolstate.
+    # Builds that are not supposed to publish don't have the access token.
+    if [ -n "${TOOLSTATE_PUBLISH+is_set}" ]; then
+      TOOLSTATE_VALIDATE_MAINTAINERS_REPO=rust-lang/rust python2.7 "${BUILD_SOURCESDIRECTORY}/src/tools/publish_toolstate.py"
+    fi
+    cd ..
+    rm -rf rust-toolstate
+  env:
+    TOOLSTATE_REPO_ACCESS_TOKEN: $(TOOLSTATE_REPO_ACCESS_TOKEN)
+  condition: and(succeeded(), not(variables.SKIP_JOB), eq(variables['IMAGE'], 'mingw-check'))
+  displayName: Verify the publish_toolstate script works
+
+- bash: |
+    set -e
+    # Remove any preexisting rustup installation since it can interfere
+    # with the cargotest step and its auto-detection of things like Clippy in
+    # the environment
+    rustup self uninstall -y || true
+    if [ "$IMAGE" = "" ]; then
+      src/ci/run.sh
+    else
+      src/ci/docker/run.sh $IMAGE
+    fi
+  #timeoutInMinutes: 180
+  timeoutInMinutes: 600
+  env:
+    CI: true
+    SRC: .
+    AWS_ACCESS_KEY_ID: $(SCCACHE_AWS_ACCESS_KEY_ID)
+    AWS_SECRET_ACCESS_KEY: $(SCCACHE_AWS_SECRET_ACCESS_KEY)
+    TOOLSTATE_REPO_ACCESS_TOKEN: $(TOOLSTATE_REPO_ACCESS_TOKEN)
+  condition: and(succeeded(), not(variables.SKIP_JOB))
+  displayName: Run build
+
+# If we're a deploy builder, use the `aws` command to publish everything to our
+# bucket.
+- bash: |
+    set -e
+    source src/ci/shared.sh
+    if [ "$AGENT_OS" = "Linux" ]; then
+        rm -rf obj/build/dist/doc
+        upload_dir=obj/build/dist
+    else
+        rm -rf build/dist/doc
+        upload_dir=build/dist
+    fi
+    ls -la $upload_dir
+    deploy_dir=rustc-builds
+    if [ "$DEPLOY_ALT" == "1" ]; then
+        deploy_dir=rustc-builds-alt
+    fi
+    retry aws s3 cp --no-progress --recursive --acl public-read ./$upload_dir s3://$DEPLOY_BUCKET/$deploy_dir/$BUILD_SOURCEVERSION
+  env:
+    AWS_ACCESS_KEY_ID: $(UPLOAD_AWS_ACCESS_KEY_ID)
+    AWS_SECRET_ACCESS_KEY: $(UPLOAD_AWS_SECRET_ACCESS_KEY)
+  condition: and(succeeded(), not(variables.SKIP_JOB), or(eq(variables.DEPLOY, '1'), eq(variables.DEPLOY_ALT, '1')))
+  displayName: Upload artifacts
+
+# Upload CPU usage statistics that we've been gathering this whole time. Always
+# execute this step in case we want to inspect failed builds, but don't let
+# errors here ever fail the build since this is just informational.
+- bash: aws s3 cp --acl public-read cpu-usage.csv s3://$DEPLOY_BUCKET/rustc-builds/$BUILD_SOURCEVERSION/cpu-$CI_JOB_NAME.csv
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   env:
     AWS_ACCESS_KEY_ID: $(UPLOAD_AWS_ACCESS_KEY_ID)
     AWS_SECRET_ACCESS_KEY: $(UPLOAD_AWS_SECRET_ACCESS_KEY)

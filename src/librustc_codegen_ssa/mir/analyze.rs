@@ -105,6 +105,7 @@ impl<Bx: BuilderMethods<'a, 'tcx>> LocalAnalyzer<'mir, 'a, 'tcx, Bx> {
     ) {
         let cx = self.fx.cx;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if let Some(proj) = place_ref.projection {
             // Allow uses of projections that are ZSTs or from scalar fields.
             let is_consume = match context {
@@ -181,6 +182,81 @@ impl<Bx: BuilderMethods<'a, 'tcx>> LocalAnalyzer<'mir, 'a, 'tcx, Bx> {
         if let Some(box proj) = place_ref.projection {
             self.visit_projection(place_ref.base, proj, context, location);
         }
+=======
+        if let [proj_base @ .., elem] = place_ref.projection {
+            // Allow uses of projections that are ZSTs or from scalar fields.
+            let is_consume = match context {
+                PlaceContext::NonMutatingUse(NonMutatingUseContext::Copy) |
+                PlaceContext::NonMutatingUse(NonMutatingUseContext::Move) => true,
+                _ => false
+            };
+            if is_consume {
+                let base_ty =
+                    mir::Place::ty_from(place_ref.base, proj_base, self.fx.mir, cx.tcx());
+                let base_ty = self.fx.monomorphize(&base_ty);
+
+                // ZSTs don't require any actual memory access.
+                let elem_ty = base_ty
+                    .projection_ty(cx.tcx(), elem)
+                    .ty;
+                let elem_ty = self.fx.monomorphize(&elem_ty);
+                let span = if let mir::PlaceBase::Local(index) = place_ref.base {
+                    self.fx.mir.local_decls[*index].source_info.span
+                } else {
+                    DUMMY_SP
+                };
+                if cx.spanned_layout_of(elem_ty, span).is_zst() {
+                    return;
+                }
+
+                if let mir::ProjectionElem::Field(..) = elem {
+                    let layout = cx.spanned_layout_of(base_ty.ty, span);
+                    if cx.is_backend_immediate(layout) || cx.is_backend_scalar_pair(layout) {
+                        // Recurse with the same context, instead of `Projection`,
+                        // potentially stopping at non-operand projections,
+                        // which would trigger `not_ssa` on locals.
+                        self.process_place(
+                            &mir::PlaceRef {
+                                base: place_ref.base,
+                                projection: proj_base,
+                            },
+                            context,
+                            location,
+                        );
+                        return;
+                    }
+                }
+            }
+
+            // A deref projection only reads the pointer, never needs the place.
+            if let mir::ProjectionElem::Deref = elem {
+                self.process_place(
+                    &mir::PlaceRef {
+                        base: place_ref.base,
+                        projection: proj_base,
+                    },
+                    PlaceContext::NonMutatingUse(NonMutatingUseContext::Copy),
+                    location
+                );
+                return;
+            }
+        }
+
+        // FIXME this is super_place code, is repeated here to avoid cloning place or changing
+        // visit_place API
+        let mut context = context;
+
+        if !place_ref.projection.is_empty() {
+            context = if context.is_mutating_use() {
+                PlaceContext::MutatingUse(MutatingUseContext::Projection)
+            } else {
+                PlaceContext::NonMutatingUse(NonMutatingUseContext::Projection)
+            };
+        }
+
+        self.visit_place_base(place_ref.base, context, location);
+        self.visit_projection(place_ref.base, place_ref.projection, context, location);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
 }
@@ -196,7 +272,11 @@ impl<'mir, 'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> Visitor<'tcx>
 
         if let mir::Place {
             base: mir::PlaceBase::Local(index),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             projection: None,
+=======
+            projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } = *place {
             self.assign(index, location);
             let decl_span = self.fx.mir.local_decls[index].source_info.span;
@@ -221,7 +301,7 @@ impl<'mir, 'a, 'tcx, Bx: BuilderMethods<'a, 'tcx>> Visitor<'tcx>
             mir::TerminatorKind::Call {
                 func: mir::Operand::Constant(ref c),
                 ref args, ..
-            } => match c.ty.sty {
+            } => match c.literal.ty.sty {
                 ty::FnDef(did, _) => Some((did, args)),
                 _ => None,
             },

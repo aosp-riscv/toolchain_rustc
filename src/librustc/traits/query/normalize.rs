@@ -5,11 +5,10 @@
 use crate::infer::at::At;
 use crate::infer::canonical::OriginalQueryValues;
 use crate::infer::{InferCtxt, InferOk};
-use crate::mir::interpret::{GlobalId, ConstValue};
 use crate::traits::project::Normalized;
 use crate::traits::{Obligation, ObligationCause, PredicateObligation, Reveal};
 use crate::ty::fold::{TypeFoldable, TypeFolder};
-use crate::ty::subst::{Subst, InternalSubsts};
+use crate::ty::subst::Subst;
 use crate::ty::{self, Ty, TyCtxt};
 
 use super::NoSolution;
@@ -191,6 +190,7 @@ impl<'cx, 'tcx> TypeFolder<'tcx> for QueryNormalizer<'cx, 'tcx> {
     }
 
     fn fold_const(&mut self, constant: &'tcx ty::Const<'tcx>) -> &'tcx ty::Const<'tcx> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if let ConstValue::Unevaluated(def_id, substs) = constant.val {
             let tcx = self.infcx.tcx.global_tcx();
             let param_env = self.param_env;
@@ -225,6 +225,9 @@ impl<'cx, 'tcx> TypeFolder<'tcx> for QueryNormalizer<'cx, 'tcx> {
             }
         }
         constant
+=======
+        constant.eval(self.infcx.tcx, self.param_env)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 

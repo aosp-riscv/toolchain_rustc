@@ -1,6 +1,11 @@
 // edition:2018
 // ignore-tidy-linelength
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await, type_alias_impl_trait)]
+=======
+
+#![feature(type_alias_impl_trait)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 pub trait Bar {
     type E: Copy;

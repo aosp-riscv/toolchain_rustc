@@ -19,7 +19,10 @@ pub fn target() -> TargetResult {
         linker_flavor: LinkerFlavor::Gcc,
         options: TargetOptions {
             features: "+secure-plt".to_string(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             target_mcount: "_mcount".to_string(),
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             .. base
         },
     })

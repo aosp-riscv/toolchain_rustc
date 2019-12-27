@@ -31,7 +31,8 @@ pub trait AppExt: Sized {
         exclude: &'static str,
     ) -> Self {
         self.arg_package_spec_simple(package)
-            ._arg(opt("all", all))
+            ._arg(opt("all", "Alias for --workspace (deprecated)"))
+            ._arg(opt("workspace", all))
             ._arg(multi_opt("exclude", "SPEC", exclude))
     }
 
@@ -99,11 +100,19 @@ pub trait AppExt: Sized {
     }
 
     fn arg_features(self) -> Self {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self._arg(
             opt("features", "Space-separated list of features to activate")
                 .multiple(true)
                 .value_name("FEATURES"),
         )
+=======
+        self._arg(multi_opt(
+            "features",
+            "FEATURES",
+            "Space-separated list of features to activate",
+        ))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         ._arg(opt("all-features", "Activate all available features"))
         ._arg(opt(
             "no-default-features",
@@ -290,7 +299,8 @@ pub trait ArgMatchesExt {
         workspace: Option<&Workspace<'a>>,
     ) -> CargoResult<CompileOptions<'a>> {
         let spec = Packages::from_flags(
-            self._is_present("all"),
+            // TODO Integrate into 'workspace'
+            self._is_present("workspace") || self._is_present("all"),
             self._values_of("exclude"),
             self._values_of("package"),
         )?;

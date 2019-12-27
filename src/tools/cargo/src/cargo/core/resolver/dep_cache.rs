@@ -353,6 +353,7 @@ fn build_requirements<'a, 'b: 'a>(
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if opts.uses_default_features {
         if s.features().contains_key("default") {
             reqs.require_feature(InternedString::new("default"))?;
@@ -436,6 +437,89 @@ impl Requirements<'_> {
             .summary
             .features()
             .get(feat.as_str())
+=======
+    if opts.uses_default_features && s.features().contains_key("default") {
+        reqs.require_feature(InternedString::new("default"))?;
+    }
+
+    Ok(reqs)
+}
+
+struct Requirements<'a> {
+    summary: &'a Summary,
+    // The deps map is a mapping of package name to list of features enabled.
+    // Each package should be enabled, and each package should have the
+    // specified set of features enabled. The boolean indicates whether this
+    // package was specifically requested (rather than just requesting features
+    // *within* this package).
+    deps: HashMap<InternedString, (bool, BTreeSet<InternedString>)>,
+    // The used features set is the set of features which this local package had
+    // enabled, which is later used when compiling to instruct the code what
+    // features were enabled.
+    used: HashSet<InternedString>,
+    visited: HashSet<InternedString>,
+}
+
+impl Requirements<'_> {
+    fn new(summary: &Summary) -> Requirements<'_> {
+        Requirements {
+            summary,
+            deps: HashMap::new(),
+            used: HashSet::new(),
+            visited: HashSet::new(),
+        }
+    }
+
+    fn into_used(self) -> HashSet<InternedString> {
+        self.used
+    }
+
+    fn require_crate_feature(&mut self, package: InternedString, feat: InternedString) {
+        // If `package` is indeed an optional dependency then we activate the
+        // feature named `package`, but otherwise if `package` is a required
+        // dependency then there's no feature associated with it.
+        if let Some(dep) = self
+            .summary
+            .dependencies()
+            .iter()
+            .find(|p| p.name_in_toml() == package)
+        {
+            if dep.is_optional() {
+                self.used.insert(package);
+            }
+        }
+        self.deps
+            .entry(package)
+            .or_insert((false, BTreeSet::new()))
+            .1
+            .insert(feat);
+    }
+
+    fn seen(&mut self, feat: InternedString) -> bool {
+        if self.visited.insert(feat) {
+            self.used.insert(feat);
+            false
+        } else {
+            true
+        }
+    }
+
+    fn require_dependency(&mut self, pkg: InternedString) {
+        if self.seen(pkg) {
+            return;
+        }
+        self.deps.entry(pkg).or_insert((false, BTreeSet::new())).0 = true;
+    }
+
+    fn require_feature(&mut self, feat: InternedString) -> CargoResult<()> {
+        if feat.is_empty() || self.seen(feat) {
+            return Ok(());
+        }
+        for fv in self
+            .summary
+            .features()
+            .get(&feat)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             .expect("must be a valid feature")
         {
             match *fv {

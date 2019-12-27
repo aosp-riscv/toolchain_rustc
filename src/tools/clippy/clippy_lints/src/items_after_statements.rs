@@ -1,6 +1,10 @@
 //! lint when items are used after statements
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, span_lint};
+=======
+use crate::utils::span_lint;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use matches::matches;
 use rustc::lint::{EarlyContext, EarlyLintPass, LintArray, LintPass};
 use rustc::{declare_lint_pass, declare_tool_lint};
@@ -38,7 +42,11 @@ declare_lint_pass!(ItemsAfterStatements => [ITEMS_AFTER_STATEMENTS]);
 
 impl EarlyLintPass for ItemsAfterStatements {
     fn check_block(&mut self, cx: &EarlyContext<'_>, item: &Block) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(item.span) {
+=======
+        if item.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 
@@ -52,7 +60,11 @@ impl EarlyLintPass for ItemsAfterStatements {
         // lint on all further items
         for stmt in stmts {
             if let StmtKind::Item(ref it) = *stmt {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if in_macro_or_desugar(it.span) {
+=======
+                if it.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     return;
                 }
                 if let ItemKind::MacroDef(..) = it.node {

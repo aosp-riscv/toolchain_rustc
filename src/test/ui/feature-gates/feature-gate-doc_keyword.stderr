@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0658]: `#[doc(keyword = "...")]` is experimental
+=======
+error[E0658]: `#[doc(keyword)]` is experimental
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-doc_keyword.rs:1:1
    |
 LL | #[doc(keyword = "match")]

@@ -10,9 +10,12 @@
 #[cfg(bootstrap)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(no_inline)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub use crate::marker::Copy;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(no_inline)]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub use crate::marker::{Send, Sized, Sync, Unpin};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(no_inline)]
@@ -27,6 +30,7 @@ pub use crate::mem::drop;
 #[cfg(bootstrap)]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(no_inline)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub use crate::clone::Clone;
 #[cfg(bootstrap)]
 #[stable(feature = "rust1", since = "1.0.0")]
@@ -34,11 +38,10 @@ pub use crate::clone::Clone;
 pub use crate::cmp::{PartialEq, PartialOrd, Eq, Ord};
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(no_inline)]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub use crate::convert::{AsRef, AsMut, Into, From};
 #[cfg(bootstrap)]
-#[stable(feature = "rust1", since = "1.0.0")]
-#[doc(no_inline)]
-pub use crate::default::Default;
 #[stable(feature = "rust1", since = "1.0.0")]
 #[doc(no_inline)]
 pub use crate::iter::{Iterator, Extend, IntoIterator};
@@ -53,6 +56,7 @@ pub use crate::option::Option::{self, Some, None};
 pub use crate::result::Result::{self, Ok, Err};
 
 // Re-exported built-in macros
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg(not(bootstrap))]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
@@ -84,6 +88,36 @@ pub use core::prelude::v1::{
 // FIXME: Attribute and derive macros are not documented because for them rustdoc generates
 // dead links which fail link checker testing.
 #[cfg(not(bootstrap))]
+=======
+#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+#[doc(no_inline)]
+pub use core::prelude::v1::{
+    asm,
+    assert,
+    cfg,
+    column,
+    compile_error,
+    concat,
+    concat_idents,
+    env,
+    file,
+    format_args,
+    format_args_nl,
+    global_asm,
+    include,
+    include_bytes,
+    include_str,
+    line,
+    log_syntax,
+    module_path,
+    option_env,
+    stringify,
+    trace_macros,
+};
+
+// FIXME: Attribute and derive macros are not documented because for them rustdoc generates
+// dead links which fail link checker testing.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow(deprecated)]
 #[doc(hidden)]

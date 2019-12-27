@@ -301,6 +301,21 @@ GIT_EXTERN(int) git_index_add_frombuffer(
 #define GIT_OBJ_OFS_DELTA GIT_OBJECT_OFS_DELTA
 #define GIT_OBJ_REF_DELTA GIT_OBJECT_REF_DELTA
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+/**
+ * Get the size in bytes for the structure which
+ * acts as an in-memory representation of any given
+ * object type.
+ *
+ * For all the core types, this would the equivalent
+ * of calling `sizeof(git_commit)` if the core types
+ * were not opaque on the external API.
+ *
+ * @param type object type to get its size
+ * @return size in bytes of the object
+ */
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 GIT_EXTERN(size_t) git_object__size(git_object_t type);
 
 /**@}*/

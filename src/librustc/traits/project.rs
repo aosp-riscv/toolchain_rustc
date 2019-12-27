@@ -15,7 +15,10 @@ use super::util;
 use crate::hir::def_id::DefId;
 use crate::infer::{InferCtxt, InferOk, LateBoundRegionConversionTime};
 use crate::infer::type_variable::{TypeVariableOrigin, TypeVariableOriginKind};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::mir::interpret::{GlobalId, ConstValue};
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc_data_structures::snapshot_map::{Snapshot, SnapshotMap};
 use rustc_macros::HashStable;
 use syntax::ast::Ident;
@@ -397,6 +400,7 @@ impl<'a, 'b, 'tcx> TypeFolder<'tcx> for AssocTypeNormalizer<'a, 'b, 'tcx> {
     }
 
     fn fold_const(&mut self, constant: &'tcx ty::Const<'tcx>) -> &'tcx ty::Const<'tcx> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if let ConstValue::Unevaluated(def_id, substs) = constant.val {
             let tcx = self.selcx.tcx().global_tcx();
             let param_env = self.param_env;
@@ -431,6 +435,9 @@ impl<'a, 'b, 'tcx> TypeFolder<'tcx> for AssocTypeNormalizer<'a, 'b, 'tcx> {
             }
         }
         constant
+=======
+        constant.eval(self.selcx.tcx(), self.param_env)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
@@ -1417,7 +1424,11 @@ fn confirm_callable_candidate<'cx, 'tcx>(
                 projection_ty: ty::ProjectionTy::from_ref_and_name(
                     tcx,
                     trait_ref,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Ident::with_empty_ctxt(FN_OUTPUT_NAME),
+=======
+                    Ident::with_dummy_span(FN_OUTPUT_NAME),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ),
                 ty: ret_type
             }

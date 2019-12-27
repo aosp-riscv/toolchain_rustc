@@ -71,6 +71,7 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriEvalContextExt<'mir, 'tcx
     /// Get the `Place` for a local
     fn local_place(&mut self, local: mir::Local) -> InterpResult<'tcx, PlaceTy<'tcx, Tag>> {
         let this = self.eval_context_mut();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let place = mir::Place { base: mir::PlaceBase::Local(local), projection: None };
         this.eval_place(&place)
     }
@@ -100,6 +101,45 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriEvalContextExt<'mir, 'tcx
         let rng = this.memory_mut().extra.rng.get_mut();
         let mut data = vec![0; len];
         rng.fill_bytes(&mut data);
+=======
+        let place = mir::Place { base: mir::PlaceBase::Local(local), projection: Box::new([]) };
+        this.eval_place(&place)
+    }
+
+    /// Generate some random bytes, and write them to `dest`.
+    fn gen_random(
+        &mut self,
+        ptr: Scalar<Tag>,
+        len: usize,
+    ) -> InterpResult<'tcx>  {
+        // Some programs pass in a null pointer and a length of 0
+        // to their platform's random-generation function (e.g. getrandom())
+        // on Linux. For compatibility with these programs, we don't perform
+        // any additional checks - it's okay if the pointer is invalid,
+        // since we wouldn't actually be writing to it.
+        if len == 0 {
+            return Ok(());
+        }
+        let this = self.eval_context_mut();
+
+        let ptr = this.memory().check_ptr_access(
+            ptr,
+            Size::from_bytes(len as u64),
+            Align::from_bytes(1).unwrap()
+        )?.expect("we already checked for size 0");
+
+        let mut data = vec![0; len];
+
+        if this.machine.communicate {
+            // Fill the buffer using the host's rng.
+            getrandom::getrandom(&mut data)
+                .map_err(|err| err_unsup_format!("getrandom failed: {}", err))?;
+        }
+        else {
+            let rng = this.memory_mut().extra.rng.get_mut();
+            rng.fill_bytes(&mut data);
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         let tcx = &{this.tcx.tcx};
         this.memory_mut().get_mut(ptr.alloc_id)?.write_bytes(tcx, ptr, &data)
@@ -214,8 +254,26 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriEvalContextExt<'mir, 'tcx
                     // This is `Freeze`, there cannot be an `UnsafeCell`
                     Ok(())
                 } else {
-                    // Proceed further
-                    self.walk_value(v)
+                    // We want to not actually read from memory for this visit. So, before
+                    // walking this value, we have to make sure it is not a
+                    // `Variants::Multiple`.
+                    match v.layout.variants {
+                        layout::Variants::Multiple { .. } => {
+                            // A multi-variant enum, or generator, or so.
+                            // Treat this like a union: without reading from memory,
+                            // we cannot determine the variant we are in. Reading from
+                            // memory would be subject to Stacked Borrows rules, leading
+                            // to all sorts of "funny" recursion.
+                            // We only end up here if the type is *not* freeze, so we just call the
+                            // `UnsafeCell` action.
+                            (self.unsafe_cell_action)(v)
+                        }
+                        layout::Variants::Single { .. } => {
+                            // Proceed further, try to find where exactly that `UnsafeCell`
+                            // is hiding.
+                            self.walk_value(v)
+                        }
+                    }
                 }
             }
 

@@ -36,12 +36,20 @@ pub trait Middleware<M: Metadata>: Send + Sync + 'static {
 }
 
 /// Dummy future used as a noop result of middleware.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub type NoopFuture = Box<Future<Item = Option<Response>, Error = ()> + Send>;
+=======
+pub type NoopFuture = Box<dyn Future<Item = Option<Response>, Error = ()> + Send>;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// Dummy future used as a noop call result of middleware.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub type NoopCallFuture = Box<Future<Item = Option<Output>, Error = ()> + Send>;
+=======
+pub type NoopCallFuture = Box<dyn Future<Item = Option<Output>, Error = ()> + Send>;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /// No-op middleware implementation
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Noop;
 impl<M: Metadata> Middleware<M> for Noop {
 	type Future = NoopFuture;

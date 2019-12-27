@@ -14,12 +14,20 @@ impl SimplifyBranches {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for SimplifyBranches {
+=======
+impl<'tcx> MirPass<'tcx> for SimplifyBranches {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(&self.label)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let param_env = tcx.param_env(src.def_id());
         for block in body.basic_blocks_mut() {
             let terminator = block.terminator_mut();

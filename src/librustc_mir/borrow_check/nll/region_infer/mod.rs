@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use super::universal_regions::UniversalRegions;
 use crate::borrow_check::nll::constraints::graph::NormalConstraintGraph;
 use crate::borrow_check::nll::constraints::{
@@ -6,10 +7,31 @@ use crate::borrow_check::nll::constraints::{
 use crate::borrow_check::nll::member_constraints::{MemberConstraintSet, NllMemberConstraintIndex};
 use crate::borrow_check::nll::region_infer::values::{
     PlaceholderIndices, RegionElement, ToElementIndex,
+=======
+use std::rc::Rc;
+
+use crate::borrow_check::nll::{
+    constraints::{
+        graph::NormalConstraintGraph,
+        ConstraintSccIndex,
+        OutlivesConstraint,
+        OutlivesConstraintSet,
+    },
+    member_constraints::{MemberConstraintSet, NllMemberConstraintIndex},
+    region_infer::values::{
+        PlaceholderIndices, RegionElement, ToElementIndex
+    },
+    type_check::{free_region_relations::UniversalRegionRelations, Locations},
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::borrow_check::nll::type_check::free_region_relations::UniversalRegionRelations;
 use crate::borrow_check::nll::type_check::Locations;
 use crate::borrow_check::Upvar;
+=======
+use crate::borrow_check::Upvar;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::hir::def_id::DefId;
 use rustc::infer::canonical::QueryOutlivesConstraint;
 use rustc::infer::opaque_types;
@@ -31,16 +53,16 @@ use rustc_data_structures::indexed_vec::IndexVec;
 use rustc_errors::{Diagnostic, DiagnosticBuilder};
 use syntax_pos::Span;
 
-use std::rc::Rc;
+crate use self::error_reporting::{RegionName, RegionNameSource, RegionErrorNamingCtx};
+use self::values::{LivenessValues, RegionValueElements, RegionValues};
+use super::universal_regions::UniversalRegions;
+use super::ToRegionVid;
 
 mod dump_mir;
 mod error_reporting;
-crate use self::error_reporting::{RegionName, RegionNameSource};
 mod graphviz;
-pub mod values;
-use self::values::{LivenessValues, RegionValueElements, RegionValues};
 
-use super::ToRegionVid;
+pub mod values;
 
 pub struct RegionInferenceContext<'tcx> {
     /// Contains the definition for every region variable. Region
@@ -487,6 +509,12 @@ impl<'tcx> RegionInferenceContext<'tcx> {
             errors_buffer,
         );
 
+        // If we produce any errors, we keep track of the names of all regions, so that we can use
+        // the same error names in any suggestions we produce. Note that we need names to be unique
+        // across different errors for the same MIR def so that we can make suggestions that fix
+        // multiple problems.
+        let mut region_naming = RegionErrorNamingCtx::new();
+
         self.check_universal_regions(
             infcx,
             body,
@@ -494,6 +522,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
             mir_def_id,
             outlives_requirements.as_mut(),
             errors_buffer,
+            &mut region_naming,
         );
 
         self.check_member_constraints(infcx, mir_def_id, errors_buffer);
@@ -1312,6 +1341,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         mir_def_id: DefId,
         mut propagated_outlives_requirements: Option<&mut Vec<ClosureOutlivesRequirement<'tcx>>>,
         errors_buffer: &mut Vec<Diagnostic>,
+        region_naming: &mut RegionErrorNamingCtx,
     ) {
         for (fr, fr_definition) in self.definitions.iter_enumerated() {
             match fr_definition.origin {
@@ -1327,6 +1357,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                         fr,
                         &mut propagated_outlives_requirements,
                         errors_buffer,
+                        region_naming,
                     );
                 }
 
@@ -1358,6 +1389,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         longer_fr: RegionVid,
         propagated_outlives_requirements: &mut Option<&mut Vec<ClosureOutlivesRequirement<'tcx>>>,
         errors_buffer: &mut Vec<Diagnostic>,
+        region_naming: &mut RegionErrorNamingCtx,
     ) {
         debug!("check_universal_region(fr={:?})", longer_fr);
 
@@ -1385,6 +1417,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                 mir_def_id,
                 propagated_outlives_requirements,
                 errors_buffer,
+                region_naming,
             );
             return;
         }
@@ -1401,8 +1434,13 @@ impl<'tcx> RegionInferenceContext<'tcx> {
                 mir_def_id,
                 propagated_outlives_requirements,
                 errors_buffer,
+                region_naming,
             ) {
                 // continuing to iterate just reports more errors than necessary
+                //
+                // FIXME It would also allow us to report more Outlives Suggestions, though, so
+                // it's not clear that that's a bad thing. Somebody should try commenting out this
+                // line and see it is actually a regression.
                 return;
             }
         }
@@ -1418,6 +1456,7 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         mir_def_id: DefId,
         propagated_outlives_requirements: &mut Option<&mut Vec<ClosureOutlivesRequirement<'tcx>>>,
         errors_buffer: &mut Vec<Diagnostic>,
+        region_naming: &mut RegionErrorNamingCtx,
     ) -> Option<ErrorReported> {
         // If it is known that `fr: o`, carry on.
         if self.universal_region_relations.outlives(longer_fr, shorter_fr) {
@@ -1466,7 +1505,22 @@ impl<'tcx> RegionInferenceContext<'tcx> {
         //
         // Note: in this case, we use the unapproximated regions to report the
         // error. This gives better error messages in some cases.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.report_error(body, upvars, infcx, mir_def_id, longer_fr, shorter_fr, errors_buffer);
+=======
+        let db = self.report_error(
+            body,
+            upvars,
+            infcx,
+            mir_def_id,
+            longer_fr,
+            shorter_fr,
+            region_naming,
+        );
+
+        db.buffer(errors_buffer);
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         Some(ErrorReported)
     }
 

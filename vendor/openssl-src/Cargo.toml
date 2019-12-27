@@ -12,7 +12,11 @@
 
 [package]
 name = "openssl-src"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 version = "111.3.0+1.1.1c"
+=======
+version = "111.6.0+1.1.1d"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 authors = ["Alex Crichton <alex@alexcrichton.com>"]
 exclude = ["openssl/boringssl/*", "openssl/fuzz/*", "openssl/krb5/*", "openssl/pyca-cryptography/*", "openssl/test/*"]
 description = "Source of OpenSSL and logic to build it.\n"

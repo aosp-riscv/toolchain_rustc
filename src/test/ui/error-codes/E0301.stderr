@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0301]: cannot mutably borrow in a pattern guard
   --> $DIR/E0301.rs:4:19
    |
@@ -18,3 +19,5 @@ error: aborting due to 2 previous errors
 
 Some errors have detailed explanations: E0301, E0596.
 For more information about an error, try `rustc --explain E0301`.
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

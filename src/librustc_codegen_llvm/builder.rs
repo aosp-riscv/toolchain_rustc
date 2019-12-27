@@ -5,7 +5,6 @@ use crate::context::CodegenCx;
 use crate::type_::Type;
 use crate::type_of::LayoutLlvmExt;
 use crate::value::Value;
-use syntax::symbol::LocalInternedString;
 use rustc_codegen_ssa::common::{IntPredicate, TypeKind, RealPredicate};
 use rustc_codegen_ssa::MemFlags;
 use libc::{c_uint, c_char};
@@ -24,6 +23,7 @@ use std::ffi::CStr;
 use std::ops::{Deref, Range};
 use std::ptr;
 use std::iter::TrustedLen;
+use syntax::symbol::Symbol;
 
 // All Builders must have an llfn associated with them
 #[must_use]
@@ -387,16 +387,21 @@ impl BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
         )
     }
 
-    fn alloca(&mut self, ty: &'ll Type, name: &str, align: Align) -> &'ll Value {
+    fn alloca(&mut self, ty: &'ll Type, align: Align) -> &'ll Value {
         let mut bx = Builder::with_cx(self.cx);
         bx.position_at_start(unsafe {
             llvm::LLVMGetFirstBasicBlock(self.llfn())
         });
-        bx.dynamic_alloca(ty, name, align)
+        bx.dynamic_alloca(ty, align)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn dynamic_alloca(&mut self, ty: &'ll Type, name: &str, align: Align) -> &'ll Value {
+=======
+    fn dynamic_alloca(&mut self, ty: &'ll Type, align: Align) -> &'ll Value {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         unsafe {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let alloca = if name.is_empty() {
                 llvm::LLVMBuildAlloca(self.llbuilder, ty, UNNAMED)
             } else {
@@ -404,6 +409,9 @@ impl BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
                 llvm::LLVMBuildAlloca(self.llbuilder, ty,
                                       name.as_ptr())
             };
+=======
+            let alloca = llvm::LLVMBuildAlloca(self.llbuilder, ty, UNNAMED);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             llvm::LLVMSetAlignment(alloca, align.bytes() as c_uint);
             alloca
         }
@@ -412,9 +420,9 @@ impl BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
     fn array_alloca(&mut self,
                         ty: &'ll Type,
                         len: &'ll Value,
-                        name: &str,
                         align: Align) -> &'ll Value {
         unsafe {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let alloca = if name.is_empty() {
                 llvm::LLVMBuildArrayAlloca(self.llbuilder, ty, len, UNNAMED)
             } else {
@@ -422,6 +430,9 @@ impl BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
                 llvm::LLVMBuildArrayAlloca(self.llbuilder, ty, len,
                                            name.as_ptr())
             };
+=======
+            let alloca = llvm::LLVMBuildArrayAlloca(self.llbuilder, ty, len, UNNAMED);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             llvm::LLVMSetAlignment(alloca, align.bytes() as c_uint);
             alloca
         }
@@ -561,7 +572,7 @@ impl BuilderMethods<'a, 'tcx> for Builder<'a, 'll, 'tcx> {
 
         let align = dest.align.restrict_for_offset(dest.layout.field(self.cx(), 0).size);
         cg_elem.val.store(&mut body_bx,
-            PlaceRef::new_sized(current, cg_elem.layout, align));
+            PlaceRef::new_sized_aligned(current, cg_elem.layout, align));
 
         let next = body_bx.inbounds_gep(current, &[self.const_usize(1)]);
         body_bx.br(header_bx.llbb());
@@ -1082,8 +1093,8 @@ impl StaticBuilderMethods for Builder<'a, 'll, 'tcx> {
 
     fn static_panic_msg(
         &mut self,
-        msg: Option<LocalInternedString>,
-        filename: LocalInternedString,
+        msg: Option<Symbol>,
+        filename: Symbol,
         line: Self::Value,
         col: Self::Value,
         kind: &str,

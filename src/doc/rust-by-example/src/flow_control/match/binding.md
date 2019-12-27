@@ -26,7 +26,33 @@ fn main() {
 }
 ```
 
+You can also use binding to "destructure" `enum` variants, such as `Option`:
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+[functions]: ../../fn.md
+=======
+```rust,editable
+fn some_number() -> Option<u32> {
+    Some(42)
+}
+
+fn main() {
+    match some_number() {
+        // Got `Some` variant, match if its value, bound to `n`,
+        // is equal to 42.
+        Some(n @ 42) => println!("The Answer: {}!", n),
+        // Match any other number.
+        Some(n)      => println!("Not interesting... {}", n),
+        // Match anything else (`None` variant).
+        _            => (),
+    }
+}
+```
+
 ### See also:
-[functions]
+[`functions`][functions], [`enums`][enums] and [`Option`][option]
 
 [functions]: ../../fn.md
+[enums]: ../../custom_types/enum.md
+[option]: ../../std/option.md
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

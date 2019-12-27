@@ -104,6 +104,7 @@ impl LitKind {
 
         Ok(match kind {
             token::Bool => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 assert!(symbol == kw::True || symbol == kw::False);
                 LitKind::Bool(symbol == kw::True)
             }
@@ -262,6 +263,166 @@ impl Lit {
     crate fn from_token(token: &Token) -> Result<Lit, LitError> {
         let lit = match token.kind {
             token::Ident(name, false) if name == kw::True || name == kw::False =>
+=======
+                assert!(symbol.is_bool_lit());
+                LitKind::Bool(symbol == kw::True)
+            }
+            token::Byte => return unescape_byte(&symbol.as_str())
+                .map(LitKind::Byte).map_err(|_| LitError::LexerError),
+            token::Char => return unescape_char(&symbol.as_str())
+                .map(LitKind::Char).map_err(|_| LitError::LexerError),
+
+            // There are some valid suffixes for integer and float literals,
+            // so all the handling is done internally.
+            token::Integer => return integer_lit(symbol, suffix),
+            token::Float => return float_lit(symbol, suffix),
+
+            token::Str => {
+                // If there are no characters requiring special treatment we can
+                // reuse the symbol from the token. Otherwise, we must generate a
+                // new symbol because the string in the LitKind is different to the
+                // string in the token.
+                let s = symbol.as_str();
+                let symbol = if s.contains(&['\\', '\r'][..]) {
+                    let mut buf = String::with_capacity(s.len());
+                    let mut error = Ok(());
+                    unescape_str(&s, &mut |_, unescaped_char| {
+                        match unescaped_char {
+                            Ok(c) => buf.push(c),
+                            Err(_) => error = Err(LitError::LexerError),
+                        }
+                    });
+                    error?;
+                    Symbol::intern(&buf)
+                } else {
+                    symbol
+                };
+                LitKind::Str(symbol, ast::StrStyle::Cooked)
+            }
+            token::StrRaw(n) => {
+                // Ditto.
+                let s = symbol.as_str();
+                let symbol = if s.contains('\r') {
+                    let mut buf = String::with_capacity(s.len());
+                    let mut error = Ok(());
+                    unescape_raw_str(&s, &mut |_, unescaped_char| {
+                        match unescaped_char {
+                            Ok(c) => buf.push(c),
+                            Err(_) => error = Err(LitError::LexerError),
+                        }
+                    });
+                    error?;
+                    buf.shrink_to_fit();
+                    Symbol::intern(&buf)
+                } else {
+                    symbol
+                };
+                LitKind::Str(symbol, ast::StrStyle::Raw(n))
+            }
+            token::ByteStr => {
+                let s = symbol.as_str();
+                let mut buf = Vec::with_capacity(s.len());
+                let mut error = Ok(());
+                unescape_byte_str(&s, &mut |_, unescaped_byte| {
+                    match unescaped_byte {
+                        Ok(c) => buf.push(c),
+                        Err(_) => error = Err(LitError::LexerError),
+                    }
+                });
+                error?;
+                buf.shrink_to_fit();
+                LitKind::ByteStr(Lrc::new(buf))
+            }
+            token::ByteStrRaw(_) => {
+                let s = symbol.as_str();
+                let bytes = if s.contains('\r') {
+                    let mut buf = Vec::with_capacity(s.len());
+                    let mut error = Ok(());
+                    unescape_raw_byte_str(&s, &mut |_, unescaped_byte| {
+                        match unescaped_byte {
+                            Ok(c) => buf.push(c),
+                            Err(_) => error = Err(LitError::LexerError),
+                        }
+                    });
+                    error?;
+                    buf.shrink_to_fit();
+                    buf
+                } else {
+                    symbol.to_string().into_bytes()
+                };
+
+                LitKind::ByteStr(Lrc::new(bytes))
+            },
+            token::Err => LitKind::Err(symbol),
+        })
+    }
+
+    /// Attempts to recover a token from semantic literal.
+    /// This function is used when the original token doesn't exist (e.g. the literal is created
+    /// by an AST-based macro) or unavailable (e.g. from HIR pretty-printing).
+    pub fn to_lit_token(&self) -> token::Lit {
+        let (kind, symbol, suffix) = match *self {
+            LitKind::Str(symbol, ast::StrStyle::Cooked) => {
+                // Don't re-intern unless the escaped string is different.
+                let s = &symbol.as_str();
+                let escaped = s.escape_default().to_string();
+                let symbol = if escaped == *s { symbol } else { Symbol::intern(&escaped) };
+                (token::Str, symbol, None)
+            }
+            LitKind::Str(symbol, ast::StrStyle::Raw(n)) => {
+                (token::StrRaw(n), symbol, None)
+            }
+            LitKind::ByteStr(ref bytes) => {
+                let string = bytes.iter().cloned().flat_map(ascii::escape_default)
+                    .map(Into::<char>::into).collect::<String>();
+                (token::ByteStr, Symbol::intern(&string), None)
+            }
+            LitKind::Byte(byte) => {
+                let string: String = ascii::escape_default(byte).map(Into::<char>::into).collect();
+                (token::Byte, Symbol::intern(&string), None)
+            }
+            LitKind::Char(ch) => {
+                let string: String = ch.escape_default().map(Into::<char>::into).collect();
+                (token::Char, Symbol::intern(&string), None)
+            }
+            LitKind::Int(n, ty) => {
+                let suffix = match ty {
+                    ast::LitIntType::Unsigned(ty) => Some(ty.to_symbol()),
+                    ast::LitIntType::Signed(ty) => Some(ty.to_symbol()),
+                    ast::LitIntType::Unsuffixed => None,
+                };
+                (token::Integer, sym::integer(n), suffix)
+            }
+            LitKind::Float(symbol, ty) => {
+                (token::Float, symbol, Some(ty.to_symbol()))
+            }
+            LitKind::FloatUnsuffixed(symbol) => {
+                (token::Float, symbol, None)
+            }
+            LitKind::Bool(value) => {
+                let symbol = if value { kw::True } else { kw::False };
+                (token::Bool, symbol, None)
+            }
+            LitKind::Err(symbol) => {
+                (token::Err, symbol, None)
+            }
+        };
+
+        token::Lit::new(kind, symbol, suffix)
+    }
+}
+
+impl Lit {
+    /// Converts literal token into an AST literal.
+    fn from_lit_token(token: token::Lit, span: Span) -> Result<Lit, LitError> {
+        Ok(Lit { token, node: LitKind::from_lit_token(token)?, span })
+    }
+
+    /// Converts arbitrary token into an AST literal.
+    crate fn from_token(token: &Token) -> Result<Lit, LitError> {
+        let lit = match token.kind {
+            token::Ident(name, false) if name.is_bool_lit() =>
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 token::Lit::new(token::Bool, name, None),
             token::Literal(lit) =>
                 lit,

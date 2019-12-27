@@ -13,6 +13,10 @@
 #include "annotated_commit.h"
 #include "merge.h"
 #include "checkout.h"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#include "commit.h"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /**
  * @file git2/rebase.h
@@ -72,6 +76,21 @@ typedef struct {
 	 * `abort` to match git semantics.
 	 */
 	git_checkout_options checkout_options;
+
+	/**
+	 * If provided, this will be called with the commit content, allowing
+	 * a signature to be added to the rebase commit. Can be skipped with
+	 * GIT_PASSTHROUGH. If GIT_PASSTHROUGH is returned, a commit will be made
+	 * without a signature.
+	 * This field is only used when performing git_rebase_commit.
+	 */
+	git_commit_signing_cb signing_cb;
+
+	/**
+	 * This will be passed to each of the callbacks in this struct
+	 * as the last parameter.
+	 */
+	void *payload;
 } git_rebase_options;
 
 /**
@@ -118,7 +137,7 @@ typedef enum {
 #define GIT_REBASE_OPTIONS_VERSION 1
 #define GIT_REBASE_OPTIONS_INIT \
 	{ GIT_REBASE_OPTIONS_VERSION, 0, 0, NULL, GIT_MERGE_OPTIONS_INIT, \
-	  GIT_CHECKOUT_OPTIONS_INIT}
+	  GIT_CHECKOUT_OPTIONS_INIT, NULL, NULL }
 
 /** Indicates that a rebase operation is not (yet) in progress. */
 #define GIT_REBASE_NO_OPERATION SIZE_MAX

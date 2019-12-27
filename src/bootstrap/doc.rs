@@ -375,7 +375,7 @@ impl Step for Standalone {
                up_to_date(&footer, &html) &&
                up_to_date(&favicon, &html) &&
                up_to_date(&full_toc, &html) &&
-               up_to_date(&version_info, &html) &&
+               (builder.config.dry_run || up_to_date(&version_info, &html)) &&
                (builder.config.dry_run || up_to_date(&rustdoc, &html)) {
                 continue
             }
@@ -413,7 +413,7 @@ impl Step for Std {
 
     fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
         let builder = run.builder;
-        run.all_krates("std").default_condition(builder.config.docs)
+        run.all_krates("test").default_condition(builder.config.docs)
     }
 
     fn make_run(run: RunConfig<'_>) {
@@ -475,12 +475,12 @@ impl Step for Std {
                  .arg("--resource-suffix").arg(crate::channel::CFG_RELEASE_NUM)
                  .arg("--index-page").arg(&builder.src.join("src/doc/index.md"));
 
-            builder.run(&mut cargo);
-            builder.cp_r(&my_out, &out);
+            builder.run(&mut cargo.into());
         };
-        for krate in &["alloc", "core", "std"] {
+        for krate in &["alloc", "core", "std", "proc_macro", "test"] {
             run_cargo_rustdoc_for(krate);
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     }
 }
 
@@ -606,6 +606,8 @@ impl Step for WhitelistedRustc {
         }
 
         builder.run(&mut cargo);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         builder.cp_r(&my_out, &out);
     }
 }
@@ -687,7 +689,7 @@ impl Step for Rustc {
             cargo.arg("-p").arg(krate);
         }
 
-        builder.run(&mut cargo);
+        builder.run(&mut cargo.into());
     }
 }
 
@@ -782,7 +784,7 @@ impl Step for Rustdoc {
         cargo.arg("-p").arg("rustdoc");
 
         cargo.env("RUSTDOCFLAGS", "--document-private-items");
-        builder.run(&mut cargo);
+        builder.run(&mut cargo.into());
     }
 }
 
@@ -825,8 +827,7 @@ impl Step for ErrorIndex {
         index.arg(crate::channel::CFG_RELEASE_NUM);
 
         // FIXME: shouldn't have to pass this env var
-        index.env("CFG_BUILD", &builder.config.build)
-             .env("RUSTC_ERROR_METADATA_DST", builder.extended_error_dir());
+        index.env("CFG_BUILD", &builder.config.build);
 
         builder.run(&mut index);
     }

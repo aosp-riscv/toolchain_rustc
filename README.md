@@ -26,12 +26,13 @@ or reading the [rustc guide][rustcguidebuild].
 ### Building on *nix
 1. Make sure you have installed the dependencies:
 
-   * `g++` 4.7 or later or `clang++` 3.x or later
+   * `g++` 5.1 or later or `clang++` 3.5 or later
    * `python` 2.7 (but not 3.x)
    * GNU `make` 3.81 or later
    * `cmake` 3.4.3 or later
    * `curl`
    * `git`
+   * `ssl` which comes in `libssl-dev` or `openssl-devel`
 
 2. Clone the [source] with `git`:
 
@@ -56,6 +57,11 @@ or reading the [rustc guide][rustcguidebuild].
     an installation (using `./x.py install`) that you set the `prefix` value
     in the `[install]` section to a directory that you have write permissions.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    Create install directory if you are not installing in default directory
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 4. Build and install:
 
     ```sh
@@ -144,9 +150,24 @@ then you may need to force rustbuild to use an older version. This can be done
 by manually calling the appropriate vcvars file before running the bootstrap.
 
 ```batch
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 > CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+=======
+> CALL "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 > python x.py build
 ```
+
+### Building rustc with older host toolchains
+It is still possible to build Rust with the older toolchain versions listed below, but only if the
+LLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN option is set to true in the config.toml file.
+
+* Clang 3.1
+* Apple Clang 3.1
+* GCC 4.8
+* Visual Studio 2015 (Update 3)
+
+Toolchain versions older than what is listed above cannot be used to build rustc.
 
 #### Specifying an ABI
 

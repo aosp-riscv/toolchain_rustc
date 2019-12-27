@@ -1,6 +1,9 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 warning: `#[test]` attribute should not be used on macros. Use `#[cfg(test)]` instead.
   --> $DIR/test-on-macro.rs:11:1
    |
 LL | foo!();
    | ^^^^^^^
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

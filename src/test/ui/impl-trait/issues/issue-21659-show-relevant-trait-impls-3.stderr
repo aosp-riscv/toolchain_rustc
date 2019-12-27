@@ -5,7 +5,11 @@ LL | struct Bar;
    | ----------- method `foo` not found for this
 ...
 LL |     f1.foo(1usize);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |        ^^^
+=======
+   |        ^^^ method not found in `Bar`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = help: items from traits can only be used if the trait is implemented and in scope
    = note: the following trait defines an item `foo`, perhaps you need to implement it:

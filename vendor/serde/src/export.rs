@@ -10,6 +10,12 @@ pub use self::string::from_utf8_lossy;
 
 #[cfg(any(feature = "alloc", feature = "std"))]
 pub use lib::{ToString, Vec};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+#[cfg(core_try_from)]
+pub use lib::convert::TryFrom;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 mod string {
     use lib::*;

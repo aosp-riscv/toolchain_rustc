@@ -12,7 +12,11 @@
 
 [package]
 name = "serde"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 version = "1.0.92"
+=======
+version = "1.0.99"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 authors = ["Erick Tryzelaar <erick.tryzelaar@gmail.com>", "David Tolnay <dtolnay@gmail.com>"]
 build = "build.rs"
 include = ["Cargo.toml", "build.rs", "src/**/*.rs", "crates-io.md", "README.md", "LICENSE-APACHE", "LICENSE-MIT"]
@@ -33,7 +37,7 @@ optional = true
 version = "1.0"
 
 [features]
-alloc = ["unstable"]
+alloc = []
 default = ["std"]
 derive = ["serde_derive"]
 rc = []

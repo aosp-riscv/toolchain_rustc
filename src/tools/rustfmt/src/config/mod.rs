@@ -152,6 +152,9 @@ create_config! {
     emit_mode: EmitMode, EmitMode::Files, false,
         "What emit Mode to use when none is supplied";
     make_backup: bool, false, false, "Backup changed files";
+    print_misformatted_file_names: bool, false, true,
+        "Prints the names of mismatched files that were formatted. Prints the names of \
+         files that would be formated when used with `--check` mode. ";
 }
 
 impl PartialConfig {
@@ -161,6 +164,7 @@ impl PartialConfig {
         cloned.file_lines = None;
         cloned.verbose = None;
         cloned.width_heuristics = None;
+        cloned.print_misformatted_file_names = None;
 
         ::toml::to_string(&cloned).map_err(|e| format!("Could not output config: {}", e))
     }
@@ -465,6 +469,7 @@ mod test {
 
     #[test]
     fn test_dump_default_config() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         const DEFAULT_CONFIG: &str = r#"max_width = 100
 hard_tabs = false
 tab_spaces = 4
@@ -534,6 +539,80 @@ make_backup = false
 "#;
         let toml = Config::default().all_options().to_toml().unwrap();
         assert_eq!(&toml, DEFAULT_CONFIG);
+=======
+        let default_config = format!(
+            r#"max_width = 100
+hard_tabs = false
+tab_spaces = 4
+newline_style = "Auto"
+use_small_heuristics = "Default"
+indent_style = "Block"
+wrap_comments = false
+format_code_in_doc_comments = false
+comment_width = 80
+normalize_comments = false
+normalize_doc_attributes = false
+license_template_path = ""
+format_strings = false
+format_macro_matchers = false
+format_macro_bodies = true
+empty_item_single_line = true
+struct_lit_single_line = true
+fn_single_line = false
+where_single_line = false
+imports_indent = "Block"
+imports_layout = "Mixed"
+merge_imports = false
+reorder_imports = true
+reorder_modules = true
+reorder_impl_items = false
+type_punctuation_density = "Wide"
+space_before_colon = false
+space_after_colon = true
+spaces_around_ranges = false
+binop_separator = "Front"
+remove_nested_parens = true
+combine_control_expr = true
+overflow_delimited_expr = false
+struct_field_align_threshold = 0
+enum_discrim_align_threshold = 0
+match_arm_blocks = true
+force_multiline_blocks = false
+fn_args_layout = "Tall"
+brace_style = "SameLineWhere"
+control_brace_style = "AlwaysSameLine"
+trailing_semicolon = true
+trailing_comma = "Vertical"
+match_block_trailing_comma = false
+blank_lines_upper_bound = 1
+blank_lines_lower_bound = 0
+edition = "2015"
+version = "One"
+inline_attribute_width = 0
+merge_derives = true
+use_try_shorthand = false
+use_field_init_shorthand = false
+force_explicit_abi = true
+condense_wildcard_suffixes = false
+color = "Auto"
+required_version = "{}"
+unstable_features = false
+disable_all_formatting = false
+skip_children = false
+hide_parse_errors = false
+error_on_line_overflow = false
+error_on_unformatted = false
+report_todo = "Never"
+report_fixme = "Never"
+ignore = []
+emit_mode = "Files"
+make_backup = false
+"#,
+            env!("CARGO_PKG_VERSION")
+        );
+        let toml = Config::default().all_options().to_toml().unwrap();
+        assert_eq!(&toml, &default_config);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     // FIXME(#2183): these tests cannot be run in parallel because they use env vars.

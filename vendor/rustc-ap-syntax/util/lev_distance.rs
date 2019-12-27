@@ -1,6 +1,9 @@
 use std::cmp;
 use crate::symbol::Symbol;
 
+#[cfg(test)]
+mod tests;
+
 /// Finds the Levenshtein distance between two strings
 pub fn lev_distance(a: &str, b: &str) -> usize {
     // cases which don't require further computation
@@ -77,6 +80,7 @@ pub fn find_best_match_for_name<'a, T>(iter_names: T,
         if let Some((candidate, _)) = levenstein_match { Some(candidate) } else { None }
     }
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 #[test]
 fn test_lev_distance() {
@@ -134,3 +138,5 @@ fn test_find_best_match_for_name() {
         );
     })
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

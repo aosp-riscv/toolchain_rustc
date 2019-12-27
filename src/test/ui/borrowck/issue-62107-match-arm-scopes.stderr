@@ -1,8 +1,16 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: use of possibly uninitialized variable: `e`
   --> $DIR/issue-62107-match-arm-scopes.rs:3:11
    |
 LL |     match e {
    |           ^ use of possibly uninitialized `e`
+=======
+error[E0381]: use of possibly-uninitialized variable: `e`
+  --> $DIR/issue-62107-match-arm-scopes.rs:3:11
+   |
+LL |     match e {
+   |           ^ use of possibly-uninitialized `e`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

@@ -1,5 +1,10 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::support::project;
 use crate::support::registry::Package;
+=======
+use cargo_test_support::project;
+use cargo_test_support::registry::Package;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 // Ensure that the "-Z minimal-versions" CLI option works and the minimal
 // version of a dependency ends up in the lock file.

@@ -25,10 +25,13 @@ use syntax::feature_gate::{emit_feature_err, GateIssue};
 use syntax::symbol::sym;
 use syntax_pos::{Span, DUMMY_SP};
 
+use std::borrow::Cow;
+use std::cell::Cell;
 use std::fmt;
 use std::ops::{Deref, Index, IndexMut};
 use std::usize;
 
+use rustc::hir::HirId;
 use crate::transform::{MirPass, MirSource};
 use super::promote_consts::{self, Candidate, TempState};
 
@@ -184,6 +187,7 @@ trait Qualif {
         cx: &ConstCx<'_, 'tcx>,
         place: PlaceRef<'_, 'tcx>,
     ) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let proj = place.projection.as_ref().unwrap();
 
         let base_qualif = Self::in_place(cx, PlaceRef {
@@ -202,8 +206,30 @@ trait Qualif {
             ProjectionElem::Field(..) |
             ProjectionElem::ConstantIndex { .. } |
             ProjectionElem::Downcast(..) => qualif,
+=======
+        if let [proj_base @ .., elem] = place.projection {
+            let base_qualif = Self::in_place(cx, PlaceRef {
+                base: place.base,
+                projection: proj_base,
+            });
+            let qualif = base_qualif && Self::mask_for_ty(
+                cx,
+                Place::ty_from(place.base, proj_base, cx.body, cx.tcx)
+                    .projection_ty(cx.tcx, elem)
+                    .ty,
+            );
+            match elem {
+                ProjectionElem::Deref |
+                ProjectionElem::Subslice { .. } |
+                ProjectionElem::Field(..) |
+                ProjectionElem::ConstantIndex { .. } |
+                ProjectionElem::Downcast(..) => qualif,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-            ProjectionElem::Index(local) => qualif || Self::in_local(cx, local),
+                ProjectionElem::Index(local) => qualif || Self::in_local(cx, *local),
+            }
+        } else {
+            bug!("This should be called if projection is not empty");
         }
     }
 
@@ -218,6 +244,7 @@ trait Qualif {
         match place {
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
             } => Self::in_local(cx, *local),
             PlaceRef {
@@ -230,12 +257,30 @@ trait Qualif {
             PlaceRef {
                 base: PlaceBase::Static(static_),
                 projection: None,
+=======
+                projection: [],
+            } => Self::in_local(cx, *local),
+            PlaceRef {
+                base: PlaceBase::Static(box Static {
+                    kind: StaticKind::Promoted(..),
+                    ..
+                }),
+                projection: [],
+            } => bug!("qualifying already promoted MIR"),
+            PlaceRef {
+                base: PlaceBase::Static(static_),
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 Self::in_static(cx, static_)
             },
             PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(_),
+=======
+                projection: [.., _],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => Self::in_projection(cx, place),
         }
     }
@@ -249,7 +294,7 @@ trait Qualif {
                 if let ConstValue::Unevaluated(def_id, _) = constant.literal.val {
                     // Don't peek inside trait associated constants.
                     if cx.tcx.trait_of_item(def_id).is_some() {
-                        Self::in_any_value_of_ty(cx, constant.ty).unwrap_or(false)
+                        Self::in_any_value_of_ty(cx, constant.literal.ty).unwrap_or(false)
                     } else {
                         let (bits, _) = cx.tcx.at(constant.span).mir_const_qualif(def_id);
 
@@ -258,7 +303,7 @@ trait Qualif {
                         // Just in case the type is more specific than
                         // the definition, e.g., impl associated const
                         // with type parameters, take it into account.
-                        qualif && Self::mask_for_ty(cx, constant.ty)
+                        qualif && Self::mask_for_ty(cx, constant.literal.ty)
                     }
                 } else {
                     false
@@ -286,13 +331,23 @@ trait Qualif {
 
             Rvalue::Ref(_, _, ref place) => {
                 // Special-case reborrows to be more like a copy of the reference.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if let Some(ref proj) = place.projection {
                     if let ProjectionElem::Deref = proj.elem {
                         let base_ty = Place::ty_from(&place.base, &proj.base, cx.body, cx.tcx).ty;
+=======
+                if let box [proj_base @ .., elem] = &place.projection {
+                    if ProjectionElem::Deref == *elem {
+                        let base_ty = Place::ty_from(&place.base, proj_base, cx.body, cx.tcx).ty;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         if let ty::Ref(..) = base_ty.sty {
                             return Self::in_place(cx, PlaceRef {
                                 base: &place.base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: &proj.base,
+=======
+                                projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             });
                         }
                     }
@@ -433,13 +488,17 @@ impl Qualif for IsNotPromotable {
 
     fn in_static(cx: &ConstCx<'_, 'tcx>, static_: &Static<'tcx>) -> bool {
         match static_.kind {
-            StaticKind::Promoted(_) => unreachable!(),
-            StaticKind::Static(def_id) => {
+            StaticKind::Promoted(_, _) => unreachable!(),
+            StaticKind::Static => {
                 // Only allow statics (not consts) to refer to other statics.
                 let allowed = cx.mode == Mode::Static || cx.mode == Mode::StaticMut;
 
                 !allowed ||
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     cx.tcx.get_attrs(def_id).iter().any(
+=======
+                    cx.tcx.get_attrs(static_.def_id).iter().any(
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         |attr| attr.check_name(sym::thread_local)
                     )
             }
@@ -450,16 +509,24 @@ impl Qualif for IsNotPromotable {
         cx: &ConstCx<'_, 'tcx>,
         place: PlaceRef<'_, 'tcx>,
     ) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let proj = place.projection.as_ref().unwrap();
 
         match proj.elem {
             ProjectionElem::Deref |
             ProjectionElem::Downcast(..) => return true,
+=======
+        if let [proj_base @ .., elem] = place.projection {
+            match elem {
+                ProjectionElem::Deref |
+                ProjectionElem::Downcast(..) => return true,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-            ProjectionElem::ConstantIndex {..} |
-            ProjectionElem::Subslice {..} |
-            ProjectionElem::Index(_) => {}
+                ProjectionElem::ConstantIndex {..} |
+                ProjectionElem::Subslice {..} |
+                ProjectionElem::Index(_) => {}
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ProjectionElem::Field(..) => {
                 if cx.mode == Mode::NonConstFn {
                     let base_ty = Place::ty_from(place.base, &proj.base, cx.body, cx.tcx).ty;
@@ -467,13 +534,29 @@ impl Qualif for IsNotPromotable {
                         // No promotion of union field accesses.
                         if def.is_union() {
                             return true;
+=======
+                ProjectionElem::Field(..) => {
+                    if cx.mode == Mode::NonConstFn {
+                        let base_ty = Place::ty_from(place.base, proj_base, cx.body, cx.tcx).ty;
+                        if let Some(def) = base_ty.ty_adt_def() {
+                            // No promotion of union field accesses.
+                            if def.is_union() {
+                                return true;
+                            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         }
                     }
                 }
             }
-        }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Self::in_projection_structurally(cx, place)
+=======
+            Self::in_projection_structurally(cx, place)
+        } else {
+            bug!("This should be called if projection is not empty");
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn in_rvalue(cx: &ConstCx<'_, 'tcx>, rvalue: &Rvalue<'tcx>) -> bool {
@@ -537,9 +620,9 @@ impl Qualif for IsNotPromotable {
                             | "cttz_nonzero"
                             | "ctlz"
                             | "ctlz_nonzero"
-                            | "overflowing_add"
-                            | "overflowing_sub"
-                            | "overflowing_mul"
+                            | "wrapping_add"
+                            | "wrapping_sub"
+                            | "wrapping_mul"
                             | "unchecked_shl"
                             | "unchecked_shr"
                             | "rotate_left"
@@ -803,6 +886,7 @@ impl<'a, 'tcx> Checker<'a, 'tcx> {
                     // We might have a candidate for promotion.
                     let candidate = Candidate::Ref(location);
                     // Start by traversing to the "base", with non-deref projections removed.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let mut place_projection = &place.projection;
                     while let Some(proj) = place_projection {
                         if proj.elem == ProjectionElem::Deref {
@@ -820,6 +904,20 @@ impl<'a, 'tcx> Checker<'a, 'tcx> {
                     // (If we bailed out of the loop due to a `Deref` above, we will definitely
                     // not enter the conditional here.)
                     if let (PlaceBase::Local(local), None) = (&place.base, place_projection) {
+=======
+                    let deref_proj =
+                        place.projection.iter().rev().find(|&elem| *elem == ProjectionElem::Deref);
+
+                    debug!(
+                        "qualify_consts: promotion candidate: place={:?} {:?}",
+                        place.base, deref_proj
+                    );
+                    // We can only promote interior borrows of promotable temps (non-temps
+                    // don't get promoted anyway).
+                    // (If we bailed out of the loop due to a `Deref` above, we will definitely
+                    // not enter the conditional here.)
+                    if let (PlaceBase::Local(local), None) = (&place.base, deref_proj) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         if self.body.local_kind(*local) == LocalKind::Temp {
                             debug!("qualify_consts: promotion candidate: local={:?}", local);
                             // The borrowed place doesn't have `HasMutInterior`
@@ -855,27 +953,51 @@ impl<'a, 'tcx> Checker<'a, 'tcx> {
             _ => {},
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut dest_projection = &dest.projection;
+=======
+        let mut dest_projection = &dest.projection[..];
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let index = loop {
             match (&dest.base, dest_projection) {
                 // We treat all locals equal in constants
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 (&PlaceBase::Local(index), None) => break index,
+=======
+                (&PlaceBase::Local(index), []) => break index,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 // projections are transparent for assignments
                 // we qualify the entire destination at once, even if just a field would have
                 // stricter qualification
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 (base, Some(proj)) => {
+=======
+                (base, [proj_base @ .., _]) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     // Catch more errors in the destination. `visit_place` also checks various
                     // projection rules like union field access and raw pointer deref
                     let context = PlaceContext::MutatingUse(MutatingUseContext::Store);
                     self.visit_place_base(base, context, location);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     self.visit_projection(base, proj, context, location);
                     dest_projection = &proj.base;
+=======
+                    self.visit_projection(base, dest_projection, context, location);
+                    dest_projection = proj_base;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 },
                 (&PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     kind: StaticKind::Promoted(_),
                     ..
                 }), None) => bug!("promoteds don't exist yet during promotion"),
                 (&PlaceBase::Static(box Static{ kind: _, .. }), None) => {
+=======
+                    kind: StaticKind::Promoted(..),
+                    ..
+                }), []) => bug!("promoteds don't exist yet during promotion"),
+                (&PlaceBase::Static(box Static{ kind: _, .. }), []) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     // Catch more errors in the destination. `visit_place` also checks that we
                     // do not try to access statics from constants or try to mutate statics
                     let context = PlaceContext::MutatingUse(MutatingUseContext::Store);
@@ -980,6 +1102,7 @@ impl<'a, 'tcx> Checker<'a, 'tcx> {
         for candidate in &self.promotion_candidates {
             match *candidate {
                 Candidate::Repeat(Location { block: bb, statement_index: stmt_idx }) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     if let StatementKind::Assign(_, box Rvalue::Repeat(
                         Operand::Move(Place {
                             base: PlaceBase::Local(index),
@@ -987,16 +1110,35 @@ impl<'a, 'tcx> Checker<'a, 'tcx> {
                         }),
                         _
                     )) = self.body[bb].statements[stmt_idx].kind {
+=======
+                    if let StatementKind::Assign(box(_, Rvalue::Repeat(
+                        Operand::Move(Place {
+                            base: PlaceBase::Local(index),
+                            projection: box [],
+                        }),
+                        _
+                    ))) = self.body[bb].statements[stmt_idx].kind {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         promoted_temps.insert(index);
                     }
                 }
                 Candidate::Ref(Location { block: bb, statement_index: stmt_idx }) => {
                     if let StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         _,
                         box Rvalue::Ref(_, _, Place {
                             base: PlaceBase::Local(index),
                             projection: None,
                         })
+=======
+                        box(
+                            _,
+                            Rvalue::Ref(_, _, Place {
+                                base: PlaceBase::Local(index),
+                                projection: box [],
+                            })
+                        )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     ) = self.body[bb].statements[stmt_idx].kind {
                         promoted_temps.insert(index);
                     }
@@ -1027,10 +1169,18 @@ impl<'a, 'tcx> Visitor<'tcx> for Checker<'a, 'tcx> {
         self.super_place_base(place_base, context, location);
         match place_base {
             PlaceBase::Local(_) => {}
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             PlaceBase::Static(box Static{ kind: StaticKind::Promoted(_), .. }) => {
+=======
+            PlaceBase::Static(box Static{ kind: StaticKind::Promoted(_, _), .. }) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 unreachable!()
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             PlaceBase::Static(box Static{ kind: StaticKind::Static(def_id), .. }) => {
+=======
+            PlaceBase::Static(box Static{ kind: StaticKind::Static, def_id, .. }) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if self.tcx
                         .get_attrs(*def_id)
                         .iter()
@@ -1081,6 +1231,7 @@ impl<'a, 'tcx> Visitor<'tcx> for Checker<'a, 'tcx> {
     fn visit_projection(
         &mut self,
         place_base: &PlaceBase<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         proj: &Projection<'tcx>,
         context: PlaceContext,
         location: Location,
@@ -1113,6 +1264,75 @@ impl<'a, 'tcx> Visitor<'tcx> for Checker<'a, 'tcx> {
                             }
                         }
                     }
+=======
+        proj: &[PlaceElem<'tcx>],
+        context: PlaceContext,
+        location: Location,
+    ) {
+        debug!(
+            "visit_place_projection: proj={:?} context={:?} location={:?}",
+            proj, context, location,
+        );
+        self.super_projection(place_base, proj, context, location);
+
+        if let [proj_base @ .., elem] = proj {
+            match elem {
+                ProjectionElem::Deref => {
+                    if context.is_mutating_use() {
+                        // `not_const` errors out in const contexts
+                        self.not_const()
+                    }
+                    let base_ty = Place::ty_from(place_base, proj_base, self.body, self.tcx).ty;
+                    match self.mode {
+                        Mode::NonConstFn => {},
+                        _ => {
+                            if let ty::RawPtr(_) = base_ty.sty {
+                                if !self.tcx.features().const_raw_ptr_deref {
+                                    emit_feature_err(
+                                        &self.tcx.sess.parse_sess, sym::const_raw_ptr_deref,
+                                        self.span, GateIssue::Language,
+                                        &format!(
+                                            "dereferencing raw pointers in {}s is unstable",
+                                            self.mode,
+                                        ),
+                                    );
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ProjectionElem::ConstantIndex {..} |
+                ProjectionElem::Subslice {..} |
+                ProjectionElem::Field(..) |
+                ProjectionElem::Index(_) => {
+                    let base_ty = Place::ty_from(place_base, proj_base, self.body, self.tcx).ty;
+                    if let Some(def) = base_ty.ty_adt_def() {
+                        if def.is_union() {
+                            match self.mode {
+                                Mode::ConstFn => {
+                                    if !self.tcx.features().const_fn_union {
+                                        emit_feature_err(
+                                            &self.tcx.sess.parse_sess, sym::const_fn_union,
+                                            self.span, GateIssue::Language,
+                                            "unions in const fn are unstable",
+                                        );
+                                    }
+                                },
+
+                                | Mode::NonConstFn
+                                | Mode::Static
+                                | Mode::StaticMut
+                                | Mode::Const
+                                => {},
+                            }
+                        }
+                    }
+                }
+
+                ProjectionElem::Downcast(..) => {
+                    self.not_const()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             }
 
@@ -1159,7 +1379,11 @@ impl<'a, 'tcx> Visitor<'tcx> for Checker<'a, 'tcx> {
                 // Mark the consumed locals to indicate later drops are noops.
                 if let Place {
                     base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     projection: None,
+=======
+                    projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 } = *place {
                     self.cx.per_local[NeedsDrop].remove(local);
                 }
@@ -1176,11 +1400,21 @@ impl<'a, 'tcx> Visitor<'tcx> for Checker<'a, 'tcx> {
         if let Rvalue::Ref(_, kind, ref place) = *rvalue {
             // Special-case reborrows.
             let mut reborrow_place = None;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if let Some(ref proj) = place.projection {
                 if let ProjectionElem::Deref = proj.elem {
                     let base_ty = Place::ty_from(&place.base, &proj.base, self.body, self.tcx).ty;
+=======
+            if let box [proj_base @ .., elem] = &place.projection {
+                if *elem == ProjectionElem::Deref {
+                    let base_ty = Place::ty_from(&place.base, proj_base, self.body, self.tcx).ty;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     if let ty::Ref(..) = base_ty.sty {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         reborrow_place = Some(&proj.base);
+=======
+                        reborrow_place = Some(proj_base);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     }
                 }
             }
@@ -1201,9 +1435,13 @@ impl<'a, 'tcx> Visitor<'tcx> for Checker<'a, 'tcx> {
                     ),
                 };
                 self.visit_place_base(&place.base, ctx, location);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if let Some(proj) = proj {
                     self.visit_projection(&place.base, proj, ctx, location);
                 }
+=======
+                self.visit_projection(&place.base, proj, ctx, location);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } else {
                 self.super_rvalue(rvalue, location);
             }
@@ -1402,10 +1640,21 @@ impl<'a, 'tcx> Visitor<'tcx> for Checker<'a, 'tcx> {
                     }
                 }
                 ty::FnPtr(_) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     if self.mode.requires_const_checking() {
+=======
+                    let unleash_miri = self
+                        .tcx
+                        .sess
+                        .opts
+                        .debugging_opts
+                        .unleash_the_miri_inside_of_you;
+                    if self.mode.requires_const_checking() && !unleash_miri {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         let mut err = self.tcx.sess.struct_span_err(
                             self.span,
-                            &format!("function pointers are not allowed in const fn"));
+                            "function pointers are not allowed in const fn"
+                        );
                         err.emit();
                     }
                 }
@@ -1474,7 +1723,11 @@ impl<'a, 'tcx> Visitor<'tcx> for Checker<'a, 'tcx> {
                 // conservatively, that drop elaboration will do.
                 let needs_drop = if let Place {
                     base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     projection: None,
+=======
+                    projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 } = *place {
                     if NeedsDrop::in_local(self, local) {
                         Some(self.body.local_decls[local].source_info.span)
@@ -1570,10 +1823,25 @@ fn mir_const_qualif(tcx: TyCtxt<'_>, def_id: DefId) -> (u8, &BitSet<Local>) {
     Checker::new(tcx, def_id, body, Mode::Const).check_const()
 }
 
-pub struct QualifyAndPromoteConstants;
+pub struct QualifyAndPromoteConstants<'tcx> {
+    pub promoted: Cell<IndexVec<Promoted, Body<'tcx>>>,
+}
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for QualifyAndPromoteConstants {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> Default for QualifyAndPromoteConstants<'tcx> {
+    fn default() -> Self {
+        QualifyAndPromoteConstants {
+            promoted: Cell::new(IndexVec::new()),
+        }
+    }
+}
+
+impl<'tcx> MirPass<'tcx> for QualifyAndPromoteConstants<'tcx> {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // There's not really any point in promoting errorful MIR.
         if body.return_ty().references_error() {
             tcx.sess.delay_span_bug(body.span, "QualifyAndPromoteConstants: MIR had errors");
@@ -1585,6 +1853,7 @@ impl MirPass for QualifyAndPromoteConstants {
         }
 
         let def_id = src.def_id();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let id = tcx.hir().as_local_hir_id(def_id).unwrap();
         let mut const_promoted_temps = None;
         let mode = match tcx.hir().body_owner_kind(id) {
@@ -1603,20 +1872,34 @@ impl MirPass for QualifyAndPromoteConstants {
             hir::BodyOwnerKind::Static(hir::MutImmutable) => Mode::Static,
             hir::BodyOwnerKind::Static(hir::MutMutable) => Mode::StaticMut,
         };
+=======
+        let hir_id = tcx.hir().as_local_hir_id(def_id).unwrap();
+
+        let mode = determine_mode(tcx, hir_id, def_id);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         debug!("run_pass: mode={:?}", mode);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if mode == Mode::NonConstFn || mode == Mode::ConstFn {
+=======
+        if let Mode::NonConstFn | Mode::ConstFn = mode {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             // This is ugly because Checker holds onto mir,
             // which can't be mutated until its scope ends.
             let (temps, candidates) = {
                 let mut checker = Checker::new(tcx, def_id, body, mode);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if mode == Mode::ConstFn {
+=======
+                if let Mode::ConstFn = mode {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     if tcx.sess.opts.debugging_opts.unleash_the_miri_inside_of_you {
                         checker.check_const();
                     } else if tcx.is_min_const_fn(def_id) {
-                        // enforce `min_const_fn` for stable const fns
+                        // Enforce `min_const_fn` for stable `const fn`s.
                         use super::qualify_min_const_fn::is_min_const_fn;
                         if let Err((span, err)) = is_min_const_fn(tcx, def_id, body) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             let mut diag = struct_span_err!(
                                 tcx.sess,
                                 span,
@@ -1630,6 +1913,9 @@ impl MirPass for QualifyAndPromoteConstants {
                                 "add `#![feature(const_fn)]` to the crate attributes to enable",
                             );
                             diag.emit();
+=======
+                            error_min_const_fn_violation(tcx, span, err);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         } else {
                             // this should not produce any errors, but better safe than sorry
                             // FIXME(#53819)
@@ -1649,8 +1935,15 @@ impl MirPass for QualifyAndPromoteConstants {
             };
 
             // Do the actual promotion, now that we know what's viable.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             promote_consts::promote_candidates(body, tcx, temps, candidates);
+=======
+            self.promoted.set(
+                promote_consts::promote_candidates(def_id, body, tcx, temps, candidates)
+            );
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } else {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if !body.control_flow_destroyed.is_empty() {
                 let mut locals = body.vars_iter();
                 if let Some(local) = locals.next() {
@@ -1688,7 +1981,11 @@ impl MirPass for QualifyAndPromoteConstants {
             } else {
                 Checker::new(tcx, def_id, body, mode).check_const().1
             };
+=======
+            check_short_circuiting_in_const_local(tcx, body, mode);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             // In `const` and `static` everything without `StorageDead`
             // is `'static`, we don't have to create promoted MIR fragments,
             // just remove `Drop` and `StorageDead` on "promoted" locals.
@@ -1721,8 +2018,16 @@ impl MirPass for QualifyAndPromoteConstants {
                     _ => {}
                 }
             }
+=======
+            let promoted_temps = match mode {
+                Mode::Const => tcx.mir_const_qualif(def_id).1,
+                _ => Checker::new(tcx, def_id, body, mode).check_const().1,
+            };
+            remove_drop_and_storage_dead_on_promoted_locals(body, promoted_temps);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // Statics must be Sync.
         if mode == Mode::Static {
             // `#[thread_local]` statics don't have to be `Sync`.
@@ -1745,10 +2050,115 @@ impl MirPass for QualifyAndPromoteConstants {
                     infcx.report_fulfillment_errors(&err, None, false);
                 }
             });
+=======
+        if mode == Mode::Static && !tcx.has_attr(def_id, sym::thread_local) {
+            // `static`s (not `static mut`s) which are not `#[thread_local]` must be `Sync`.
+            check_static_is_sync(tcx, body, hir_id);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+fn determine_mode(tcx: TyCtxt<'_>, hir_id: HirId, def_id: DefId) -> Mode {
+    match tcx.hir().body_owner_kind(hir_id) {
+        hir::BodyOwnerKind::Closure => Mode::NonConstFn,
+        hir::BodyOwnerKind::Fn if tcx.is_const_fn(def_id) => Mode::ConstFn,
+        hir::BodyOwnerKind::Fn => Mode::NonConstFn,
+        hir::BodyOwnerKind::Const => Mode::Const,
+        hir::BodyOwnerKind::Static(hir::MutImmutable) => Mode::Static,
+        hir::BodyOwnerKind::Static(hir::MutMutable) => Mode::StaticMut,
+    }
+}
+
+fn error_min_const_fn_violation(tcx: TyCtxt<'_>, span: Span, msg: Cow<'_, str>) {
+    struct_span_err!(tcx.sess, span, E0723, "{}", msg)
+        .note("for more information, see issue https://github.com/rust-lang/rust/issues/57563")
+        .help("add `#![feature(const_fn)]` to the crate attributes to enable")
+        .emit();
+}
+
+fn check_short_circuiting_in_const_local(tcx: TyCtxt<'_>, body: &mut Body<'tcx>, mode: Mode) {
+    if body.control_flow_destroyed.is_empty() {
+        return;
+    }
+
+    let mut locals = body.vars_iter();
+    if let Some(local) = locals.next() {
+        let span = body.local_decls[local].source_info.span;
+        let mut error = tcx.sess.struct_span_err(
+            span,
+            &format!(
+                "new features like let bindings are not permitted in {}s \
+                which also use short circuiting operators",
+                mode,
+            ),
+        );
+        for (span, kind) in body.control_flow_destroyed.iter() {
+            error.span_note(
+                *span,
+                &format!("use of {} here does not actually short circuit due to \
+                the const evaluator presently not being able to do control flow. \
+                See https://github.com/rust-lang/rust/issues/49146 for more \
+                information.", kind),
+            );
+        }
+        for local in locals {
+            let span = body.local_decls[local].source_info.span;
+            error.span_note(span, "more locals defined here");
+        }
+        error.emit();
+    }
+}
+
+/// In `const` and `static` everything without `StorageDead`
+/// is `'static`, we don't have to create promoted MIR fragments,
+/// just remove `Drop` and `StorageDead` on "promoted" locals.
+fn remove_drop_and_storage_dead_on_promoted_locals(
+    body: &mut Body<'tcx>,
+    promoted_temps: &BitSet<Local>,
+) {
+    debug!("run_pass: promoted_temps={:?}", promoted_temps);
+
+    for block in body.basic_blocks_mut() {
+        block.statements.retain(|statement| {
+            match statement.kind {
+                StatementKind::StorageDead(index) => !promoted_temps.contains(index),
+                _ => true
+            }
+        });
+        let terminator = block.terminator_mut();
+        match terminator.kind {
+            TerminatorKind::Drop {
+                location: Place {
+                    base: PlaceBase::Local(index),
+                    projection: box [],
+                },
+                target,
+                ..
+            } if promoted_temps.contains(index) => {
+                terminator.kind = TerminatorKind::Goto { target };
+            }
+            _ => {}
+        }
+    }
+}
+
+fn check_static_is_sync(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>, hir_id: HirId) {
+    let ty = body.return_ty();
+    tcx.infer_ctxt().enter(|infcx| {
+        let cause = traits::ObligationCause::new(body.span, hir_id, traits::SharedStatic);
+        let mut fulfillment_cx = traits::FulfillmentContext::new();
+        let sync_def_id = tcx.require_lang_item(lang_items::SyncTraitLangItem, Some(body.span));
+        fulfillment_cx.register_bound(&infcx, ty::ParamEnv::empty(), ty, sync_def_id, cause);
+        if let Err(err) = fulfillment_cx.select_all_or_error(&infcx) {
+            infcx.report_fulfillment_errors(&err, None, false);
+        }
+    });
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 fn args_required_const(tcx: TyCtxt<'_>, def_id: DefId) -> Option<FxHashSet<usize>> {
     let attrs = tcx.get_attrs(def_id);
     let attr = attrs.iter().find(|a| a.check_name(sym::rustc_args_required_const))?;

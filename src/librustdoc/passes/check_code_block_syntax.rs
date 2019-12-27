@@ -32,6 +32,7 @@ impl<'a, 'tcx> SyntaxChecker<'a, 'tcx> {
             dox[code_block.code].to_owned(),
         );
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let has_errors = {
             let mut has_errors = false;
             let mut lexer = Lexer::new(&sess, source_file, None);
@@ -40,20 +41,51 @@ impl<'a, 'tcx> SyntaxChecker<'a, 'tcx> {
                     token::Eof => break,
                     token::Unknown(..) => has_errors = true,
                     _ => (),
+=======
+        let validation_status = {
+            let mut has_syntax_errors = false;
+            let mut only_whitespace = true;
+            // even if there is a syntax error, we need to run the lexer over the whole file
+            let mut lexer = Lexer::new(&sess, source_file, None);
+            loop  {
+                match lexer.next_token().kind {
+                    token::Eof => break,
+                    token::Whitespace => (),
+                    token::Unknown(..) => has_syntax_errors = true,
+                    _ => only_whitespace = false,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             }
             has_errors
         };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if has_errors {
+=======
+            if has_syntax_errors {
+                Some(CodeBlockInvalid::SyntaxError)
+            } else if only_whitespace {
+                Some(CodeBlockInvalid::Empty)
+            } else {
+                None
+            }
+        };
+
+        if let Some(code_block_invalid) = validation_status {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let mut diag = if let Some(sp) =
                 super::source_span_for_markdown_range(self.cx, &dox, &code_block.range, &item.attrs)
             {
-                let mut diag = self
-                    .cx
-                    .sess()
-                    .struct_span_warn(sp, "could not parse code block as Rust code");
+                let warning_message = match code_block_invalid {
+                    CodeBlockInvalid::SyntaxError => "could not parse code block as Rust code",
+                    CodeBlockInvalid::Empty => "Rust code block is empty",
+                };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+                let mut diag = self.cx.sess().struct_span_warn(sp, warning_message);
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if code_block.syntax.is_none() && code_block.is_fenced {
                     let sp = sp.from_inner(InnerSpan::new(0, 3));
                     diag.span_suggestion(
@@ -95,4 +127,9 @@ impl<'a, 'tcx> DocFolder for SyntaxChecker<'a, 'tcx> {
 
         self.fold_item_recur(item)
     }
+}
+
+enum CodeBlockInvalid {
+    SyntaxError,
+    Empty,
 }

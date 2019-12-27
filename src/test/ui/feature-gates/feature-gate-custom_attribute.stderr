@@ -1,76 +1,128 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:3:3
    |
 LL | #[fake_attr]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:4:3
    |
 LL | #[fake_attr(100)]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:5:3
    |
 LL | #[fake_attr(1, 2, 3)]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:6:3
    |
 LL | #[fake_attr("hello")]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:7:3
    |
 LL | #[fake_attr(name = "hello")]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:8:3
    |
 LL | #[fake_attr(1, "hi", key = 12, true, false)]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:9:3
    |
 LL | #[fake_attr(key = "hello", val = 10)]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:10:3
    |
 LL | #[fake_attr(key("hello"), val(10))]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:11:3
    |
 LL | #[fake_attr(enabled = true, disabled = false)]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:12:3
    |
 LL | #[fake_attr(true)]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:13:3
    |
 LL | #[fake_attr(pi = 3.14159)]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_attr` in this scope
+=======
+error: cannot find attribute `fake_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:14:3
    |
 LL | #[fake_attr(b"hi")]
    |   ^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `fake_doc` in this scope
+=======
+error: cannot find attribute `fake_doc` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-custom_attribute.rs:15:3
    |
 LL | #[fake_doc(r"doc")]

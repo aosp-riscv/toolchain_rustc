@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{has_drop, in_macro_or_desugar, snippet_opt, span_lint, span_lint_and_sugg};
+=======
+use crate::utils::{has_drop, qpath_res, snippet_opt, span_lint, span_lint_and_sugg};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::hir::def::{DefKind, Res};
 use rustc::hir::{BinOpKind, BlockCheckMode, Expr, ExprKind, Stmt, StmtKind, UnsafeSource};
 use rustc::lint::{LateContext, LateLintPass, LintArray, LintPass};
@@ -43,7 +47,11 @@ declare_clippy_lint! {
 }
 
 fn has_no_effect(cx: &LateContext<'_, '_>, expr: &Expr) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if in_macro_or_desugar(expr.span) {
+=======
+    if expr.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         return false;
     }
     match expr.node {
@@ -63,14 +71,15 @@ fn has_no_effect(cx: &LateContext<'_, '_>, expr: &Expr) -> bool {
         ExprKind::Struct(_, ref fields, ref base) => {
             !has_drop(cx, cx.tables.expr_ty(expr))
                 && fields.iter().all(|field| has_no_effect(cx, &field.expr))
-                && match *base {
-                    Some(ref base) => has_no_effect(cx, base),
-                    None => true,
-                }
+                && base.as_ref().map_or(true, |base| has_no_effect(cx, base))
         },
         ExprKind::Call(ref callee, ref args) => {
             if let ExprKind::Path(ref qpath) = callee.node {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let res = cx.tables.qpath_res(qpath, callee.hir_id);
+=======
+                let res = qpath_res(cx, qpath, callee.hir_id);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 match res {
                     Res::Def(DefKind::Struct, ..) | Res::Def(DefKind::Variant, ..) | Res::Def(DefKind::Ctor(..), _) => {
                         !has_drop(cx, cx.tables.expr_ty(expr)) && args.iter().all(|arg| has_no_effect(cx, arg))
@@ -82,12 +91,7 @@ fn has_no_effect(cx: &LateContext<'_, '_>, expr: &Expr) -> bool {
             }
         },
         ExprKind::Block(ref block, _) => {
-            block.stmts.is_empty()
-                && if let Some(ref expr) = block.expr {
-                    has_no_effect(cx, expr)
-                } else {
-                    false
-                }
+            block.stmts.is_empty() && block.expr.as_ref().map_or(false, |expr| has_no_effect(cx, expr))
         },
         _ => false,
     }
@@ -103,7 +107,11 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NoEffect {
             } else if let Some(reduced) = reduce_expression(cx, expr) {
                 let mut snippet = String::new();
                 for e in reduced {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     if in_macro_or_desugar(e.span) {
+=======
+                    if e.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         return;
                     }
                     if let Some(snip) = snippet_opt(cx, e.span) {
@@ -128,7 +136,11 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NoEffect {
 }
 
 fn reduce_expression<'a>(cx: &LateContext<'_, '_>, expr: &'a Expr) -> Option<Vec<&'a Expr>> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if in_macro_or_desugar(expr.span) {
+=======
+    if expr.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         return None;
     }
     match expr.node {
@@ -153,7 +165,11 @@ fn reduce_expression<'a>(cx: &LateContext<'_, '_>, expr: &'a Expr) -> Option<Vec
         },
         ExprKind::Call(ref callee, ref args) => {
             if let ExprKind::Path(ref qpath) = callee.node {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let res = cx.tables.qpath_res(qpath, callee.hir_id);
+=======
+                let res = qpath_res(cx, qpath, callee.hir_id);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 match res {
                     Res::Def(DefKind::Struct, ..) | Res::Def(DefKind::Variant, ..) | Res::Def(DefKind::Ctor(..), _)
                         if !has_drop(cx, cx.tables.expr_ty(expr)) =>

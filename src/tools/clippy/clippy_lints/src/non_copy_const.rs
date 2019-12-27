@@ -14,7 +14,11 @@ use rustc_errors::Applicability;
 use rustc_typeck::hir_ty_to_ty;
 use syntax_pos::{InnerSpan, Span, DUMMY_SP};
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_constant, in_macro_or_desugar, is_copy, span_lint_and_then};
+=======
+use crate::utils::{in_constant, is_copy, qpath_res, span_lint_and_then};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 declare_clippy_lint! {
     /// **What it does:** Checks for declaration of `const` items which is interior
@@ -119,7 +123,11 @@ fn verify_ty_bound<'a, 'tcx>(cx: &LateContext<'a, 'tcx>, ty: Ty<'tcx>, source: S
 
     let (lint, msg, span) = source.lint();
     span_lint_and_then(cx, lint, span, msg, |db| {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(span) {
+=======
+        if span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return; // Don't give suggestions into macros.
         }
         match source {
@@ -195,7 +203,11 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NonCopyConst {
             }
 
             // Make sure it is a const item.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             match cx.tables.qpath_res(qpath, expr.hir_id) {
+=======
+            match qpath_res(cx, qpath, expr.hir_id) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 Res::Def(DefKind::Const, _) | Res::Def(DefKind::AssocConst, _) => {},
                 _ => return,
             };

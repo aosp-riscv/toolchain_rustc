@@ -138,5 +138,8 @@ mod tests {
         assert_eq!(__crc32cd(0, 0), 0);
         assert_eq!(__crc32cd(0, 18446744073709551615), 3293575501);
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

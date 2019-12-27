@@ -17,4 +17,31 @@ fn match_as_ref() {
     };
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+mod issue4437 {
+    use std::{error::Error, fmt, num::ParseIntError};
+
+    #[derive(Debug)]
+    struct E {
+        source: Option<ParseIntError>,
+    }
+
+    impl Error for E {
+        fn source(&self) -> Option<&(dyn Error + 'static)> {
+            match self.source {
+                Some(ref s) => Some(s),
+                None => None,
+            }
+        }
+    }
+
+    impl fmt::Display for E {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            unimplemented!()
+        }
+    }
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 fn main() {}

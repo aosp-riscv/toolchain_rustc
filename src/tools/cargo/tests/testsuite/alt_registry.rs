@@ -1,7 +1,14 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::support::publish::validate_alt_upload;
 use crate::support::registry::{self, Package};
 use crate::support::{basic_manifest, git, paths, project};
 use cargo::util::IntoUrl;
+=======
+use cargo::util::IntoUrl;
+use cargo_test_support::publish::validate_alt_upload;
+use cargo_test_support::registry::{self, Package};
+use cargo_test_support::{basic_manifest, git, paths, project};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::fs::{self, File};
 use std::io::Write;
 
@@ -824,6 +831,7 @@ fn alt_reg_metadata() {
                         "features": {},
                         "manifest_path": "[..]/foo/Cargo.toml",
                         "metadata": null,
+                        "publish": null,
                         "authors": [],
                         "categories": [],
                         "keywords": [],
@@ -863,6 +871,7 @@ fn alt_reg_metadata() {
                         "features": {},
                         "manifest_path": "[..]/altdep2-0.0.1/Cargo.toml",
                         "metadata": null,
+                        "publish": null,
                         "authors": [],
                         "categories": [],
                         "keywords": [],
@@ -897,6 +906,7 @@ fn alt_reg_metadata() {
                         "features": {},
                         "manifest_path": "[..]/altdep-0.0.1/Cargo.toml",
                         "metadata": null,
+                        "publish": null,
                         "authors": [],
                         "categories": [],
                         "keywords": [],
@@ -943,6 +953,7 @@ fn alt_reg_metadata() {
                         "features": {},
                         "manifest_path": "[..]/foo/Cargo.toml",
                         "metadata": null,
+                        "publish": null,
                         "authors": [],
                         "categories": [],
                         "keywords": [],
@@ -977,6 +988,7 @@ fn alt_reg_metadata() {
                         "features": {},
                         "manifest_path": "[..]/iodep-0.0.1/Cargo.toml",
                         "metadata": null,
+                        "publish": null,
                         "authors": [],
                         "categories": [],
                         "keywords": [],
@@ -998,6 +1010,7 @@ fn alt_reg_metadata() {
                         "features": {},
                         "manifest_path": "[..]/bar-0.0.1/Cargo.toml",
                         "metadata": null,
+                        "publish": null,
                         "authors": [],
                         "categories": [],
                         "keywords": [],
@@ -1076,6 +1089,7 @@ fn unknown_registry() {
                   "features": {},
                   "manifest_path": "[..]",
                   "metadata": null,
+                  "publish": null,
                   "authors": [],
                   "categories": [],
                   "keywords": [],
@@ -1110,6 +1124,7 @@ fn unknown_registry() {
                   "features": {},
                   "manifest_path": "[..]/foo/Cargo.toml",
                   "metadata": null,
+                  "publish": null,
                   "authors": [],
                   "categories": [],
                   "keywords": [],
@@ -1144,6 +1159,7 @@ fn unknown_registry() {
                   "features": {},
                   "manifest_path": "[..]",
                   "metadata": null,
+                  "publish": null,
                   "authors": [],
                   "categories": [],
                   "keywords": [],

@@ -6,6 +6,10 @@ cfg_if::cfg_if! {
         use std::fmt;
         use std::path::PathBuf;
         use std::prelude::v1::*;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        use std::str;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
@@ -47,22 +51,34 @@ impl<'a> BytesOrWideString<'a> {
     pub fn into_path_buf(self) -> PathBuf {
         #[cfg(unix)]
         {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             use self::BytesOrWideString::*;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             use std::ffi::OsStr;
             use std::os::unix::ffi::OsStrExt;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             match self {
                 Bytes(slice) => PathBuf::from(OsStr::from_bytes(slice)),
                 _ => unreachable!(),
+=======
+            if let BytesOrWideString::Bytes(slice) = self {
+                return PathBuf::from(OsStr::from_bytes(slice));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
 
         #[cfg(windows)]
         {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             use self::BytesOrWideString::*;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             use std::ffi::OsString;
             use std::os::windows::ffi::OsStringExt;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             match self {
                 Wide(slice) => PathBuf::from(OsString::from_wide(slice)),
                 _ => unreachable!(),
@@ -72,7 +88,19 @@ impl<'a> BytesOrWideString<'a> {
         #[cfg(all(not(windows), not(unix)))]
         {
             unreachable!()
+=======
+            if let BytesOrWideString::Wide(slice) = self {
+                return PathBuf::from(OsString::from_wide(slice));
+            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
+
+        if let BytesOrWideString::Bytes(b) = self {
+            if let Ok(s) = str::from_utf8(b) {
+                return PathBuf::from(s);
+            }
+        }
+        unreachable!()
     }
 }
 

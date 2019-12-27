@@ -518,7 +518,8 @@ impl Display for Arguments<'_> {
     label="`{Self}` cannot be formatted using `{{:?}}` because it doesn't implement `{Debug}`",
 )]
 #[doc(alias = "{:?}")]
-#[lang = "debug_trait"]
+#[cfg_attr(bootstrap, lang = "debug_trait")]
+#[cfg_attr(not(bootstrap), rustc_diagnostic_item = "debug_trait")]
 pub trait Debug {
     /// Formats the value using the given formatter.
     ///
@@ -546,6 +547,7 @@ pub trait Debug {
 }
 
 // Separate module to reexport the macro `Debug` from prelude without the trait `Debug`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg(not(bootstrap))]
 pub(crate) mod macros {
     /// Derive macro generating an impl of the trait `Debug`.
@@ -556,6 +558,16 @@ pub(crate) mod macros {
     pub macro Debug($item:item) { /* compiler built-in */ }
 }
 #[cfg(not(bootstrap))]
+=======
+pub(crate) mod macros {
+    /// Derive macro generating an impl of the trait `Debug`.
+    #[rustc_builtin_macro]
+    #[cfg_attr(bootstrap, rustc_macro_transparency = "semitransparent")]
+    #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+    #[allow_internal_unstable(core_intrinsics)]
+    pub macro Debug($item:item) { /* compiler built-in */ }
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(inline)]
 pub use macros::Debug;

@@ -114,7 +114,6 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     destination,
                     Constant {
                         span: expr_span,
-                        ty: this.hir.bool_ty(),
                         user_ty: None,
                         literal: this.hir.true_literal(),
                     },
@@ -126,7 +125,10 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     destination,
                     Constant {
                         span: expr_span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         ty: this.hir.bool_ty(),
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         user_ty: None,
                         literal: this.hir.false_literal(),
                     },
@@ -246,6 +248,9 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
 
                     let success = this.cfg.start_new_block();
                     let cleanup = this.diverge_cleanup();
+
+                    this.record_operands_moved(&args);
+
                     this.cfg.terminate(
                         block,
                         source_info,
@@ -303,7 +308,11 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 // Create a "fake" temporary variable so that we check that the
                 // value is Sized. Usually, this is caught in type checking, but
                 // in the case of box expr there is no such check.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if destination.projection.is_some() {
+=======
+                if !destination.projection.is_empty() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     this.local_decls
                         .push(LocalDecl::new_temp(expr.ty, expr.span));
                 }

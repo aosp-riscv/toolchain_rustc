@@ -2,6 +2,7 @@
 // edition:2018
 // run-pass
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![allow(unused_variables)]
 #![feature(async_await)]
 
@@ -47,6 +48,52 @@ struct NeverReady;
 impl Future for NeverReady {
     type Output = ();
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+=======
+// Test that the drop order for parameters in a fn and async fn matches up. Also test that
+// parameters (used or unused) are not dropped until the async fn is cancelled.
+// This file is mostly copy-pasted from drop-order-for-async-fn-parameters.rs
+
+#![allow(unused_variables)]
+
+extern crate arc_wake;
+
+use arc_wake::ArcWake;
+use std::cell::RefCell;
+use std::future::Future;
+use std::marker::PhantomData;
+use std::pin::Pin;
+use std::rc::Rc;
+use std::sync::Arc;
+use std::task::{Context, Poll};
+
+struct EmptyWaker;
+
+impl ArcWake for EmptyWaker {
+    fn wake(self: Arc<Self>) {}
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum DropOrder {
+    Function,
+    Val(&'static str),
+}
+
+type DropOrderListPtr = Rc<RefCell<Vec<DropOrder>>>;
+
+struct D(&'static str, DropOrderListPtr);
+
+impl Drop for D {
+    fn drop(&mut self) {
+        self.1.borrow_mut().push(DropOrder::Val(self.0));
+    }
+}
+
+struct NeverReady;
+
+impl Future for NeverReady {
+    type Output = ();
+    fn poll(self: Pin<&mut Self>, cx: &mut Context) -> Poll<Self::Output> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         Poll::Pending
     }
 }

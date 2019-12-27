@@ -11,6 +11,7 @@ fn main() {
         None => return,
     };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if compiler.minor >= 19 {
         println!("cargo:rustc-cfg=syn_can_use_thread_id");
     }
@@ -22,6 +23,10 @@ fn main() {
     // Macro modularization allows re-exporting the `quote!` macro in 1.30+.
     if compiler.minor >= 30 {
         println!("cargo:rustc-cfg=syn_can_call_macro_by_path");
+=======
+    if compiler.minor < 36 {
+        println!("cargo:rustc-cfg=syn_omit_await_from_token_macro");
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     if !compiler.nightly {

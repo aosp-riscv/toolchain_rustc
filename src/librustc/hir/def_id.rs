@@ -1,5 +1,8 @@
 use crate::ty::{self, TyCtxt};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::hir::map::definitions::FIRST_FREE_DEF_INDEX;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc_data_structures::indexed_vec::Idx;
 use std::fmt;
 use std::u32;
@@ -12,7 +15,11 @@ newtype_index! {
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum CrateNum {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// A special CrateNum that we use for the tcx.rcache when decoding from
+=======
+    /// A special `CrateNum` that we use for the `tcx.rcache` when decoding from
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// the incr. comp. cache.
     ReservedForIncrCompCache,
     Index(CrateId),
@@ -27,10 +34,9 @@ impl ::std::fmt::Debug for CrateNum {
     }
 }
 
-/// Item definitions in the currently-compiled crate would have the CrateNum
-/// LOCAL_CRATE in their DefId.
+/// Item definitions in the currently-compiled crate would have the `CrateNum`
+/// `LOCAL_CRATE` in their `DefId`.
 pub const LOCAL_CRATE: CrateNum = CrateNum::Index(CrateId::from_u32_const(0));
-
 
 impl Idx for CrateNum {
     #[inline]
@@ -102,6 +108,7 @@ newtype_index! {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl DefIndex {
     // Proc macros from a proc-macro crate have a kind of virtual DefIndex. This
     // function maps the index of the macro within the crate (which is also the
@@ -127,6 +134,8 @@ impl DefIndex {
     }
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 impl rustc_serialize::UseSpecializedEncodable for DefIndex {}
 impl rustc_serialize::UseSpecializedDecodable for DefIndex {}
 

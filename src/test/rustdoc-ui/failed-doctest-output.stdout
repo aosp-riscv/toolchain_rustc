@@ -1,13 +1,26 @@
 
 running 2 tests
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 test $DIR/failed-doctest-output.rs - OtherStruct (line 20) ... FAILED
 test $DIR/failed-doctest-output.rs - SomeStruct (line 10) ... FAILED
+=======
+test $DIR/failed-doctest-output.rs - OtherStruct (line 21) ... FAILED
+test $DIR/failed-doctest-output.rs - SomeStruct (line 11) ... FAILED
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 failures:
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 ---- $DIR/failed-doctest-output.rs - OtherStruct (line 20) stdout ----
+=======
+---- $DIR/failed-doctest-output.rs - OtherStruct (line 21) stdout ----
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 error[E0425]: cannot find value `no` in this scope
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
  --> $DIR/failed-doctest-output.rs:21:1
+=======
+ --> $DIR/failed-doctest-output.rs:22:1
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   |
 3 | no
   | ^^ not found in this scope
@@ -16,24 +29,49 @@ error: aborting due to previous error
 
 For more information about this error, try `rustc --explain E0425`.
 Couldn't compile the test.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 ---- $DIR/failed-doctest-output.rs - SomeStruct (line 10) stdout ----
 Test executable failed (exit code 101).
 
 stdout:
 stdout 1
 stdout 2
+=======
+---- $DIR/failed-doctest-output.rs - SomeStruct (line 11) stdout ----
+Test executable failed (exit code 101).
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+stderr:
+stderr 1
+stderr 2
+thread 'main' panicked at 'oh no', $DIR/failed-doctest-output.rs:7:1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
+=======
+stdout:
+stdout 1
+stdout 2
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 stderr:
 stderr 1
 stderr 2
 thread 'main' panicked at 'oh no', $DIR/failed-doctest-output.rs:7:1
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
 
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 
 failures:
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     $DIR/failed-doctest-output.rs - OtherStruct (line 20)
     $DIR/failed-doctest-output.rs - SomeStruct (line 10)
+=======
+    $DIR/failed-doctest-output.rs - OtherStruct (line 21)
+    $DIR/failed-doctest-output.rs - SomeStruct (line 11)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 test result: FAILED. 0 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out
 

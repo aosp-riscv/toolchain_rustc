@@ -18,8 +18,13 @@ pub fn remove_noop_landing_pads<'tcx>(tcx: TyCtxt<'tcx>, body: &mut Body<'tcx>) 
     RemoveNoopLandingPads.remove_nop_landing_pads(body)
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for RemoveNoopLandingPads {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, _src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for RemoveNoopLandingPads {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, _src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         remove_noop_landing_pads(tcx, body);
     }
 }
@@ -41,10 +46,17 @@ impl RemoveNoopLandingPads {
                     // These are all nops in a landing pad
                 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 StatementKind::Assign(Place {
                     base: PlaceBase::Local(_),
                     projection: None,
                 }, box Rvalue::Use(_)) => {
+=======
+                StatementKind::Assign(box(Place {
+                    base: PlaceBase::Local(_),
+                    projection: box [],
+                }, Rvalue::Use(_))) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     // Writing to a local (e.g., a drop flag) does not
                     // turn a landing pad to a non-nop
                 }

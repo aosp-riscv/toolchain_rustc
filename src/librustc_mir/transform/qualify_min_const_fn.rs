@@ -5,6 +5,8 @@ use rustc::ty::{self, Predicate, Ty, TyCtxt, adjustment::{PointerCast}};
 use rustc_target::spec::abi;
 use std::borrow::Cow;
 use syntax_pos::Span;
+use syntax::symbol::{sym, Symbol};
+use syntax::attr;
 
 type McfResult = Result<(), (Span, Cow<'static, str>)>;
 
@@ -67,9 +69,17 @@ pub fn is_min_const_fn(tcx: TyCtxt<'tcx>, def_id: DefId, body: &'a Body<'tcx>) -
     )?;
 
     for bb in body.basic_blocks() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         check_terminator(tcx, body, bb.terminator())?;
+=======
+        check_terminator(tcx, body, def_id, bb.terminator())?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         for stmt in &bb.statements {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             check_statement(tcx, body, stmt)?;
+=======
+            check_statement(tcx, body, def_id, stmt)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
     Ok(())
@@ -121,16 +131,29 @@ fn check_ty(tcx: TyCtxt<'tcx>, ty: Ty<'tcx>, span: Span, fn_def_id: DefId) -> Mc
 
 fn check_rvalue(
     tcx: TyCtxt<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     body: &'a Body<'tcx>,
+=======
+    body: &Body<'tcx>,
+    def_id: DefId,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     rvalue: &Rvalue<'tcx>,
     span: Span,
 ) -> McfResult {
     match rvalue {
         Rvalue::Repeat(operand, _) | Rvalue::Use(operand) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             check_operand(operand, span)
+=======
+            check_operand(tcx, operand, span, def_id, body)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         Rvalue::Len(place) | Rvalue::Discriminant(place) | Rvalue::Ref(_, _, place) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             check_place(place, span)
+=======
+            check_place(tcx, place, span, def_id, body)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         Rvalue::Cast(CastKind::Misc, operand, cast_ty) => {
             use rustc::ty::cast::CastTy;
@@ -144,11 +167,19 @@ fn check_rvalue(
                 (CastTy::RPtr(_), CastTy::Float) => bug!(),
                 (CastTy::RPtr(_), CastTy::Int(_)) => bug!(),
                 (CastTy::Ptr(_), CastTy::RPtr(_)) => bug!(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 _ => check_operand(operand, span),
+=======
+                _ => check_operand(tcx, operand, span, def_id, body),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
         Rvalue::Cast(CastKind::Pointer(PointerCast::MutToConstPointer), operand, _) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             check_operand(operand, span)
+=======
+            check_operand(tcx, operand, span, def_id, body)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         Rvalue::Cast(CastKind::Pointer(PointerCast::UnsafeFnPointer), _, _) |
         Rvalue::Cast(CastKind::Pointer(PointerCast::ClosureFnPointer(_)), _, _) |
@@ -162,8 +193,13 @@ fn check_rvalue(
         )),
         // binops are fine on integers
         Rvalue::BinaryOp(_, lhs, rhs) | Rvalue::CheckedBinaryOp(_, lhs, rhs) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             check_operand(lhs, span)?;
             check_operand(rhs, span)?;
+=======
+            check_operand(tcx, lhs, span, def_id, body)?;
+            check_operand(tcx, rhs, span, def_id, body)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let ty = lhs.ty(body, tcx);
             if ty.is_integral() || ty.is_bool() || ty.is_char() {
                 Ok(())
@@ -182,7 +218,11 @@ fn check_rvalue(
         Rvalue::UnaryOp(_, operand) => {
             let ty = operand.ty(body, tcx);
             if ty.is_integral() || ty.is_bool() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 check_operand(operand, span)
+=======
+                check_operand(tcx, operand, span, def_id, body)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } else {
                 Err((
                     span,
@@ -192,7 +232,11 @@ fn check_rvalue(
         }
         Rvalue::Aggregate(_, operands) => {
             for operand in operands {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 check_operand(operand, span)?;
+=======
+                check_operand(tcx, operand, span, def_id, body)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             Ok(())
         }
@@ -201,21 +245,36 @@ fn check_rvalue(
 
 fn check_statement(
     tcx: TyCtxt<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     body: &'a Body<'tcx>,
+=======
+    body: &Body<'tcx>,
+    def_id: DefId,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     statement: &Statement<'tcx>,
 ) -> McfResult {
     let span = statement.source_info.span;
     match &statement.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         StatementKind::Assign(place, rval) => {
             check_place(place, span)?;
             check_rvalue(tcx, body, rval, span)
+=======
+        StatementKind::Assign(box(place, rval)) => {
+            check_place(tcx, place, span, def_id, body)?;
+            check_rvalue(tcx, body, def_id, rval, span)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
 
         StatementKind::FakeRead(FakeReadCause::ForMatchedPlace, _) => {
             Err((span, "loops and conditional expressions are not stable in const fn".into()))
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         StatementKind::FakeRead(_, place) => check_place(place, span),
+=======
+        StatementKind::FakeRead(_, place) => check_place(tcx, place, span, def_id, body),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         // just an assignment
         StatementKind::SetDiscriminant { .. } => Ok(()),
@@ -234,21 +293,38 @@ fn check_statement(
 }
 
 fn check_operand(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    tcx: TyCtxt<'tcx>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     operand: &Operand<'tcx>,
     span: Span,
+    def_id: DefId,
+    body: &Body<'tcx>
 ) -> McfResult {
     match operand {
         Operand::Move(place) | Operand::Copy(place) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             check_place(place, span)
+=======
+            check_place(tcx, place, span, def_id, body)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         Operand::Constant(_) => Ok(()),
     }
 }
 
 fn check_place(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    tcx: TyCtxt<'tcx>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     place: &Place<'tcx>,
     span: Span,
+    def_id: DefId,
+    body: &Body<'tcx>
 ) -> McfResult {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     place.iterate(|place_base, place_projection| {
         for proj in place_projection {
             match proj.elem {
@@ -260,8 +336,32 @@ fn check_place(
                 | ProjectionElem::Deref
                 | ProjectionElem::Field(..)
                 | ProjectionElem::Index(_) => {}
+=======
+    let mut cursor = &*place.projection;
+    while let [proj_base @ .., elem] = cursor {
+        cursor = proj_base;
+        match elem {
+            ProjectionElem::Downcast(..) => {
+                return Err((span, "`match` or `if let` in `const fn` is unstable".into()));
             }
+            ProjectionElem::Field(..) => {
+                let base_ty = Place::ty_from(&place.base, &proj_base, body, tcx).ty;
+                if let Some(def) = base_ty.ty_adt_def() {
+                    // No union field accesses in `const fn`
+                    if def.is_union() {
+                        if !feature_allowed(tcx, def_id, sym::const_fn_union) {
+                            return Err((span, "accessing union fields is unstable".into()));
+                        }
+                    }
+                }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+            }
+            ProjectionElem::ConstantIndex { .. }
+            | ProjectionElem::Subslice { .. }
+            | ProjectionElem::Deref
+            | ProjectionElem::Index(_) => {}
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
         match place_base {
             PlaceBase::Static(box Static { kind: StaticKind::Static(_), .. }) => {
@@ -271,11 +371,36 @@ fn check_place(
             | PlaceBase::Static(box Static { kind: StaticKind::Promoted(_), .. }) => Ok(()),
         }
     })
+=======
+    }
+
+    match place.base {
+        PlaceBase::Static(box Static { kind: StaticKind::Static, .. }) => {
+            Err((span, "cannot access `static` items in const fn".into()))
+        }
+        PlaceBase::Local(_)
+        | PlaceBase::Static(box Static { kind: StaticKind::Promoted(_, _), .. }) => Ok(()),
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+}
+
+/// Returns whether `allow_internal_unstable(..., <feature_gate>, ...)` is present.
+fn feature_allowed(
+    tcx: TyCtxt<'tcx>,
+    def_id: DefId,
+    feature_gate: Symbol,
+) -> bool {
+    attr::allow_internal_unstable(&tcx.get_attrs(def_id), &tcx.sess.diagnostic())
+        .map_or(false, |mut features| features.any(|name| name == feature_gate))
 }
 
 fn check_terminator(
     tcx: TyCtxt<'tcx>,
     body: &'a Body<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    def_id: DefId,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     terminator: &Terminator<'tcx>,
 ) -> McfResult {
     let span = terminator.source_info.span;
@@ -285,11 +410,20 @@ fn check_terminator(
         | TerminatorKind::Resume => Ok(()),
 
         TerminatorKind::Drop { location, .. } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             check_place(location, span)
+=======
+            check_place(tcx, location, span, def_id, body)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         TerminatorKind::DropAndReplace { location, value, .. } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             check_place(location, span)?;
             check_operand(value, span)
+=======
+            check_place(tcx, location, span, def_id, body)?;
+            check_operand(tcx, value, span, def_id, body)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         },
 
         TerminatorKind::FalseEdges { .. } | TerminatorKind::SwitchInt { .. } => Err((
@@ -341,10 +475,18 @@ fn check_terminator(
                     )),
                 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 check_operand(func, span)?;
+=======
+                check_operand(tcx, func, span, def_id, body)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                 for arg in args {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     check_operand(arg, span)?;
+=======
+                    check_operand(tcx, arg, span, def_id, body)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
                 Ok(())
             } else {
@@ -358,7 +500,11 @@ fn check_terminator(
             msg: _,
             target: _,
             cleanup: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         } => check_operand(cond, span),
+=======
+        } => check_operand(tcx, cond, span, def_id, body),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         TerminatorKind::FalseUnwind { .. } => {
             Err((span, "loops are not allowed in const fn".into()))
@@ -379,9 +525,9 @@ fn is_intrinsic_whitelisted(tcx: TyCtxt<'tcx>, def_id: DefId) -> bool {
         | "add_with_overflow" // ~> .overflowing_add
         | "sub_with_overflow" // ~> .overflowing_sub
         | "mul_with_overflow" // ~> .overflowing_mul
-        | "overflowing_add" // ~> .wrapping_add
-        | "overflowing_sub" // ~> .wrapping_sub
-        | "overflowing_mul" // ~> .wrapping_mul
+        | "wrapping_add" // ~> .wrapping_add
+        | "wrapping_sub" // ~> .wrapping_sub
+        | "wrapping_mul" // ~> .wrapping_mul
         | "saturating_add" // ~> .saturating_add
         | "saturating_sub" // ~> .saturating_sub
         | "unchecked_shl" // ~> .wrapping_shl

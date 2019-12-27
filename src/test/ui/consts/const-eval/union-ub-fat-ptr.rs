@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![allow(unused)]
 #![allow(const_err)] // make sure we cannot allow away the errors tested here
 
@@ -129,3 +130,5 @@ const J2: &MyStr = unsafe { SliceTransmute { slice: &[0xFF] }.my_str };
 
 fn main() {
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

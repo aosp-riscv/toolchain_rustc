@@ -12,10 +12,67 @@
  * <http://creativecommons.org/publicdomain/zero/1.0/>.
  */
 
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <git2.h>
+#include <fcntl.h>
+
+#ifdef _WIN32
+# include <io.h>
+# include <Windows.h>
+# define open _open
+# define read _read
+# define close _close
+# define ssize_t int
+# define sleep(a) Sleep(a * 1000)
+#else
+# include <unistd.h>
+#endif
+
+#ifndef PRIuZ
+/* Define the printf format specifer to use for size_t output */
+#if defined(_MSC_VER) || defined(__MINGW32__)
+#	define PRIuZ "Iu"
+#else
+#	define PRIuZ "zu"
+#endif
+#endif
+
+#ifdef _MSC_VER
+#define snprintf sprintf_s
+#define strcasecmp strcmpi
+#endif
+
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(*x))
+#define UNUSED(x) (void)(x)
+
+extern int lg2_add(git_repository *repo, int argc, char **argv);
+extern int lg2_blame(git_repository *repo, int argc, char **argv);
+extern int lg2_cat_file(git_repository *repo, int argc, char **argv);
+extern int lg2_checkout(git_repository *repo, int argc, char **argv);
+extern int lg2_clone(git_repository *repo, int argc, char **argv);
+extern int lg2_config(git_repository *repo, int argc, char **argv);
+extern int lg2_describe(git_repository *repo, int argc, char **argv);
+extern int lg2_diff(git_repository *repo, int argc, char **argv);
+extern int lg2_fetch(git_repository *repo, int argc, char **argv);
+extern int lg2_for_each_ref(git_repository *repo, int argc, char **argv);
+extern int lg2_general(git_repository *repo, int argc, char **argv);
+extern int lg2_index_pack(git_repository *repo, int argc, char **argv);
+extern int lg2_init(git_repository *repo, int argc, char **argv);
+extern int lg2_log(git_repository *repo, int argc, char **argv);
+extern int lg2_ls_files(git_repository *repo, int argc, char **argv);
+extern int lg2_ls_remote(git_repository *repo, int argc, char **argv);
+extern int lg2_merge(git_repository *repo, int argc, char **argv);
+extern int lg2_remote(git_repository *repo, int argc, char **argv);
+extern int lg2_rev_list(git_repository *repo, int argc, char **argv);
+extern int lg2_rev_parse(git_repository *repo, int argc, char **argv);
+extern int lg2_show_index(git_repository *repo, int argc, char **argv);
+extern int lg2_stash(git_repository *repo, int argc, char **argv);
+extern int lg2_status(git_repository *repo, int argc, char **argv);
+extern int lg2_tag(git_repository *repo, int argc, char **argv);
 
 #ifndef PRIuZ
 /* Define the printf format specifer to use for size_t output */
@@ -65,6 +122,14 @@ extern int lg2_tag(git_repository *repo, int argc, char **argv);
 extern void check_lg2(int error, const char *message, const char *extra);
 
 /**
+ * Read a file into a buffer
+ *
+ * @param path The path to the file that shall be read
+ * @return NUL-terminated buffer if the file was successfully read, NULL-pointer otherwise
+ */
+extern char *read_file(const char *path);
+
+/**
  * Exit the program, printing error to stderr
  */
 extern void fatal(const char *message, const char *extra);
@@ -90,7 +155,7 @@ struct args_info {
 /**
  * Check current `args` entry against `opt` string.  If it matches
  * exactly, take the next arg as a string; if it matches as a prefix with
- * an equal sign, take the remainder as a string; if value not supplied, 
+ * an equal sign, take the remainder as a string; if value not supplied,
  * default value `def` will be given. otherwise return 0.
  */
 extern int optional_str_arg(

@@ -184,8 +184,13 @@ static ERR_STRING_DATA *int_err_get_item(const ERR_STRING_DATA *d)
 }
 
 #ifndef OPENSSL_NO_ERR
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /* A measurement on Linux 2018-11-21 showed about 3.5kib */
 # define SPACE_SYS_STR_REASONS 4 * 1024
+=======
+/* 2019-05-21: Russian and Ukrainian locales on Linux require more than 6,5 kB */
+# define SPACE_SYS_STR_REASONS 8 * 1024
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 # define NUM_SYS_STR_REASONS 127
 
 static ERR_STRING_DATA SYS_str_reasons[NUM_SYS_STR_REASONS + 1];
@@ -219,6 +224,7 @@ static void build_SYS_str_reasons(void)
         ERR_STRING_DATA *str = &SYS_str_reasons[i - 1];
 
         str->error = ERR_PACK(ERR_LIB_SYS, 0, i);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if (str->string == NULL) {
             if (openssl_strerror_r(i, cur, sizeof(strerror_pool) - cnt)) {
                 size_t l = strlen(cur);
@@ -234,6 +240,25 @@ static void build_SYS_str_reasons(void)
                  * some (most? all?) messages.  Lets trim them off.
                  */
                 while (ossl_isspace(cur[-1])) {
+=======
+        /*
+         * If we have used up all the space in strerror_pool,
+         * there's no point in calling openssl_strerror_r()
+         */
+        if (str->string == NULL && cnt < sizeof(strerror_pool)) {
+            if (openssl_strerror_r(i, cur, sizeof(strerror_pool) - cnt)) {
+                size_t l = strlen(cur);
+
+                str->string = cur;
+                cnt += l;
+                cur += l;
+
+                /*
+                 * VMS has an unusual quirk of adding spaces at the end of
+                 * some (most? all?) messages. Lets trim them off.
+                 */
+                while (cur > strerror_pool && ossl_isspace(cur[-1])) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     cur--;
                     cnt--;
                 }

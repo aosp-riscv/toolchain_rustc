@@ -1,14 +1,16 @@
 use std::borrow::Cow;
 
-use bytecount;
-
 use rustc_target::spec::abi;
 use syntax::ast::{
     self, Attribute, CrateSugar, MetaItem, MetaItemKind, NestedMetaItem, NodeId, Path, Visibility,
     VisibilityKind,
 };
 use syntax::ptr;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax::source_map::{BytePos, Span, NO_EXPANSION};
+=======
+use syntax::source_map::{BytePos, Span, SyntaxContext};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax::symbol::{sym, Symbol};
 use syntax_pos::ExpnId;
 use unicode_width::UnicodeWidthStr;
@@ -335,7 +337,11 @@ macro_rules! source {
 }
 
 pub(crate) fn mk_sp(lo: BytePos, hi: BytePos) -> Span {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     Span::new(lo, hi, NO_EXPANSION)
+=======
+    Span::new(lo, hi, SyntaxContext::root())
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 // Returns `true` if the given span does not intersect with file lines.

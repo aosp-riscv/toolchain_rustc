@@ -8,11 +8,15 @@ mod acle;
 
 mod simd;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg_attr(
     bootstrap,
     doc(include = "../stdarch/crates/core_arch/src/core_arch_docs.md")
 )]
 #[cfg_attr(not(bootstrap), doc(include = "core_arch_docs.md"))]
+=======
+#[doc(include = "core_arch_docs.md")]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[stable(feature = "simd_arch", since = "1.27.0")]
 pub mod arch {
     /// Platform-specific intrinsics for the `x86` platform.

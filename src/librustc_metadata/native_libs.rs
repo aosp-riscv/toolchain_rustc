@@ -8,7 +8,11 @@ use rustc_target::spec::abi::Abi;
 use syntax::attr;
 use syntax::source_map::Span;
 use syntax::feature_gate::{self, GateIssue};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax::symbol::{Symbol, sym};
+=======
+use syntax::symbol::{kw, sym, Symbol};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax::{span_err, struct_span_err};
 
 pub fn collect(tcx: TyCtxt<'_>) -> Vec<NativeLibrary> {
@@ -132,7 +136,7 @@ impl ItemLikeVisitor<'tcx> for Collector<'tcx> {
 
 impl Collector<'tcx> {
     fn register_native_lib(&mut self, span: Option<Span>, lib: NativeLibrary) {
-        if lib.name.as_ref().map(|s| s.as_str().is_empty()).unwrap_or(false) {
+        if lib.name.as_ref().map(|&s| s == kw::Invalid).unwrap_or(false) {
             match span {
                 Some(span) => {
                     struct_span_err!(self.tcx.sess, span, E0454,
@@ -159,7 +163,7 @@ impl Collector<'tcx> {
                                            sym::link_cfg,
                                            span.unwrap(),
                                            GateIssue::Language,
-                                           "is feature gated");
+                                           "is unstable");
         }
         if lib.kind == cstore::NativeStaticNobundle &&
            !self.tcx.features().static_nobundle {
@@ -167,7 +171,7 @@ impl Collector<'tcx> {
                                            sym::static_nobundle,
                                            span.unwrap_or_else(|| syntax_pos::DUMMY_SP),
                                            GateIssue::Language,
-                                           "kind=\"static-nobundle\" is feature gated");
+                                           "kind=\"static-nobundle\" is unstable");
         }
         self.libs.push(lib);
     }

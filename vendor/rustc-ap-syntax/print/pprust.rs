@@ -15,10 +15,20 @@ use crate::tokenstream::{self, TokenStream, TokenTree};
 
 use rustc_target::spec::abi::{self, Abi};
 use syntax_pos::{self, BytePos};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax_pos::{DUMMY_SP, FileName, Span};
+=======
+use syntax_pos::{FileName, Span};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use std::borrow::Cow;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#[cfg(test)]
+mod tests;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub enum MacHeader<'a> {
     Path(&'a ast::Path),
     Keyword(&'static str),
@@ -116,20 +126,38 @@ pub fn print_crate<'a>(cm: &'a SourceMap,
     if is_expanded && sess.injected_crate_name.try_get().is_some() {
         // We need to print `#![no_std]` (and its feature gate) so that
         // compiling pretty-printed source won't inject libstd again.
-        // However we don't want these attributes in the AST because
+        // However, we don't want these attributes in the AST because
         // of the feature gate, so we fake them up here.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // #![feature(prelude_import)]
         let pi_nested = attr::mk_nested_word_item(ast::Ident::with_empty_ctxt(sym::prelude_import));
         let list = attr::mk_list_item(
             DUMMY_SP, ast::Ident::with_empty_ctxt(sym::feature), vec![pi_nested]);
         let fake_attr = attr::mk_attr_inner(DUMMY_SP, attr::mk_attr_id(), list);
+=======
+        // `#![feature(prelude_import)]`
+        let pi_nested = attr::mk_nested_word_item(ast::Ident::with_dummy_span(sym::prelude_import));
+        let list = attr::mk_list_item(ast::Ident::with_dummy_span(sym::feature), vec![pi_nested]);
+        let fake_attr = attr::mk_attr_inner(list);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         s.print_attribute(&fake_attr);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // #![no_std]
         let no_std_meta = attr::mk_word_item(ast::Ident::with_empty_ctxt(sym::no_std));
         let fake_attr = attr::mk_attr_inner(DUMMY_SP, attr::mk_attr_id(), no_std_meta);
         s.print_attribute(&fake_attr);
+=======
+        // Currently, in Rust 2018 we don't have `extern crate std;` at the crate
+        // root, so this is not needed, and actually breaks things.
+        if sess.edition == syntax_pos::edition::Edition::Edition2015 {
+            // `#![no_std]`
+            let no_std_meta = attr::mk_word_item(ast::Ident::with_dummy_span(sym::no_std));
+            let fake_attr = attr::mk_attr_inner(no_std_meta);
+            s.print_attribute(&fake_attr);
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     s.print_mod(&krate.module, &krate.attrs);
@@ -148,6 +176,21 @@ pub fn to_string<F>(f: F) -> String where
     };
     f(&mut printer);
     printer.s.eof()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+}
+
+// This makes comma-separated lists look slightly nicer,
+// and also addresses a specific regression described in issue #63896.
+fn tt_prepend_space(tt: &TokenTree) -> bool {
+    match tt {
+        TokenTree::Token(token) => match token.kind {
+            token::Comma => false,
+            _ => true,
+        }
+        _ => true,
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 fn binop_to_string(op: BinOpToken) -> &'static str {
@@ -285,6 +328,7 @@ fn token_kind_to_string_ext(tok: &TokenKind, convert_dollar_crate: Option<Span>)
         token::Whitespace           => " ".to_string(),
         token::Comment              => "/* */".to_string(),
         token::Shebang(s)           => format!("/* shebang: {}*/", s),
+        token::Unknown(s)           => s.to_string(),
 
         token::Interpolated(ref nt) => nonterminal_to_string(nt),
     }
@@ -341,11 +385,15 @@ pub fn tt_to_string(tt: tokenstream::TokenTree) -> String {
     to_string(|s| s.print_tt(tt, false))
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub fn tts_to_string(tts: &[tokenstream::TokenTree]) -> String {
     tokens_to_string(tts.iter().cloned().collect())
 }
 
 pub fn tokens_to_string(tokens: TokenStream) -> String {
+=======
+pub fn tts_to_string(tokens: TokenStream) -> String {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     to_string(|s| s.print_tts(tokens, false))
 }
 
@@ -381,13 +429,18 @@ pub fn vis_to_string(v: &ast::Visibility) -> String {
     to_string(|s| s.print_visibility(v))
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg(test)]
 fn fun_to_string(decl: &ast::FnDecl,
                      header: ast::FnHeader,
                      name: ast::Ident,
                      generics: &ast::Generics)
                      -> String {
+=======
+fn block_to_string(blk: &ast::Block) -> String {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     to_string(|s| {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         s.head("");
         s.print_fn(decl, header, Some(name),
                    generics, &source_map::dummy_spanned(ast::VisibilityKind::Inherited));
@@ -401,6 +454,11 @@ fn block_to_string(blk: &ast::Block) -> String {
         // containing cbox, will be closed by print-block at }
         s.cbox(INDENT_UNIT);
         // head-ibox, will be closed by print-block after {
+=======
+        // Containing cbox, will be closed by `print_block` at `}`.
+        s.cbox(INDENT_UNIT);
+        // Head-ibox, will be closed by `print_block` after `{`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         s.ibox(0);
         s.print_block(blk)
     })
@@ -418,6 +476,7 @@ pub fn attribute_to_string(attr: &ast::Attribute) -> String {
     to_string(|s| s.print_attribute(attr))
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg(test)]
 fn variant_to_string(var: &ast::Variant) -> String {
     to_string(|s| s.print_variant(var))
@@ -425,6 +484,10 @@ fn variant_to_string(var: &ast::Variant) -> String {
 
 pub fn arg_to_string(arg: &ast::Arg) -> String {
     to_string(|s| s.print_arg(arg, false))
+=======
+pub fn param_to_string(arg: &ast::Param) -> String {
+    to_string(|s| s.print_param(arg, false))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 fn foreign_item_to_string(arg: &ast::ForeignItem) -> String {
@@ -448,21 +511,50 @@ impl std::ops::DerefMut for State<'_> {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub trait PrintState<'a>: std::ops::Deref<Target=pp::Printer> + std::ops::DerefMut {
+=======
+pub trait PrintState<'a>: std::ops::Deref<Target = pp::Printer> + std::ops::DerefMut {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn comments(&mut self) -> &mut Option<Comments<'a>>;
     fn print_ident(&mut self, ident: ast::Ident);
     fn print_generic_args(&mut self, args: &ast::GenericArgs, colons_before_params: bool);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn commasep<T, F>(&mut self, b: Breaks, elts: &[T], mut op: F)
+=======
+    fn strsep<T, F>(&mut self, sep: &'static str, space_before: bool,
+                    b: Breaks, elts: &[T], mut op: F)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         where F: FnMut(&mut Self, &T),
     {
         self.rbox(0, b);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut first = true;
         for elt in elts {
             if first { first = false; } else { self.word_space(","); }
             op(self, elt);
         }
         self.end();
+=======
+        if let Some((first, rest)) = elts.split_first() {
+            op(self, first);
+            for elt in rest {
+                if space_before {
+                    self.space();
+                }
+                self.word_space(sep);
+                op(self, elt);
+            }
+        }
+        self.end();
+    }
+
+    fn commasep<T, F>(&mut self, b: Breaks, elts: &[T], op: F)
+        where F: FnMut(&mut Self, &T),
+    {
+        self.strsep(",", false, b, elts, op)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn maybe_print_comment(&mut self, pos: BytePos) {
@@ -488,7 +580,7 @@ pub trait PrintState<'a>: std::ops::Deref<Target=pp::Printer> + std::ops::DerefM
                 self.hardbreak_if_not_bol();
                 for line in &cmnt.lines {
                     // Don't print empty lines because they will end up as trailing
-                    // whitespace
+                    // whitespace.
                     if !line.is_empty() {
                         self.word(line.clone());
                     }
@@ -695,6 +787,7 @@ pub trait PrintState<'a>: std::ops::Deref<Target=pp::Printer> + std::ops::DerefM
                 self.print_mac_common(
                     None, false, None, delim, tts, convert_dollar_crate, dspan.entire()
                 );
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             }
         }
     }
@@ -703,11 +796,17 @@ pub trait PrintState<'a>: std::ops::Deref<Target=pp::Printer> + std::ops::DerefM
         for (i, tt) in tts.into_trees().enumerate() {
             if i != 0 {
                 self.space();
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             self.print_tt(tt, convert_dollar_crate);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn print_mac_common(
         &mut self,
         header: Option<MacHeader<'_>>,
@@ -721,6 +820,107 @@ pub trait PrintState<'a>: std::ops::Deref<Target=pp::Printer> + std::ops::DerefM
         if delim == DelimToken::Brace {
             self.cbox(INDENT_UNIT);
         }
+        match header {
+            Some(MacHeader::Path(path)) => self.print_path(path, false, 0),
+            Some(MacHeader::Keyword(kw)) => self.word(kw),
+            None => {}
+        }
+        if has_bang {
+            self.word("!");
+        }
+        if let Some(ident) = ident {
+            self.nbsp();
+            self.print_ident(ident);
+        }
+        match delim {
+            DelimToken::Brace => {
+                if header.is_some() || has_bang || ident.is_some() {
+                    self.nbsp();
+                }
+                self.word("{");
+                if !tts.is_empty() {
+                    self.space();
+                }
+            }
+            _ => self.word(token_kind_to_string(&token::OpenDelim(delim))),
+        }
+        self.ibox(0);
+        self.print_tts(tts, convert_dollar_crate);
+        self.end();
+        match delim {
+            DelimToken::Brace => self.bclose(span),
+            _ => self.word(token_kind_to_string(&token::CloseDelim(delim))),
+=======
+    fn print_tts(&mut self, tts: tokenstream::TokenStream, convert_dollar_crate: bool) {
+        for (i, tt) in tts.into_trees().enumerate() {
+            if i != 0 && tt_prepend_space(&tt) {
+                self.space();
+            }
+            self.print_tt(tt, convert_dollar_crate);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+        }
+    }
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+    fn print_path(&mut self, path: &ast::Path, colons_before_params: bool, depth: usize) {
+        self.maybe_print_comment(path.span.lo());
+
+        for (i, segment) in path.segments[..path.segments.len() - depth].iter().enumerate() {
+            if i > 0 {
+                self.word("::")
+            }
+            self.print_path_segment(segment, colons_before_params);
+=======
+    fn print_mac_common(
+        &mut self,
+        header: Option<MacHeader<'_>>,
+        has_bang: bool,
+        ident: Option<ast::Ident>,
+        delim: DelimToken,
+        tts: TokenStream,
+        convert_dollar_crate: bool,
+        span: Span,
+    ) {
+        if delim == DelimToken::Brace {
+            self.cbox(INDENT_UNIT);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+        }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+    }
+
+    fn print_path_segment(&mut self, segment: &ast::PathSegment, colons_before_params: bool) {
+        if segment.ident.name != kw::PathRoot {
+            self.print_ident(segment.ident);
+            if let Some(ref args) = segment.args {
+                self.print_generic_args(args, colons_before_params);
+            }
+        }
+    }
+
+    fn head<S: Into<Cow<'static, str>>>(&mut self, w: S) {
+        let w = w.into();
+        // outer-box is consistent
+        self.cbox(INDENT_UNIT);
+        // head-box is inconsistent
+        self.ibox(w.len() + 1);
+        // keyword that starts the head
+        if !w.is_empty() {
+            self.word_nbsp(w);
+        }
+    }
+
+    fn bopen(&mut self) {
+        self.word("{");
+        self.end(); // close the head-box
+    }
+
+    fn bclose_maybe_open(&mut self, span: syntax_pos::Span, close_box: bool) {
+        self.maybe_print_comment(span.hi());
+        self.break_offset_if_not_bol(1, -(INDENT_UNIT as isize));
+        self.word("}");
+        if close_box {
+            self.end(); // close the outer-box
+=======
         match header {
             Some(MacHeader::Path(path)) => self.print_path(path, false, 0),
             Some(MacHeader::Keyword(kw)) => self.word(kw),
@@ -776,11 +976,11 @@ pub trait PrintState<'a>: std::ops::Deref<Target=pp::Printer> + std::ops::DerefM
 
     fn head<S: Into<Cow<'static, str>>>(&mut self, w: S) {
         let w = w.into();
-        // outer-box is consistent
+        // Outer-box is consistent.
         self.cbox(INDENT_UNIT);
-        // head-box is inconsistent
+        // Head-box is inconsistent.
         self.ibox(w.len() + 1);
-        // keyword that starts the head
+        // Keyword that starts the head.
         if !w.is_empty() {
             self.word_nbsp(w);
         }
@@ -788,7 +988,7 @@ pub trait PrintState<'a>: std::ops::Deref<Target=pp::Printer> + std::ops::DerefM
 
     fn bopen(&mut self) {
         self.word("{");
-        self.end(); // close the head-box
+        self.end(); // Close the head-box.
     }
 
     fn bclose_maybe_open(&mut self, span: syntax_pos::Span, close_box: bool) {
@@ -796,7 +996,8 @@ pub trait PrintState<'a>: std::ops::Deref<Target=pp::Printer> + std::ops::DerefM
         self.break_offset_if_not_bol(1, -(INDENT_UNIT as isize));
         self.word("}");
         if close_box {
-            self.end(); // close the outer-box
+            self.end(); // Close the outer-box.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
@@ -893,8 +1094,11 @@ impl<'a> State<'a> {
         self.s.word("*/")
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     crate fn commasep_cmnt<T, F, G>(&mut self,
                                   b: Breaks,
                                   elts: &[T],
@@ -921,12 +1125,20 @@ impl<'a> State<'a> {
     }
 
     crate fn commasep_exprs(&mut self, b: Breaks,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                           exprs: &[P<ast::Expr>]) {
+=======
+                            exprs: &[P<ast::Expr>]) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.commasep_cmnt(b, exprs, |s, e| s.print_expr(e), |e| e.span)
     }
 
     crate fn print_mod(&mut self, _mod: &ast::Mod,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                      attrs: &[ast::Attribute]) {
+=======
+                       attrs: &[ast::Attribute]) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.print_inner_attributes(attrs);
         for item in &_mod.items {
             self.print_item(item);
@@ -934,7 +1146,11 @@ impl<'a> State<'a> {
     }
 
     crate fn print_foreign_mod(&mut self, nmod: &ast::ForeignMod,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                              attrs: &[ast::Attribute]) {
+=======
+                               attrs: &[ast::Attribute]) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.print_inner_attributes(attrs);
         for item in &nmod.items {
             self.print_foreign_item(item);
@@ -1084,7 +1300,11 @@ impl<'a> State<'a> {
             }
             ast::ForeignItemKind::Macro(ref m) => {
                 self.print_mac(m);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 match m.node.delim {
+=======
+                match m.delim {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     MacDelimiter::Brace => {},
                     _ => self.s.word(";")
                 }
@@ -1129,7 +1349,11 @@ impl<'a> State<'a> {
         self.s.word(";")
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Pretty-print an item
+=======
+    /// Pretty-prints an item.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     crate fn print_item(&mut self, item: &ast::Item) {
         self.hardbreak_if_not_bol();
         self.maybe_print_comment(item.span.lo());
@@ -1225,7 +1449,11 @@ impl<'a> State<'a> {
                 self.s.word(ga.asm.as_str().to_string());
                 self.end();
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ast::ItemKind::Ty(ref ty, ref generics) => {
+=======
+            ast::ItemKind::TyAlias(ref ty, ref generics) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.head(visibility_qualified(&item.vis, "type"));
                 self.print_ident(item.ident);
                 self.print_generic_params(&generics.params);
@@ -1238,9 +1466,16 @@ impl<'a> State<'a> {
                 self.s.word(";");
                 self.end(); // end the outer ibox
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ast::ItemKind::Existential(ref bounds, ref generics) => {
                 self.head(visibility_qualified(&item.vis, "existential type"));
                 self.print_ident(item.ident);
+=======
+            ast::ItemKind::OpaqueTy(ref bounds, ref generics) => {
+                self.head(visibility_qualified(&item.vis, "type"));
+                self.print_ident(item.ident);
+                self.word_space("= impl");
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.print_generic_params(&generics.params);
                 self.end(); // end the inner ibox
 
@@ -1357,7 +1592,11 @@ impl<'a> State<'a> {
             }
             ast::ItemKind::Mac(ref mac) => {
                 self.print_mac(mac);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 match mac.node.delim {
+=======
+                match mac.delim {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     MacDelimiter::Brace => {}
                     _ => self.s.word(";"),
                 }
@@ -1418,7 +1657,11 @@ impl<'a> State<'a> {
         for v in variants {
             self.space_if_not_bol();
             self.maybe_print_comment(v.span.lo());
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             self.print_outer_attributes(&v.node.attrs);
+=======
+            self.print_outer_attributes(&v.attrs);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             self.ibox(INDENT_UNIT);
             self.print_variant(v);
             self.s.word(",");
@@ -1481,7 +1724,11 @@ impl<'a> State<'a> {
                     self.s.word(";");
                 }
                 self.end();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.end(); // close the outer-box
+=======
+                self.end(); // Close the outer-box.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             ast::VariantData::Struct(..) => {
                 self.print_where_clause(&generics.where_clause);
@@ -1508,8 +1755,13 @@ impl<'a> State<'a> {
     crate fn print_variant(&mut self, v: &ast::Variant) {
         self.head("");
         let generics = ast::Generics::default();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.print_struct(&v.node.data, &generics, v.node.ident, v.span, false);
         match v.node.disr_expr {
+=======
+        self.print_struct(&v.data, &generics, v.ident, v.span, false);
+        match v.disr_expr {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             Some(ref d) => {
                 self.s.space();
                 self.word_space("=");
@@ -1570,7 +1822,11 @@ impl<'a> State<'a> {
             }
             ast::TraitItemKind::Macro(ref mac) => {
                 self.print_mac(mac);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 match mac.node.delim {
+=======
+                match mac.delim {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     MacDelimiter::Brace => {}
                     _ => self.s.word(";"),
                 }
@@ -1595,16 +1851,33 @@ impl<'a> State<'a> {
                 self.nbsp();
                 self.print_block_with_attrs(body, &ii.attrs);
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ast::ImplItemKind::Type(ref ty) => {
+=======
+            ast::ImplItemKind::TyAlias(ref ty) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.print_associated_type(ii.ident, None, Some(ty));
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ast::ImplItemKind::Existential(ref bounds) => {
                 self.word_space("existential");
                 self.print_associated_type(ii.ident, Some(bounds), None);
+=======
+            ast::ImplItemKind::OpaqueTy(ref bounds) => {
+                self.word_space("type");
+                self.print_ident(ii.ident);
+                self.word_space("= impl");
+                self.print_type_bounds(":", bounds);
+                self.s.word(";");
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             ast::ImplItemKind::Macro(ref mac) => {
                 self.print_mac(mac);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 match mac.node.delim {
+=======
+                match mac.delim {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     MacDelimiter::Brace => {}
                     _ => self.s.word(";"),
                 }
@@ -1703,11 +1976,19 @@ impl<'a> State<'a> {
         self.ann.post(self, AnnNode::Block(blk))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Print a `let pats = scrutinee` expression.
     crate fn print_let(&mut self, pats: &[P<ast::Pat>], scrutinee: &ast::Expr) {
         self.s.word("let ");
 
         self.print_pats(pats);
+=======
+    /// Print a `let pat = scrutinee` expression.
+    crate fn print_let(&mut self, pat: &ast::Pat, scrutinee: &ast::Expr) {
+        self.s.word("let ");
+
+        self.print_pat(pat);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.s.space();
 
         self.word_space("=");
@@ -1762,11 +2043,19 @@ impl<'a> State<'a> {
 
     crate fn print_mac(&mut self, m: &ast::Mac) {
         self.print_mac_common(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Some(MacHeader::Path(&m.node.path)),
             true,
             None,
             m.node.delim.to_token(),
             m.node.stream(),
+=======
+            Some(MacHeader::Path(&m.path)),
+            true,
+            None,
+            m.delim.to_token(),
+            m.stream(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             true,
             m.span,
         );
@@ -1782,7 +2071,7 @@ impl<'a> State<'a> {
         self.print_expr_cond_paren(expr, expr.precedence().order() < prec)
     }
 
-    /// Print an expr using syntax that's acceptable in a condition position, such as the `cond` in
+    /// Prints an expr using syntax that's acceptable in a condition position, such as the `cond` in
     /// `if cond { ... }`.
     crate fn print_expr_as_cond(&mut self, expr: &ast::Expr) {
         self.print_expr_cond_paren(expr, Self::cond_needs_par(expr))
@@ -1801,7 +2090,11 @@ impl<'a> State<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Print `expr` or `(expr)` when `needs_par` holds.
+=======
+    /// Prints `expr` or `(expr)` when `needs_par` holds.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn print_expr_cond_paren(&mut self, expr: &ast::Expr, needs_par: bool) {
         if needs_par {
             self.popen();
@@ -2033,8 +2326,13 @@ impl<'a> State<'a> {
                 self.word_space(":");
                 self.print_type(ty);
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ast::ExprKind::Let(ref pats, ref scrutinee) => {
                 self.print_let(pats, scrutinee);
+=======
+            ast::ExprKind::Let(ref pat, ref scrutinee) => {
+                self.print_let(pat, scrutinee);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             ast::ExprKind::If(ref test, ref blk, ref elseopt) => {
                 self.print_if(test, blk, elseopt.as_ref().map(|e| &**e));
@@ -2090,7 +2388,11 @@ impl<'a> State<'a> {
                 self.print_asyncness(asyncness);
                 self.print_capture_clause(capture_clause);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.print_fn_block_args(decl);
+=======
+                self.print_fn_block_params(decl);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.s.space();
                 self.print_expr(body);
                 self.end(); // need to close a box
@@ -2365,6 +2667,12 @@ impl<'a> State<'a> {
                 self.popen();
                 self.commasep(Inconsistent, &elts[..], |s, p| s.print_pat(p));
                 self.pclose();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            }
+            PatKind::Or(ref pats) => {
+                self.strsep("|", true, Inconsistent, &pats[..], |s, p| s.print_pat(p));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             PatKind::Path(None, ref path) => {
                 self.print_path(path, true, 0);
@@ -2380,14 +2688,27 @@ impl<'a> State<'a> {
                     Consistent, &fields[..],
                     |s, f| {
                         s.cbox(INDENT_UNIT);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         if !f.node.is_shorthand {
                             s.print_ident(f.node.ident);
+=======
+                        if !f.is_shorthand {
+                            s.print_ident(f.ident);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             s.word_nbsp(":");
                         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         s.print_pat(&f.node.pat);
+=======
+                        s.print_pat(&f.pat);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         s.end();
                     },
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     |f| f.node.pat.span);
+=======
+                    |f| f.pat.span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if etc {
                     if !fields.is_empty() { self.word_space(","); }
                     self.s.word("..");
@@ -2441,6 +2762,7 @@ impl<'a> State<'a> {
         self.ann.post(self, AnnNode::Pat(pat))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn print_pats(&mut self, pats: &[P<ast::Pat>]) {
         let mut first = true;
         for p in pats {
@@ -2457,14 +2779,24 @@ impl<'a> State<'a> {
     fn print_arm(&mut self, arm: &ast::Arm) {
         // I have no idea why this check is necessary, but here it
         // is :(
+=======
+    fn print_arm(&mut self, arm: &ast::Arm) {
+        // Note, I have no idea why this check is necessary, but here it is.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         if arm.attrs.is_empty() {
             self.s.space();
         }
         self.cbox(INDENT_UNIT);
         self.ibox(0);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.maybe_print_comment(arm.pats[0].span.lo());
         self.print_outer_attributes(&arm.attrs);
         self.print_pats(&arm.pats);
+=======
+        self.maybe_print_comment(arm.pat.span.lo());
+        self.print_outer_attributes(&arm.attrs);
+        self.print_pat(&arm.pat);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.s.space();
         if let Some(ref e) = arm.guard {
             self.word_space("if");
@@ -2480,21 +2812,33 @@ impl<'a> State<'a> {
                     self.word_space(":");
                 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 // the block will close the pattern's ibox
+=======
+                // The block will close the pattern's ibox.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.print_block_unclosed_indent(blk);
 
-                // If it is a user-provided unsafe block, print a comma after it
+                // If it is a user-provided unsafe block, print a comma after it.
                 if let BlockCheckMode::Unsafe(ast::UserProvided) = blk.rules {
                     self.s.word(",");
                 }
             }
             _ => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.end(); // close the ibox for the pattern
+=======
+                self.end(); // Close the ibox for the pattern.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.print_expr(&arm.body);
                 self.s.word(",");
             }
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.end(); // close enclosing cbox
+=======
+        self.end(); // Close enclosing cbox.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn print_explicit_self(&mut self, explicit_self: &ast::ExplicitSelf) {
@@ -2531,21 +2875,37 @@ impl<'a> State<'a> {
             self.print_ident(name);
         }
         self.print_generic_params(&generics.params);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.print_fn_args_and_ret(decl);
+=======
+        self.print_fn_params_and_ret(decl);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.print_where_clause(&generics.where_clause)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     crate fn print_fn_args_and_ret(&mut self, decl: &ast::FnDecl) {
         self.popen();
         self.commasep(Inconsistent, &decl.inputs, |s, arg| s.print_arg(arg, false));
+=======
+    crate fn print_fn_params_and_ret(&mut self, decl: &ast::FnDecl) {
+        self.popen();
+        self.commasep(Inconsistent, &decl.inputs, |s, param| s.print_param(param, false));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.pclose();
 
         self.print_fn_output(decl)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     crate fn print_fn_block_args(&mut self, decl: &ast::FnDecl) {
         self.s.word("|");
         self.commasep(Inconsistent, &decl.inputs, |s, arg| s.print_arg(arg, true));
+=======
+    crate fn print_fn_block_params(&mut self, decl: &ast::FnDecl) {
+        self.s.word("|");
+        self.commasep(Inconsistent, &decl.inputs, |s, param| s.print_param(param, true));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.s.word("|");
 
         if let ast::FunctionRetTy::Default(..) = decl.output {
@@ -2639,13 +2999,19 @@ impl<'a> State<'a> {
         self.s.word("<");
 
         self.commasep(Inconsistent, &generic_params, |s, param| {
+            s.print_outer_attributes_inline(&param.attrs);
+
             match param.kind {
                 ast::GenericParamKind::Lifetime => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     s.print_outer_attributes_inline(&param.attrs);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     let lt = ast::Lifetime { id: param.id, ident: param.ident };
                     s.print_lifetime_bounds(lt, &param.bounds)
                 }
                 ast::GenericParamKind::Type { ref default } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     s.print_outer_attributes_inline(&param.attrs);
                     s.print_ident(param.ident);
                     s.print_type_bounds(":", &param.bounds);
@@ -2656,10 +3022,21 @@ impl<'a> State<'a> {
                             s.print_type(default)
                         }
                         _ => {}
+=======
+                    s.print_ident(param.ident);
+                    s.print_type_bounds(":", &param.bounds);
+                    if let Some(ref default) = default {
+                        s.s.space();
+                        s.word_space("=");
+                        s.print_type(default)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     }
                 }
                 ast::GenericParamKind::Const { ref ty } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     s.print_outer_attributes_inline(&param.attrs);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     s.word_space("const");
                     s.print_ident(param.ident);
                     s.s.space();
@@ -2758,8 +3135,16 @@ impl<'a> State<'a> {
         self.print_type(&mt.ty)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     crate fn print_arg(&mut self, input: &ast::Arg, is_closure: bool) {
         self.ibox(INDENT_UNIT);
+=======
+    crate fn print_param(&mut self, input: &ast::Param, is_closure: bool) {
+        self.ibox(INDENT_UNIT);
+
+        self.print_outer_attributes_inline(&input.attrs);
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         match input.ty.node {
             ast::TyKind::Infer if is_closure => self.print_pat(&input.pat),
             _ => {
@@ -2888,6 +3273,7 @@ impl<'a> State<'a> {
         }
     }
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 #[cfg(test)]
 mod tests {
@@ -2945,3 +3331,5 @@ mod tests {
         })
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

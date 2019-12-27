@@ -1,5 +1,9 @@
 error[E0308]: mismatched types
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/dont-suggest-missing-await.rs:16:18
+=======
+  --> $DIR/dont-suggest-missing-await.rs:14:18
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |         take_u32(x)
    |                  ^ expected u32, found opaque type

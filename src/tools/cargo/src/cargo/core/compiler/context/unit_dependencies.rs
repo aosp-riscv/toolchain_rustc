@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! Constructs the dependency graph for compilation.
 //!
 //! Rust code is typically organized as a set of Cargo packages. The
@@ -561,3 +562,5 @@ impl<'a, 'cfg, 'tmp> State<'a, 'cfg, 'tmp> {
         Ok(())
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

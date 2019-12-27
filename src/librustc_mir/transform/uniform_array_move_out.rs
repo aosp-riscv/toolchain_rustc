@@ -36,8 +36,13 @@ use crate::util::patch::MirPatch;
 
 pub struct UniformArrayMoveOut;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for UniformArrayMoveOut {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for UniformArrayMoveOut {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let mut patch = MirPatch::new(body);
         let param_env = tcx.param_env(src.def_id());
         {
@@ -61,14 +66,22 @@ impl<'a, 'tcx> Visitor<'tcx> for UniformArrayMoveOutVisitor<'a, 'tcx> {
                     rvalue: &Rvalue<'tcx>,
                     location: Location) {
         if let Rvalue::Use(Operand::Move(ref src_place)) = rvalue {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if let Some(ref proj) = src_place.projection {
+=======
+            if let box [proj_base @ .., elem] = &src_place.projection {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if let ProjectionElem::ConstantIndex{offset: _,
                                                      min_length: _,
-                                                     from_end: false} = proj.elem {
+                                                     from_end: false} = elem {
                     // no need to transformation
                 } else {
                     let place_ty =
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         Place::ty_from(&src_place.base, &proj.base, self.body, self.tcx).ty;
+=======
+                        Place::ty_from(&src_place.base, proj_base, self.body, self.tcx).ty;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     if let ty::Array(item_ty, const_size) = place_ty.sty {
                         if let Some(size) = const_size.try_eval_usize(self.tcx, self.param_env) {
                             assert!(size <= u32::max_value() as u64,
@@ -78,7 +91,11 @@ impl<'a, 'tcx> Visitor<'tcx> for UniformArrayMoveOutVisitor<'a, 'tcx> {
                                 location,
                                 dst_place,
                                 &src_place.base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 proj,
+=======
+                                &src_place.projection,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                 item_ty,
                                 size as u32,
                             );
@@ -97,9 +114,14 @@ impl<'a, 'tcx> UniformArrayMoveOutVisitor<'a, 'tcx> {
                location: Location,
                dst_place: &Place<'tcx>,
                base: &PlaceBase<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                proj: &Projection<'tcx>,
+=======
+               proj: &[PlaceElem<'tcx>],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                item_ty: &'tcx ty::TyS<'tcx>,
                size: u32) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         match proj.elem {
             // uniforms statements like_10 = move _2[:-1];
             ProjectionElem::Subslice{from, to} => {
@@ -107,12 +129,72 @@ impl<'a, 'tcx> UniformArrayMoveOutVisitor<'a, 'tcx> {
                 let temps : Vec<_> = (from..(size-to)).map(|i| {
                     let temp = self.patch.new_temp(item_ty, self.body.source_info(location).span);
                     self.patch.add_statement(location, StatementKind::StorageLive(temp));
+=======
+        if let [proj_base @ .., elem] = proj {
+            match elem {
+                // uniforms statements like_10 = move _2[:-1];
+                ProjectionElem::Subslice{from, to} => {
+                    self.patch.make_nop(location);
+                    let temps : Vec<_> = (*from..(size-*to)).map(|i| {
+                        let temp =
+                            self.patch.new_temp(item_ty, self.body.source_info(location).span);
+                        self.patch.add_statement(location, StatementKind::StorageLive(temp));
+
+                        let mut projection = proj_base.to_vec();
+                        projection.push(ProjectionElem::ConstantIndex {
+                            offset: i,
+                            min_length: size,
+                            from_end: false,
+                        });
+                        self.patch.add_assign(location,
+                                              Place::from(temp),
+                                              Rvalue::Use(
+                                                  Operand::Move(
+                                                      Place {
+                                                          base: base.clone(),
+                                                          projection: projection.into_boxed_slice(),
+                                                      }
+                                                  )
+                                              )
+                        );
+                        temp
+                    }).collect();
+                    self.patch.add_assign(
+                        location,
+                        dst_place.clone(),
+                        Rvalue::Aggregate(
+                            box AggregateKind::Array(item_ty),
+                            temps.iter().map(
+                                |x| Operand::Move(Place::from(*x))
+                            ).collect()
+                        )
+                    );
+                    for temp in temps {
+                        self.patch.add_statement(location, StatementKind::StorageDead(temp));
+                    }
+                }
+                // uniforms statements like _11 = move _2[-1 of 1];
+                ProjectionElem::ConstantIndex{offset, min_length: _, from_end: true} => {
+                    self.patch.make_nop(location);
+
+                    let mut projection = proj_base.to_vec();
+                    projection.push(ProjectionElem::ConstantIndex {
+                        offset: size - offset,
+                        min_length: size,
+                        from_end: false,
+                    });
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     self.patch.add_assign(location,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                           Place::from(temp),
+=======
+                                          dst_place.clone(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                           Rvalue::Use(
                                               Operand::Move(
                                                   Place {
                                                       base: base.clone(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                                       projection: Some(box Projection {
                                                           base: proj.base.clone(),
                                                           elem: ProjectionElem::ConstantIndex {
@@ -139,8 +221,17 @@ impl<'a, 'tcx> UniformArrayMoveOutVisitor<'a, 'tcx> {
                 );
                 for temp in temps {
                     self.patch.add_statement(location, StatementKind::StorageDead(temp));
+=======
+                                                      projection: projection.into_boxed_slice(),
+                                                  }
+                                              )
+                                          )
+                    );
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
+                _ => {}
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             // uniforms statements like _11 = move _2[-1 of 1];
             ProjectionElem::ConstantIndex{offset, min_length: _, from_end: true} => {
                 self.patch.make_nop(location);
@@ -164,6 +255,8 @@ impl<'a, 'tcx> UniformArrayMoveOutVisitor<'a, 'tcx> {
                 );
             }
             _ => {}
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 }
@@ -184,8 +277,13 @@ impl<'a, 'tcx> UniformArrayMoveOutVisitor<'a, 'tcx> {
 
 pub struct RestoreSubsliceArrayMoveOut;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for RestoreSubsliceArrayMoveOut {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for RestoreSubsliceArrayMoveOut {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let mut patch = MirPatch::new(body);
         let param_env = tcx.param_env(src.def_id());
         {
@@ -197,12 +295,21 @@ impl MirPass for RestoreSubsliceArrayMoveOut {
 
             for candidate in &visitor.candidates {
                 let statement = &body[candidate.block].statements[candidate.statement_index];
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if let StatementKind::Assign(ref dst_place, ref rval) = statement.kind {
                     if let Rvalue::Aggregate(box AggregateKind::Array(_), ref items) = **rval {
+=======
+                if let StatementKind::Assign(box(ref dst_place, ref rval)) = statement.kind {
+                    if let Rvalue::Aggregate(box AggregateKind::Array(_), ref items) = *rval {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         let items : Vec<_> = items.iter().map(|item| {
                             if let Operand::Move(Place {
                                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: None,
+=======
+                                projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             }) = item {
                                 let local_use = &visitor.locals_use[*local];
                                 let opt_index_and_place =
@@ -269,6 +376,7 @@ impl RestoreSubsliceArrayMoveOut {
             }
             patch.make_nop(candidate);
             let size = opt_size.unwrap() as u32;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             patch.add_assign(candidate,
                              dst_place.clone(),
                              Rvalue::Use(
@@ -279,6 +387,19 @@ impl RestoreSubsliceArrayMoveOut {
                                              base: src_place.projection.clone(),
                                              elem: ProjectionElem::Subslice{
                                                  from: min, to: size - max - 1}})})));
+=======
+
+            let mut projection = src_place.projection.to_vec();
+            projection.push(ProjectionElem::Subslice { from: min, to: size - max - 1 });
+            patch.add_assign(
+                candidate,
+                dst_place.clone(),
+                Rvalue::Use(Operand::Move(Place {
+                    base: src_place.base.clone(),
+                    projection: projection.into_boxed_slice(),
+                })),
+            );
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
@@ -289,6 +410,7 @@ impl RestoreSubsliceArrayMoveOut {
             if block.statements.len() > location.statement_index {
                 let statement = &block.statements[location.statement_index];
                 if let StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Place {
                         base: PlaceBase::Local(_),
                         projection: None,
@@ -306,6 +428,36 @@ impl RestoreSubsliceArrayMoveOut {
                         base,
                         projection: proj_base,
                     }))
+=======
+                    box(
+                        Place {
+                            base: PlaceBase::Local(_),
+                            projection: box [],
+                        },
+                        Rvalue::Use(Operand::Move(Place {
+                            base: _,
+                            projection: box [.., ProjectionElem::ConstantIndex {
+                                offset, min_length: _, from_end: false
+                            }],
+                        })),
+                    )
+                ) = &statement.kind {
+                    // FIXME remove once we can use slices patterns
+                    if let StatementKind::Assign(
+                        box(
+                            _,
+                            Rvalue::Use(Operand::Move(Place {
+                                base,
+                                projection: box [proj_base @ .., _],
+                            })),
+                        )
+                    ) = &statement.kind {
+                        return Some((*offset, PlaceRef {
+                            base,
+                            projection: proj_base,
+                        }))
+                    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             }
         }

@@ -1,8 +1,16 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: use of possibly uninitialized variable: `y`
   --> $DIR/no-non-guaranteed-initialization.rs:12:5
    |
 LL |     y
    |     ^ use of possibly uninitialized `y`
+=======
+error[E0381]: use of possibly-uninitialized variable: `y`
+  --> $DIR/no-non-guaranteed-initialization.rs:10:5
+   |
+LL |     y
+   |     ^ use of possibly-uninitialized `y`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

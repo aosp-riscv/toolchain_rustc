@@ -5,8 +5,11 @@
 // See further discussion on rust-lang/rust#24535,
 // rust-lang/rfcs#1006, and rust-lang/rfcs#107
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(bind_by_move_pattern_guards)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 fn main() {
     rust_issue_24535();
     rfcs_issue_1006_1();

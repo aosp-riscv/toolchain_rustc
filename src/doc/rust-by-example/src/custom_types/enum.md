@@ -53,11 +53,63 @@ fn main() {
 
 ```
 
+## Type aliases
+
+If you use a type alias, you can refer to each enum variant via its alias. 
+This might be useful if the enum's name is too long or too generic, and you
+want to rename it.
+
+```rust,editable
+enum VeryVerboseEnumOfThingsToDoWithNumbers {
+    Add,
+    Subtract,
+}
+
+// Creates a type alias
+type Operations = VeryVerboseEnumOfThingsToDoWithNumbers;
+
+fn main() {
+    // We can refer to each variant via its alias, not its long and inconvenient
+    // name.
+    let x = Operations::Add;
+}
+```
+
+The most common place you'll see this is in `impl` blocks using the `Self` alias.
+
+```rust,editable
+enum VeryVerboseEnumOfThingsToDoWithNumbers {
+    Add,
+    Subtract,
+}
+
+impl VeryVerboseEnumOfThingsToDoWithNumbers {
+    fn run(&self, x: i32, y: i32) -> i32 {
+        match self {
+            Self::Add => x + y,
+            Self::Subtract => x - y,
+        }
+    }
+}
+```
+
+To learn more about enums and type aliases, you can read the 
+[stabilization report][aliasreport] from when this feature was stabilized into
+Rust. 
+
 ### See also:
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 [`match`][match], [`fn`][fn], and [`String`][str]
+=======
+[`match`][match], [`fn`][fn], and [`String`][str], []
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 [c_struct]: https://en.wikipedia.org/wiki/Struct_(C_programming_language)
 [match]: ../flow_control/match.md
 [fn]: ../fn.md
 [str]: ../std/str.md
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+[aliasreport]: https://github.com/rust-lang/rust/pull/61682/#issuecomment-502472847
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

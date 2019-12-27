@@ -179,6 +179,49 @@ LL | | #[doc = "```"]
    |
    = help: mark blocks that do not contain Rust code as text: ```text
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+warning: Rust code block is empty
+  --> $DIR/invalid-syntax.rs:68:5
+   |
+LL |   /// ```rust
+   |  _____^
+LL | | /// ```
+   | |_______^
+
+warning: Rust code block is empty
+  --> $DIR/invalid-syntax.rs:72:5
+   |
+LL |   /// ```
+   |  _____^
+LL | | ///
+LL | | ///
+LL | | /// ```
+   | |_______^
+help: mark blocks that do not contain Rust code as text
+   |
+LL | /// ```text
+   |     ^^^^^^^
+
+error: unknown start of token: \
+ --> <doctest>:1:1
+  |
+1 | \____/
+  | ^
+
+warning: could not parse code block as Rust code
+  --> $DIR/invalid-syntax.rs:82:9
+   |
+LL | ///     \____/
+   |         ^^^^^^
+
+error: unknown start of token: \
+ --> <rustdoc-highlighting>:1:1
+  |
+1 | \____/
+  | ^
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 error: unknown start of token: \
  --> <rustdoc-highlighting>:1:1
   |

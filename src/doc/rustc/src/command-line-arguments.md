@@ -304,3 +304,13 @@ to customize the output:
 
 Note that it is invalid to combine the `--json` argument with the `--color`
 argument, and it is required to combine `--json` with `--error-format=json`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+## `@path`: load command-line flags from a path
+
+If you specify `@path` on the command-line, then it will open `path` and read
+command line options from it. These options are one per line; a blank line indicates
+an empty option. The file can use Unix or Windows style line endings, and must be
+encoded as UTF-8.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

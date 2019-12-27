@@ -1,4 +1,5 @@
 // aux-build:option_helpers.rs
+// compile-flags: --edition 2018
 
 #![warn(clippy::all, clippy::pedantic, clippy::option_unwrap_used)]
 #![allow(
@@ -11,7 +12,10 @@
     clippy::needless_pass_by_value,
     clippy::default_trait_access,
     clippy::use_self,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     clippy::new_ret_no_self,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     clippy::useless_format,
     clippy::wrong_self_convention
 )]
@@ -138,6 +142,22 @@ impl<T> V<T> {
     }
 }
 
+struct AsyncNew;
+
+impl AsyncNew {
+    async fn new() -> Option<Self> {
+        None
+    }
+}
+
+struct BadNew;
+
+impl BadNew {
+    fn new() -> i32 {
+        0
+    }
+}
+
 impl Mul<T> for T {
     type Output = T;
     // No error, obviously.
@@ -244,9 +264,13 @@ fn filter_next() {
 #[rustfmt::skip]
 fn search_is_some() {
     let v = vec![3, 2, 1, 0, -1, -2, -3];
+    let y = &&42;
 
     // Check `find().is_some()`, single-line case.
     let _ = v.iter().find(|&x| *x < 0).is_some();
+    let _ = (0..1).find(|x| **y == *x).is_some(); // one dereference less
+    let _ = (0..1).find(|x| *x == 0).is_some();
+    let _ = v.iter().find(|x| **x == 0).is_some();
 
     // Check `find().is_some()`, multi-line case.
     let _ = v.iter().find(|&x| {

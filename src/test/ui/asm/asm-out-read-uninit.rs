@@ -20,7 +20,11 @@ pub fn main() {
     let x: isize;
     unsafe {
         asm!("mov $1, $0" : "=r"(x) : "r"(x));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         //~^ ERROR use of possibly uninitialized variable: `x`
+=======
+        //~^ ERROR use of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
     foo(x);
 }

@@ -17,8 +17,8 @@ pub struct RawConst<'tcx> {
     pub ty: Ty<'tcx>,
 }
 
-/// Represents a constant value in Rust. `Scalar` and `ScalarPair` are optimizations that
-/// match the `LocalState` optimizations for easy conversions between `Value` and `ConstValue`.
+/// Represents a constant value in Rust. `Scalar` and `Slice` are optimizations for
+/// array length computations, enum discriminants and the pattern matching logic.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, PartialOrd, Ord,
          RustcEncodable, RustcDecodable, Hash, HashStable)]
 pub enum ConstValue<'tcx> {
@@ -91,7 +91,7 @@ impl<'tcx> ConstValue<'tcx> {
 /// of a simple value or a pointer into another `Allocation`
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd,
          RustcEncodable, RustcDecodable, Hash, HashStable)]
-pub enum Scalar<Tag=(), Id=AllocId> {
+pub enum Scalar<Tag = (), Id = AllocId> {
     /// The raw bytes of a simple value.
     Raw {
         /// The first `size` bytes of `data` are the value.
@@ -359,7 +359,11 @@ impl<'tcx, Tag> Scalar<Tag> {
 
     #[inline(always)]
     pub fn assert_bits(self, target_size: Size) -> u128 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.to_bits(target_size).expect("Expected Raw bits but got a Pointer")
+=======
+        self.to_bits(target_size).expect("expected Raw bits but got a Pointer")
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Do not call this method!  Use either `assert_ptr` or `force_ptr`.
@@ -374,7 +378,11 @@ impl<'tcx, Tag> Scalar<Tag> {
 
     #[inline(always)]
     pub fn assert_ptr(self) -> Pointer<Tag> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.to_ptr().expect("Expected a Pointer but got Raw bits")
+=======
+        self.to_ptr().expect("expected a Pointer but got Raw bits")
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Do not call this method!  Dispatch based on the type instead.
@@ -482,8 +490,13 @@ impl<Tag> From<Pointer<Tag>> for Scalar<Tag> {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, RustcEncodable, RustcDecodable, Hash)]
 pub enum ScalarMaybeUndef<Tag=(), Id=AllocId> {
+=======
+#[derive(Clone, Copy, Eq, PartialEq, Ord, PartialOrd, Hash, RustcEncodable, RustcDecodable)]
+pub enum ScalarMaybeUndef<Tag = (), Id = AllocId> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Scalar(Scalar<Tag, Id>),
     Undef,
 }
@@ -530,7 +543,11 @@ impl<'tcx, Tag> ScalarMaybeUndef<Tag> {
     pub fn not_undef(self) -> InterpResult<'static, Scalar<Tag>> {
         match self {
             ScalarMaybeUndef::Scalar(scalar) => Ok(scalar),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ScalarMaybeUndef::Undef => throw_unsup!(ReadUndefBytes(Size::from_bytes(0))),
+=======
+            ScalarMaybeUndef::Undef => throw_unsup!(ReadUndefBytes(Size::ZERO)),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 

@@ -1,8 +1,16 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: use of possibly uninitialized variable: `x`
   --> $DIR/asm-out-read-uninit.rs:22:43
    |
 LL |         asm!("mov $1, $0" : "=r"(x) : "r"(x));
    |                                           ^ use of possibly uninitialized `x`
+=======
+error[E0381]: use of possibly-uninitialized variable: `x`
+  --> $DIR/asm-out-read-uninit.rs:22:43
+   |
+LL |         asm!("mov $1, $0" : "=r"(x) : "r"(x));
+   |                                           ^ use of possibly-uninitialized `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0670]: `async fn` is not permitted in the 2015 edition
   --> $DIR/feature-gate-async-await-2015-edition.rs:3:1
    |
@@ -29,3 +30,5 @@ error: aborting due to 4 previous errors
 
 Some errors have detailed explanations: E0422, E0425, E0658, E0670.
 For more information about an error, try `rustc --explain E0422`.
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

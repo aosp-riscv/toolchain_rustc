@@ -108,7 +108,11 @@ fn is_argument(map: &hir::map::Map<'_>, id: HirId) -> bool {
     }
 
     match map.find(map.get_parent_node(id)) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Some(Node::Arg(_)) => true,
+=======
+        Some(Node::Param(_)) => true,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         _ => false,
     }
 }

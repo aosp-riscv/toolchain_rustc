@@ -1,8 +1,12 @@
-error[E0381]: use of possibly uninitialized variable: `a`
+error[E0381]: use of possibly-uninitialized variable: `a`
   --> $DIR/move-into-dead-array-1.rs:14:5
    |
 LL |     a[i] = d();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |     ^^^^ use of possibly uninitialized `a`
+=======
+   |     ^^^^ use of possibly-uninitialized `a`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

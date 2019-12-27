@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0658]: macro invocations in `extern {}` blocks are experimental
   --> $DIR/macros-in-extern.rs:26:5
    |
@@ -28,3 +29,5 @@ LL |     emits_nothing!();
 error: aborting due to 3 previous errors
 
 For more information about this error, try `rustc --explain E0658`.
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

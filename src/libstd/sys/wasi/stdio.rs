@@ -1,7 +1,12 @@
 use crate::io::{self, IoSlice, IoSliceMut};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::libc;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::mem::ManuallyDrop;
 use crate::sys::fd::WasiFd;
+
+use ::wasi::wasi_unstable as wasi;
 
 pub struct Stdin;
 pub struct Stdout;
@@ -17,7 +22,11 @@ impl Stdin {
     }
 
     pub fn read_vectored(&self, data: &mut [IoSliceMut<'_>]) -> io::Result<usize> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         ManuallyDrop::new(unsafe { WasiFd::from_raw(libc::STDIN_FILENO as u32) })
+=======
+        ManuallyDrop::new(unsafe { WasiFd::from_raw(wasi::STDIN_FD) })
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             .read(data)
     }
 }
@@ -32,7 +41,11 @@ impl Stdout {
     }
 
     pub fn write_vectored(&self, data: &[IoSlice<'_>]) -> io::Result<usize> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         ManuallyDrop::new(unsafe { WasiFd::from_raw(libc::STDOUT_FILENO as u32) })
+=======
+        ManuallyDrop::new(unsafe { WasiFd::from_raw(wasi::STDOUT_FD) })
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             .write(data)
     }
 
@@ -51,7 +64,11 @@ impl Stderr {
     }
 
     pub fn write_vectored(&self, data: &[IoSlice<'_>]) -> io::Result<usize> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         ManuallyDrop::new(unsafe { WasiFd::from_raw(libc::STDERR_FILENO as u32) })
+=======
+        ManuallyDrop::new(unsafe { WasiFd::from_raw(wasi::STDERR_FD) })
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             .write(data)
     }
 
@@ -73,7 +90,7 @@ impl io::Write for Stderr {
 pub const STDIN_BUF_SIZE: usize = crate::sys_common::io::DEFAULT_BUF_SIZE;
 
 pub fn is_ebadf(err: &io::Error) -> bool {
-    err.raw_os_error() == Some(libc::__WASI_EBADF as i32)
+    err.raw_os_error() == Some(wasi::EBADF.get() as i32)
 }
 
 pub fn panic_output() -> Option<impl io::Write> {

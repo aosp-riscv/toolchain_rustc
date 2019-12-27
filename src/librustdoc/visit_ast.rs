@@ -41,7 +41,11 @@ fn def_id_to_path(
 // framework from syntax?.
 
 pub struct RustdocVisitor<'a, 'tcx> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     cx: &'a core::DocContext<'tcx>,
+=======
+    cx: &'a mut core::DocContext<'tcx>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     view_item_stack: FxHashSet<hir::HirId>,
     inlining: bool,
     /// Are the current module and all of its parents public?
@@ -51,7 +55,7 @@ pub struct RustdocVisitor<'a, 'tcx> {
 
 impl<'a, 'tcx> RustdocVisitor<'a, 'tcx> {
     pub fn new(
-        cx: &'a core::DocContext<'tcx>
+        cx: &'a mut core::DocContext<'tcx>
     ) -> RustdocVisitor<'a, 'tcx> {
         // If the root is re-exported, terminate all recursion.
         let mut stack = FxHashSet::default();
@@ -84,7 +88,11 @@ impl<'a, 'tcx> RustdocVisitor<'a, 'tcx> {
         );
         module.is_crate = true;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.cx.renderinfo.borrow_mut().exact_paths = self.exact_paths;
+=======
+        self.cx.renderinfo.get_mut().exact_paths = self.exact_paths;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         module
     }
@@ -130,10 +138,17 @@ impl<'a, 'tcx> RustdocVisitor<'a, 'tcx> {
         Enum {
             name,
             variants: def.variants.iter().map(|v| Variant {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 name: v.node.ident.name,
                 id: v.node.id,
                 attrs: &v.node.attrs,
                 def: &v.node.data,
+=======
+                name: v.ident.name,
+                id: v.id,
+                attrs: &v.attrs,
+                def: &v.data,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 whence: v.span,
             }).collect(),
             vis: &it.vis,
@@ -292,7 +307,7 @@ impl<'a, 'tcx> RustdocVisitor<'a, 'tcx> {
                 Res::Def(DefKind::ForeignTy, did) |
                 Res::Def(DefKind::TyAlias, did) if !self_is_hidden => {
                     self.cx.renderinfo
-                        .borrow_mut()
+                        .get_mut()
                         .access_levels.map
                         .insert(did, AccessLevel::Public);
                 },

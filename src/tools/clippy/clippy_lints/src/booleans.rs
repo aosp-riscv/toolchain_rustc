@@ -106,7 +106,11 @@ impl<'a, 'tcx, 'v> Hir2Qmm<'a, 'tcx, 'v> {
         }
 
         // prevent folding of `cfg!` macros and the like
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if !in_macro_or_desugar(e.span) {
+=======
+        if !e.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             match &e.node {
                 ExprKind::Unary(UnNot, inner) => return Ok(Bool::Not(box self.run(inner)?)),
                 ExprKind::Binary(binop, lhs, rhs) => match &binop.node {

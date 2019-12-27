@@ -744,6 +744,17 @@ pub fn exe_names(pkg: &Package, filter: &ops::CompileFilter) -> BTreeSet<String>
             .map(|t| to_exe(t.name()))
             .collect(),
         CompileFilter::Only {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            all_targets: true, ..
+        } => pkg
+            .targets()
+            .iter()
+            .filter(|target| target.is_executable())
+            .map(|target| to_exe(target.name()))
+            .collect(),
+        CompileFilter::Only {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             ref bins,
             ref examples,
             ..

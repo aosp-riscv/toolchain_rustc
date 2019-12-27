@@ -70,7 +70,11 @@ pub enum _Unwind_Context {}
 
 pub type _Unwind_Exception_Cleanup_Fn = extern "C" fn(unwind_code: _Unwind_Reason_Code,
                                                       exception: *mut _Unwind_Exception);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg_attr(all(not(bootstrap), feature = "llvm-libunwind",
+=======
+#[cfg_attr(all(feature = "llvm-libunwind",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                any(target_os = "fuchsia", target_os = "linux")),
            link(name = "unwind", kind = "static"))]
 extern "C" {
@@ -97,7 +101,11 @@ if #[cfg(all(any(target_os = "ios", target_os = "netbsd", not(target_arch = "arm
     }
     pub use _Unwind_Action::*;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[cfg_attr(all(not(bootstrap), feature = "llvm-libunwind",
+=======
+    #[cfg_attr(all(feature = "llvm-libunwind",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                    any(target_os = "fuchsia", target_os = "linux")),
                link(name = "unwind", kind = "static"))]
     extern "C" {
@@ -153,7 +161,11 @@ if #[cfg(all(any(target_os = "ios", target_os = "netbsd", not(target_arch = "arm
     pub const UNWIND_POINTER_REG: c_int = 12;
     pub const UNWIND_IP_REG: c_int = 15;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[cfg_attr(all(not(bootstrap), feature = "llvm-libunwind",
+=======
+    #[cfg_attr(all(feature = "llvm-libunwind",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                    any(target_os = "fuchsia", target_os = "linux")),
                link(name = "unwind", kind = "static"))]
     extern "C" {
@@ -218,7 +230,11 @@ if #[cfg(all(any(target_os = "ios", target_os = "netbsd", not(target_arch = "arm
 cfg_if::cfg_if! {
 if #[cfg(not(all(target_os = "ios", target_arch = "arm")))] {
     // Not 32-bit iOS
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[cfg_attr(all(not(bootstrap), feature = "llvm-libunwind",
+=======
+    #[cfg_attr(all(feature = "llvm-libunwind",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                    any(target_os = "fuchsia", target_os = "linux")),
                link(name = "unwind", kind = "static"))]
     extern "C" {
@@ -230,7 +246,11 @@ if #[cfg(not(all(target_os = "ios", target_arch = "arm")))] {
     }
 } else {
     // 32-bit iOS uses SjLj and does not provide _Unwind_Backtrace()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[cfg_attr(all(not(bootstrap), feature = "llvm-libunwind",
+=======
+    #[cfg_attr(all(feature = "llvm-libunwind",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                    any(target_os = "fuchsia", target_os = "linux")),
                link(name = "unwind", kind = "static"))]
     extern "C" {

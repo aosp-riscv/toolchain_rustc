@@ -68,6 +68,13 @@ pub struct PendingPredicateObligation<'tcx> {
     pub stalled_on: Vec<Ty<'tcx>>,
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+// `PendingPredicateObligation` is used a lot. Make sure it doesn't unintentionally get bigger.
+#[cfg(target_arch = "x86_64")]
+static_assert_size!(PendingPredicateObligation<'_>, 136);
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 impl<'a, 'tcx> FulfillmentContext<'tcx> {
     /// Creates a new fulfillment context.
     pub fn new() -> FulfillmentContext<'tcx> {
@@ -248,19 +255,32 @@ impl<'a, 'b, 'tcx> ObligationProcessor for FulfillProcessor<'a, 'b, 'tcx> {
     /// This is always inlined, despite its size, because it has a single
     /// callsite and it is called *very* frequently.
     #[inline(always)]
-    fn process_obligation(&mut self,
-                          pending_obligation: &mut Self::Obligation)
-                          -> ProcessResult<Self::Obligation, Self::Error>
-    {
-        // if we were stalled on some unresolved variables, first check
+    fn process_obligation(
+        &mut self,
+        pending_obligation: &mut Self::Obligation,
+    ) -> ProcessResult<Self::Obligation, Self::Error> {
+        // If we were stalled on some unresolved variables, first check
         // whether any of them have been resolved; if not, don't bother
         // doing more work yet
         if !pending_obligation.stalled_on.is_empty() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if pending_obligation.stalled_on.iter().all(|&ty| {
                 // Use the force-inlined variant of shallow_resolve() because this code is hot.
                 let resolved = ShallowResolver::new(self.selcx.infcx()).inlined_shallow_resolve(ty);
                 resolved == ty // nothing changed here
             }) {
+=======
+            let mut changed = false;
+            // This `for` loop was once a call to `all()`, but this lower-level
+            // form was a perf win. See #64545 for details.
+            for &ty in &pending_obligation.stalled_on {
+                if ShallowResolver::new(self.selcx.infcx()).shallow_resolve_changed(ty) {
+                    changed = true;
+                    break;
+                }
+            }
+            if !changed {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 debug!("process_predicate: pending obligation {:?} still stalled on {:?}",
                        self.selcx.infcx()
                            .resolve_vars_if_possible(&pending_obligation.obligation),
@@ -277,7 +297,7 @@ impl<'a, 'b, 'tcx> ObligationProcessor for FulfillProcessor<'a, 'b, 'tcx> {
                 self.selcx.infcx().resolve_vars_if_possible(&obligation.predicate);
         }
 
-        debug!("process_obligation: obligation = {:?}", obligation);
+        debug!("process_obligation: obligation = {:?} cause = {:?}", obligation, obligation.cause);
 
         match obligation.predicate {
             ty::Predicate::Trait(ref data) => {
@@ -425,10 +445,13 @@ impl<'a, 'b, 'tcx> ObligationProcessor for FulfillProcessor<'a, 'b, 'tcx> {
             }
 
             ty::Predicate::WellFormed(ty) => {
-                match ty::wf::obligations(self.selcx.infcx(),
-                                          obligation.param_env,
-                                          obligation.cause.body_id,
-                                          ty, obligation.cause.span) {
+                match ty::wf::obligations(
+                    self.selcx.infcx(),
+                    obligation.param_env,
+                    obligation.cause.body_id,
+                    ty,
+                    obligation.cause.span,
+                ) {
                     None => {
                         pending_obligation.stalled_on = vec![ty];
                         ProcessResult::Unchanged

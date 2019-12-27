@@ -3,6 +3,10 @@
 
 #![crate_type = "proc-macro"]
 #![feature(proc_macro_hygiene)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![feature(proc_macro_quote)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 extern crate proc_macro;
 

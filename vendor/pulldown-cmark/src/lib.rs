@@ -23,7 +23,11 @@
 //! directly, or to output HTML using the [HTML module](html/index.html).
 //!
 //! By default, only CommonMark features are enabled. To use extensions like tables,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! footnotes or task lists, enable by setting the corresponding flags in the
+=======
+//! footnotes or task lists, enable them by setting the corresponding flags in the
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 //! [Options](struct.Options.html) struct.
 //!
 //! # Example

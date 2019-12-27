@@ -18,6 +18,7 @@ const SHR_B: u32 = 128u32.wrapping_shr(128);
 const NEG_A: u32 = 5u32.wrapping_neg();
 const NEG_B: u32 = 1234567890u32.wrapping_neg();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn main() {
     assert_eq!(ADD_A, 255);
     assert_eq!(ADD_B, 199);
@@ -36,4 +37,32 @@ fn main() {
 
     assert_eq!(NEG_A, 4294967291);
     assert_eq!(NEG_B, 3060399406);
+=======
+const ABS_POS: i32 = 10i32.wrapping_abs();
+const ABS_NEG: i32 = (-10i32).wrapping_abs();
+const ABS_MIN: i32 = i32::min_value().wrapping_abs();
+
+fn main() {
+    assert_eq!(ADD_A, 255);
+    assert_eq!(ADD_B, 199);
+
+    assert_eq!(SUB_A, 0);
+    assert_eq!(SUB_B, 101);
+
+    assert_eq!(MUL_A, 120);
+    assert_eq!(MUL_B, 44);
+
+    assert_eq!(SHL_A, 128);
+    assert_eq!(SHL_B, 1);
+
+    assert_eq!(SHR_A, 1);
+    assert_eq!(SHR_B, 128);
+
+    assert_eq!(NEG_A, 4294967291);
+    assert_eq!(NEG_B, 3060399406);
+
+    assert_eq!(ABS_POS, 10);
+    assert_eq!(ABS_NEG, 10);
+    assert_eq!(ABS_MIN, i32::min_value());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

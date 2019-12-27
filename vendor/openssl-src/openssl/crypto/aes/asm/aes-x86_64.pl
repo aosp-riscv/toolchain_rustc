@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #! /usr/bin/env perl
 # Copyright 2005-2019 The OpenSSL Project Authors. All Rights Reserved.
 #
@@ -2914,3 +2915,5 @@ $code =~ s/\`([^\`]*)\`/eval($1)/gem;
 print $code;
 
 close STDOUT;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

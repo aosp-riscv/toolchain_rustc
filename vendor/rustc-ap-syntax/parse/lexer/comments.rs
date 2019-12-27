@@ -9,6 +9,9 @@ use syntax_pos::{BytePos, CharPos, Pos, FileName};
 
 use std::usize;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum CommentStyle {
     /// No code on either side of each line of the comment
@@ -191,8 +194,66 @@ pub fn gather_comments(sess: &ParseSess, path: FileName, src: String) -> Vec<Com
             pos: start_bpos,
         });
         pos += shebang_len;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
     }
 
+    for token in rustc_lexer::tokenize(&text[pos..]) {
+        let token_text = &text[pos..pos + token.len];
+        match token.kind {
+            rustc_lexer::TokenKind::Whitespace => {
+                if let Some(mut idx) = token_text.find('\n') {
+                    code_to_the_left = false;
+                    while let Some(next_newline) = &token_text[idx + 1..].find('\n') {
+                        idx = idx + 1 + next_newline;
+                        comments.push(Comment {
+                            style: BlankLine,
+                            lines: vec![],
+                            pos: start_bpos + BytePos((pos + idx) as u32),
+                        });
+                    }
+                }
+            }
+            rustc_lexer::TokenKind::BlockComment { terminated: _ } => {
+                if !is_block_doc_comment(token_text) {
+                    let code_to_the_right = match text[pos + token.len..].chars().next() {
+                        Some('\r') | Some('\n') => false,
+                        _ => true,
+                    };
+                    let style = match (code_to_the_left, code_to_the_right) {
+                        (true, true) | (false, true) => Mixed,
+                        (false, false) => Isolated,
+                        (true, false) => Trailing,
+                    };
+
+                    // Count the number of chars since the start of the line by rescanning.
+                    let pos_in_file = start_bpos + BytePos(pos as u32);
+                    let line_begin_in_file = source_file.line_begin_pos(pos_in_file);
+                    let line_begin_pos = (line_begin_in_file - start_bpos).to_usize();
+                    let col = CharPos(text[line_begin_pos..pos].chars().count());
+
+                    let lines = split_block_comment_into_lines(token_text, col);
+                    comments.push(Comment { style, lines, pos: pos_in_file })
+                }
+            }
+            rustc_lexer::TokenKind::LineComment => {
+                if !is_doc_comment(token_text) {
+                    comments.push(Comment {
+                        style: if code_to_the_left { Trailing } else { Isolated },
+                        lines: vec![token_text.to_string()],
+                        pos: start_bpos + BytePos(pos as u32),
+                    })
+                }
+            }
+            _ => {
+                code_to_the_left = true;
+            }
+        }
+        pos += token.len;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+    }
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     for token in rustc_lexer::tokenize(&text[pos..]) {
         let token_text = &text[pos..pos + token.len];
         match token.kind {
@@ -299,4 +360,7 @@ mod tests {
         let stripped = strip_doc_comment_decoration("//test");
         assert_eq!(stripped, "test");
     }
+=======
+    comments
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

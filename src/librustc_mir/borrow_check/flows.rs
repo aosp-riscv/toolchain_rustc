@@ -12,7 +12,11 @@ use crate::borrow_check::location::LocationIndex;
 use polonius_engine::Output;
 
 use crate::dataflow::indexes::BorrowIndex;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::dataflow::move_paths::HasMoveData;
+=======
+use crate::dataflow::move_paths::{HasMoveData, MovePathIndex};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::dataflow::Borrows;
 use crate::dataflow::EverInitializedPlaces;
 use crate::dataflow::MaybeUninitializedPlaces;
@@ -21,9 +25,14 @@ use either::Either;
 use std::fmt;
 use std::rc::Rc;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 crate type PoloniusOutput = Output<RegionVid, BorrowIndex, LocationIndex, Local>;
 
 // (forced to be `pub` due to its use as an associated type below.)
+=======
+crate type PoloniusOutput = Output<RegionVid, BorrowIndex, LocationIndex, Local, MovePathIndex>;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 crate struct Flows<'b, 'tcx> {
     borrows: FlowAtLocation<'tcx, Borrows<'b, 'tcx>>,
     pub uninits: FlowAtLocation<'tcx, MaybeUninitializedPlaces<'b, 'tcx>>,

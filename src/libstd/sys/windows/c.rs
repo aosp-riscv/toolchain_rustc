@@ -714,7 +714,11 @@ if #[cfg(target_vendor = "uwp")] {
     pub struct FILE_STANDARD_INFO {
         pub AllocationSize: LARGE_INTEGER,
         pub EndOfFile: LARGE_INTEGER,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         pub NumberOfLink: DWORD,
+=======
+        pub NumberOfLinks: DWORD,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         pub DeletePending: BOOLEAN,
         pub Directory: BOOLEAN,
     }

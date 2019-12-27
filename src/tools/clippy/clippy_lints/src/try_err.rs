@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, match_qpath, paths, snippet, snippet_with_macro_callsite, span_lint_and_sugg};
 use if_chain::if_chain;
 use rustc::hir::*;
@@ -68,6 +69,78 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for TryErr {
             then {
                 let err_type = cx.tables.expr_ty(err_arg);
                 let origin_snippet = if in_macro_or_desugar(err_arg.span) {
+=======
+use crate::utils::{match_qpath, paths, snippet, snippet_with_macro_callsite, span_lint_and_sugg};
+use if_chain::if_chain;
+use rustc::hir::*;
+use rustc::lint::{LateContext, LateLintPass, LintArray, LintPass};
+use rustc::ty::Ty;
+use rustc::{declare_lint_pass, declare_tool_lint};
+use rustc_errors::Applicability;
+
+declare_clippy_lint! {
+    /// **What it does:** Checks for usages of `Err(x)?`.
+    ///
+    /// **Why is this bad?** The `?` operator is designed to allow calls that
+    /// can fail to be easily chained. For example, `foo()?.bar()` or
+    /// `foo(bar()?)`. Because `Err(x)?` can't be used that way (it will
+    /// always return), it is more clear to write `return Err(x)`.
+    ///
+    /// **Known problems:** None.
+    ///
+    /// **Example:**
+    /// ```rust
+    /// fn foo(fail: bool) -> Result<i32, String> {
+    ///     if fail {
+    ///       Err("failed")?;
+    ///     }
+    ///     Ok(0)
+    /// }
+    /// ```
+    /// Could be written:
+    ///
+    /// ```rust
+    /// fn foo(fail: bool) -> Result<i32, String> {
+    ///     if fail {
+    ///       return Err("failed".into());
+    ///     }
+    ///     Ok(0)
+    /// }
+    /// ```
+    pub TRY_ERR,
+    style,
+    "return errors explicitly rather than hiding them behind a `?`"
+}
+
+declare_lint_pass!(TryErr => [TRY_ERR]);
+
+impl<'a, 'tcx> LateLintPass<'a, 'tcx> for TryErr {
+    fn check_expr(&mut self, cx: &LateContext<'a, 'tcx>, expr: &'tcx Expr) {
+        // Looks for a structure like this:
+        // match ::std::ops::Try::into_result(Err(5)) {
+        //     ::std::result::Result::Err(err) =>
+        //         #[allow(unreachable_code)]
+        //         return ::std::ops::Try::from_error(::std::convert::From::from(err)),
+        //     ::std::result::Result::Ok(val) =>
+        //         #[allow(unreachable_code)]
+        //         val,
+        // };
+        if_chain! {
+            if let ExprKind::Match(ref match_arg, _, MatchSource::TryDesugar) = expr.node;
+            if let ExprKind::Call(ref match_fun, ref try_args) = match_arg.node;
+            if let ExprKind::Path(ref match_fun_path) = match_fun.node;
+            if match_qpath(match_fun_path, &paths::TRY_INTO_RESULT);
+            if let Some(ref try_arg) = try_args.get(0);
+            if let ExprKind::Call(ref err_fun, ref err_args) = try_arg.node;
+            if let Some(ref err_arg) = err_args.get(0);
+            if let ExprKind::Path(ref err_fun_path) = err_fun.node;
+            if match_qpath(err_fun_path, &paths::RESULT_ERR);
+            if let Some(return_type) = find_err_return_type(cx, &expr.node);
+
+            then {
+                let err_type = cx.tables.expr_ty(err_arg);
+                let origin_snippet = if err_arg.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     snippet_with_macro_callsite(cx, err_arg.span, "_")
                 } else {
                     snippet(cx, err_arg.span, "_")

@@ -29,8 +29,13 @@ use crate::util::def_use::DefUseAnalysis;
 
 pub struct CopyPropagation;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for CopyPropagation {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, _source: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for CopyPropagation {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, _source: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // We only run when the MIR optimization level is > 1.
         // This avoids a slow pass, and messing up debug info.
         if tcx.sess.opts.debugging_opts.mir_opt_level <= 1 {
@@ -94,11 +99,21 @@ impl MirPass for CopyPropagation {
                     // That use of the source must be an assignment.
                     match statement.kind {
                         StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             Place {
                                 base: PlaceBase::Local(local),
                                 projection: None,
                             },
                             box Rvalue::Use(ref operand)
+=======
+                            box(
+                                Place {
+                                    base: PlaceBase::Local(local),
+                                    projection: box [],
+                                },
+                                Rvalue::Use(ref operand)
+                            )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         ) if local == dest_local => {
                             let maybe_action = match *operand {
                                 Operand::Copy(ref src_place) |
@@ -148,6 +163,7 @@ fn eliminate_self_assignments(
             if let Some(stmt) = body[location.block].statements.get(location.statement_index) {
                 match stmt.kind {
                     StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         Place {
                             base: PlaceBase::Local(local),
                             projection: None,
@@ -156,8 +172,21 @@ fn eliminate_self_assignments(
                             base: PlaceBase::Local(src_local),
                             projection: None,
                         })),
+=======
+                        box(
+                            Place {
+                                base: PlaceBase::Local(local),
+                                projection: box [],
+                            },
+                            Rvalue::Use(Operand::Copy(Place {
+                                base: PlaceBase::Local(src_local),
+                                projection: box [],
+                            })),
+                        )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     ) |
                     StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         Place {
                             base: PlaceBase::Local(local),
                             projection: None,
@@ -166,6 +195,18 @@ fn eliminate_self_assignments(
                             base: PlaceBase::Local(src_local),
                             projection: None,
                         })),
+=======
+                        box(
+                            Place {
+                                base: PlaceBase::Local(local),
+                                projection: box [],
+                            },
+                            Rvalue::Use(Operand::Move(Place {
+                                base: PlaceBase::Local(src_local),
+                                projection: box [],
+                            })),
+                        )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     ) if local == dest_local && dest_local == src_local => {}
                     _ => {
                         continue;
@@ -194,7 +235,11 @@ impl<'tcx> Action<'tcx> {
         // The source must be a local.
         let src_local = if let Place {
             base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             projection: None,
+=======
+            projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } = *src_place {
             local
         } else {
@@ -351,11 +396,19 @@ impl<'tcx> MutVisitor<'tcx> for ConstantPropagationVisitor<'tcx> {
         match *operand {
             Operand::Copy(Place {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
             }) |
             Operand::Move(Place {
                 base: PlaceBase::Local(local),
                 projection: None,
+=======
+                projection: box [],
+            }) |
+            Operand::Move(Place {
+                base: PlaceBase::Local(local),
+                projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }) if local == self.dest_local => {}
             _ => return,
         }

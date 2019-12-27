@@ -20,6 +20,18 @@ have questions or comments, the `LLVM Developer's Mailing List
 <https://lists.llvm.org/mailman/listinfo/llvm-dev>`_ is a good place to send
 them.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+Known Issues
+============
+
+These are issues that couldn't be fixed before the release. See the bug reports
+for the latest status.
+
+* `PR40547 <https://llvm.org/pr40547>`_ Clang gets miscompiled by GCC 9.
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 Non-comprehensive list of changes in this release
 =================================================
@@ -295,6 +307,8 @@ External Open Source Projects Using LLVM 9
 
 Mull - Mutation Testing tool for C and C++
 ------------------------------------------
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 
 `Mull <https://github.com/mull-project/mull>`_ is an LLVM-based tool for
 mutation testing with a strong focus on C and C++ languages.
@@ -338,6 +352,61 @@ IR features such as aliases and intrinsics. Zig uses Clang to provide automatic
 import of .h symbols, including inline functions and simple macros. Zig uses
 LLD combined with lazily building compiler-rt to provide out-of-the-box
 cross-compiling for all supported targets.
+
+
+LDC - the LLVM-based D compiler
+-------------------------------
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+`Mull <https://github.com/mull-project/mull>`_ is an LLVM-based tool for
+mutation testing with a strong focus on C and C++ languages.
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+Portable Computing Language (pocl)
+----------------------------------
+
+In addition to producing an easily portable open source OpenCL
+implementation, another major goal of `pocl <http://portablecl.org/>`_
+is improving performance portability of OpenCL programs with
+compiler optimizations, reducing the need for target-dependent manual
+optimizations. An important part of pocl is a set of LLVM passes used to
+statically parallelize multiple work-items with the kernel compiler, even in
+the presence of work-group barriers. This enables static parallelization of
+the fine-grained static concurrency in the work groups in multiple ways.
+
+TTA-based Co-design Environment (TCE)
+-------------------------------------
+
+`TCE <http://openasip.org/>`_ is an open source toolset for designing customized
+processors based on the Transport Triggered Architecture (TTA).
+The toolset provides a complete co-design flow from C/C++
+programs down to synthesizable VHDL/Verilog and parallel program binaries.
+Processor customization points include register files, function units,
+supported operations, and the interconnection network.
+
+TCE uses Clang and LLVM for C/C++/OpenCL C language support, target independent
+optimizations and also for parts of code generation. It generates new
+LLVM-based code generators "on the fly" for the designed TTA processors and
+loads them in to the compiler backend as runtime libraries to avoid
+per-target recompilation of larger parts of the compiler chain.
+
+
+Zig Programming Language
+------------------------
+
+`Zig <https://ziglang.org>`_  is a system programming language intended to be
+an alternative to C. It provides high level features such as generics, compile
+time function execution, and partial evaluation, while exposing low level LLVM
+IR features such as aliases and intrinsics. Zig uses Clang to provide automatic
+import of .h symbols, including inline functions and simple macros. Zig uses
+LLD combined with lazily building compiler-rt to provide out-of-the-box
+cross-compiling for all supported targets.
+=======
+`LDC <http://wiki.dlang.org/LDC>`_ uses the frontend from the reference compiler
+combined with LLVM as backend to produce efficient native code. LDC targets
+x86/x86_64 systems like Linux, OS X, FreeBSD and Windows and also Linux on ARM
+and PowerPC (32/64 bit). Ports to other architectures are underway.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 
 Additional Information

@@ -215,10 +215,18 @@ fn if_same_then_else() -> Result<&'static str, ()> {
     };
 
     if true {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         r#try!(Ok("foo"));
+=======
+        Ok("foo")?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     } else {
         //~ ERROR same body as `if` block
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         r#try!(Ok("foo"));
+=======
+        Ok("foo")?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     if true {

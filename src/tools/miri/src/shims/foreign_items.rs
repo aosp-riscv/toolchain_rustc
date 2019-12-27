@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::ty::layout::{Align, LayoutOf, Size};
 use rustc::hir::def_id::DefId;
 use rustc::mir;
@@ -599,6 +600,560 @@ pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriEvalContextExt<'mir, 'tcx
                 }
                 let n = unsafe { ldexp(x, exp) };
                 this.write_scalar(Scalar::from_u64(n.to_bits()), dest)?;
+=======
+use std::convert::TryInto;
+
+use rustc_apfloat::Float;
+use rustc::ty::layout::{Align, LayoutOf, Size};
+use rustc::hir::def_id::DefId;
+use rustc::mir;
+use syntax::attr;
+use syntax::symbol::sym;
+
+use crate::*;
+
+impl<'mir, 'tcx> EvalContextExt<'mir, 'tcx> for crate::MiriEvalContext<'mir, 'tcx> {}
+pub trait EvalContextExt<'mir, 'tcx: 'mir>: crate::MiriEvalContextExt<'mir, 'tcx> {
+    /// Returns the minimum alignment for the target architecture for allocations of the given size.
+    fn min_align(&self, size: u64, kind: MiriMemoryKind) -> Align {
+        let this = self.eval_context_ref();
+        // List taken from `libstd/sys_common/alloc.rs`.
+        let min_align = match this.tcx.tcx.sess.target.target.arch.as_str() {
+            "x86" | "arm" | "mips" | "powerpc" | "powerpc64" | "asmjs" | "wasm32" => 8,
+            "x86_64" | "aarch64" | "mips64" | "s390x" | "sparc64" => 16,
+            arch => bug!("Unsupported target architecture: {}", arch),
+        };
+        // Windows always aligns, even small allocations.
+        // Source: <https://support.microsoft.com/en-us/help/286470/how-to-use-pageheap-exe-in-windows-xp-windows-2000-and-windows-server>
+        // But jemalloc does not, so for the C heap we only align if the allocation is sufficiently big.
+        if kind == MiriMemoryKind::WinHeap || size >= min_align {
+            return Align::from_bytes(min_align).unwrap();
+        }
+        // We have `size < min_align`. Round `size` *down* to the next power of two and use that.
+        fn prev_power_of_two(x: u64) -> u64 {
+            let next_pow2 = x.next_power_of_two();
+            if next_pow2 == x {
+                // x *is* a power of two, just use that.
+                x
+            } else {
+                // x is between two powers, so next = 2*prev.
+                next_pow2 / 2
+            }
+        }
+        Align::from_bytes(prev_power_of_two(size)).unwrap()
+    }
+
+    fn malloc(
+        &mut self,
+        size: u64,
+        zero_init: bool,
+        kind: MiriMemoryKind,
+    ) -> Scalar<Tag> {
+        let this = self.eval_context_mut();
+        let tcx = &{this.tcx.tcx};
+        if size == 0 {
+            Scalar::from_int(0, this.pointer_size())
+        } else {
+            let align = this.min_align(size, kind);
+            let ptr = this.memory_mut().allocate(Size::from_bytes(size), align, kind.into());
+            if zero_init {
+                // We just allocated this, the access cannot fail
+                this.memory_mut()
+                    .get_mut(ptr.alloc_id).unwrap()
+                    .write_repeat(tcx, ptr, 0, Size::from_bytes(size)).unwrap();
+            }
+            Scalar::Ptr(ptr)
+        }
+    }
+
+    fn free(
+        &mut self,
+        ptr: Scalar<Tag>,
+        kind: MiriMemoryKind,
+    ) -> InterpResult<'tcx> {
+        let this = self.eval_context_mut();
+        if !this.is_null(ptr)? {
+            let ptr = this.force_ptr(ptr)?;
+            this.memory_mut().deallocate(
+                ptr,
+                None,
+                kind.into(),
+            )?;
+        }
+        Ok(())
+    }
+
+    fn realloc(
+        &mut self,
+        old_ptr: Scalar<Tag>,
+        new_size: u64,
+        kind: MiriMemoryKind,
+    ) -> InterpResult<'tcx, Scalar<Tag>> {
+        let this = self.eval_context_mut();
+        let new_align = this.min_align(new_size, kind);
+        if this.is_null(old_ptr)? {
+            if new_size == 0 {
+                Ok(Scalar::from_int(0, this.pointer_size()))
+            } else {
+                let new_ptr = this.memory_mut().allocate(
+                    Size::from_bytes(new_size),
+                    new_align,
+                    kind.into()
+                );
+                Ok(Scalar::Ptr(new_ptr))
+            }
+        } else {
+            let old_ptr = this.force_ptr(old_ptr)?;
+            let memory = this.memory_mut();
+            if new_size == 0 {
+                memory.deallocate(
+                    old_ptr,
+                    None,
+                    kind.into(),
+                )?;
+                Ok(Scalar::from_int(0, this.pointer_size()))
+            } else {
+                let new_ptr = memory.reallocate(
+                    old_ptr,
+                    None,
+                    Size::from_bytes(new_size),
+                    new_align,
+                    kind.into(),
+                )?;
+                Ok(Scalar::Ptr(new_ptr))
+            }
+        }
+    }
+
+    /// Emulates calling a foreign item, failing if the item is not supported.
+    /// This function will handle `goto_block` if needed.
+    fn emulate_foreign_item(
+        &mut self,
+        def_id: DefId,
+        args: &[OpTy<'tcx, Tag>],
+        dest: Option<PlaceTy<'tcx, Tag>>,
+        ret: Option<mir::BasicBlock>,
+    ) -> InterpResult<'tcx> {
+        let this = self.eval_context_mut();
+        let attrs = this.tcx.get_attrs(def_id);
+        let link_name = match attr::first_attr_value_str_by_name(&attrs, sym::link_name) {
+            Some(name) => name.as_str(),
+            None => this.tcx.item_name(def_id).as_str(),
+        };
+        // Strip linker suffixes (seen on 32-bit macOS).
+        let link_name = link_name.trim_end_matches("$UNIX2003");
+        let tcx = &{this.tcx.tcx};
+
+        // First: functions that diverge.
+        match link_name {
+            "__rust_start_panic" | "panic_impl" => {
+                throw_unsup_format!("the evaluated program panicked");
+            }
+            "exit" | "ExitProcess" => {
+                // it's really u32 for ExitProcess, but we have to put it into the `Exit` error variant anyway
+                let code = this.read_scalar(args[0])?.to_i32()?;
+                return Err(InterpError::Exit(code).into());
+            }
+            _ => if dest.is_none() {
+                throw_unsup_format!("can't call (diverging) foreign function: {}", link_name);
+            }
+        }
+
+        // Next: functions that assume a ret and dest.
+        let dest = dest.expect("we already checked for a dest");
+        let ret = ret.expect("dest is `Some` but ret is `None`");
+        match link_name {
+            "malloc" => {
+                let size = this.read_scalar(args[0])?.to_usize(this)?;
+                let res = this.malloc(size, /*zero_init:*/ false, MiriMemoryKind::C);
+                this.write_scalar(res, dest)?;
+            }
+            "calloc" => {
+                let items = this.read_scalar(args[0])?.to_usize(this)?;
+                let len = this.read_scalar(args[1])?.to_usize(this)?;
+                let size = items.checked_mul(len).ok_or_else(|| err_panic!(Overflow(mir::BinOp::Mul)))?;
+                let res = this.malloc(size, /*zero_init:*/ true, MiriMemoryKind::C);
+                this.write_scalar(res, dest)?;
+            }
+            "posix_memalign" => {
+                let ret = this.deref_operand(args[0])?;
+                let align = this.read_scalar(args[1])?.to_usize(this)?;
+                let size = this.read_scalar(args[2])?.to_usize(this)?;
+                // Align must be power of 2, and also at least ptr-sized (POSIX rules).
+                if !align.is_power_of_two() {
+                    throw_unsup!(HeapAllocNonPowerOfTwoAlignment(align));
+                }
+                if align < this.pointer_size().bytes() {
+                    throw_ub_format!(
+                        "posix_memalign: alignment must be at least the size of a pointer, but is {}",
+                        align,
+                    );
+                }
+
+                if size == 0 {
+                    this.write_null(ret.into())?;
+                } else {
+                    let ptr = this.memory_mut().allocate(
+                        Size::from_bytes(size),
+                        Align::from_bytes(align).unwrap(),
+                        MiriMemoryKind::C.into()
+                    );
+                    this.write_scalar(Scalar::Ptr(ptr), ret.into())?;
+                }
+                this.write_null(dest)?;
+            }
+            "free" => {
+                let ptr = this.read_scalar(args[0])?.not_undef()?;
+                this.free(ptr, MiriMemoryKind::C)?;
+            }
+            "realloc" => {
+                let old_ptr = this.read_scalar(args[0])?.not_undef()?;
+                let new_size = this.read_scalar(args[1])?.to_usize(this)?;
+                let res = this.realloc(old_ptr, new_size, MiriMemoryKind::C)?;
+                this.write_scalar(res, dest)?;
+            }
+
+            "__rust_alloc" => {
+                let size = this.read_scalar(args[0])?.to_usize(this)?;
+                let align = this.read_scalar(args[1])?.to_usize(this)?;
+                if size == 0 {
+                    throw_unsup!(HeapAllocZeroBytes);
+                }
+                if !align.is_power_of_two() {
+                    throw_unsup!(HeapAllocNonPowerOfTwoAlignment(align));
+                }
+                let ptr = this.memory_mut()
+                    .allocate(
+                        Size::from_bytes(size),
+                        Align::from_bytes(align).unwrap(),
+                        MiriMemoryKind::Rust.into()
+                    );
+                this.write_scalar(Scalar::Ptr(ptr), dest)?;
+            }
+            "__rust_alloc_zeroed" => {
+                let size = this.read_scalar(args[0])?.to_usize(this)?;
+                let align = this.read_scalar(args[1])?.to_usize(this)?;
+                if size == 0 {
+                    throw_unsup!(HeapAllocZeroBytes);
+                }
+                if !align.is_power_of_two() {
+                    throw_unsup!(HeapAllocNonPowerOfTwoAlignment(align));
+                }
+                let ptr = this.memory_mut()
+                    .allocate(
+                        Size::from_bytes(size),
+                        Align::from_bytes(align).unwrap(),
+                        MiriMemoryKind::Rust.into()
+                    );
+                // We just allocated this, the access cannot fail
+                this.memory_mut()
+                    .get_mut(ptr.alloc_id).unwrap()
+                    .write_repeat(tcx, ptr, 0, Size::from_bytes(size)).unwrap();
+                this.write_scalar(Scalar::Ptr(ptr), dest)?;
+            }
+            "__rust_dealloc" => {
+                let ptr = this.read_scalar(args[0])?.not_undef()?;
+                let old_size = this.read_scalar(args[1])?.to_usize(this)?;
+                let align = this.read_scalar(args[2])?.to_usize(this)?;
+                if old_size == 0 {
+                    throw_unsup!(HeapAllocZeroBytes);
+                }
+                if !align.is_power_of_two() {
+                    throw_unsup!(HeapAllocNonPowerOfTwoAlignment(align));
+                }
+                let ptr = this.force_ptr(ptr)?;
+                this.memory_mut().deallocate(
+                    ptr,
+                    Some((Size::from_bytes(old_size), Align::from_bytes(align).unwrap())),
+                    MiriMemoryKind::Rust.into(),
+                )?;
+            }
+            "__rust_realloc" => {
+                let ptr = this.read_scalar(args[0])?.to_ptr()?;
+                let old_size = this.read_scalar(args[1])?.to_usize(this)?;
+                let align = this.read_scalar(args[2])?.to_usize(this)?;
+                let new_size = this.read_scalar(args[3])?.to_usize(this)?;
+                if old_size == 0 || new_size == 0 {
+                    throw_unsup!(HeapAllocZeroBytes);
+                }
+                if !align.is_power_of_two() {
+                    throw_unsup!(HeapAllocNonPowerOfTwoAlignment(align));
+                }
+                let align = Align::from_bytes(align).unwrap();
+                let new_ptr = this.memory_mut().reallocate(
+                    ptr,
+                    Some((Size::from_bytes(old_size), align)),
+                    Size::from_bytes(new_size),
+                    align,
+                    MiriMemoryKind::Rust.into(),
+                )?;
+                this.write_scalar(Scalar::Ptr(new_ptr), dest)?;
+            }
+
+            "syscall" => {
+                let sys_getrandom = this.eval_path_scalar(&["libc", "SYS_getrandom"])?
+                    .expect("Failed to get libc::SYS_getrandom")
+                    .to_usize(this)?;
+
+                // `libc::syscall(NR_GETRANDOM, buf.as_mut_ptr(), buf.len(), GRND_NONBLOCK)`
+                // is called if a `HashMap` is created the regular way (e.g. HashMap<K, V>).
+                match this.read_scalar(args[0])?.to_usize(this)? {
+                    id if id == sys_getrandom => {
+                        // The first argument is the syscall id,
+                        // so skip over it.
+                        linux_getrandom(this, &args[1..], dest)?;
+                    }
+                    id => {
+                        throw_unsup_format!("miri does not support syscall ID {}", id)
+                    }
+                }
+            }
+
+            "getrandom" => {
+                linux_getrandom(this, args, dest)?;
+            }
+
+            "dlsym" => {
+                let _handle = this.read_scalar(args[0])?;
+                let symbol = this.read_scalar(args[1])?.not_undef()?;
+                let symbol_name = this.memory().read_c_str(symbol)?;
+                let err = format!("bad c unicode symbol: {:?}", symbol_name);
+                let symbol_name = ::std::str::from_utf8(symbol_name).unwrap_or(&err);
+                if let Some(dlsym) = Dlsym::from_str(symbol_name)? {
+                    let ptr = this.memory_mut().create_fn_alloc(FnVal::Other(dlsym));
+                    this.write_scalar(Scalar::from(ptr), dest)?;
+                } else {
+                    this.write_null(dest)?;
+                }
+            }
+
+            "__rust_maybe_catch_panic" => {
+                // fn __rust_maybe_catch_panic(
+                //     f: fn(*mut u8),
+                //     data: *mut u8,
+                //     data_ptr: *mut usize,
+                //     vtable_ptr: *mut usize,
+                // ) -> u32
+                // We abort on panic, so not much is going on here, but we still have to call the closure.
+                let f = this.read_scalar(args[0])?.not_undef()?;
+                let data = this.read_scalar(args[1])?.not_undef()?;
+                let f_instance = this.memory().get_fn(f)?.as_instance()?;
+                this.write_null(dest)?;
+                trace!("__rust_maybe_catch_panic: {:?}", f_instance);
+
+                // Now we make a function call.
+                // TODO: consider making this reusable? `InterpCx::step` does something similar
+                // for the TLS destructors, and of course `eval_main`.
+                let mir = this.load_mir(f_instance.def, None)?;
+                let ret_place = MPlaceTy::dangling(this.layout_of(this.tcx.mk_unit())?, this).into();
+                this.push_stack_frame(
+                    f_instance,
+                    mir.span,
+                    mir,
+                    Some(ret_place),
+                    // Directly return to caller.
+                    StackPopCleanup::Goto(Some(ret)),
+                )?;
+                let mut args = this.frame().body.args_iter();
+
+                let arg_local = args.next()
+                    .expect("Argument to __rust_maybe_catch_panic does not take enough arguments.");
+                let arg_dest = this.local_place(arg_local)?;
+                this.write_scalar(data, arg_dest)?;
+
+                assert!(args.next().is_none(), "__rust_maybe_catch_panic argument has more arguments than expected");
+
+                // We ourselves will return `0`, eventually (because we will not return if we paniced).
+                this.write_null(dest)?;
+
+                // Don't fall through, we do *not* want to `goto_block`!
+                return Ok(());
+            }
+
+            "memcmp" => {
+                let left = this.read_scalar(args[0])?.not_undef()?;
+                let right = this.read_scalar(args[1])?.not_undef()?;
+                let n = Size::from_bytes(this.read_scalar(args[2])?.to_usize(this)?);
+
+                let result = {
+                    let left_bytes = this.memory().read_bytes(left, n)?;
+                    let right_bytes = this.memory().read_bytes(right, n)?;
+
+                    use std::cmp::Ordering::*;
+                    match left_bytes.cmp(right_bytes) {
+                        Less => -1i32,
+                        Equal => 0,
+                        Greater => 1,
+                    }
+                };
+
+                this.write_scalar(
+                    Scalar::from_int(result, Size::from_bits(32)),
+                    dest,
+                )?;
+            }
+
+            "memrchr" => {
+                let ptr = this.read_scalar(args[0])?.not_undef()?;
+                let val = this.read_scalar(args[1])?.to_i32()? as u8;
+                let num = this.read_scalar(args[2])?.to_usize(this)?;
+                if let Some(idx) = this.memory().read_bytes(ptr, Size::from_bytes(num))?
+                    .iter().rev().position(|&c| c == val)
+                {
+                    let new_ptr = ptr.ptr_offset(Size::from_bytes(num - idx as u64 - 1), this)?;
+                    this.write_scalar(new_ptr, dest)?;
+                } else {
+                    this.write_null(dest)?;
+                }
+            }
+
+            "memchr" => {
+                let ptr = this.read_scalar(args[0])?.not_undef()?;
+                let val = this.read_scalar(args[1])?.to_i32()? as u8;
+                let num = this.read_scalar(args[2])?.to_usize(this)?;
+                let idx = this
+                    .memory()
+                    .read_bytes(ptr, Size::from_bytes(num))?
+                    .iter()
+                    .position(|&c| c == val);
+                if let Some(idx) = idx {
+                    let new_ptr = ptr.ptr_offset(Size::from_bytes(idx as u64), this)?;
+                    this.write_scalar(new_ptr, dest)?;
+                } else {
+                    this.write_null(dest)?;
+                }
+            }
+
+            "getenv" => {
+                let result = this.getenv(args[0])?;
+                this.write_scalar(result, dest)?;
+            }
+
+            "unsetenv" => {
+                let result = this.unsetenv(args[0])?;
+                this.write_scalar(Scalar::from_int(result, dest.layout.size), dest)?;
+            }
+
+            "setenv" => {
+                let result = this.setenv(args[0], args[1])?;
+                this.write_scalar(Scalar::from_int(result, dest.layout.size), dest)?;
+            }
+
+            "write" => {
+                let fd = this.read_scalar(args[0])?.to_i32()?;
+                let buf = this.read_scalar(args[1])?.not_undef()?;
+                let n = this.read_scalar(args[2])?.to_usize(&*this.tcx)?;
+                trace!("Called write({:?}, {:?}, {:?})", fd, buf, n);
+                let result = if fd == 1 || fd == 2 {
+                    // stdout/stderr
+                    use std::io::{self, Write};
+
+                    let buf_cont = this.memory().read_bytes(buf, Size::from_bytes(n))?;
+                    // We need to flush to make sure this actually appears on the screen
+                    let res = if fd == 1 {
+                        // Stdout is buffered, flush to make sure it appears on the screen.
+                        // This is the write() syscall of the interpreted program, we want it
+                        // to correspond to a write() syscall on the host -- there is no good
+                        // in adding extra buffering here.
+                        let res = io::stdout().write(buf_cont);
+                        io::stdout().flush().unwrap();
+                        res
+                    } else {
+                        // No need to flush, stderr is not buffered.
+                        io::stderr().write(buf_cont)
+                    };
+                    match res {
+                        Ok(n) => n as i64,
+                        Err(_) => -1,
+                    }
+                } else {
+                    eprintln!("Miri: Ignored output to FD {}", fd);
+                    // Pretend it all went well.
+                    n as i64
+                };
+                // Now, `result` is the value we return back to the program.
+                this.write_scalar(
+                    Scalar::from_int(result, dest.layout.size),
+                    dest,
+                )?;
+            }
+
+            "strlen" => {
+                let ptr = this.read_scalar(args[0])?.not_undef()?;
+                let n = this.memory().read_c_str(ptr)?.len();
+                this.write_scalar(Scalar::from_uint(n as u64, dest.layout.size), dest)?;
+            }
+
+            // math functions
+
+            "cbrtf" | "coshf" | "sinhf" |"tanf" => {
+                // FIXME: Using host floats.
+                let f = f32::from_bits(this.read_scalar(args[0])?.to_u32()?);
+                let f = match link_name {
+                    "cbrtf" => f.cbrt(),
+                    "coshf" => f.cosh(),
+                    "sinhf" => f.sinh(),
+                    "tanf" => f.tan(),
+                    _ => bug!(),
+                };
+                this.write_scalar(Scalar::from_u32(f.to_bits()), dest)?;
+            }
+            // underscore case for windows
+            "_hypotf" | "hypotf" | "atan2f" => {
+                // FIXME: Using host floats.
+                let f1 = f32::from_bits(this.read_scalar(args[0])?.to_u32()?);
+                let f2 = f32::from_bits(this.read_scalar(args[1])?.to_u32()?);
+                let n = match link_name {
+                    "_hypotf" | "hypotf" => f1.hypot(f2),
+                    "atan2f" => f1.atan2(f2),
+                    _ => bug!(),
+                };
+                this.write_scalar(Scalar::from_u32(n.to_bits()), dest)?;
+            }
+
+            "cbrt" | "cosh" | "sinh" | "tan" => {
+                // FIXME: Using host floats.
+                let f = f64::from_bits(this.read_scalar(args[0])?.to_u64()?);
+                let f = match link_name {
+                    "cbrt" => f.cbrt(),
+                    "cosh" => f.cosh(),
+                    "sinh" => f.sinh(),
+                    "tan" => f.tan(),
+                    _ => bug!(),
+                };
+                this.write_scalar(Scalar::from_u64(f.to_bits()), dest)?;
+            }
+            // underscore case for windows, here and below
+            // (see https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/floating-point-primitives?view=vs-2019)
+            "_hypot" | "hypot" | "atan2" => {
+                // FIXME: Using host floats.
+                let f1 = f64::from_bits(this.read_scalar(args[0])?.to_u64()?);
+                let f2 = f64::from_bits(this.read_scalar(args[1])?.to_u64()?);
+                let n = match link_name {
+                    "_hypot" | "hypot" => f1.hypot(f2),
+                    "atan2" => f1.atan2(f2),
+                    _ => bug!(),
+                };
+                this.write_scalar(Scalar::from_u64(n.to_bits()), dest)?;
+            }
+            // For radix-2 (binary) systems, `ldexp` and `scalbn` are the same.
+            "_ldexp" | "ldexp" | "scalbn" => {
+                let x = this.read_scalar(args[0])?.to_f64()?;
+                let exp = this.read_scalar(args[1])?.to_i32()?;
+
+                // Saturating cast to i16. Even those are outside the valid exponent range to
+                // `scalbn` below will do its over/underflow handling.
+                let exp = if exp > i16::max_value() as i32 {
+                    i16::max_value()
+                } else if exp < i16::min_value() as i32 {
+                    i16::min_value()
+                } else {
+                    exp.try_into().unwrap()
+                };
+
+                let res = x.scalbn(exp);
+                this.write_scalar(Scalar::from_f64(res), dest)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
 
             // Some things needed for `sys::thread` initialization to go through.

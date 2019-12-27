@@ -26,7 +26,11 @@
 
 /* #define ENGINE_DEVCRYPTO_DEBUG */
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #ifdef CRYPTO_ALGORITHM_MIN
+=======
+#if CRYPTO_ALGORITHM_MIN < CRYPTO_ALGORITHM_MAX
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 # define CHECK_BSD_STYLE_MACROS
 #endif
 

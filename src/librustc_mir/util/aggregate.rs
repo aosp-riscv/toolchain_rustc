@@ -24,6 +24,7 @@ pub fn expand_aggregate<'tcx>(
             if adt_def.is_enum() {
                 set_discriminant = Some(Statement {
                     kind: StatementKind::SetDiscriminant {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         place: lhs.clone(),
                         variant_index,
                     },
@@ -71,6 +72,55 @@ pub fn expand_aggregate<'tcx>(
         Statement {
             source_info,
             kind: StatementKind::Assign(lhs_field, box Rvalue::Use(op)),
+=======
+                        place: box(lhs.clone()),
+                        variant_index,
+                    },
+                    source_info,
+                });
+                lhs = lhs.downcast(adt_def, variant_index);
+            }
+            active_field_index
+        }
+        AggregateKind::Generator(..) => {
+            // Right now we only support initializing generators to
+            // variant 0 (Unresumed).
+            let variant_index = VariantIdx::new(0);
+            set_discriminant = Some(Statement {
+                kind: StatementKind::SetDiscriminant {
+                    place: box(lhs.clone()),
+                    variant_index,
+                },
+                source_info,
+            });
+
+            // Operands are upvars stored on the base place, so no
+            // downcast is necessary.
+
+            None
+        }
+        _ => None
+    };
+
+    operands.into_iter().enumerate().map(move |(i, (op, ty))| {
+        let lhs_field = if let AggregateKind::Array(_) = kind {
+            // FIXME(eddyb) `offset` should be u64.
+            let offset = i as u32;
+            assert_eq!(offset as usize, i);
+            lhs.clone().elem(ProjectionElem::ConstantIndex {
+                offset,
+                // FIXME(eddyb) `min_length` doesn't appear to be used.
+                min_length: offset + 1,
+                from_end: false
+            })
+        } else {
+            let field = Field::new(active_field_index.unwrap_or(i));
+            lhs.clone().field(field, ty)
+        };
+        Statement {
+            source_info,
+            kind: StatementKind::Assign(box(lhs_field, Rvalue::Use(op))),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }).chain(set_discriminant)
 }

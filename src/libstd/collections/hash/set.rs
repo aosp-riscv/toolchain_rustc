@@ -1,5 +1,9 @@
 use crate::borrow::Borrow;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::collections::CollectionAllocErr;
+=======
+use crate::collections::TryReserveError;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::fmt;
 use crate::hash::{Hash, BuildHasher};
 use crate::iter::{Chain, FromIterator, FusedIterator};
@@ -383,7 +387,11 @@ impl<T, S> HashSet<T, S>
     /// ```
     #[inline]
     #[unstable(feature = "try_reserve", reason = "new API", issue="48043")]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn try_reserve(&mut self, additional: usize) -> Result<(), CollectionAllocErr> {
+=======
+    pub fn try_reserve(&mut self, additional: usize) -> Result<(), TryReserveError> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.map.try_reserve(additional)
     }
 

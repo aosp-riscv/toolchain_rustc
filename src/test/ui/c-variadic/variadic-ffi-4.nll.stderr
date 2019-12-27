@@ -37,6 +37,7 @@ error: lifetime may not live long enough
   --> $DIR/variadic-ffi-4.rs:20:5
    |
 LL | pub unsafe extern "C" fn no_escape3(_: usize, mut ap0: &mut VaListImpl, mut ap1: ...) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                                               -------                   ------- has type `core::ffi::VaListImpl<'1>`
    |                                               |
    |                                               has type `&mut core::ffi::VaListImpl<'2>`
@@ -104,6 +105,75 @@ LL | pub unsafe extern "C" fn no_escape5(_: usize, mut ap0: &mut VaListImpl, mut
    |                                               has type `&mut core::ffi::VaListImpl<'2>`
 LL |     *ap0 = ap1.clone();
    |            ^^^^^^^^^^^ argument requires that `'1` must outlive `'2`
+=======
+   |                                               -------                   ------- has type `core::ffi::VaListImpl<'2>`
+   |                                               |
+   |                                               has type `&mut core::ffi::VaListImpl<'1>`
+LL |     *ap0 = ap1;
+   |     ^^^^ assignment requires that `'2` must outlive `'1`
+
+error: lifetime may not live long enough
+  --> $DIR/variadic-ffi-4.rs:25:5
+   |
+LL | pub unsafe extern "C" fn no_escape4(_: usize, ap0: &mut VaListImpl, mut ap1: ...) {
+   |                                               ---                   ------- has type `core::ffi::VaListImpl<'2>`
+   |                                               |
+   |                                               has type `&mut core::ffi::VaListImpl<'1>`
+LL |     ap0 = &mut ap1;
+   |     ^^^^^^^^^^^^^^ assignment requires that `'1` must outlive `'2`
+
+error: lifetime may not live long enough
+  --> $DIR/variadic-ffi-4.rs:25:5
+   |
+LL | pub unsafe extern "C" fn no_escape4(_: usize, ap0: &mut VaListImpl, mut ap1: ...) {
+   |                                               ---                   ------- has type `core::ffi::VaListImpl<'2>`
+   |                                               |
+   |                                               has type `&mut core::ffi::VaListImpl<'1>`
+LL |     ap0 = &mut ap1;
+   |     ^^^^^^^^^^^^^^ assignment requires that `'2` must outlive `'1`
+
+error[E0384]: cannot assign to immutable argument `ap0`
+  --> $DIR/variadic-ffi-4.rs:25:5
+   |
+LL | pub unsafe extern "C" fn no_escape4(_: usize, ap0: &mut VaListImpl, mut ap1: ...) {
+   |                                               --- help: make this binding mutable: `mut ap0`
+LL |     ap0 = &mut ap1;
+   |     ^^^^^^^^^^^^^^ cannot assign to immutable argument
+
+error[E0597]: `ap1` does not live long enough
+  --> $DIR/variadic-ffi-4.rs:25:11
+   |
+LL | pub unsafe extern "C" fn no_escape4(_: usize, ap0: &mut VaListImpl, mut ap1: ...) {
+   |                                                    - let's call the lifetime of this reference `'1`
+LL |     ap0 = &mut ap1;
+   |     ------^^^^^^^^
+   |     |     |
+   |     |     borrowed value does not live long enough
+   |     assignment requires that `ap1` is borrowed for `'1`
+...
+LL | }
+   | - `ap1` dropped here while still borrowed
+
+error: lifetime may not live long enough
+  --> $DIR/variadic-ffi-4.rs:33:12
+   |
+LL | pub unsafe extern "C" fn no_escape5(_: usize, mut ap0: &mut VaListImpl, mut ap1: ...) {
+   |                                               -------                   ------- has type `core::ffi::VaListImpl<'2>`
+   |                                               |
+   |                                               has type `&mut core::ffi::VaListImpl<'1>`
+LL |     *ap0 = ap1.clone();
+   |            ^^^^^^^^^^^ argument requires that `'1` must outlive `'2`
+
+error: lifetime may not live long enough
+  --> $DIR/variadic-ffi-4.rs:33:12
+   |
+LL | pub unsafe extern "C" fn no_escape5(_: usize, mut ap0: &mut VaListImpl, mut ap1: ...) {
+   |                                               -------                   ------- has type `core::ffi::VaListImpl<'2>`
+   |                                               |
+   |                                               has type `&mut core::ffi::VaListImpl<'1>`
+LL |     *ap0 = ap1.clone();
+   |            ^^^^^^^^^^^ argument requires that `'2` must outlive `'1`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 11 previous errors
 

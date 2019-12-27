@@ -61,8 +61,14 @@ error[E0038]: the trait `X` cannot be made into an object
    |
 LL | impl dyn X {
    |      ^^^^^ the trait `X` cannot be made into an object
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |
    = note: method `xxx` has no receiver
+=======
+...
+LL |     fn xxx() { ### }
+   |        --- associated function `xxx` has no `self` parameter
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 9 previous errors
 

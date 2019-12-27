@@ -46,7 +46,11 @@ fn cc2ar(cc: &Path, target: &str) -> Option<PathBuf> {
     } else if target.contains("openbsd") {
         Some(PathBuf::from("ar"))
     } else if target.contains("vxworks") {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Some(PathBuf::from("vx-ar"))
+=======
+        Some(PathBuf::from("wr-ar"))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     } else {
         let parent = cc.parent().unwrap();
         let file = cc.file_name().unwrap().to_str().unwrap();

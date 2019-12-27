@@ -1,5 +1,11 @@
 //! Test for Clippy lint renames.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
+=======
+// run-rustfix
+
+#![allow(dead_code)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // allow the new lint name here, to test if the new name works
 #![allow(clippy::module_name_repetitions)]
 #![allow(clippy::new_without_default)]
@@ -15,6 +21,7 @@ fn main() {}
 struct Foo;
 
 #[warn(clippy::const_static_lifetime)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static Bar: &'static str = "baz";
 
 impl Foo {
@@ -22,3 +29,6 @@ impl Foo {
         Foo
     }
 }
+=======
+fn foo() {}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

@@ -7,10 +7,15 @@
 // edition:2018
 // ignore-wasm32-bare compiled with panic=abort by default
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![allow(unused_assignments)]
 #![allow(unused_variables)]
 #![feature(slice_patterns)]
 #![feature(async_await)]
+=======
+#![feature(slice_patterns)]
+#![allow(unused)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use std::{
     cell::{Cell, RefCell},

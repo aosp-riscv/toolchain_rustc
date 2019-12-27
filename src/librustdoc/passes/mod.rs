@@ -336,7 +336,11 @@ pub fn look_for_tests<'tcx>(
         found_tests: 0,
     };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     find_testable_code(&dox, &mut tests, ErrorCodes::No);
+=======
+    find_testable_code(&dox, &mut tests, ErrorCodes::No, false);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     if check_missing_code == true && tests.found_tests == 0 {
         let sp = span_of_attrs(&item.attrs).unwrap_or(item.source.span());

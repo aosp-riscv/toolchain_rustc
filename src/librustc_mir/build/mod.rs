@@ -94,7 +94,7 @@ pub fn mir_build(tcx: TyCtxt<'_>, def_id: DefId) -> Body<'_> {
 
             let body = tcx.hir().body(body_id);
             let explicit_arguments =
-                body.arguments
+                body.params
                     .iter()
                     .enumerate()
                     .map(|(index, arg)| {
@@ -511,7 +511,11 @@ fn should_abort_on_panic(tcx: TyCtxt<'_>, fn_def_id: DefId, abi: Abi) -> bool {
 ///////////////////////////////////////////////////////////////////////////
 /// the main entry point for building MIR for a function
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 struct ArgInfo<'tcx>(Ty<'tcx>, Option<Span>, Option<&'tcx hir::Arg>, Option<ImplicitSelfKind>);
+=======
+struct ArgInfo<'tcx>(Ty<'tcx>, Option<Span>, Option<&'tcx hir::Param>, Option<ImplicitSelfKind>);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 fn construct_fn<'a, 'tcx, A>(
     hir: Cx<'a, 'tcx>,
@@ -609,7 +613,11 @@ where
         unpack!(block = builder.in_breakable_scope(
             None,
             START_BLOCK,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Place::RETURN_PLACE,
+=======
+            Place::return_place(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             |builder| {
                 builder.in_scope(arg_scope_s, LintLevel::Inherited, |builder| {
                     builder.args_and_body(block, &arguments, arg_scope, &body.value)
@@ -670,7 +678,7 @@ fn construct_const<'a, 'tcx>(
     let mut block = START_BLOCK;
     let ast_expr = &tcx.hir().body(body_id).value;
     let expr = builder.hir.mirror(ast_expr);
-    unpack!(block = builder.into_expr(&Place::RETURN_PLACE, block, expr));
+    unpack!(block = builder.into_expr(&Place::return_place(), block, expr));
 
     let source_info = builder.source_info(span);
     builder.cfg.terminate(block, source_info, TerminatorKind::Return);
@@ -763,7 +771,6 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             self.cfg.basic_blocks,
             self.source_scopes,
             ClearCrossCrate::Set(self.source_scope_local_data),
-            IndexVec::new(),
             yield_ty,
             self.local_decls,
             self.canonical_user_type_annotations,
@@ -872,7 +879,31 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         }
 
         let body = self.hir.mirror(ast_body);
-        self.into(&Place::RETURN_PLACE, block, body)
+        self.into(&Place::return_place(), block, body)
+    }
+
+    fn set_correct_source_scope_for_arg(
+        &mut self,
+        arg_hir_id: hir::HirId,
+        original_source_scope: SourceScope,
+        pattern_span: Span
+    ) {
+        let tcx = self.hir.tcx();
+        let current_root = tcx.maybe_lint_level_root_bounded(
+            arg_hir_id,
+            self.hir.root_lint_level
+        );
+        let parent_root = tcx.maybe_lint_level_root_bounded(
+            self.source_scope_local_data[original_source_scope].lint_root,
+            self.hir.root_lint_level,
+        );
+        if current_root != parent_root {
+            self.source_scope = self.new_source_scope(
+                pattern_span,
+                LintLevel::Explicit(current_root),
+                None
+            );
+        }
     }
 
     fn set_correct_source_scope_for_arg(

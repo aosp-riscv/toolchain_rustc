@@ -1,9 +1,15 @@
-//! Reduced graph building.
+//! After we obtain a fresh AST fragment from a macro, code in this module helps to integrate
+//! that fragment into the module structures that are already partially built.
 //!
-//! Here we build the "reduced graph": the graph of the module tree without
-//! any imports resolved.
+//! Items from the fragment are placed into modules,
+//! unexpanded macros in the fragment are visited and registered.
+//! Imports are also considered items and placed into modules here, but not resolved yet.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::macros::{InvocationData, LegacyBinding, LegacyScope};
+=======
+use crate::macros::{LegacyBinding, LegacyScope};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::resolve_imports::ImportDirective;
 use crate::resolve_imports::ImportDirectiveSubclass::{self, GlobImport, SingleImport};
 use crate::{Module, ModuleData, ModuleKind, NameBinding, NameBindingKind, Segment, ToNameBinding};
@@ -14,6 +20,10 @@ use crate::{ResolutionError, Determinacy, PathResult, CrateLint};
 use rustc::bug;
 use rustc::hir::def::{self, *};
 use rustc::hir::def_id::{CRATE_DEF_INDEX, LOCAL_CRATE, DefId};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use rustc::hir::map::DefCollector;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::ty;
 use rustc::middle::cstore::CrateStore;
 use rustc_metadata::cstore::LoadedMacro;
@@ -28,8 +38,16 @@ use syntax::ast::{Name, Ident};
 use syntax::attr;
 
 use syntax::ast::{self, Block, ForeignItem, ForeignItemKind, Item, ItemKind, NodeId};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax::ast::{MetaItemKind, StmtKind, TraitItem, TraitItemKind, Variant};
+=======
+use syntax::ast::{MetaItemKind, StmtKind, TraitItem, TraitItemKind};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax::ext::base::{MacroKind, SyntaxExtension};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use syntax::ext::expand::AstFragment;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax::ext::hygiene::ExpnId;
 use syntax::feature_gate::is_builtin_attr;
 use syntax::parse::token::{self, Token};
@@ -67,7 +85,7 @@ impl<'a> ToNameBinding<'a> for (Res, ty::Visibility, Span, ExpnId) {
     }
 }
 
-pub(crate) struct IsMacroExport;
+struct IsMacroExport;
 
 impl<'a> ToNameBinding<'a> for (Res, ty::Visibility, Span, ExpnId, IsMacroExport) {
     fn to_name_binding(self, arenas: &'a ResolverArenas<'a>) -> &'a NameBinding<'a> {
@@ -84,7 +102,7 @@ impl<'a> ToNameBinding<'a> for (Res, ty::Visibility, Span, ExpnId, IsMacroExport
 impl<'a> Resolver<'a> {
     /// Defines `name` in namespace `ns` of module `parent` to be `def` if it is not yet defined;
     /// otherwise, reports an error.
-    pub fn define<T>(&mut self, parent: Module<'a>, ident: Ident, ns: Namespace, def: T)
+    crate fn define<T>(&mut self, parent: Module<'a>, ident: Ident, ns: Namespace, def: T)
         where T: ToNameBinding<'a>,
     {
         let binding = def.to_name_binding(self.arenas);
@@ -93,6 +111,7 @@ impl<'a> Resolver<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn get_module(&mut self, def_id: DefId) -> Module<'a> {
         if def_id.krate == LOCAL_CRATE {
             return self.module_map[&def_id]
@@ -173,6 +192,111 @@ impl<'a> Resolver<'a> {
 pub struct BuildReducedGraphVisitor<'a, 'b> {
     pub r: &'b mut Resolver<'a>,
     pub parent_scope: ParentScope<'a>,
+=======
+    crate fn get_module(&mut self, def_id: DefId) -> Module<'a> {
+        if def_id.krate == LOCAL_CRATE {
+            return self.module_map[&def_id]
+        }
+
+        let macros_only = self.cstore.dep_kind_untracked(def_id.krate).macros_only();
+        if let Some(&module) = self.extern_module_map.get(&(def_id, macros_only)) {
+            return module;
+        }
+
+        let (name, parent) = if def_id.index == CRATE_DEF_INDEX {
+            (self.cstore.crate_name_untracked(def_id.krate).as_interned_str(), None)
+        } else {
+            let def_key = self.cstore.def_key(def_id);
+            (def_key.disambiguated_data.data.get_opt_name().unwrap(),
+             Some(self.get_module(DefId { index: def_key.parent.unwrap(), ..def_id })))
+        };
+
+        let kind = ModuleKind::Def(DefKind::Mod, def_id, name.as_symbol());
+        let module = self.arenas.alloc_module(ModuleData::new(
+            parent, kind, def_id, ExpnId::root(), DUMMY_SP
+        ));
+        self.extern_module_map.insert((def_id, macros_only), module);
+        module
+    }
+
+    crate fn macro_def_scope(&mut self, expn_id: ExpnId) -> Module<'a> {
+        let def_id = match self.macro_defs.get(&expn_id) {
+            Some(def_id) => *def_id,
+            None => return self.ast_transform_scopes.get(&expn_id)
+                .unwrap_or(&self.graph_root),
+        };
+        if let Some(id) = self.definitions.as_local_node_id(def_id) {
+            self.local_macro_def_scopes[&id]
+        } else {
+            let module_def_id = ty::DefIdTree::parent(&*self, def_id).unwrap();
+            self.get_module(module_def_id)
+        }
+    }
+
+    crate fn get_macro(&mut self, res: Res) -> Option<Lrc<SyntaxExtension>> {
+        match res {
+            Res::Def(DefKind::Macro(..), def_id) => self.get_macro_by_def_id(def_id),
+            Res::NonMacroAttr(attr_kind) =>
+                Some(self.non_macro_attr(attr_kind == NonMacroAttrKind::Tool)),
+            _ => None,
+        }
+    }
+
+    crate fn get_macro_by_def_id(&mut self, def_id: DefId) -> Option<Lrc<SyntaxExtension>> {
+        if let Some(ext) = self.macro_map.get(&def_id) {
+            return Some(ext.clone());
+        }
+
+        let ext = Lrc::new(match self.cstore.load_macro_untracked(def_id, &self.session) {
+            LoadedMacro::MacroDef(item) =>
+                self.compile_macro(&item, self.cstore.crate_edition_untracked(def_id.krate)),
+            LoadedMacro::ProcMacro(ext) => ext,
+        });
+
+        self.macro_map.insert(def_id, ext.clone());
+        Some(ext)
+    }
+
+    // FIXME: `extra_placeholders` should be included into the `fragment` as regular placeholders.
+    crate fn build_reduced_graph(
+        &mut self,
+        fragment: &AstFragment,
+        extra_placeholders: &[NodeId],
+        parent_scope: ParentScope<'a>,
+    ) -> LegacyScope<'a> {
+        let mut def_collector = DefCollector::new(&mut self.definitions, parent_scope.expansion);
+        fragment.visit_with(&mut def_collector);
+        for placeholder in extra_placeholders {
+            def_collector.visit_macro_invoc(*placeholder);
+        }
+
+        let mut visitor = BuildReducedGraphVisitor { r: self, parent_scope };
+        fragment.visit_with(&mut visitor);
+        for placeholder in extra_placeholders {
+            visitor.parent_scope.legacy = visitor.visit_invoc(*placeholder);
+        }
+
+        visitor.parent_scope.legacy
+    }
+
+    crate fn build_reduced_graph_external(&mut self, module: Module<'a>) {
+        let def_id = module.def_id().expect("unpopulated module without a def-id");
+        for child in self.cstore.item_children_untracked(def_id, self.session) {
+            let child = child.map_id(|_| panic!("unexpected id"));
+            BuildReducedGraphVisitor { r: self, parent_scope: ParentScope::module(module) }
+                .build_reduced_graph_for_external_crate_res(child);
+        }
+    }
+}
+
+struct BuildReducedGraphVisitor<'a, 'b> {
+    r: &'b mut Resolver<'a>,
+    parent_scope: ParentScope<'a>,
+}
+
+impl<'a> AsMut<Resolver<'a>> for BuildReducedGraphVisitor<'a, '_> {
+    fn as_mut(&mut self) -> &mut Resolver<'a> { self.r }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
@@ -300,10 +424,16 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
         root_id: NodeId,
         vis: ty::Visibility,
     ) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let parent_scope = &self.parent_scope;
         let current_module = parent_scope.module;
         let directive = self.r.arenas.alloc_import_directive(ImportDirective {
             parent_scope: parent_scope.clone(),
+=======
+        let current_module = self.parent_scope.module;
+        let directive = self.r.arenas.alloc_import_directive(ImportDirective {
+            parent_scope: self.parent_scope,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             module_path,
             imported_module: Cell::new(None),
             subclass,
@@ -554,7 +684,11 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
     }
 
     /// Constructs the reduced graph for one item.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn build_reduced_graph_for_item(&mut self, item: &Item) {
+=======
+    fn build_reduced_graph_for_item(&mut self, item: &'b Item) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let parent_scope = &self.parent_scope;
         let parent = parent_scope.module;
         let expansion = parent_scope.expansion;
@@ -593,15 +727,22 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
                     self.r.get_module(DefId { krate: crate_id, index: CRATE_DEF_INDEX })
                 };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.r.populate_module_if_necessary(module);
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let used = self.process_legacy_macro_imports(item, module);
                 let binding =
                     (module, ty::Visibility::Public, sp, expansion).to_name_binding(self.r.arenas);
                 let directive = self.r.arenas.alloc_import_directive(ImportDirective {
                     root_id: item.id,
                     id: item.id,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     parent_scope: self.parent_scope.clone(),
+=======
+                    parent_scope: self.parent_scope,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     imported_module: Cell::new(Some(ModuleOrUniformRoot::Module(module))),
                     subclass: ImportDirectiveSubclass::ExternCrate {
                         source: orig_name,
@@ -692,22 +833,33 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
                 self.r.define(parent, ident, TypeNS, (res, vis, sp, expansion));
             }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ItemKind::Enum(ref enum_definition, _) => {
                 let module_kind = ModuleKind::Def(
                     DefKind::Enum,
                     self.r.definitions.local_def_id(item.id),
                     ident.name,
                 );
+=======
+            ItemKind::Enum(_, _) => {
+                let def_id = self.r.definitions.local_def_id(item.id);
+                self.r.variant_vis.insert(def_id, vis);
+                let module_kind = ModuleKind::Def(DefKind::Enum, def_id, ident.name);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let module = self.r.new_module(parent,
                                              module_kind,
                                              parent.normal_ancestor_id,
                                              expansion,
                                              item.span);
                 self.r.define(parent, ident, TypeNS, (module, vis, sp, expansion));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
                 for variant in &(*enum_definition).variants {
                     self.build_reduced_graph_for_variant(variant, module, vis, expansion);
                 }
+=======
+                self.parent_scope.module = module;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
 
             ItemKind::TraitAlias(..) => {
@@ -792,6 +944,7 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // Constructs the reduced graph for one variant. Variants exist in the
     // type and value namespaces.
     fn build_reduced_graph_for_variant(&mut self,
@@ -826,6 +979,8 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
         self.r.define(parent, ident, ValueNS, (ctor_res, ctor_vis, variant.span, expn_id));
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Constructs the reduced graph for one foreign item.
     fn build_reduced_graph_for_foreign_item(&mut self, item: &ForeignItem) {
         let (res, ns) = match item.node {
@@ -861,20 +1016,33 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
     }
 
     /// Builds the reduced graph for a single item in an external crate.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn build_reduced_graph_for_external_crate_res(
         &mut self,
         parent: Module<'a>,
         child: Export<ast::NodeId>,
     ) {
+=======
+    fn build_reduced_graph_for_external_crate_res(&mut self, child: Export<NodeId>) {
+        let parent = self.parent_scope.module;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let Export { ident, res, vis, span } = child;
         // FIXME: We shouldn't create the gensym here, it should come from metadata,
         // but metadata cannot encode gensyms currently, so we create it here.
         // This is only a guess, two equivalent idents may incorrectly get different gensyms here.
         let ident = ident.gensym_if_underscore();
         let expansion = ExpnId::root(); // FIXME(jseyfried) intercrate hygiene
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         match res {
             Res::Def(kind @ DefKind::Mod, def_id)
             | Res::Def(kind @ DefKind::Enum, def_id) => {
+=======
+        // Record primary definitions.
+        match res {
+            Res::Def(kind @ DefKind::Mod, def_id)
+            | Res::Def(kind @ DefKind::Enum, def_id)
+            | Res::Def(kind @ DefKind::Trait, def_id) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let module = self.r.new_module(parent,
                                              ModuleKind::Def(kind, def_id, ident.name),
                                              def_id,
@@ -882,6 +1050,7 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
                                              span);
                 self.r.define(parent, ident, TypeNS, (module, vis, DUMMY_SP, expansion));
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Res::Def(DefKind::Variant, _)
             | Res::Def(DefKind::TyAlias, _)
             | Res::Def(DefKind::ForeignTy, _)
@@ -934,18 +1103,66 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
                 self.r.define(parent, ident, TypeNS, (res, vis, DUMMY_SP, expansion));
 
                 // Record field names for error reporting.
+=======
+            Res::Def(DefKind::Struct, _)
+            | Res::Def(DefKind::Union, _)
+            | Res::Def(DefKind::Variant, _)
+            | Res::Def(DefKind::TyAlias, _)
+            | Res::Def(DefKind::ForeignTy, _)
+            | Res::Def(DefKind::OpaqueTy, _)
+            | Res::Def(DefKind::TraitAlias, _)
+            | Res::Def(DefKind::AssocTy, _)
+            | Res::Def(DefKind::AssocOpaqueTy, _)
+            | Res::PrimTy(..)
+            | Res::ToolMod =>
+                self.r.define(parent, ident, TypeNS, (res, vis, DUMMY_SP, expansion)),
+            Res::Def(DefKind::Fn, _)
+            | Res::Def(DefKind::Method, _)
+            | Res::Def(DefKind::Static, _)
+            | Res::Def(DefKind::Const, _)
+            | Res::Def(DefKind::AssocConst, _)
+            | Res::Def(DefKind::Ctor(..), _) =>
+                self.r.define(parent, ident, ValueNS, (res, vis, DUMMY_SP, expansion)),
+            Res::Def(DefKind::Macro(..), _)
+            | Res::NonMacroAttr(..) =>
+                self.r.define(parent, ident, MacroNS, (res, vis, DUMMY_SP, expansion)),
+            Res::Def(DefKind::TyParam, _) | Res::Def(DefKind::ConstParam, _)
+            | Res::Local(..) | Res::SelfTy(..) | Res::SelfCtor(..) | Res::Err =>
+                bug!("unexpected resolution: {:?}", res)
+        }
+        // Record some extra data for better diagnostics.
+        match res {
+            Res::Def(DefKind::Struct, def_id) | Res::Def(DefKind::Union, def_id) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let field_names = self.r.cstore.struct_field_names_untracked(def_id);
                 self.insert_field_names(def_id, field_names);
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Res::Def(DefKind::Macro(..), _) | Res::NonMacroAttr(..) => {
                 self.r.define(parent, ident, MacroNS, (res, vis, DUMMY_SP, expansion));
+=======
+            Res::Def(DefKind::Method, def_id) => {
+                if self.r.cstore.associated_item_cloned_untracked(def_id).method_has_self_argument {
+                    self.r.has_self.insert(def_id);
+                }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             _ => bug!("unexpected resolution: {:?}", res)
+=======
+            Res::Def(DefKind::Ctor(CtorOf::Struct, ..), def_id) => {
+                let parent = self.r.cstore.def_key(def_id).parent;
+                if let Some(struct_def_id) = parent.map(|index| DefId { index, ..def_id }) {
+                    self.r.struct_constructors.insert(struct_def_id, (res, vis));
+                }
+            }
+            _ => {}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
     fn legacy_import_macro(&mut self,
-                           name: Name,
+                           name: ast::Name,
                            binding: &'a NameBinding<'a>,
                            span: Span,
                            allow_shadowing: bool) {
@@ -997,7 +1214,11 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
                 |this: &Self, span| this.r.arenas.alloc_import_directive(ImportDirective {
             root_id: item.id,
             id: item.id,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             parent_scope: this.parent_scope.clone(),
+=======
+            parent_scope: this.parent_scope,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             imported_module: Cell::new(Some(ModuleOrUniformRoot::Module(module))),
             subclass: ImportDirectiveSubclass::MacroUse,
             use_span_with_attributes: item.span_with_attributes(),
@@ -1014,9 +1235,15 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
         if let Some(span) = import_all {
             let directive = macro_use_directive(self, span);
             self.r.potentially_unused_imports.push(directive);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             module.for_each_child(|ident, ns, binding| if ns == MacroNS {
                 let imported_binding = self.r.import(binding, directive);
                 self.legacy_import_macro(ident.name, imported_binding, span, allow_shadowing);
+=======
+            module.for_each_child(self, |this, ident, ns, binding| if ns == MacroNS {
+                let imported_binding = this.r.import(binding, directive);
+                this.legacy_import_macro(ident.name, imported_binding, span, allow_shadowing);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             });
         } else {
             for ident in single_imports.iter().cloned() {
@@ -1066,9 +1293,14 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
         false
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn visit_invoc(&mut self, id: ast::NodeId) -> &'a InvocationData<'a> {
+=======
+    fn visit_invoc(&mut self, id: NodeId) -> LegacyScope<'a> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let invoc_id = id.placeholder_to_expn_id();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.parent_scope.module.unresolved_invocations.borrow_mut().insert(invoc_id);
 
         let invocation_data = self.r.arenas.alloc_invocation_data(InvocationData {
@@ -1103,6 +1335,37 @@ impl<'a, 'b> BuildReducedGraphVisitor<'a, 'b> {
         let (ext, ident, span, is_legacy) = match &item.node {
             ItemKind::MacroDef(def) => {
                 let ext = self.r.compile_macro(item, self.r.session.edition());
+=======
+        self.parent_scope.module.unexpanded_invocations.borrow_mut().insert(invoc_id);
+
+        let old_parent_scope = self.r.invocation_parent_scopes.insert(invoc_id, self.parent_scope);
+        assert!(old_parent_scope.is_none(), "invocation data is reset for an invocation");
+
+        LegacyScope::Invocation(invoc_id)
+    }
+
+    fn proc_macro_stub(item: &ast::Item) -> Option<(MacroKind, Ident, Span)> {
+        if attr::contains_name(&item.attrs, sym::proc_macro) {
+            return Some((MacroKind::Bang, item.ident, item.span));
+        } else if attr::contains_name(&item.attrs, sym::proc_macro_attribute) {
+            return Some((MacroKind::Attr, item.ident, item.span));
+        } else if let Some(attr) = attr::find_by_name(&item.attrs, sym::proc_macro_derive) {
+            if let Some(nested_meta) = attr.meta_item_list().and_then(|list| list.get(0).cloned()) {
+                if let Some(ident) = nested_meta.ident() {
+                    return Some((MacroKind::Derive, ident, ident.span));
+                }
+            }
+        }
+        None
+    }
+
+    fn define_macro(&mut self, item: &ast::Item) -> LegacyScope<'a> {
+        let parent_scope = &self.parent_scope;
+        let expansion = parent_scope.expansion;
+        let (ext, ident, span, is_legacy) = match &item.node {
+            ItemKind::MacroDef(def) => {
+                let ext = Lrc::new(self.r.compile_macro(item, self.r.session.edition()));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 (ext, item.ident, item.span, def.legacy)
             }
             ItemKind::Fn(..) => match Self::proc_macro_stub(item) {
@@ -1180,13 +1443,20 @@ impl<'a, 'b> Visitor<'b> for BuildReducedGraphVisitor<'a, 'b> {
                 return
             }
             ItemKind::Mac(..) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.parent_scope.legacy = LegacyScope::Invocation(self.visit_invoc(item.id));
+=======
+                self.parent_scope.legacy = self.visit_invoc(item.id);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 return
             }
             ItemKind::Mod(..) => self.contains_macro_use(&item.attrs),
             _ => false,
         };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let orig_current_module = self.parent_scope.module;
         let orig_current_legacy_scope = self.parent_scope.legacy;
         self.build_reduced_graph_for_item(item);
@@ -1199,7 +1469,11 @@ impl<'a, 'b> Visitor<'b> for BuildReducedGraphVisitor<'a, 'b> {
 
     fn visit_stmt(&mut self, stmt: &'b ast::Stmt) {
         if let ast::StmtKind::Mac(..) = stmt.node {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             self.parent_scope.legacy = LegacyScope::Invocation(self.visit_invoc(stmt.id));
+=======
+            self.parent_scope.legacy = self.visit_invoc(stmt.id);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } else {
             visit::walk_stmt(self, stmt);
         }
@@ -1250,9 +1524,15 @@ impl<'a, 'b> Visitor<'b> for BuildReducedGraphVisitor<'a, 'b> {
         let expansion = self.parent_scope.expansion;
         self.r.define(parent, item.ident, ns, (res, vis, item.span, expansion));
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.parent_scope.module = parent.parent.unwrap(); // nearest normal ancestor
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         visit::walk_trait_item(self, item);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.parent_scope.module = parent;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn visit_token(&mut self, t: Token) {
@@ -1267,10 +1547,102 @@ impl<'a, 'b> Visitor<'b> for BuildReducedGraphVisitor<'a, 'b> {
 
     fn visit_attribute(&mut self, attr: &'b ast::Attribute) {
         if !attr.is_sugared_doc && is_builtin_attr(attr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             self.parent_scope.module.builtin_attrs.borrow_mut().push((
                 attr.path.segments[0].ident, self.parent_scope.clone()
             ));
+=======
+            self.r.builtin_attrs.push((attr.path.segments[0].ident, self.parent_scope));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         visit::walk_attribute(self, attr);
+    }
+
+    fn visit_arm(&mut self, arm: &'b ast::Arm) {
+        if arm.is_placeholder {
+            self.visit_invoc(arm.id);
+        } else {
+            visit::walk_arm(self, arm);
+        }
+    }
+
+    fn visit_field(&mut self, f: &'b ast::Field) {
+        if f.is_placeholder {
+            self.visit_invoc(f.id);
+        } else {
+            visit::walk_field(self, f);
+        }
+    }
+
+    fn visit_field_pattern(&mut self, fp: &'b ast::FieldPat) {
+        if fp.is_placeholder {
+            self.visit_invoc(fp.id);
+        } else {
+            visit::walk_field_pattern(self, fp);
+        }
+    }
+
+    fn visit_generic_param(&mut self, param: &'b ast::GenericParam) {
+        if param.is_placeholder {
+            self.visit_invoc(param.id);
+        } else {
+            visit::walk_generic_param(self, param);
+        }
+    }
+
+    fn visit_param(&mut self, p: &'b ast::Param) {
+        if p.is_placeholder {
+            self.visit_invoc(p.id);
+        } else {
+            visit::walk_param(self, p);
+        }
+    }
+
+    fn visit_struct_field(&mut self, sf: &'b ast::StructField) {
+        if sf.is_placeholder {
+            self.visit_invoc(sf.id);
+        } else {
+            visit::walk_struct_field(self, sf);
+        }
+    }
+
+    // Constructs the reduced graph for one variant. Variants exist in the
+    // type and value namespaces.
+    fn visit_variant(&mut self, variant: &'b ast::Variant) {
+        if variant.is_placeholder {
+            self.visit_invoc(variant.id);
+            return;
+        }
+
+        let parent = self.parent_scope.module;
+        let vis = self.r.variant_vis[&parent.def_id().expect("enum without def-id")];
+        let expn_id = self.parent_scope.expansion;
+        let ident = variant.ident;
+
+        // Define a name in the type namespace.
+        let def_id = self.r.definitions.local_def_id(variant.id);
+        let res = Res::Def(DefKind::Variant, def_id);
+        self.r.define(parent, ident, TypeNS, (res, vis, variant.span, expn_id));
+
+        // If the variant is marked as non_exhaustive then lower the visibility to within the
+        // crate.
+        let mut ctor_vis = vis;
+        let has_non_exhaustive = attr::contains_name(&variant.attrs, sym::non_exhaustive);
+        if has_non_exhaustive && vis == ty::Visibility::Public {
+            ctor_vis = ty::Visibility::Restricted(DefId::local(CRATE_DEF_INDEX));
+        }
+
+        // Define a constructor name in the value namespace.
+        // Braced variants, unlike structs, generate unusable names in
+        // value namespace, they are reserved for possible future use.
+        // It's ok to use the variant's id as a ctor id since an
+        // error will be reported on any use of such resolution anyway.
+        let ctor_node_id = variant.data.ctor_id().unwrap_or(variant.id);
+        let ctor_def_id = self.r.definitions.local_def_id(ctor_node_id);
+        let ctor_kind = CtorKind::from_ast(&variant.data);
+        let ctor_res = Res::Def(DefKind::Ctor(CtorOf::Variant, ctor_kind), ctor_def_id);
+        self.r.define(parent, ident, ValueNS, (ctor_res, ctor_vis, variant.span, expn_id));
+
+        visit::walk_variant(self, variant);
     }
 }

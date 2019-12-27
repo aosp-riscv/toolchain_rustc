@@ -1,4 +1,5 @@
 error: statement with no effect
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/blocks.rs:14:5
    |
 LL |     -x;
@@ -7,4 +8,20 @@ LL |     -x;
    = note: `-D clippy::no-effect` implied by `-D warnings`
 
 error: aborting due to previous error
+=======
+  --> $DIR/blocks.rs:8:9
+   |
+LL |         ;;;;
+   |         ^^^^
+   |
+   = note: `-D clippy::no-effect` implied by `-D warnings`
+
+error: statement with no effect
+  --> $DIR/blocks.rs:15:5
+   |
+LL |     -x;
+   |     ^^^
+
+error: aborting due to 2 previous errors
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 

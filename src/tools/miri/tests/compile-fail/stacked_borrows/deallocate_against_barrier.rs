@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // error-pattern: deallocating while item is protected
 
 fn inner(x: &mut i32, f: fn(&mut i32)) {
@@ -11,3 +12,5 @@ fn main() {
         drop(unsafe { Box::from_raw(raw) });
     });
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

@@ -8,9 +8,12 @@
 
 #[macro_use]
 extern crate cargo_test_macro;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 #[macro_use]
 mod support;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 mod alt_registry;
 mod bad_config;
@@ -91,6 +94,7 @@ mod rustflags;
 mod search;
 mod shell_quoting;
 mod small_fd_limits;
+mod standard_lib;
 mod test;
 mod tool_paths;
 mod update;
@@ -103,5 +107,5 @@ mod workspaces;
 #[cargo_test]
 fn aaa_trigger_cross_compile_disabled_check() {
     // This triggers the cross compile disabled check to run ASAP, see #5141
-    support::cross_compile::disabled();
+    cargo_test_support::cross_compile::disabled();
 }

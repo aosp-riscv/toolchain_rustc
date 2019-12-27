@@ -21,6 +21,7 @@ LL | use inner1::*;
    |     ^^^^^^^^^
    = help: consider adding an explicit import of `exported` to disambiguate
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0659]: `include` is ambiguous (macro-expanded name vs less macro-expanded name from outer scope during import/macro resolution)
   --> $DIR/local-modularized-tricky-fail-1.rs:46:1
    |
@@ -40,6 +41,8 @@ LL |       define_include!();
    |       ------------------ in this macro invocation
    = help: use `crate::include` to refer to this macro unambiguously
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 error[E0659]: `panic` is ambiguous (macro-expanded name vs less macro-expanded name from outer scope during import/macro resolution)
   --> $DIR/local-modularized-tricky-fail-1.rs:35:5
    |
@@ -59,6 +62,28 @@ LL |       define_panic!();
    |       ---------------- in this macro invocation
    = help: use `crate::panic` to refer to this macro unambiguously
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+error[E0659]: `include` is ambiguous (macro-expanded name vs less macro-expanded name from outer scope during import/macro resolution)
+  --> $DIR/local-modularized-tricky-fail-1.rs:46:1
+   |
+LL | include!();
+   | ^^^^^^^ ambiguous name
+   |
+   = note: `include` could refer to a macro from prelude
+note: `include` could also refer to the macro defined here
+  --> $DIR/local-modularized-tricky-fail-1.rs:17:5
+   |
+LL | /     macro_rules! include {
+LL | |         () => ()
+LL | |     }
+   | |_____^
+...
+LL |       define_include!();
+   |       ------------------ in this macro invocation
+   = help: use `crate::include` to refer to this macro unambiguously
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 error: aborting due to 3 previous errors
 
 For more information about this error, try `rustc --explain E0659`.

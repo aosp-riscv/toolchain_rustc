@@ -14,7 +14,11 @@ pub trait EvalContextExt<'tcx> {
         bin_op: mir::BinOp,
         left: ImmTy<'tcx, Tag>,
         right: ImmTy<'tcx, Tag>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ) -> InterpResult<'tcx, (Scalar<Tag>, bool)>;
+=======
+    ) -> InterpResult<'tcx, (Scalar<Tag>, bool, Ty<'tcx>)>;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     fn ptr_eq(
         &self,
@@ -35,7 +39,11 @@ impl<'mir, 'tcx> EvalContextExt<'tcx> for super::MiriEvalContext<'mir, 'tcx> {
     #[inline]
     fn pointer_inbounds(&self, ptr: Pointer<Tag>) -> InterpResult<'tcx> {
         let (size, _align) = self.memory().get_size_and_align(ptr.alloc_id, AllocCheck::Live)?;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         ptr.check_in_alloc(size, CheckInAllocMsg::InboundsTest)
+=======
+        ptr.check_inbounds_alloc(size, CheckInAllocMsg::InboundsTest)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn binary_ptr_op(
@@ -43,7 +51,11 @@ impl<'mir, 'tcx> EvalContextExt<'tcx> for super::MiriEvalContext<'mir, 'tcx> {
         bin_op: mir::BinOp,
         left: ImmTy<'tcx, Tag>,
         right: ImmTy<'tcx, Tag>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ) -> InterpResult<'tcx, (Scalar<Tag>, bool)> {
+=======
+    ) -> InterpResult<'tcx, (Scalar<Tag>, bool, Ty<'tcx>)> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         use rustc::mir::BinOp::*;
 
         trace!("ptr_op: {:?} {:?} {:?}", *left, bin_op, *right);
@@ -59,7 +71,11 @@ impl<'mir, 'tcx> EvalContextExt<'tcx> for super::MiriEvalContext<'mir, 'tcx> {
                         self.ptr_eq(left2.not_undef()?, right2.not_undef()?)?,
                     _ => bug!("Type system should not allow comparing Scalar with ScalarPair"),
                 };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 (Scalar::from_bool(if bin_op == Eq { eq } else { !eq }), false)
+=======
+                (Scalar::from_bool(if bin_op == Eq { eq } else { !eq }), false, self.tcx.types.bool)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
 
             Lt | Le | Gt | Ge => {
@@ -74,7 +90,11 @@ impl<'mir, 'tcx> EvalContextExt<'tcx> for super::MiriEvalContext<'mir, 'tcx> {
                     Ge => left >= right,
                     _ => bug!("We already established it has to be one of these operators."),
                 };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 (Scalar::from_bool(res), false)
+=======
+                (Scalar::from_bool(res), false, self.tcx.types.bool)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
 
             Offset => {
@@ -87,7 +107,11 @@ impl<'mir, 'tcx> EvalContextExt<'tcx> for super::MiriEvalContext<'mir, 'tcx> {
                     pointee_ty,
                     right.to_scalar()?.to_isize(self)?,
                 )?;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 (ptr, false)
+=======
+                (ptr, false, left.layout.ty)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
 
             _ => bug!("Invalid operator on pointers: {:?}", bin_op)

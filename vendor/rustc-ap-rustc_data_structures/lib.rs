@@ -23,10 +23,18 @@
 #![feature(core_intrinsics)]
 #![feature(integer_atomics)]
 #![feature(test)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![feature(associated_type_bounds)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #![cfg_attr(unix, feature(libc))]
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![cfg_attr(not(bootstrap), allow(rustc::default_hash_types))]
+=======
+#![allow(rustc::default_hash_types)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #[macro_use]
 extern crate log;

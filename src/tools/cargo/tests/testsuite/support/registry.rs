@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::collections::HashMap;
 use std::fs::{self, File};
 use std::io::prelude::*;
@@ -597,3 +598,5 @@ impl Dependency {
         self
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

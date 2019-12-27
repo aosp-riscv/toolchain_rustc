@@ -10,10 +10,15 @@ use rustc::lint::builtin::{MUTABLE_BORROW_RESERVATION_CONFLICT};
 use rustc::middle::borrowck::SignalledError;
 use rustc::mir::{AggregateKind, BasicBlock, BorrowCheckResult, BorrowKind};
 use rustc::mir::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ClearCrossCrate, Local, Location, Body, Mutability, Operand, Place, PlaceBase, PlaceRef,
     Static, StaticKind
+=======
+    ClearCrossCrate, Local, Location, Body, Mutability, Operand, Place, PlaceBase, PlaceElem,
+    PlaceRef, Static, StaticKind
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
-use rustc::mir::{Field, Projection, ProjectionElem, Rvalue, Statement, StatementKind};
+use rustc::mir::{Field, ProjectionElem, Promoted, Rvalue, Statement, StatementKind};
 use rustc::mir::{Terminator, TerminatorKind};
 use rustc::ty::query::Providers;
 use rustc::ty::{self, TyCtxt};
@@ -22,6 +27,7 @@ use rustc_errors::{Applicability, Diagnostic, DiagnosticBuilder, Level};
 use rustc_data_structures::bit_set::BitSet;
 use rustc_data_structures::fx::{FxHashMap, FxHashSet};
 use rustc_data_structures::graph::dominators::Dominators;
+use rustc_data_structures::indexed_vec::IndexVec;
 use smallvec::SmallVec;
 
 use std::collections::BTreeMap;
@@ -86,12 +92,21 @@ pub fn provide(providers: &mut Providers<'_>) {
 }
 
 fn mir_borrowck(tcx: TyCtxt<'_>, def_id: DefId) -> BorrowCheckResult<'_> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let input_body = tcx.mir_validated(def_id);
+=======
+    let (input_body, promoted) = tcx.mir_validated(def_id);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     debug!("run query mir_borrowck: {}", tcx.def_path_str(def_id));
 
     let opt_closure_req = tcx.infer_ctxt().enter(|infcx| {
         let input_body: &Body<'_> = &input_body.borrow();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         do_mir_borrowck(&infcx, input_body, def_id)
+=======
+        let promoted: &IndexVec<_, _> = &promoted.borrow();
+        do_mir_borrowck(&infcx, input_body, promoted, def_id)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     });
     debug!("mir_borrowck done");
 
@@ -101,6 +116,10 @@ fn mir_borrowck(tcx: TyCtxt<'_>, def_id: DefId) -> BorrowCheckResult<'_> {
 fn do_mir_borrowck<'a, 'tcx>(
     infcx: &InferCtxt<'a, 'tcx>,
     input_body: &Body<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    input_promoted: &IndexVec<Promoted, Body<'tcx>>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     def_id: DefId,
 ) -> BorrowCheckResult<'tcx> {
     debug!("do_mir_borrowck(def_id = {:?})", def_id);
@@ -147,7 +166,13 @@ fn do_mir_borrowck<'a, 'tcx>(
     // be modified (in place) to contain non-lexical lifetimes. It
     // will have a lifetime tied to the inference context.
     let mut body: Body<'tcx> = input_body.clone();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let free_regions = nll::replace_regions_in_mir(infcx, def_id, param_env, &mut body);
+=======
+    let mut promoted: IndexVec<Promoted, Body<'tcx>> = input_promoted.clone();
+    let free_regions =
+        nll::replace_regions_in_mir(infcx, def_id, param_env, &mut body, &mut promoted);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let body = &body; // no further changes
     let location_table = &LocationTable::new(body);
 
@@ -159,8 +184,8 @@ fn do_mir_borrowck<'a, 'tcx>(
         };
 
     let mdpe = MoveDataParamEnv {
-        move_data: move_data,
-        param_env: param_env,
+        move_data,
+        param_env,
     };
 
     let dead_unwinds = BitSet::new_empty(body.basic_blocks().len());
@@ -184,6 +209,10 @@ fn do_mir_borrowck<'a, 'tcx>(
         def_id,
         free_regions,
         body,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        &promoted,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         &upvars,
         location_table,
         param_env,
@@ -253,7 +282,14 @@ fn do_mir_borrowck<'a, 'tcx>(
         move_error_reported: BTreeMap::new(),
         uninitialized_error_reported: Default::default(),
         errors_buffer,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         disable_error_downgrading: false,
+=======
+        // Only downgrade errors on Rust 2015 and refuse to do so on Rust 2018.
+        // FIXME(Centril): In Rust 1.40.0, refuse doing so on 2015 as well and
+        // proceed to throwing out the migration infrastructure.
+        disable_error_downgrading: body.span.rust_2018(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         nonlexical_regioncx: regioncx,
         used_mut: Default::default(),
         used_mut_upvars: SmallVec::new(),
@@ -393,7 +429,7 @@ fn do_mir_borrowck<'a, 'tcx>(
         }
 
         for diag in mbcx.errors_buffer.drain(..) {
-            DiagnosticBuilder::new_diagnostic(mbcx.infcx.tcx.sess.diagnostic(), diag).emit();
+            mbcx.infcx.tcx.sess.diagnostic().emit_diagnostic(&diag);
         }
     }
 
@@ -537,7 +573,7 @@ impl<'cx, 'tcx> DataflowResultsConsumer<'cx, 'tcx> for MirBorrowckCtxt<'cx, 'tcx
         self.check_activations(location, span, flow_state);
 
         match stmt.kind {
-            StatementKind::Assign(ref lhs, ref rhs) => {
+            StatementKind::Assign(box(ref lhs, ref rhs)) => {
                 self.consume_rvalue(
                     location,
                     (rhs, span),
@@ -552,7 +588,7 @@ impl<'cx, 'tcx> DataflowResultsConsumer<'cx, 'tcx> for MirBorrowckCtxt<'cx, 'tcx
                     flow_state,
                 );
             }
-            StatementKind::FakeRead(_, ref place) => {
+            StatementKind::FakeRead(_, box ref place) => {
                 // Read for match doesn't access any memory and is used to
                 // assert that a place is safe and live. So we don't have to
                 // do any checks here.
@@ -896,7 +932,11 @@ enum InitializationRequiringAction {
 
 struct RootPlace<'d, 'tcx> {
     place_base: &'d PlaceBase<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     place_projection: &'d Option<Box<Projection<'tcx>>>,
+=======
+    place_projection: &'d [PlaceElem<'tcx>],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     is_local_mutation_allowed: LocalMutationIsAllowed,
 }
 
@@ -1182,7 +1222,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         // before (at this point in the flow).
         if let Place {
             base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             projection: None,
+=======
+            projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } = place_span.0 {
             if let Mutability::Not = self.body.local_decls[*local].mutability {
                 // check for reassignments to immutable local variables
@@ -1322,6 +1366,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
     fn propagate_closure_used_mut_upvar(&mut self, operand: &Operand<'tcx>) {
         let propagate_closure_used_mut_place = |this: &mut Self, place: &Place<'tcx>| {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if place.projection.is_some() {
                 if let Some(field) = this.is_upvar_field_projection(place.as_ref()) {
                     this.used_mut_upvars.push(field);
@@ -1379,6 +1424,65 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 debug!("temporary assigned in: stmt={:?}", stmt);
 
                 if let StatementKind::Assign(_, box Rvalue::Ref(_, _, ref source)) = stmt.kind {
+=======
+            if !place.projection.is_empty() {
+                if let Some(field) = this.is_upvar_field_projection(place.as_ref()) {
+                    this.used_mut_upvars.push(field);
+                }
+            } else if let PlaceBase::Local(local) = place.base {
+                this.used_mut.insert(local);
+            }
+        };
+
+        // This relies on the current way that by-value
+        // captures of a closure are copied/moved directly
+        // when generating MIR.
+        match *operand {
+            Operand::Move(Place {
+                base: PlaceBase::Local(local),
+                projection: box [],
+            }) |
+            Operand::Copy(Place {
+                base: PlaceBase::Local(local),
+                projection: box [],
+            }) if self.body.local_decls[local].is_user_variable.is_none() => {
+                if self.body.local_decls[local].ty.is_mutable_ptr() {
+                    // The variable will be marked as mutable by the borrow.
+                    return;
+                }
+                // This is an edge case where we have a `move` closure
+                // inside a non-move closure, and the inner closure
+                // contains a mutation:
+                //
+                // let mut i = 0;
+                // || { move || { i += 1; }; };
+                //
+                // In this case our usual strategy of assuming that the
+                // variable will be captured by mutable reference is
+                // wrong, since `i` can be copied into the inner
+                // closure from a shared reference.
+                //
+                // As such we have to search for the local that this
+                // capture comes from and mark it as being used as mut.
+
+                let temp_mpi = self.move_data.rev_lookup.find_local(local);
+                let init = if let [init_index] = *self.move_data.init_path_map[temp_mpi] {
+                    &self.move_data.inits[init_index]
+                } else {
+                    bug!("temporary should be initialized exactly once")
+                };
+
+                let loc = match init.location {
+                    InitLocation::Statement(stmt) => stmt,
+                    _ => bug!("temporary initialized in arguments"),
+                };
+
+                let bbd = &self.body[loc.block];
+                let stmt = &bbd.statements[loc.statement_index];
+                debug!("temporary assigned in: stmt={:?}", stmt);
+
+                if let StatementKind::Assign(box(_, Rvalue::Ref(_, _, ref source))) = stmt.kind {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     propagate_closure_used_mut_place(self, source);
                 } else {
                     bug!("closures should only capture user variables \
@@ -1459,16 +1563,27 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         //
         // FIXME: allow thread-locals to borrow other thread locals?
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         assert!(root_place.projection.is_none());
         let (might_be_alive, will_be_dropped) = match root_place.base {
             PlaceBase::Static(box Static {
                 kind: StaticKind::Promoted(_),
+=======
+        assert!(root_place.projection.is_empty());
+        let (might_be_alive, will_be_dropped) = match root_place.base {
+            PlaceBase::Static(box Static {
+                kind: StaticKind::Promoted(..),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ..
             }) => {
                 (true, false)
             }
             PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 kind: StaticKind::Static(_),
+=======
+                kind: StaticKind::Static,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ..
             }) => {
                 // Thread-locals might be dropped after the function exits, but
@@ -1747,6 +1862,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         flow_state: &Flows<'cx, 'tcx>,
     ) {
         debug!("check_if_assigned_path_is_moved place: {:?}", place);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // recur down place; dispatch to external checks when necessary
         let mut place_projection = &place.projection;
 
@@ -1770,6 +1886,31 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         (PlaceRef {
                             base: &place.base,
                             projection: base,
+=======
+
+        // None case => assigning to `x` does not require `x` be initialized.
+        let mut cursor = &*place.projection;
+        while let [proj_base @ .., elem] = cursor {
+            cursor = proj_base;
+
+            match elem {
+                ProjectionElem::Index(_/*operand*/) |
+                ProjectionElem::ConstantIndex { .. } |
+                // assigning to P[i] requires P to be valid.
+                ProjectionElem::Downcast(_/*adt_def*/, _/*variant_idx*/) =>
+                // assigning to (P->variant) is okay if assigning to `P` is okay
+                //
+                // FIXME: is this true even if P is a adt with a dtor?
+                { }
+
+                // assigning to (*P) requires P to be initialized
+                ProjectionElem::Deref => {
+                    self.check_if_full_path_is_moved(
+                        location, InitializationRequiringAction::Use,
+                        (PlaceRef {
+                            base: &place.base,
+                            projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         }, span), flow_state);
                     // (base initialized; no need to
                     // recur further)
@@ -1786,6 +1927,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                     // assigning to `P.f` requires `P` itself
                     // be already initialized
                     let tcx = self.infcx.tcx;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let base_ty = Place::ty_from(&place.base, base, self.body, tcx).ty;
                     match base_ty.sty {
                         ty::Adt(def, _) if def.has_dtor(tcx) => {
@@ -1794,6 +1936,16 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                                 (PlaceRef {
                                     base: &place.base,
                                     projection: base,
+=======
+                    let base_ty = Place::ty_from(&place.base, proj_base, self.body, tcx).ty;
+                    match base_ty.sty {
+                        ty::Adt(def, _) if def.has_dtor(tcx) => {
+                            self.check_if_path_or_subpath_is_moved(
+                                location, InitializationRequiringAction::Assignment,
+                                (PlaceRef {
+                                    base: &place.base,
+                                    projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                 }, span), flow_state);
 
                             // (base initialized; no need to
@@ -1806,7 +1958,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         ty::Adt(..) | ty::Tuple(..) => {
                             check_parent_of_field(self, location, PlaceRef {
                                 base: &place.base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: base,
+=======
+                                projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             }, span, flow_state);
 
                             if let PlaceBase::Local(local) = place.base {
@@ -2075,7 +2231,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         match root_place {
             RootPlace {
                 place_base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 place_projection: None,
+=======
+                place_projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 is_local_mutation_allowed,
             } => {
                 // If the local may have been initialized, and it is now currently being
@@ -2094,7 +2254,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             } => {}
             RootPlace {
                 place_base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 place_projection: place_projection @ Some(_),
+=======
+                place_projection: place_projection @ [.., _],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 is_local_mutation_allowed: _,
             } => {
                 if let Some(field) = self.is_upvar_field_projection(PlaceRef {
@@ -2106,7 +2270,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             }
             RootPlace {
                 place_base: PlaceBase::Static(..),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 place_projection: None,
+=======
+                place_projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 is_local_mutation_allowed: _,
             } => {}
         }
@@ -2122,7 +2290,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         match place {
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 let local = &self.body.local_decls[*local];
                 match local.mutability {
@@ -2150,10 +2322,17 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             // `Place::Promoted` if the promotion weren't 100% legal. So we just forward this
             PlaceRef {
                 base: PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     kind: StaticKind::Promoted(_),
                     ..
                 }),
                 projection: None,
+=======
+                    kind: StaticKind::Promoted(..),
+                    ..
+                }),
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } =>
                 Ok(RootPlace {
                     place_base: place.base,
@@ -2162,10 +2341,18 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 }),
             PlaceRef {
                 base: PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     kind: StaticKind::Static(def_id),
                     ..
                 }),
                 projection: None,
+=======
+                    kind: StaticKind::Static,
+                    def_id,
+                    ..
+                }),
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 if !self.infcx.tcx.is_mutable_static(*def_id) {
                     Err(place)
@@ -2179,12 +2366,22 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             }
             PlaceRef {
                 base: _,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(proj),
             } => {
                 match proj.elem {
+=======
+                projection: [proj_base @ .., elem],
+            } => {
+                match elem {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     ProjectionElem::Deref => {
                         let base_ty =
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             Place::ty_from(place.base, &proj.base, self.body, self.infcx.tcx).ty;
+=======
+                            Place::ty_from(place.base, proj_base, self.body, self.infcx.tcx).ty;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                         // Check the kind of deref to decide
                         match base_ty.sty {
@@ -2206,7 +2403,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
                                         self.is_mutable(PlaceRef {
                                             base: place.base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                             projection: &proj.base,
+=======
+                                            projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                         }, mode)
                                     }
                                 }
@@ -2230,7 +2431,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                             _ if base_ty.is_box() => {
                                 self.is_mutable(PlaceRef {
                                     base: place.base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                     projection: &proj.base,
+=======
+                                    projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                 }, is_local_mutation_allowed)
                             }
                             // Deref should only be for reference, pointers or boxes
@@ -2287,7 +2492,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                                     // ```
                                     let _ = self.is_mutable(PlaceRef {
                                         base: place.base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                         projection: &proj.base,
+=======
+                                        projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                     }, is_local_mutation_allowed)?;
                                     Ok(RootPlace {
                                         place_base: place.base,
@@ -2299,7 +2508,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         } else {
                             self.is_mutable(PlaceRef {
                                 base: place.base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: &proj.base,
+=======
+                                projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             }, is_local_mutation_allowed)
                         }
                     }
@@ -2316,6 +2529,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         let mut place_projection = place_ref.projection;
         let mut by_ref = false;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if let Some(box Projection {
             base,
             elem: ProjectionElem::Deref,
@@ -2331,6 +2545,17 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             }) => {
                 let tcx = self.infcx.tcx;
                 let base_ty = Place::ty_from(place_ref.base, &base, self.body, tcx).ty;
+=======
+        if let [proj_base @ .., ProjectionElem::Deref] = place_projection {
+            place_projection = proj_base;
+            by_ref = true;
+        }
+
+        match place_projection {
+            [base @ .., ProjectionElem::Field(field, _ty)] => {
+                let tcx = self.infcx.tcx;
+                let base_ty = Place::ty_from(place_ref.base, base, self.body, tcx).ty;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                 if (base_ty.is_closure() || base_ty.is_generator()) &&
                     (!by_ref || self.upvars[field.index()].by_ref) {

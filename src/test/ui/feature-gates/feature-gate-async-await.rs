@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // edition:2018
 
 struct S;
@@ -16,3 +17,5 @@ async fn foo() {} //~ ERROR async fn is unstable
 fn main() {
     let _ = async {}; //~ ERROR async blocks are unstable
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

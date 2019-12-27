@@ -30,7 +30,10 @@ fn digits(x: u8) -> u32 {
         OneDigit::FIRST..=OneDigit::LAST => 1,
         TwoDigits::FIRST..=TwoDigits::LAST => 2,
         ThreeDigits::FIRST..=ThreeDigits::LAST => 3,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         _ => unreachable!(),
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 

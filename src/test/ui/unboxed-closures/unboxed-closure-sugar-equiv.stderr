@@ -1,6 +1,7 @@
 error[E0277]: the trait bound `dyn Foo<(char,), Output = ()>: Eq<dyn Foo<(), Output = ()>>` is not satisfied
   --> $DIR/unboxed-closure-sugar-equiv.rs:43:5
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL | /     eq::< dyn Foo<(),Output=()>,
 LL | |           dyn Foo(char)                                               >();
    | |_______________________________________________________________________^ the trait `Eq<dyn Foo<(), Output = ()>>` is not implemented for `dyn Foo<(char,), Output = ()>`
@@ -10,6 +11,14 @@ note: required by `eq`
    |
 LL | fn eq<A: ?Sized,B: ?Sized +Eq<A>>() { }
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+=======
+LL |   fn eq<A: ?Sized,B: ?Sized +Eq<A>>() { }
+   |      --                      ----- required by this bound in `eq`
+...
+LL | /     eq::< dyn Foo<(),Output=()>,
+LL | |           dyn Foo(char)                                               >();
+   | |_______________________________________________________________________^ the trait `Eq<dyn Foo<(), Output = ()>>` is not implemented for `dyn Foo<(char,), Output = ()>`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

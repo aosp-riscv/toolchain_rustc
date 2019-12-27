@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // build-pass (FIXME(62277): could be check-pass?)
 // compile-flags: --test
 
@@ -34,3 +35,5 @@ fn test4() {
 fn test5() {
     panic!();
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

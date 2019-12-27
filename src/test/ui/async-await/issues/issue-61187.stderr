@@ -1,5 +1,9 @@
 error[E0596]: cannot borrow `data` as mutable, as it is not declared as mutable
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/issue-61187.rs:8:5
+=======
+  --> $DIR/issue-61187.rs:6:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | async fn response(data: Vec<u8>) {
    |                   ---- help: consider changing this to be mutable: `mut data`

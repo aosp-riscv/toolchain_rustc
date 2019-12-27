@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // ignore-tidy-filelength
 
 use crate::ast::{AngleBracketedArgs, ParenthesizedArgs, AttrStyle, BareFnTy};
@@ -37,69 +38,61 @@ use crate::ext::base::DummyResult;
 use crate::ext::hygiene::SyntaxContext;
 use crate::source_map::{self, SourceMap, Spanned, respan};
 use crate::parse::{SeqSep, classify, literal, token};
+=======
+mod expr;
+mod pat;
+mod item;
+pub use item::AliasKind;
+mod module;
+pub use module::{ModulePath, ModulePathSuccess};
+mod ty;
+mod path;
+pub use path::PathStyle;
+mod stmt;
+mod generics;
+
+use crate::ast::{
+    self, DUMMY_NODE_ID, AttrStyle, Attribute, BindingMode, CrateSugar, FnDecl, Ident,
+    IsAsync, MacDelimiter, Mutability, Param, StrStyle, SelfKind, TyKind, Visibility,
+    VisibilityKind, Unsafety,
+};
+use crate::parse::{ParseSess, PResult, Directory, DirectoryOwnership, SeqSep, literal, token};
+use crate::parse::diagnostics::{Error, dummy_arg};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::parse::lexer::UnmatchedBrace;
 use crate::parse::lexer::comments::{doc_comment_style, strip_doc_comment_decoration};
 use crate::parse::token::{Token, TokenKind, DelimToken};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::parse::{new_sub_parser_from_file, ParseSess, Directory, DirectoryOwnership};
 use crate::util::parser::{AssocOp, Fixity, prec_let_scrutinee_needs_par};
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::print::pprust;
 use crate::ptr::P;
-use crate::parse::PResult;
-use crate::ThinVec;
+use crate::source_map::{self, respan};
+use crate::symbol::{kw, sym, Symbol};
 use crate::tokenstream::{self, DelimSpan, TokenTree, TokenStream, TreeAndJoint};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::symbol::{kw, sym, Symbol};
 use crate::parse::diagnostics::{Error, dummy_arg};
+=======
+use crate::ThinVec;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-use errors::{Applicability, DiagnosticBuilder, DiagnosticId, FatalError};
+use errors::{Applicability, DiagnosticId, FatalError};
 use rustc_target::spec::abi::{self, Abi};
 use syntax_pos::{Span, BytePos, DUMMY_SP, FileName};
 use log::debug;
 
 use std::borrow::Cow;
-use std::cmp;
-use std::mem;
-use std::path::{self, Path, PathBuf};
-use std::slice;
-
-#[derive(Debug)]
-/// Whether the type alias or associated type is a concrete type or an existential type
-pub enum AliasKind {
-    /// Just a new name for the same type
-    Weak(P<Ty>),
-    /// Only trait impls of the type will be usable, not the actual type itself
-    Existential(GenericBounds),
-}
+use std::{cmp, mem, slice};
+use std::path::PathBuf;
 
 bitflags::bitflags! {
     struct Restrictions: u8 {
         const STMT_EXPR         = 1 << 0;
         const NO_STRUCT_LITERAL = 1 << 1;
     }
-}
-
-type ItemInfo = (Ident, ItemKind, Option<Vec<Attribute>>);
-
-/// Specifies how to parse a path.
-#[derive(Copy, Clone, PartialEq)]
-pub enum PathStyle {
-    /// In some contexts, notably in expressions, paths with generic arguments are ambiguous
-    /// with something else. For example, in expressions `segment < ....` can be interpreted
-    /// as a comparison and `segment ( ....` can be interpreted as a function call.
-    /// In all such contexts the non-path interpretation is preferred by default for practical
-    /// reasons, but the path interpretation can be forced by the disambiguator `::`, e.g.
-    /// `x<y>` - comparisons, `x::<y>` - unambiguously a path.
-    Expr,
-    /// In other contexts, notably in types, no ambiguity exists and paths can be written
-    /// without the disambiguator, e.g., `x<y>` - unambiguously a path.
-    /// Paths with disambiguators are still accepted, `x::<Y>` - unambiguously a path too.
-    Type,
-    /// A path with generic arguments disallowed, e.g., `foo::bar::Baz`, used in imports,
-    /// visibilities or attributes.
-    /// Technically, this variant is unnecessary and e.g., `Expr` can be used instead
-    /// (paths in "mod" contexts have to be checked later for absence of generic arguments
-    /// anyway, due to macros), but it is used to avoid weird suggestions about expected
-    /// tokens when something goes wrong.
-    Mod,
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
@@ -115,6 +108,7 @@ crate enum BlockMode {
     Ignore,
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// Possibly accepts an `token::Interpolated` expression (a pre-parsed expression
 /// dropped into the token stream, which happens while parsing the result of
 /// macro expansion). Placement of these is not as complex as I feared it would
@@ -151,6 +145,10 @@ macro_rules! maybe_whole_expr {
 }
 
 /// As maybe_whole_expr, but for things other than expressions
+=======
+/// Like `maybe_whole_expr`, but for things other than expressions.
+#[macro_export]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 macro_rules! maybe_whole {
     ($p:expr, $constructor:ident, |$x:ident| $e:expr) => {
         if let token::Interpolated(nt) = &$p.token.kind {
@@ -164,6 +162,10 @@ macro_rules! maybe_whole {
 }
 
 /// If the next tokens are ill-formed `$ty::` recover them as `<$ty>::`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#[macro_export]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 macro_rules! maybe_recover_from_interpolated_ty_qpath {
     ($self: expr, $allow_qpath_recovery: expr) => {
         if $allow_qpath_recovery && $self.look_ahead(1, |t| t == &token::ModSep) {
@@ -208,11 +210,23 @@ pub struct Parser<'a> {
     /// with non-interpolated identifier and lifetime tokens they refer to.
     /// Perhaps the normalized / non-normalized setup can be simplified somehow.
     pub token: Token,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Span of the current non-normalized token.
+=======
+    /// The span of the current non-normalized token.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     meta_var_span: Option<Span>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Span of the previous non-normalized token.
+=======
+    /// The span of the previous non-normalized token.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub prev_span: Span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Kind of the previous normalized token (in simplified form).
+=======
+    /// The kind of the previous normalized token (in simplified form).
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     prev_token_kind: PrevTokenKind,
     restrictions: Restrictions,
     /// Used to determine the path to externally loaded source files.
@@ -235,7 +249,7 @@ pub struct Parser<'a> {
     /// See the comments in the `parse_path_segment` function for more details.
     crate unmatched_angle_bracket_count: u32,
     crate max_angle_bracket_count: u32,
-    /// List of all unclosed delimiters found by the lexer. If an entry is used for error recovery
+    /// A list of all unclosed delimiters found by the lexer. If an entry is used for error recovery
     /// it gets removed from here. Every entry left at the end gets emitted as an independent
     /// error.
     crate unclosed_delims: Vec<UnmatchedBrace>,
@@ -415,6 +429,7 @@ impl TokenType {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// Returns `true` if `IDENT t` can start a type -- `IDENT::a::b`, `IDENT<u8, u8>`,
 /// `IDENT<<u8 as Trait>::AssocTy>`.
 ///
@@ -461,6 +476,8 @@ impl From<P<Expr>> for LhsExpr {
     }
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[derive(Copy, Clone, Debug)]
 crate enum TokenExpectType {
     Expect,
@@ -513,10 +530,18 @@ impl<'a> Parser<'a> {
         if let Some(directory) = directory {
             parser.directory = directory;
         } else if !parser.token.span.is_dummy() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if let FileName::Real(mut path) =
                     sess.source_map().span_to_unmapped_path(parser.token.span) {
                 path.pop();
                 parser.directory.path = Cow::from(path);
+=======
+            if let Some(FileName::Real(path)) =
+                    &sess.source_map().lookup_char_pos(parser.token.span.lo()).file.unmapped_path {
+                if let Some(directory_path) = path.parent() {
+                    parser.directory.path = Cow::from(directory_path.to_path_buf());
+                }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
 
@@ -602,6 +627,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Returns the span of expr, if it was not interpolated or the span of the interpolated token.
     fn interpolated_or_expr_span(
         &self,
@@ -616,6 +642,8 @@ impl<'a> Parser<'a> {
         })
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn parse_ident(&mut self) -> PResult<'a, ast::Ident> {
         self.parse_ident_common(true)
     }
@@ -754,7 +782,6 @@ impl<'a> Parser<'a> {
             _ => false,
         }
     }
-
 
     /// Checks to see if the next token is either `+` or `+=`.
     /// Otherwise returns `false`.
@@ -951,14 +978,14 @@ impl<'a> Parser<'a> {
                             break;
                         }
                         Err(mut e) => {
-                            // Attempt to keep parsing if it was a similar separator
+                            // Attempt to keep parsing if it was a similar separator.
                             if let Some(ref tokens) = t.similar_tokens() {
                                 if tokens.contains(&self.token.kind) {
                                     self.bump();
                                 }
                             }
                             e.emit();
-                            // Attempt to keep parsing if it was an omitted separator
+                            // Attempt to keep parsing if it was an omitted separator.
                             match f(self) {
                                 Ok(t) => {
                                     v.push(t);
@@ -1001,6 +1028,29 @@ impl<'a> Parser<'a> {
             self.eat(ket);
         }
         Ok((result, trailing))
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+    }
+
+    fn parse_delim_comma_seq<T>(
+        &mut self,
+        delim: DelimToken,
+        f: impl FnMut(&mut Parser<'a>) -> PResult<'a, T>,
+    ) -> PResult<'a, (Vec<T>, bool)> {
+        self.parse_unspanned_seq(
+            &token::OpenDelim(delim),
+            &token::CloseDelim(delim),
+            SeqSep::trailing_allowed(token::Comma),
+            f,
+        )
+    }
+
+    fn parse_paren_comma_seq<T>(
+        &mut self,
+        f: impl FnMut(&mut Parser<'a>) -> PResult<'a, T>,
+    ) -> PResult<'a, (Vec<T>, bool)> {
+        self.parse_delim_comma_seq(token::Paren, f)
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn parse_delim_comma_seq<T>(
@@ -1023,7 +1073,7 @@ impl<'a> Parser<'a> {
         self.parse_delim_comma_seq(token::Paren, f)
     }
 
-    /// Advance the parser by one token
+    /// Advance the parser by one token.
     pub fn bump(&mut self) {
         if self.prev_token_kind == PrevTokenKind::Eof {
             // Bumping after EOF is a bad sign, usually an infinite loop.
@@ -1046,17 +1096,17 @@ impl<'a> Parser<'a> {
 
         self.token = self.next_tok();
         self.expected_tokens.clear();
-        // check after each token
+        // Check after each token.
         self.process_potential_macro_variable();
     }
 
-    /// Advance the parser using provided token as a next one. Use this when
+    /// Advances the parser using provided token as a next one. Use this when
     /// consuming a part of a token. For example a single `<` from `<<`.
     fn bump_with(&mut self, next: TokenKind, span: Span) {
         self.prev_span = self.token.span.with_hi(span.lo());
         // It would be incorrect to record the kind of the current token, but
         // fortunately for tokens currently using `bump_with`, the
-        // prev_token_kind will be of no use anyway.
+        // `prev_token_kind` will be of no use anyway.
         self.prev_token_kind = PrevTokenKind::Other;
         self.token = Token::new(next, span);
         self.expected_tokens.clear();
@@ -1083,6 +1133,7 @@ impl<'a> Parser<'a> {
     /// Returns whether any of the given keywords are `dist` tokens ahead of the current one.
     fn is_keyword_ahead(&self, dist: usize, kws: &[Symbol]) -> bool {
         self.look_ahead(dist, |t| kws.iter().any(|&kw| t.is_keyword(kw)))
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     }
 
     /// Is the current token one of the keywords that signals a bare function type?
@@ -1127,14 +1178,16 @@ impl<'a> Parser<'a> {
             generic_params,
             decl,
         })))
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Parses asyncness: `async` or nothing.
     fn parse_asyncness(&mut self) -> IsAsync {
         if self.eat_keyword(kw::Async) {
             IsAsync::Async {
-                closure_id: ast::DUMMY_NODE_ID,
-                return_impl_trait_id: ast::DUMMY_NODE_ID,
+                closure_id: DUMMY_NODE_ID,
+                return_impl_trait_id: DUMMY_NODE_ID,
             }
         } else {
             IsAsync::NotAsync
@@ -1150,6 +1203,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parses the items in a trait declaration.
     pub fn parse_trait_item(&mut self, at_end: &mut bool) -> PResult<'a, TraitItem> {
         maybe_whole!(self, NtTraitItem, |x| x);
@@ -1489,6 +1543,8 @@ impl<'a> Parser<'a> {
         Ok(MutTy { ty: t, mutbl })
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn is_named_argument(&self) -> bool {
         let offset = match self.token.kind {
             token::Interpolated(ref nt) => match **nt {
@@ -1506,6 +1562,7 @@ impl<'a> Parser<'a> {
 
     /// Skips unexpected attributes and doc comments in this position and emits an appropriate
     /// error.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// This version of parse arg doesn't necessarily require identifier names.
     fn parse_arg_general<F>(
         &mut self,
@@ -1521,15 +1578,39 @@ impl<'a> Parser<'a> {
         if let Some(mut arg) = self.parse_self_arg()? {
             arg.attrs = attrs.into();
             return self.recover_bad_self_arg(arg, is_trait_item);
+=======
+    /// This version of parse param doesn't necessarily require identifier names.
+    fn parse_param_general(
+        &mut self,
+        is_trait_item: bool,
+        allow_c_variadic: bool,
+        is_name_required: impl Fn(&token::Token) -> bool,
+    ) -> PResult<'a, Param> {
+        let lo = self.token.span;
+        let attrs = self.parse_param_attributes()?;
+        if let Some(mut param) = self.parse_self_param()? {
+            param.attrs = attrs.into();
+            return self.recover_bad_self_param(param, is_trait_item);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
 
         let is_name_required = is_name_required(&self.token);
         let (pat, ty) = if is_name_required || self.is_named_argument() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             debug!("parse_arg_general parse_pat (is_name_required:{})", is_name_required);
 
             let pat = self.parse_pat(Some("argument name"))?;
+=======
+            debug!("parse_param_general parse_pat (is_name_required:{})", is_name_required);
+
+            let pat = self.parse_fn_param_pat()?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             if let Err(mut err) = self.expect(&token::Colon) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if let Some(ident) = self.argument_without_type(
+=======
+                if let Some(ident) = self.parameter_without_type(
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     &mut err,
                     pat,
                     is_name_required,
@@ -1542,12 +1623,20 @@ impl<'a> Parser<'a> {
                 }
             }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             self.eat_incorrect_doc_comment_for_arg_type();
+=======
+            self.eat_incorrect_doc_comment_for_param_type();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             (pat, self.parse_ty_common(true, true, allow_c_variadic)?)
         } else {
-            debug!("parse_arg_general ident_to_pat");
+            debug!("parse_param_general ident_to_pat");
             let parser_snapshot_before_ty = self.clone();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             self.eat_incorrect_doc_comment_for_arg_type();
+=======
+            self.eat_incorrect_doc_comment_for_param_type();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let mut ty = self.parse_ty_common(true, true, allow_c_variadic);
             if ty.is_ok() && self.token != token::Comma &&
                self.token != token::CloseDelim(token::Paren) {
@@ -1558,12 +1647,17 @@ impl<'a> Parser<'a> {
             match ty {
                 Ok(ty) => {
                     let ident = Ident::new(kw::Invalid, self.prev_span);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let pat = P(Pat {
                         id: ast::DUMMY_NODE_ID,
                         node: PatKind::Ident(
                             BindingMode::ByValue(Mutability::Immutable), ident, None),
                         span: ty.span,
                     });
+=======
+                    let bm = BindingMode::ByValue(Mutability::Immutable);
+                    let pat = self.mk_pat_ident(ty.span, bm, ident);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     (pat, ty)
                 }
                 Err(mut err) => {
@@ -1582,6 +1676,7 @@ impl<'a> Parser<'a> {
 
         let span = lo.to(self.token.span);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Ok(Arg { attrs: attrs.into(), id: ast::DUMMY_NODE_ID, pat, span, ty })
     }
 
@@ -1865,6 +1960,9 @@ impl<'a> Parser<'a> {
         } else {
             None
         }
+=======
+        Ok(Param { attrs: attrs.into(), id: DUMMY_NODE_ID, pat, span, ty })
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Parses mutability (`mut` or nothing).
@@ -1887,6 +1985,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parse ident (COLON expr)?
     fn parse_field(&mut self) -> PResult<'a, Field> {
         let attrs = self.parse_outer_attributes()?;
@@ -1967,6 +2066,8 @@ impl<'a> Parser<'a> {
         ExprKind::AssignOp(binop, lhs, rhs)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn expect_delimited_token_tree(&mut self) -> PResult<'a, (MacDelimiter, TokenStream)> {
         let delim = match self.token.kind {
             token::OpenDelim(delim) => delim,
@@ -1990,6 +2091,7 @@ impl<'a> Parser<'a> {
         Ok((delim, tts.into()))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// At the bottom (top?) of the precedence hierarchy,
     /// Parses things like parenthesized exprs, macros, `return`, etc.
     ///
@@ -2418,6 +2520,8 @@ impl<'a> Parser<'a> {
         return Ok(self.mk_expr(span, ExprKind::Struct(pth, fields, base), attrs));
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn parse_or_use_outer_attributes(&mut self,
                                      already_parsed_attrs: Option<ThinVec<Attribute>>)
                                      -> PResult<'a, ThinVec<Attribute>> {
@@ -2428,6 +2532,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parses a block or unsafe block.
     crate fn parse_block_expr(
         &mut self,
@@ -2617,9 +2722,15 @@ impl<'a> Parser<'a> {
         self.parse_paren_comma_seq(|p| p.parse_expr()).map(|(r, _)| r)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     crate fn process_potential_macro_variable(&mut self) {
         self.token = match self.token.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             token::Dollar if self.token.span.ctxt() != SyntaxContext::empty() &&
+=======
+            token::Dollar if self.token.span.from_expansion() &&
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                              self.look_ahead(1, |t| t.is_ident()) => {
                 self.bump();
                 let name = match self.token.kind {
@@ -2693,6 +2804,7 @@ impl<'a> Parser<'a> {
         TokenStream::new(result)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parse a prefix-unary-operator expr
     fn parse_prefix_expr(&mut self,
                              already_parsed_attrs: Option<ThinVec<Attribute>>)
@@ -3464,6 +3576,8 @@ impl<'a> Parser<'a> {
         self.parse_expr_res(Restrictions::empty(), None)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Evaluates the closure with restrictions in place.
     ///
     /// Afters the closure is evaluated, restrictions are reset.
@@ -3478,6 +3592,7 @@ impl<'a> Parser<'a> {
 
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parses an expression, subject to the given restrictions.
     #[inline]
     fn parse_expr_res(&mut self, r: Restrictions,
@@ -5312,17 +5427,30 @@ impl<'a> Parser<'a> {
 
     fn parse_fn_args(&mut self, named_args: bool, allow_c_variadic: bool)
                      -> PResult<'a, (Vec<Arg> , bool)> {
+=======
+    fn parse_fn_params(&mut self, named_params: bool, allow_c_variadic: bool)
+                     -> PResult<'a, (Vec<Param> , bool)> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let sp = self.token.span;
         let mut c_variadic = false;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let (args, _): (Vec<Option<Arg>>, _) = self.parse_paren_comma_seq(|p| {
+=======
+        let (params, _): (Vec<Option<Param>>, _) = self.parse_paren_comma_seq(|p| {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let do_not_enforce_named_arguments_for_c_variadic =
                 |token: &token::Token| -> bool {
                     if token == &token::DotDotDot {
                         false
                     } else {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         named_args
+=======
+                        named_params
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     }
                 };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             match p.parse_arg_general(
                 false,
                 allow_c_variadic,
@@ -5341,6 +5469,26 @@ impl<'a> Parser<'a> {
                         }
                     } else {
                         Ok(Some(arg))
+=======
+            match p.parse_param_general(
+                false,
+                allow_c_variadic,
+                do_not_enforce_named_arguments_for_c_variadic
+            ) {
+                Ok(param) => {
+                    if let TyKind::CVarArgs = param.ty.node {
+                        c_variadic = true;
+                        if p.token != token::CloseDelim(token::Paren) {
+                            let span = p.token.span;
+                            p.span_err(span,
+                                "`...` must be the last argument of a C-variadic function");
+                            Ok(None)
+                        } else {
+                            Ok(Some(param))
+                        }
+                    } else {
+                        Ok(Some(param))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     }
                 },
                 Err(mut e) => {
@@ -5354,17 +5502,21 @@ impl<'a> Parser<'a> {
                 }
             }
         })?;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 
-        let args: Vec<_> = args.into_iter().filter_map(|x| x).collect();
+        let params: Vec<_> = params.into_iter().filter_map(|x| x).collect();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-        if c_variadic && args.is_empty() {
+        if c_variadic && params.len() <= 1 {
             self.span_err(sp,
                           "C-variadic function must be declared with at least one named argument");
         }
 
-        Ok((args, c_variadic))
+        Ok((params, c_variadic))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parses the argument list and result type of a function declaration.
     fn parse_fn_decl(&mut self, allow_c_variadic: bool) -> PResult<'a, P<FnDecl>> {
         let (args, c_variadic) = self.parse_fn_args(true, allow_c_variadic)?;
@@ -5381,6 +5533,12 @@ impl<'a> Parser<'a> {
     ///
     /// See `parse_self_arg_with_attrs` to collect attributes.
     fn parse_self_arg(&mut self) -> PResult<'a, Option<Arg>> {
+=======
+    /// Returns the parsed optional self parameter and whether a self shortcut was used.
+    ///
+    /// See `parse_self_param_with_attrs` to collect attributes.
+    fn parse_self_param(&mut self) -> PResult<'a, Option<Param>> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let expect_ident = |this: &mut Self| match this.token.kind {
             // Preserve hygienic context.
             token::Ident(name, _) =>
@@ -5485,6 +5643,7 @@ impl<'a> Parser<'a> {
         };
 
         let eself = source_map::respan(eself_lo.to(eself_hi), eself);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Ok(Some(Arg::from_self(ThinVec::default(), eself, eself_ident)))
     }
 
@@ -5496,38 +5655,71 @@ impl<'a> Parser<'a> {
         Ok(arg_opt.map(|mut arg| {
             arg.attrs = attrs.into();
             arg
+=======
+        Ok(Some(Param::from_self(ThinVec::default(), eself, eself_ident)))
+    }
+
+    /// Returns the parsed optional self parameter with attributes and whether a self
+    /// shortcut was used.
+    fn parse_self_parameter_with_attrs(&mut self) -> PResult<'a, Option<Param>> {
+        let attrs = self.parse_param_attributes()?;
+        let param_opt = self.parse_self_param()?;
+        Ok(param_opt.map(|mut param| {
+            param.attrs = attrs.into();
+            param
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }))
     }
 
     /// Parses the parameter list and result type of a function that may have a `self` parameter.
-    fn parse_fn_decl_with_self<F>(&mut self, parse_arg_fn: F) -> PResult<'a, P<FnDecl>>
-        where F: FnMut(&mut Parser<'a>) -> PResult<'a,  Arg>,
+    fn parse_fn_decl_with_self<F>(&mut self, parse_param_fn: F) -> PResult<'a, P<FnDecl>>
+        where F: FnMut(&mut Parser<'a>) -> PResult<'a,  Param>,
     {
         self.expect(&token::OpenDelim(token::Paren))?;
 
         // Parse optional self argument.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let self_arg = self.parse_self_arg_with_attrs()?;
+=======
+        let self_param = self.parse_self_parameter_with_attrs()?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         // Parse the rest of the function parameter list.
         let sep = SeqSep::trailing_allowed(token::Comma);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let (mut fn_inputs, recovered) = if let Some(self_arg) = self_arg {
+=======
+        let (mut fn_inputs, recovered) = if let Some(self_param) = self_param {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             if self.check(&token::CloseDelim(token::Paren)) {
-                (vec![self_arg], false)
+                (vec![self_param], false)
             } else if self.eat(&token::Comma) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let mut fn_inputs = vec![self_arg];
                 let (mut input, _, recovered) = self.parse_seq_to_before_end(
                     &token::CloseDelim(token::Paren), sep, parse_arg_fn)?;
+=======
+                let mut fn_inputs = vec![self_param];
+                let (mut input, _, recovered) = self.parse_seq_to_before_end(
+                    &token::CloseDelim(token::Paren), sep, parse_param_fn)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 fn_inputs.append(&mut input);
                 (fn_inputs, recovered)
             } else {
                 match self.expect_one_of(&[], &[]) {
                     Err(err) => return Err(err),
-                    Ok(recovered) => (vec![self_arg], recovered),
+                    Ok(recovered) => (vec![self_param], recovered),
                 }
             }
         } else {
             let (input, _, recovered) =
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.parse_seq_to_before_end(&token::CloseDelim(token::Paren), sep, parse_arg_fn)?;
+=======
+                self.parse_seq_to_before_end(&token::CloseDelim(token::Paren),
+                                             sep,
+                                             parse_param_fn)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             (input, recovered)
         };
 
@@ -5535,8 +5727,13 @@ impl<'a> Parser<'a> {
             // Parse closing paren and return type.
             self.expect(&token::CloseDelim(token::Paren))?;
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // Replace duplicated recovered arguments with `_` pattern to avoid unecessary errors.
         self.deduplicate_recovered_arg_names(&mut fn_inputs);
+=======
+        // Replace duplicated recovered params with `_` pattern to avoid unecessary errors.
+        self.deduplicate_recovered_params_names(&mut fn_inputs);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         Ok(P(FnDecl {
             inputs: fn_inputs,
@@ -5545,6 +5742,7 @@ impl<'a> Parser<'a> {
         }))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parses the `|arg, arg|` header of a closure.
     fn parse_fn_block_decl(&mut self) -> PResult<'a, P<FnDecl>> {
         let inputs_captures = {
@@ -6214,6 +6412,10 @@ impl<'a> Parser<'a> {
         let lo = self.token.span;
         let vis = self.parse_visibility(false)?;
         self.parse_single_struct_field(lo, vis, attrs)
+=======
+    fn is_crate_vis(&self) -> bool {
+        self.token.is_keyword(kw::Crate) && self.look_ahead(1, |t| t != &token::ModSep)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Parses `pub`, `pub(crate)` and `pub(in path)` plus shortcuts `crate` for `pub(crate)`,
@@ -6298,13 +6500,18 @@ impl<'a> Parser<'a> {
                         format!("in {}", path),
                         Applicability::MachineApplicable,
                     )
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     .emit();  // emit diagnostic, but continue with public visibility
+=======
+                    .emit(); // Emit diagnostic, but continue with public visibility.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
 
         Ok(respan(lo, VisibilityKind::Public))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parses defaultness (i.e., `default` or nothing).
     fn parse_defaultness(&mut self) -> Defaultness {
         // `pub` is included for better error messages
@@ -6923,6 +7130,8 @@ impl<'a> Parser<'a> {
         Ok((id, ItemKind::Enum(enum_definition, generics), None))
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Parses a string as an ABI spec on an extern type or module. Consumes
     /// the `extern` keyword, if one is found.
     fn parse_opt_abi(&mut self) -> PResult<'a, Option<Abi>> {
@@ -6955,6 +7164,7 @@ impl<'a> Parser<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn is_static_global(&mut self) -> bool {
         if self.check_keyword(kw::Static) {
             // Check if this could be a closure
@@ -7495,7 +7705,18 @@ impl<'a> Parser<'a> {
                         vis: visibility,
                         node: ForeignItemKind::Macro(mac),
                     }
+=======
+    /// We are parsing `async fn`. If we are on Rust 2015, emit an error.
+    fn ban_async_in_2015(&self, async_span: Span) {
+        if async_span.rust_2015() {
+            self.diagnostic()
+                .struct_span_err_with_code(
+                    async_span,
+                    "`async fn` is not permitted in the 2015 edition",
+                    DiagnosticId::Error("E0670".into())
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             }
             None => {
                 if !attrs.is_empty()  {
@@ -7587,6 +7808,9 @@ impl<'a> Parser<'a> {
             Ok(Some(respan(lo.to(self.prev_span), Mac_ { path, tts, delim })))
         } else {
             Ok(None)
+=======
+                .emit();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
@@ -7659,11 +7883,6 @@ impl<'a> Parser<'a> {
         Ok((ret?, TokenStream::new(collected_tokens)))
     }
 
-    pub fn parse_item(&mut self) -> PResult<'a, Option<P<Item>>> {
-        let attrs = self.parse_outer_attributes()?;
-        self.parse_item_(attrs, true, false)
-    }
-
     /// `::{` or `::*`
     fn is_import_coupler(&mut self) -> bool {
         self.check(&token::ModSep) &&
@@ -7671,6 +7890,7 @@ impl<'a> Parser<'a> {
                                    *t == token::BinOp(token::Star))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parses a `UseTree`.
     ///
     /// ```
@@ -7747,6 +7967,8 @@ impl<'a> Parser<'a> {
         krate
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn parse_optional_str(&mut self) -> Option<(Symbol, ast::StrStyle, Option<ast::Name>)> {
         let ret = match self.token.kind {
             token::Literal(token::Lit { kind: token::Str, symbol, suffix }) =>

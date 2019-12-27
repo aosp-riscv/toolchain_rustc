@@ -3,6 +3,7 @@
 
 // edition:2018
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await)]
 
 struct S { x: i32, y: i32 }
@@ -32,6 +33,35 @@ async fn test_struct() {
     let mut t: S;
     t.x = 42;
     //~^ ERROR assign to part of possibly uninitialized variable: `t` [E0381]
+=======
+struct S { x: i32, y: i32 }
+struct T(i32, i32);
+
+async fn noop() {}
+
+async fn test_tuple() {
+    let mut t: (i32, i32);
+    t.0 = 42;
+    //~^ ERROR assign to part of possibly-uninitialized variable: `t` [E0381]
+    noop().await;
+    t.1 = 88;
+    let _ = t;
+}
+
+async fn test_tuple_struct() {
+    let mut t: T;
+    t.0 = 42;
+    //~^ ERROR assign to part of possibly-uninitialized variable: `t` [E0381]
+    noop().await;
+    t.1 = 88;
+    let _ = t;
+}
+
+async fn test_struct() {
+    let mut t: S;
+    t.x = 42;
+    //~^ ERROR assign to part of possibly-uninitialized variable: `t` [E0381]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     noop().await;
     t.y = 88;
     let _ = t;

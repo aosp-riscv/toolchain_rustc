@@ -8,7 +8,7 @@ use syntax::source_map::Spanned;
 
 use crate::utils::sugg::Sugg;
 use crate::utils::{get_trait_def_id, higher, implements_trait, SpanlessEq};
-use crate::utils::{is_integer_literal, paths, snippet, snippet_opt, span_lint, span_lint_and_then};
+use crate::utils::{is_integer_const, paths, snippet, snippet_opt, span_lint, span_lint_and_then};
 
 declare_clippy_lint! {
     /// **What it does:** Checks for calling `.step_by(0)` on iterators,
@@ -42,6 +42,14 @@ declare_clippy_lint! {
     /// ```rust
     /// # let x = vec![1];
     /// x.iter().zip(0..x.len());
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    /// ```
+    /// Could be written as
+    /// ```rust
+    /// # let x = vec![1];
+    /// x.iter().enumerate();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// ```
     pub RANGE_ZIP_WITH_LEN,
     complexity,
@@ -64,6 +72,10 @@ declare_clippy_lint! {
     /// ```rust,ignore
     /// for x..(y+1) { .. }
     /// ```
+    /// Could be written as
+    /// ```rust,ignore
+    /// for x..=y { .. }
+    /// ```
     pub RANGE_PLUS_ONE,
     complexity,
     "`x..(y+1)` reads better as `x..=y`"
@@ -81,6 +93,10 @@ declare_clippy_lint! {
     /// **Example:**
     /// ```rust,ignore
     /// for x..=(y-1) { .. }
+    /// ```
+    /// Could be written as
+    /// ```rust,ignore
+    /// for x..y { .. }
     /// ```
     pub RANGE_MINUS_ONE,
     complexity,
@@ -119,7 +135,7 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for Ranges {
                     if iter_path.ident.name == sym!(iter);
                     // range expression in `.zip()` call: `0..x.len()`
                     if let Some(higher::Range { start: Some(start), end: Some(end), .. }) = higher::range(cx, zip_arg);
-                    if is_integer_literal(start, 0);
+                    if is_integer_const(cx, start, 0);
                     // `.len()` call
                     if let ExprKind::MethodCall(ref len_path, _, ref len_args) = end.node;
                     if len_path.ident.name == sym!(len) && len_args.len() == 1;
@@ -138,6 +154,7 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for Ranges {
             }
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // exclusive range plus one: `x..(y+1)`
         if_chain! {
             if let Some(higher::Range {
@@ -180,29 +197,84 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for Ranges {
                 );
             }
         }
+=======
+        check_exclusive_range_plus_one(cx, expr);
+        check_inclusive_range_minus_one(cx, expr);
+    }
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-        // inclusive range minus one: `x..=(y-1)`
-        if_chain! {
-            if let Some(higher::Range { start, end: Some(end), limits: RangeLimits::Closed }) = higher::range(cx, expr);
-            if let Some(y) = y_minus_one(end);
-            then {
-                span_lint_and_then(
-                    cx,
-                    RANGE_MINUS_ONE,
-                    expr.span,
-                    "an exclusive range would be more readable",
-                    |db| {
-                        let start = start.map_or(String::new(), |x| Sugg::hir(cx, x, "x").to_string());
-                        let end = Sugg::hir(cx, y, "y");
-                        db.span_suggestion(
-                            expr.span,
-                            "use",
-                            format!("{}..{}", start, end),
-                            Applicability::MachineApplicable, // snippet
-                        );
-                    },
-                );
-            }
+// exclusive range plus one: `x..(y+1)`
+fn check_exclusive_range_plus_one(cx: &LateContext<'_, '_>, expr: &Expr) {
+    if_chain! {
+        if let Some(higher::Range {
+            start,
+            end: Some(end),
+            limits: RangeLimits::HalfOpen
+        }) = higher::range(cx, expr);
+        if let Some(y) = y_plus_one(cx, end);
+        then {
+            let span = if expr.span.from_expansion() {
+                expr.span
+                    .ctxt()
+                    .outer_expn_data()
+                    .call_site
+            } else {
+                expr.span
+            };
+            span_lint_and_then(
+                cx,
+                RANGE_PLUS_ONE,
+                span,
+                "an inclusive range would be more readable",
+                |db| {
+                    let start = start.map_or(String::new(), |x| Sugg::hir(cx, x, "x").to_string());
+                    let end = Sugg::hir(cx, y, "y");
+                    if let Some(is_wrapped) = &snippet_opt(cx, span) {
+                        if is_wrapped.starts_with('(') && is_wrapped.ends_with(')') {
+                            db.span_suggestion(
+                                span,
+                                "use",
+                                format!("({}..={})", start, end),
+                                Applicability::MaybeIncorrect,
+                            );
+                        } else {
+                            db.span_suggestion(
+                                span,
+                                "use",
+                                format!("{}..={}", start, end),
+                                Applicability::MachineApplicable, // snippet
+                            );
+                        }
+                    }
+                },
+            );
+        }
+    }
+}
+
+// inclusive range minus one: `x..=(y-1)`
+fn check_inclusive_range_minus_one(cx: &LateContext<'_, '_>, expr: &Expr) {
+    if_chain! {
+        if let Some(higher::Range { start, end: Some(end), limits: RangeLimits::Closed }) = higher::range(cx, expr);
+        if let Some(y) = y_minus_one(cx, end);
+        then {
+            span_lint_and_then(
+                cx,
+                RANGE_MINUS_ONE,
+                expr.span,
+                "an exclusive range would be more readable",
+                |db| {
+                    let start = start.map_or(String::new(), |x| Sugg::hir(cx, x, "x").to_string());
+                    let end = Sugg::hir(cx, y, "y");
+                    db.span_suggestion(
+                        expr.span,
+                        "use",
+                        format!("{}..{}", start, end),
+                        Applicability::MachineApplicable, // snippet
+                    );
+                },
+            );
         }
     }
 }
@@ -215,7 +287,7 @@ fn has_step_by(cx: &LateContext<'_, '_>, expr: &Expr) -> bool {
     get_trait_def_id(cx, &paths::ITERATOR).map_or(false, |iterator_trait| implements_trait(cx, ty, iterator_trait, &[]))
 }
 
-fn y_plus_one(expr: &Expr) -> Option<&Expr> {
+fn y_plus_one<'t>(cx: &LateContext<'_, '_>, expr: &'t Expr) -> Option<&'t Expr> {
     match expr.node {
         ExprKind::Binary(
             Spanned {
@@ -224,9 +296,9 @@ fn y_plus_one(expr: &Expr) -> Option<&Expr> {
             ref lhs,
             ref rhs,
         ) => {
-            if is_integer_literal(lhs, 1) {
+            if is_integer_const(cx, lhs, 1) {
                 Some(rhs)
-            } else if is_integer_literal(rhs, 1) {
+            } else if is_integer_const(cx, rhs, 1) {
                 Some(lhs)
             } else {
                 None
@@ -236,7 +308,7 @@ fn y_plus_one(expr: &Expr) -> Option<&Expr> {
     }
 }
 
-fn y_minus_one(expr: &Expr) -> Option<&Expr> {
+fn y_minus_one<'t>(cx: &LateContext<'_, '_>, expr: &'t Expr) -> Option<&'t Expr> {
     match expr.node {
         ExprKind::Binary(
             Spanned {
@@ -244,7 +316,7 @@ fn y_minus_one(expr: &Expr) -> Option<&Expr> {
             },
             ref lhs,
             ref rhs,
-        ) if is_integer_literal(rhs, 1) => Some(lhs),
+        ) if is_integer_const(cx, rhs, 1) => Some(lhs),
         _ => None,
     }
 }

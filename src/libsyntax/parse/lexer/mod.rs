@@ -4,7 +4,11 @@ use crate::symbol::{sym, Symbol};
 use crate::parse::unescape_error_reporting::{emit_unescape_error, push_escaped_char};
 
 use errors::{FatalError, DiagnosticBuilder};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax_pos::{BytePos, Pos, Span, NO_EXPANSION};
+=======
+use syntax_pos::{BytePos, Pos, Span};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc_lexer::Base;
 use rustc_lexer::unescape;
 
@@ -84,7 +88,11 @@ impl<'a> StringReader<'a> {
 
 
     fn mk_sp(&self, lo: BytePos, hi: BytePos) -> Span {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.override_span.unwrap_or_else(|| Span::new(lo, hi, NO_EXPANSION))
+=======
+        self.override_span.unwrap_or_else(|| Span::with_root_ctxt(lo, hi))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Returns the next token, including trivia like whitespace or comments.
@@ -291,6 +299,7 @@ impl<'a> StringReader<'a> {
             }
             rustc_lexer::TokenKind::Semi => token::Semi,
             rustc_lexer::TokenKind::Comma => token::Comma,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             rustc_lexer::TokenKind::DotDotDot => token::DotDotDot,
             rustc_lexer::TokenKind::DotDotEq => token::DotDotEq,
             rustc_lexer::TokenKind::DotDot => token::DotDot,
@@ -341,6 +350,33 @@ impl<'a> StringReader<'a> {
             rustc_lexer::TokenKind::CaretEq => token::BinOpEq(token::Caret),
             rustc_lexer::TokenKind::Percent => token::BinOp(token::Percent),
             rustc_lexer::TokenKind::PercentEq => token::BinOpEq(token::Percent),
+=======
+            rustc_lexer::TokenKind::Dot => token::Dot,
+            rustc_lexer::TokenKind::OpenParen => token::OpenDelim(token::Paren),
+            rustc_lexer::TokenKind::CloseParen => token::CloseDelim(token::Paren),
+            rustc_lexer::TokenKind::OpenBrace => token::OpenDelim(token::Brace),
+            rustc_lexer::TokenKind::CloseBrace => token::CloseDelim(token::Brace),
+            rustc_lexer::TokenKind::OpenBracket => token::OpenDelim(token::Bracket),
+            rustc_lexer::TokenKind::CloseBracket => token::CloseDelim(token::Bracket),
+            rustc_lexer::TokenKind::At => token::At,
+            rustc_lexer::TokenKind::Pound => token::Pound,
+            rustc_lexer::TokenKind::Tilde => token::Tilde,
+            rustc_lexer::TokenKind::Question => token::Question,
+            rustc_lexer::TokenKind::Colon => token::Colon,
+            rustc_lexer::TokenKind::Dollar => token::Dollar,
+            rustc_lexer::TokenKind::Eq => token::Eq,
+            rustc_lexer::TokenKind::Not => token::Not,
+            rustc_lexer::TokenKind::Lt => token::Lt,
+            rustc_lexer::TokenKind::Gt => token::Gt,
+            rustc_lexer::TokenKind::Minus => token::BinOp(token::Minus),
+            rustc_lexer::TokenKind::And => token::BinOp(token::And),
+            rustc_lexer::TokenKind::Or => token::BinOp(token::Or),
+            rustc_lexer::TokenKind::Plus => token::BinOp(token::Plus),
+            rustc_lexer::TokenKind::Star => token::BinOp(token::Star),
+            rustc_lexer::TokenKind::Slash => token::BinOp(token::Slash),
+            rustc_lexer::TokenKind::Caret => token::BinOp(token::Caret),
+            rustc_lexer::TokenKind::Percent => token::BinOp(token::Percent),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
             rustc_lexer::TokenKind::Unknown => {
                 let c = self.str_from(start).chars().next().unwrap();

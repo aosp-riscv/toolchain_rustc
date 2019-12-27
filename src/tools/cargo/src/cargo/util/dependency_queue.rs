@@ -31,8 +31,13 @@ pub struct DependencyQueue<N: Hash + Eq, E: Hash + Eq, V> {
     /// easily indexable with just an `N`
     reverse_dep_map: HashMap<N, HashMap<E, HashSet<N>>>,
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Topological depth of each key
     depth: HashMap<N, usize>,
+=======
+    /// The total number of packages that are transitively waiting on this package
+    priority: HashMap<N, usize>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 impl<N: Hash + Eq, E: Hash + Eq, V> Default for DependencyQueue<N, E, V> {
@@ -47,7 +52,11 @@ impl<N: Hash + Eq, E: Hash + Eq, V> DependencyQueue<N, E, V> {
         DependencyQueue {
             dep_map: HashMap::new(),
             reverse_dep_map: HashMap::new(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             depth: HashMap::new(),
+=======
+            priority: HashMap::new(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 }
@@ -82,10 +91,13 @@ impl<N: Hash + Eq + Clone, E: Eq + Hash + Clone, V> DependencyQueue<N, E, V> {
     /// All nodes have been added, calculate some internal metadata and prepare
     /// for `dequeue`.
     pub fn queue_finished(&mut self) {
+        let mut out = HashMap::new();
         for key in self.dep_map.keys() {
-            depth(key, &self.reverse_dep_map, &mut self.depth);
+            depth(key, &self.reverse_dep_map, &mut out);
         }
+        self.priority = out.into_iter().map(|(n, set)| (n, set.len())).collect();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         fn depth<N: Hash + Eq + Clone, E: Hash + Eq + Clone>(
             key: &N,
             map: &HashMap<N, HashMap<E, HashSet<N>>>,
@@ -95,23 +107,41 @@ impl<N: Hash + Eq + Clone, E: Eq + Hash + Clone, V> DependencyQueue<N, E, V> {
 
             if let Some(&depth) = results.get(key) {
                 assert_ne!(depth, IN_PROGRESS, "cycle in DependencyQueue");
+=======
+        fn depth<'a, N: Hash + Eq + Clone, E: Hash + Eq + Clone>(
+            key: &N,
+            map: &HashMap<N, HashMap<E, HashSet<N>>>,
+            results: &'a mut HashMap<N, HashSet<N>>,
+        ) -> &'a HashSet<N> {
+            if results.contains_key(key) {
+                let depth = &results[key];
+                assert!(!depth.is_empty(), "cycle in DependencyQueue");
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 return depth;
             }
+            results.insert(key.clone(), HashSet::new());
 
-            results.insert(key.clone(), IN_PROGRESS);
+            let mut set = HashSet::new();
+            set.insert(key.clone());
 
-            let depth = 1 + map
+            for dep in map
                 .get(key)
                 .into_iter()
                 .flat_map(|it| it.values())
                 .flat_map(|set| set)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 .map(|dep| depth(dep, map, results))
                 .max()
                 .unwrap_or(0);
+=======
+            {
+                set.extend(depth(dep, map, results).iter().cloned())
+            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-            *results.get_mut(key).unwrap() = depth;
-
-            depth
+            let slot = results.get_mut(key).unwrap();
+            *slot = set;
+            return &*slot;
         }
     }
 
@@ -122,7 +152,7 @@ impl<N: Hash + Eq + Clone, E: Eq + Hash + Clone, V> DependencyQueue<N, E, V> {
     pub fn dequeue(&mut self) -> Option<(N, V)> {
         // Look at all our crates and find everything that's ready to build (no
         // deps). After we've got that candidate set select the one which has
-        // the maximum depth in the dependency graph. This way we should
+        // the maximum priority in the dependency graph. This way we should
         // hopefully keep CPUs hottest the longest by ensuring that long
         // dependency chains are scheduled early on in the build process and the
         // leafs higher in the tree can fill in the cracks later.
@@ -135,7 +165,7 @@ impl<N: Hash + Eq + Clone, E: Eq + Hash + Clone, V> DependencyQueue<N, E, V> {
             .iter()
             .filter(|(_, (deps, _))| deps.is_empty())
             .map(|(key, _)| key.clone())
-            .max_by_key(|k| self.depth[k]);
+            .max_by_key(|k| self.priority[k]);
         let key = match next {
             Some(key) => key,
             None => return None,
@@ -159,16 +189,37 @@ impl<N: Hash + Eq + Clone, E: Eq + Hash + Clone, V> DependencyQueue<N, E, V> {
     /// Calling this function indicates that the `node` has produced `edge`. All
     /// remaining work items which only depend on this node/edge pair are now
     /// candidates to start their job.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn finish(&mut self, node: &N, edge: &E) {
+=======
+    ///
+    /// Returns the nodes that are now allowed to be dequeued as a result of
+    /// finishing this node.
+    pub fn finish(&mut self, node: &N, edge: &E) -> Vec<&N> {
+        // hashset<Node>
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let reverse_deps = self.reverse_dep_map.get(node).and_then(|map| map.get(edge));
         let reverse_deps = match reverse_deps {
             Some(deps) => deps,
-            None => return,
+            None => return Vec::new(),
         };
         let key = (node.clone(), edge.clone());
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        let mut result = Vec::new();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         for dep in reverse_deps.iter() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             assert!(self.dep_map.get_mut(dep).unwrap().0.remove(&key));
+=======
+            let edges = &mut self.dep_map.get_mut(dep).unwrap().0;
+            assert!(edges.remove(&key));
+            if edges.is_empty() {
+                result.push(dep);
+            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
+        result
     }
 }
 

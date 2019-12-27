@@ -8,13 +8,16 @@ use rustc_data_structures::indexed_vec::Idx;
 use rustc_data_structures::newtype_index;
 use rustc_macros::symbols;
 use rustc_serialize::{Decodable, Decoder, Encodable, Encoder};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use rustc_serialize::{UseSpecializedDecodable, UseSpecializedEncodable};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use std::cmp::{PartialEq, Ordering, PartialOrd, Ord};
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::str;
 
-use crate::hygiene::SyntaxContext;
 use crate::{Span, DUMMY_SP, GLOBALS};
 
 #[cfg(test)]
@@ -83,6 +86,7 @@ symbols! {
         Yield:              "yield",
 
         // Edition-specific keywords that are used in stable Rust.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Dyn:                "dyn", // >= 2018 Edition only
 
         // Edition-specific keywords that are used in unstable Rust or reserved for future use.
@@ -611,6 +615,539 @@ symbols! {
         rust_eh_unwind_resume,
         rust_oom,
         __rust_unstable_column,
+=======
+        Async:              "async", // >= 2018 Edition only
+        Await:              "await", // >= 2018 Edition only
+        Dyn:                "dyn", // >= 2018 Edition only
+
+        // Edition-specific keywords that are used in unstable Rust or reserved for future use.
+        Try:                "try", // >= 2018 Edition only
+
+        // Special lifetime names
+        UnderscoreLifetime: "'_",
+        StaticLifetime:     "'static",
+
+        // Weak keywords, have special meaning only in specific contexts.
+        Auto:               "auto",
+        Catch:              "catch",
+        Default:            "default",
+        Union:              "union",
+    }
+
+    // Symbols that can be referred to with syntax_pos::sym::*. The symbol is
+    // the stringified identifier unless otherwise specified (e.g.
+    // `proc_dash_macro` represents "proc-macro").
+    //
+    // As well as the symbols listed, there are symbols for the the strings
+    // "0", "1", ..., "9", which are accessible via `sym::integer`.
+    Symbols {
+        aarch64_target_feature,
+        abi,
+        abi_amdgpu_kernel,
+        abi_msp430_interrupt,
+        abi_ptx,
+        abi_sysv64,
+        abi_thiscall,
+        abi_unadjusted,
+        abi_vectorcall,
+        abi_x86_interrupt,
+        aborts,
+        advanced_slice_patterns,
+        adx_target_feature,
+        alias,
+        align,
+        alignstack,
+        all,
+        allocator,
+        allocator_internals,
+        alloc_error_handler,
+        allow,
+        allowed,
+        allow_fail,
+        allow_internal_unsafe,
+        allow_internal_unstable,
+        allow_internal_unstable_backcompat_hack,
+        always,
+        and,
+        any,
+        arbitrary_enum_discriminant,
+        arbitrary_self_types,
+        Arguments,
+        ArgumentV1,
+        arm_target_feature,
+        asm,
+        assert,
+        associated_consts,
+        associated_type_bounds,
+        associated_type_defaults,
+        associated_types,
+        async_await,
+        async_closure,
+        attr,
+        attributes,
+        attr_literals,
+        augmented_assignments,
+        automatically_derived,
+        avx512_target_feature,
+        await_macro,
+        begin_panic,
+        bench,
+        bin,
+        bind_by_move_pattern_guards,
+        block,
+        bool,
+        borrowck_graphviz_postflow,
+        borrowck_graphviz_preflow,
+        box_patterns,
+        box_syntax,
+        braced_empty_structs,
+        C,
+        cdylib,
+        cfg,
+        cfg_attr,
+        cfg_attr_multi,
+        cfg_doctest,
+        cfg_target_feature,
+        cfg_target_has_atomic,
+        cfg_target_thread_local,
+        cfg_target_vendor,
+        char,
+        clippy,
+        clone,
+        Clone,
+        clone_closures,
+        clone_from,
+        closure_to_fn_coercion,
+        cmp,
+        cmpxchg16b_target_feature,
+        cold,
+        column,
+        compile_error,
+        compiler_builtins,
+        concat,
+        concat_idents,
+        conservative_impl_trait,
+        console,
+        const_compare_raw_pointers,
+        const_constructor,
+        const_fn,
+        const_fn_union,
+        const_generics,
+        const_indexing,
+        const_in_array_repeat_expressions,
+        const_let,
+        const_panic,
+        const_raw_ptr_deref,
+        const_raw_ptr_to_usize_cast,
+        const_transmute,
+        contents,
+        context,
+        convert,
+        Copy,
+        copy_closures,
+        core,
+        core_intrinsics,
+        crate_id,
+        crate_in_paths,
+        crate_local,
+        crate_name,
+        crate_type,
+        crate_visibility_modifier,
+        custom_attribute,
+        custom_derive,
+        custom_inner_attributes,
+        custom_test_frameworks,
+        c_variadic,
+        debug_trait,
+        declare_lint_pass,
+        decl_macro,
+        Debug,
+        Decodable,
+        Default,
+        default_lib_allocator,
+        default_type_parameter_fallback,
+        default_type_params,
+        deny,
+        deprecated,
+        deref,
+        deref_mut,
+        derive,
+        diagnostic,
+        direct,
+        doc,
+        doc_alias,
+        doc_cfg,
+        doc_keyword,
+        doc_masked,
+        doc_spotlight,
+        doctest,
+        document_private_items,
+        dotdoteq_in_patterns,
+        dotdot_in_tuple_patterns,
+        double_braced_crate: "{{crate}}",
+        double_braced_impl: "{{impl}}",
+        double_braced_misc: "{{misc}}",
+        double_braced_closure: "{{closure}}",
+        double_braced_constructor: "{{constructor}}",
+        double_braced_constant: "{{constant}}",
+        double_braced_opaque: "{{opaque}}",
+        dropck_eyepatch,
+        dropck_parametricity,
+        drop_types_in_const,
+        dylib,
+        dyn_trait,
+        eh_personality,
+        eh_unwind_resume,
+        enable,
+        Encodable,
+        env,
+        eq,
+        err,
+        Err,
+        Eq,
+        Equal,
+        except,
+        exclusive_range_pattern,
+        exhaustive_integer_patterns,
+        exhaustive_patterns,
+        existential_type,
+        expected,
+        export_name,
+        expr,
+        extern_absolute_paths,
+        external_doc,
+        extern_crate_item_prelude,
+        extern_crate_self,
+        extern_in_paths,
+        extern_prelude,
+        extern_types,
+        f16c_target_feature,
+        f32,
+        f64,
+        feature,
+        ffi_returns_twice,
+        field,
+        field_init_shorthand,
+        file,
+        fmt,
+        fmt_internals,
+        fn_must_use,
+        forbid,
+        format_args,
+        format_args_nl,
+        from,
+        From,
+        from_desugaring,
+        from_error,
+        from_generator,
+        from_method,
+        from_ok,
+        from_usize,
+        fundamental,
+        future,
+        Future,
+        FxHashSet,
+        FxHashMap,
+        gen_future,
+        generators,
+        generic_associated_types,
+        generic_param_attrs,
+        global_allocator,
+        global_asm,
+        globs,
+        hash,
+        Hash,
+        HashSet,
+        HashMap,
+        hexagon_target_feature,
+        hidden,
+        homogeneous_aggregate,
+        html_favicon_url,
+        html_logo_url,
+        html_no_source,
+        html_playground_url,
+        html_root_url,
+        i128,
+        i128_type,
+        i16,
+        i32,
+        i64,
+        i8,
+        ident,
+        if_let,
+        if_while_or_patterns,
+        ignore,
+        impl_header_lifetime_elision,
+        impl_lint_pass,
+        impl_trait_in_bindings,
+        import_shadowing,
+        index,
+        index_mut,
+        in_band_lifetimes,
+        include,
+        include_bytes,
+        include_str,
+        inclusive_range_syntax,
+        infer_outlives_requirements,
+        infer_static_outlives_requirements,
+        inline,
+        intel,
+        into_iter,
+        IntoIterator,
+        into_result,
+        intrinsics,
+        irrefutable_let_patterns,
+        isize,
+        issue,
+        issue_5723_bootstrap,
+        issue_tracker_base_url,
+        item,
+        item_like_imports,
+        iter,
+        Iterator,
+        keyword,
+        kind,
+        label,
+        label_break_value,
+        lang,
+        lang_items,
+        let_chains,
+        lhs,
+        lib,
+        lifetime,
+        line,
+        link,
+        linkage,
+        link_args,
+        link_cfg,
+        link_llvm_intrinsics,
+        link_name,
+        link_section,
+        LintPass,
+        lint_reasons,
+        literal,
+        local_inner_macros,
+        log_syntax,
+        loop_break_value,
+        macro_at_most_once_rep,
+        macro_escape,
+        macro_export,
+        macro_lifetime_matcher,
+        macro_literal_matcher,
+        macro_reexport,
+        macro_rules,
+        macros_in_extern,
+        macro_use,
+        macro_vis_matcher,
+        main,
+        managed_boxes,
+        marker,
+        marker_trait_attr,
+        masked,
+        match_beginning_vert,
+        match_default_bindings,
+        may_dangle,
+        mem,
+        member_constraints,
+        message,
+        meta,
+        min_const_fn,
+        min_const_unsafe_fn,
+        mips_target_feature,
+        mmx_target_feature,
+        module,
+        module_path,
+        more_struct_aliases,
+        movbe_target_feature,
+        must_use,
+        naked,
+        naked_functions,
+        name,
+        needs_allocator,
+        needs_panic_runtime,
+        negate_unsigned,
+        never,
+        never_type,
+        new,
+        next,
+        __next,
+        nll,
+        no_builtins,
+        no_core,
+        no_crate_inject,
+        no_debug,
+        no_default_passes,
+        no_implicit_prelude,
+        no_inline,
+        no_link,
+        no_main,
+        no_mangle,
+        non_ascii_idents,
+        None,
+        non_exhaustive,
+        non_modrs_mods,
+        no_stack_check,
+        no_start,
+        no_std,
+        not,
+        note,
+        Ok,
+        omit_gdb_pretty_printer_section,
+        on,
+        on_unimplemented,
+        oom,
+        ops,
+        optimize,
+        optimize_attribute,
+        optin_builtin_traits,
+        option,
+        Option,
+        option_env,
+        opt_out_copy,
+        or,
+        or_patterns,
+        Ord,
+        Ordering,
+        Output,
+        overlapping_marker_traits,
+        packed,
+        panic,
+        panic_handler,
+        panic_impl,
+        panic_implementation,
+        panic_runtime,
+        parent_trait,
+        partial_cmp,
+        param_attrs,
+        PartialEq,
+        PartialOrd,
+        passes,
+        pat,
+        path,
+        pattern_parentheses,
+        Pending,
+        pin,
+        Pin,
+        pinned,
+        platform_intrinsics,
+        plugin,
+        plugin_registrar,
+        plugins,
+        Poll,
+        poll_with_tls_context,
+        powerpc_target_feature,
+        precise_pointer_size_matching,
+        prelude,
+        prelude_import,
+        primitive,
+        proc_dash_macro: "proc-macro",
+        proc_macro,
+        proc_macro_attribute,
+        proc_macro_def_site,
+        proc_macro_derive,
+        proc_macro_expr,
+        proc_macro_gen,
+        proc_macro_hygiene,
+        proc_macro_internals,
+        proc_macro_mod,
+        proc_macro_non_items,
+        proc_macro_path_invoc,
+        profiler_runtime,
+        pub_restricted,
+        pushpop_unsafe,
+        quad_precision_float,
+        question_mark,
+        quote,
+        Range,
+        RangeFrom,
+        RangeFull,
+        RangeInclusive,
+        RangeTo,
+        RangeToInclusive,
+        raw_identifiers,
+        Ready,
+        reason,
+        recursion_limit,
+        reexport_test_harness_main,
+        reflect,
+        relaxed_adts,
+        repr,
+        repr128,
+        repr_align,
+        repr_align_enum,
+        repr_packed,
+        repr_simd,
+        repr_transparent,
+        re_rebalance_coherence,
+        result,
+        Result,
+        Return,
+        rhs,
+        rlib,
+        rt,
+        rtm_target_feature,
+        rust,
+        rust_2015_preview,
+        rust_2018_preview,
+        rust_begin_unwind,
+        rustc,
+        RustcDecodable,
+        RustcEncodable,
+        rustc_allocator,
+        rustc_allocator_nounwind,
+        rustc_allow_const_fn_ptr,
+        rustc_args_required_const,
+        rustc_attrs,
+        rustc_builtin_macro,
+        rustc_clean,
+        rustc_const_unstable,
+        rustc_conversion_suggestion,
+        rustc_def_path,
+        rustc_deprecated,
+        rustc_diagnostic_item,
+        rustc_diagnostic_macros,
+        rustc_dirty,
+        rustc_dummy,
+        rustc_dump_env_program_clauses,
+        rustc_dump_program_clauses,
+        rustc_dump_user_substs,
+        rustc_error,
+        rustc_expected_cgu_reuse,
+        rustc_if_this_changed,
+        rustc_inherit_overflow_checks,
+        rustc_layout,
+        rustc_layout_scalar_valid_range_end,
+        rustc_layout_scalar_valid_range_start,
+        rustc_macro_transparency,
+        rustc_mir,
+        rustc_nonnull_optimization_guaranteed,
+        rustc_object_lifetime_default,
+        rustc_on_unimplemented,
+        rustc_outlives,
+        rustc_paren_sugar,
+        rustc_partition_codegened,
+        rustc_partition_reused,
+        rustc_peek,
+        rustc_peek_definite_init,
+        rustc_peek_maybe_init,
+        rustc_peek_maybe_uninit,
+        rustc_private,
+        rustc_proc_macro_decls,
+        rustc_promotable,
+        rustc_regions,
+        rustc_stable,
+        rustc_std_internal_symbol,
+        rustc_symbol_name,
+        rustc_synthetic,
+        rustc_test_marker,
+        rustc_then_this_would_need,
+        rustc_variance,
+        rustdoc,
+        rustfmt,
+        rust_eh_personality,
+        rust_eh_unwind_resume,
+        rust_oom,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         rvalue_static_promotion,
         sanitizer_runtime,
         _Self,
@@ -746,25 +1283,42 @@ impl Ident {
         Ident { name, span }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Constructs a new identifier with an empty syntax context.
+=======
+    /// Constructs a new identifier with a dummy span.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     #[inline]
-    pub const fn with_empty_ctxt(name: Symbol) -> Ident {
+    pub const fn with_dummy_span(name: Symbol) -> Ident {
         Ident::new(name, DUMMY_SP)
     }
 
     #[inline]
     pub fn invalid() -> Ident {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Ident::with_empty_ctxt(kw::Invalid)
+=======
+        Ident::with_dummy_span(kw::Invalid)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Maps an interned string to an identifier with an empty syntax context.
     pub fn from_interned_str(string: InternedString) -> Ident {
-        Ident::with_empty_ctxt(string.as_symbol())
+        Ident::with_dummy_span(string.as_symbol())
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Maps a string to an identifier with an empty span.
+=======
+    /// Maps a string to an identifier with a dummy span.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn from_str(string: &str) -> Ident {
-        Ident::with_empty_ctxt(Symbol::intern(string))
+        Ident::with_dummy_span(Symbol::intern(string))
+    }
+
+    /// Maps a string and a span to an identifier.
+    pub fn from_str_and_span(string: &str, span: Span) -> Ident {
+        Ident::new(Symbol::intern(string), span)
     }
 
     /// Maps a string and a span to an identifier.
@@ -799,27 +1353,43 @@ impl Ident {
         Ident::new(self.name, self.span.modern_and_legacy())
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Transforms an identifier into one with the same name, but gensymed.
     pub fn gensym(self) -> Ident {
         let name = with_interner(|interner| interner.gensymed(self.name));
         Ident::new(name, self.span)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Transforms an underscore identifier into one with the same name, but
     /// gensymed. Leaves non-underscore identifiers unchanged.
     pub fn gensym_if_underscore(self) -> Ident {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if self.name == kw::Underscore { self.gensym() } else { self }
     }
 
     // WARNING: this function is deprecated and will be removed in the future.
     pub fn is_gensymed(self) -> bool {
         with_interner(|interner| interner.is_gensymed(self.name))
+=======
+        if self.name == kw::Underscore {
+            let name = with_interner(|interner| interner.gensymed(self.name));
+            Ident::new(name, self.span)
+        } else {
+            self
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
+    /// Convert the name to a `LocalInternedString`. This is a slowish
+    /// operation because it requires locking the symbol interner.
     pub fn as_str(self) -> LocalInternedString {
         self.name.as_str()
     }
 
+    /// Convert the name to an `InternedString`. This is a slowish operation
+    /// because it requires locking the symbol interner.
     pub fn as_interned_str(self) -> InternedString {
         self.name.as_interned_str()
     }
@@ -850,6 +1420,7 @@ impl fmt::Display for Ident {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl Encodable for Ident {
     fn encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
         if self.span.ctxt().modern() == SyntaxContext::empty() {
@@ -869,10 +1440,35 @@ impl Decodable for Ident {
             Ident::from_str(&string)
         } else { // FIXME(jseyfried): intercrate hygiene
             Ident::from_str(&string[1..]).gensym()
+=======
+impl UseSpecializedEncodable for Ident {
+    fn default_encode<S: Encoder>(&self, s: &mut S) -> Result<(), S::Error> {
+        s.emit_struct("Ident", 2, |s| {
+            s.emit_struct_field("name", 0, |s| {
+                self.name.encode(s)
+            })?;
+            s.emit_struct_field("span", 1, |s| {
+                self.span.encode(s)
+            })
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         })
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+impl UseSpecializedDecodable for Ident {
+    fn default_decode<D: Decoder>(d: &mut D) -> Result<Self, D::Error> {
+        d.read_struct("Ident", 2, |d| {
+            Ok(Ident {
+                name: d.read_struct_field("name", 0, Decodable::decode)?,
+                span: d.read_struct_field("span", 1, Decodable::decode)?,
+            })
+        })
+    }
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// A symbol is an interned or gensymed string. A gensym is a symbol that is
 /// never equal to any other symbol.
 ///
@@ -885,9 +1481,18 @@ impl Decodable for Ident {
 ///
 /// Examples:
 /// ```
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// assert_eq!(Ident::from_str("x"), Ident::from_str("x"))
 /// assert_ne!(Ident::from_str("x").gensym(), Ident::from_str("x"))
 /// assert_ne!(Ident::from_str("x").gensym(), Ident::from_str("x").gensym())
+=======
+/// assert_eq!(Ident::from_str("_"), Ident::from_str("_"))
+/// assert_ne!(Ident::from_str("_").gensym_if_underscore(), Ident::from_str("_"))
+/// assert_ne!(
+///     Ident::from_str("_").gensym_if_underscore(),
+///     Ident::from_str("_").gensym_if_underscore(),
+/// )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// ```
 /// Internally, a symbol is implemented as an index, and all operations
 /// (including hashing, equality, and ordering) operate on that index. The use
@@ -913,6 +1518,28 @@ impl Symbol {
         with_interner(|interner| interner.intern(string))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    /// Access the symbol's chars. This is a slowish operation because it
+    /// requires locking the symbol interner.
+    pub fn with<F: FnOnce(&str) -> R, R>(self, f: F) -> R {
+        with_interner(|interner| {
+            f(interner.get(self))
+        })
+    }
+
+    /// Access two symbols' chars. This is a slowish operation because it
+    /// requires locking the symbol interner, but it is faster than calling
+    /// `with()` twice.
+    fn with2<F: FnOnce(&str, &str) -> R, R>(self, other: Symbol, f: F) -> R {
+        with_interner(|interner| {
+            f(interner.get(self), interner.get(other))
+        })
+    }
+
+    /// Convert to a `LocalInternedString`. This is a slowish operation because
+    /// it requires locking the symbol interner.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn as_str(self) -> LocalInternedString {
         with_interner(|interner| unsafe {
             LocalInternedString {
@@ -921,6 +1548,8 @@ impl Symbol {
         })
     }
 
+    /// Convert to an `InternedString`. This is a slowish operation because it
+    /// requires locking the symbol interner.
     pub fn as_interned_str(self) -> InternedString {
         with_interner(|interner| InternedString {
             symbol: interner.interned(self)
@@ -1061,10 +1690,15 @@ pub mod sym {
 
 impl Symbol {
     fn is_used_keyword_2018(self) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self == kw::Dyn
+=======
+        self >= kw::Async && self <= kw::Dyn
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn is_unused_keyword_2018(self) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self >= kw::Async && self <= kw::Try
     }
 
@@ -1081,6 +1715,29 @@ impl Symbol {
         self == kw::Crate ||
         self == kw::PathRoot ||
         self == kw::DollarCrate
+=======
+        self == kw::Try
+    }
+
+    /// Used for sanity checking rustdoc keyword sections.
+    pub fn is_doc_keyword(self) -> bool {
+        self <= kw::Union
+    }
+
+    /// A keyword or reserved identifier that can be used as a path segment.
+    pub fn is_path_segment_keyword(self) -> bool {
+        self == kw::Super ||
+        self == kw::SelfLower ||
+        self == kw::SelfUpper ||
+        self == kw::Crate ||
+        self == kw::PathRoot ||
+        self == kw::DollarCrate
+    }
+
+    /// Returns `true` if the symbol is `true` or `false`.
+    pub fn is_bool_lit(self) -> bool {
+        self == kw::True || self == kw::False
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// This symbol can be a raw identifier.
@@ -1144,11 +1801,16 @@ fn with_interner<T, F: FnOnce(&mut Interner) -> T>(f: F) -> T {
 // FIXME: ensure that the interner outlives any thread which uses
 // `LocalInternedString`, by creating a new thread right after constructing the
 // interner.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[derive(Clone, Copy, Hash, PartialOrd, Eq, Ord)]
+=======
+#[derive(Clone, Copy, Eq, PartialOrd, Ord)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub struct LocalInternedString {
     string: &'static str,
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl LocalInternedString {
     /// Maps a string to its interned representation.
     pub fn intern(string: &str) -> Self {
@@ -1177,6 +1839,8 @@ impl LocalInternedString {
     }
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 impl<U: ?Sized> std::convert::AsRef<U> for LocalInternedString
 where
     str: std::convert::AsRef<U>
@@ -1238,6 +1902,7 @@ impl fmt::Display for LocalInternedString {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl Decodable for LocalInternedString {
     fn decode<D: Decoder>(d: &mut D) -> Result<LocalInternedString, D::Error> {
         Ok(LocalInternedString::intern(&d.read_str()?))
@@ -1250,6 +1915,8 @@ impl Encodable for LocalInternedString {
     }
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// An alternative to `Symbol` that is focused on string contents. It has two
 /// main differences to `Symbol`.
 ///
@@ -1277,13 +1944,11 @@ impl InternedString {
     }
 
     pub fn with<F: FnOnce(&str) -> R, R>(self, f: F) -> R {
-        let str = with_interner(|interner| {
-            interner.get(self.symbol) as *const str
-        });
-        // This is safe because the interner keeps string alive until it is dropped.
-        // We can access it because we know the interner is still alive since we use a
-        // scoped thread local to access it, and it was alive at the beginning of this scope
-        unsafe { f(&*str) }
+        self.symbol.with(f)
+    }
+
+    fn with2<F: FnOnce(&str, &str) -> R, R>(self, other: &InternedString, f: F) -> R {
+        self.symbol.with2(other.symbol, f)
     }
 
     fn with2<F: FnOnce(&str, &str) -> R, R>(self, other: &InternedString, f: F) -> R {
@@ -1299,6 +1964,8 @@ impl InternedString {
         self.symbol
     }
 
+    /// Convert to a `LocalInternedString`. This is a slowish operation because it
+    /// requires locking the symbol interner.
     pub fn as_str(self) -> LocalInternedString {
         self.symbol.as_str()
     }

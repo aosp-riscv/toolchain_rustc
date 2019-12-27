@@ -2,11 +2,21 @@ error: unreachable block in `while` expression
   --> $DIR/expr_while.rs:7:20
    |
 LL |       while {return} {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |  ____________________^
 LL | |
 LL | |         println!("Hello, world!");
 LL | |     }
    | |_____^
+=======
+   |  ____________------__^
+   | |            |
+   | |            any code following this expression is unreachable
+LL | |
+LL | |         println!("Hello, world!");
+LL | |     }
+   | |_____^ unreachable block in `while` expression
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 note: lint level defined here
   --> $DIR/expr_while.rs:4:9
@@ -18,11 +28,21 @@ error: unreachable block in `while` expression
   --> $DIR/expr_while.rs:22:20
    |
 LL |       while {return} {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |  ____________________^
 LL | |
 LL | |         println!("I am dead.");
 LL | |     }
    | |_____^
+=======
+   |  ____________------__^
+   | |            |
+   | |            any code following this expression is unreachable
+LL | |
+LL | |         println!("I am dead.");
+LL | |     }
+   | |_____^ unreachable block in `while` expression
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 2 previous errors
 

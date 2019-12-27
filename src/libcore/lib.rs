@@ -63,7 +63,11 @@
 #![warn(missing_debug_implementations)]
 #![deny(intra_doc_link_resolution_failure)] // rustdoc is run without -D warnings
 #![allow(explicit_outlives_requirements)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![cfg_attr(not(bootstrap), allow(incomplete_features))]
+=======
+#![allow(incomplete_features)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #![feature(allow_internal_unstable)]
 #![feature(arbitrary_self_types)]
@@ -87,7 +91,7 @@
 #![feature(link_llvm_intrinsics)]
 #![feature(never_type)]
 #![feature(nll)]
-#![feature(bind_by_move_pattern_guards)]
+#![cfg_attr(bootstrap, feature(bind_by_move_pattern_guards))]
 #![feature(exhaustive_patterns)]
 #![feature(no_core)]
 #![feature(on_unimplemented)]
@@ -120,16 +124,26 @@
 #![feature(rtm_target_feature)]
 #![feature(f16c_target_feature)]
 #![feature(hexagon_target_feature)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(const_slice_len)]
 #![feature(const_str_as_bytes)]
 #![feature(const_str_len)]
+=======
+#![cfg_attr(bootstrap, feature(const_slice_len))]
+#![cfg_attr(bootstrap, feature(const_str_as_bytes))]
+#![cfg_attr(bootstrap, feature(const_str_len))]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(const_int_conversion)]
 #![feature(const_transmute)]
 #![feature(non_exhaustive)]
 #![feature(structural_match)]
 #![feature(abi_unadjusted)]
 #![feature(adx_target_feature)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(maybe_uninit_slice, maybe_uninit_array)]
+=======
+#![feature(maybe_uninit_slice)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(external_doc)]
 #![feature(mem_take)]
 #![feature(associated_type_bounds)]
@@ -227,6 +241,7 @@ pub mod task;
 pub mod alloc;
 
 // note: does not need to be public
+mod bool;
 mod tuple;
 mod unit;
 

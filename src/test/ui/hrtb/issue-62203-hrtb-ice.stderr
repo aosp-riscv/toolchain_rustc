@@ -6,6 +6,11 @@ LL |     let v = Unit2.m(
    |
    = note: expected type `Unit4`
               found type `<_ as Ty<'_>>::V`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+   = note: consider constraining the associated type `<_ as Ty<'_>>::V` to `Unit4`
+   = note: for more information, visit https://doc.rust-lang.org/book/ch19-03-advanced-traits.html
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error[E0271]: type mismatch resolving `<[closure@$DIR/issue-62203-hrtb-ice.rs:42:17: 42:39] as std::ops::FnOnce<((&u8,),)>>::Output == Unit3`
   --> $DIR/issue-62203-hrtb-ice.rs:38:19

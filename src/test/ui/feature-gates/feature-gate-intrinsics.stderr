@@ -22,7 +22,16 @@ error[E0093]: unrecognized intrinsic function: `bar`
 LL |     fn bar();
    |     ^^^^^^^^^ unrecognized intrinsic
 
-error: aborting due to 3 previous errors
+error: intrinsic must be in `extern "rust-intrinsic" { ... }` block
+  --> $DIR/feature-gate-intrinsics.rs:5:34
+   |
+LL | extern "rust-intrinsic" fn baz() {}
+   |                                  ^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+error: aborting due to 4 previous errors
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 Some errors have detailed explanations: E0093, E0658.
 For more information about an error, try `rustc --explain E0093`.

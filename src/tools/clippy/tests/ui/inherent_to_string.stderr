@@ -1,4 +1,5 @@
 error: implementation of inherent method `to_string(&self) -> String` for type `A`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/inherent_to_string.rs:18:5
    |
 LL | /     fn to_string(&self) -> String {
@@ -11,6 +12,20 @@ LL | |     }
 
 error: type `C` implements inherent method `to_string(&self) -> String` which shadows the implementation of `Display`
   --> $DIR/inherent_to_string.rs:42:5
+=======
+  --> $DIR/inherent_to_string.rs:20:5
+   |
+LL | /     fn to_string(&self) -> String {
+LL | |         "A.to_string()".to_string()
+LL | |     }
+   | |_____^
+   |
+   = note: `-D clippy::inherent-to-string` implied by `-D warnings`
+   = help: implement trait `Display` for type `A` instead
+
+error: type `C` implements inherent method `to_string(&self) -> String` which shadows the implementation of `Display`
+  --> $DIR/inherent_to_string.rs:44:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | /     fn to_string(&self) -> String {
 LL | |         "C.to_string()".to_string()

@@ -61,6 +61,7 @@ Rust, as well as publications about Rust.
 * [Reenix: Implementing a Unix-Like Operating System in
   Rust](http://scialex.github.io/reenix.pdf). Undergrad paper by Alex
   Light.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 * [Evaluation of performance and productivity metrics of potential programming languages in the HPC environment](http://octarineparrot.com/assets/mrfloya-thesis-ba.pdf).
   Bachelor's thesis by Florian Wilkens. Compares C, Go and Rust.
 * [Nom, a byte oriented, streaming, zero copy, parser combinators library
@@ -82,6 +83,29 @@ Rust, as well as publications about Rust.
 * [You can't spell trust without Rust](https://raw.githubusercontent.com/Gankro/thesis/master/thesis.pdf). Alexis Beingessner's master's thesis.
 * [Rust-Bio: a fast and safe bioinformatics library](http://bioinformatics.oxfordjournals.org/content/early/2015/10/06/bioinformatics.btv573). Johannes Köster
 * [Safe, Correct, and Fast Low-Level Networking](https://octarineparrot.com/assets/msci_paper.pdf). Robert Clipsham's master's thesis.
+=======
+* [Evaluation of performance and productivity metrics of potential programming languages in the HPC environment](https://github.com/1wilkens/thesis-ba).
+  Bachelor's thesis by Florian Wilkens. Compares C, Go and Rust.
+* [Nom, a byte oriented, streaming, zero copy, parser combinators library
+  in Rust](http://spw15.langsec.org/papers/couprie-nom.pdf). By
+  Geoffroy Couprie, research for VLC.
+* [Graph-Based Higher-Order Intermediate
+  Representation](http://compilers.cs.uni-saarland.de/papers/lkh15_cgo.pdf). An
+  experimental IR implemented in Impala, a Rust-like language.
+* [Code Refinement of Stencil
+  Codes](http://compilers.cs.uni-saarland.de/papers/ppl14_web.pdf). Another
+  paper using Impala.
+* [Parallelization in Rust with fork-join and
+  friends](http://publications.lib.chalmers.se/records/fulltext/219016/219016.pdf). Linus
+  Farnstrand's master's thesis.
+* [Session Types for
+  Rust](http://munksgaard.me/papers/laumann-munksgaard-larsen.pdf). Philip
+  Munksgaard's master's thesis. Research for Servo.
+* [Ownership is Theft: Experiences Building an Embedded OS in Rust - Amit Levy, et. al.](http://amitlevy.com/papers/tock-plos2015.pdf)
+* [You can't spell trust without Rust](https://raw.githubusercontent.com/Gankro/thesis/master/thesis.pdf). Alexis Beingessner's master's thesis.
+* [Rust-Bio: a fast and safe bioinformatics library](http://bioinformatics.oxfordjournals.org/content/early/2015/10/06/bioinformatics.btv573). Johannes Köster
+* [Safe, Correct, and Fast Low-Level Networking](http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.704.1768). Robert Clipsham's master's thesis.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 * [Formalizing Rust traits](http://hdl.handle.net/2429/55609). Jonatan Milewski's master's thesis.
 * [Rust as a Language for High Performance GC Implementation](http://users.cecs.anu.edu.au/~steveb/downloads/pdf/rust-ismm-2016.pdf)
 * [Simple Verification of Rust Programs via Functional Purification](https://github.com/Kha/electrolysis). Sebastian Ullrich's master's thesis.

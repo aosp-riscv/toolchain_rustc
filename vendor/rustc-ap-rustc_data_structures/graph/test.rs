@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::fx::FxHashMap;
 use std::cmp::max;
 use std::slice;
@@ -73,3 +74,5 @@ impl<'graph> GraphSuccessors<'graph> for TestGraph {
     type Item = usize;
     type Iter = iter::Cloned<slice::Iter<'graph, usize>>;
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

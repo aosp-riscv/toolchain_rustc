@@ -25,7 +25,17 @@ impl rustc_driver::Callbacks for MiriCompilerCalls<'_> {
             );
 
             self.bencher.iter(|| {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let config = miri::MiriConfig { validate: true, args: vec![], seed: None };
+=======
+                let config = miri::MiriConfig {
+                    validate: true,
+                    communicate: false,
+                    excluded_env_vars: vec![],
+                    args: vec![],
+                    seed: None,
+                };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 eval_main(tcx, entry_def_id, config);
             });
         });

@@ -4,12 +4,20 @@
 #![feature(box_syntax, rustc_private)]
 
 extern crate rustc;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 extern crate rustc_plugin;
 extern crate rustc_driver;
 
 use std::any::Any;
 use std::cell::RefCell;
 use rustc_plugin::Registry;
+=======
+extern crate rustc_driver;
+
+use std::any::Any;
+use std::cell::RefCell;
+use rustc_driver::plugin::Registry;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 struct Foo {
     foo: isize

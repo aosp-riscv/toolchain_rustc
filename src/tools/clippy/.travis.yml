@@ -56,8 +56,13 @@ matrix:
       if: repo =~ /^rust-lang\/rust-clippy$/ AND branch IN (auto, try)
     - env: INTEGRATION=rust-lang-nursery/chalk
       if: repo =~ /^rust-lang\/rust-clippy$/ AND branch IN (auto, try)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     - env: INTEGRATION=rust-lang/rls
       if: repo =~ /^rust-lang\/rust-clippy$/ AND branch IN (auto, try)
+=======
+    # - env: INTEGRATION=rust-lang/rls
+    #   if: repo =~ /^rust-lang\/rust-clippy$/ AND branch IN (auto, try)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     - env: INTEGRATION=Geal/nom
       if: repo =~ /^rust-lang\/rust-clippy$/ AND branch IN (auto, try)
     - env: INTEGRATION=rust-lang/rustfmt
@@ -82,7 +87,14 @@ matrix:
       if: repo =~ /^rust-lang\/rust-clippy$/ AND branch IN (auto, try)
     - env: INTEGRATION=chronotope/chrono
       if: repo =~ /^rust-lang\/rust-clippy$/ AND branch IN (auto, try)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 # prevent these jobs with default env vars
+=======
+  allow_failures:
+    - os: windows
+      env: CARGO_INCREMENTAL=0 BASE_TESTS=true OS_WINDOWS=true
+  # prevent these jobs with default env vars
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   exclude:
     - os: linux
     - os: osx

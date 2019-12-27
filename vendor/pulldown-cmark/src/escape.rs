@@ -78,6 +78,7 @@ where
     w.write_str(&s[mark..])
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[rustfmt::skip]
 static HTML_ESCAPE_TABLE: [u8; 256] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -97,9 +98,28 @@ static HTML_ESCAPE_TABLE: [u8; 256] = [
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 ];
+=======
+const fn create_html_escape_table() -> [u8; 256] {
+    let mut table = [0; 256];
+    table[b'"' as usize] = 1;
+    table[b'&' as usize] = 2;
+    table[b'<' as usize] = 3;
+    table[b'>' as usize] = 4;
+    table
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 static HTML_ESCAPES: [&str; 5] = ["", "&quot;", "&amp;", "&lt;", "&gt;"];
+=======
+static HTML_ESCAPE_TABLE: [u8; 256] = create_html_escape_table();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+static HTML_ESCAPES: [&'static str; 5] = ["", "&quot;", "&amp;", "&lt;", "&gt;"];
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// Writes the given string to the Write sink, replacing special HTML bytes
 /// (<, >, &, ") by escape sequences.
 pub(crate) fn escape_html<W: StrWrite>(w: W, s: &str) -> io::Result<()> {
@@ -129,13 +149,20 @@ fn escape_html_scalar<W: StrWrite>(mut w: W, s: &str) -> io::Result<()> {
         }
         let c = bytes[i];
         let escape = HTML_ESCAPE_TABLE[c as usize];
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if escape != 0 {
             let escape_seq = HTML_ESCAPES[escape as usize];
             w.write_str(&s[mark..i])?;
             w.write_str(escape_seq)?;
             mark = i + 1; // all escaped characters are ASCII
         }
+=======
+        let escape_seq = HTML_ESCAPES[escape as usize];
+        w.write_str(&s[mark..i])?;
+        w.write_str(escape_seq)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         i += 1;
+        mark = i; // all escaped characters are ASCII
     }
     w.write_str(&s[mark..])
 }

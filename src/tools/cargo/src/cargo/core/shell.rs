@@ -111,6 +111,13 @@ impl Shell {
         }
     }
 
+    pub fn stdout_println(&mut self, message: impl fmt::Display) {
+        if self.needs_clear {
+            self.err_erase_line();
+        }
+        println!("{}", message);
+    }
+
     /// Sets whether the next print should clear the current line.
     pub fn set_needs_clear(&mut self, needs_clear: bool) {
         self.needs_clear = needs_clear;
@@ -210,14 +217,18 @@ impl Shell {
         if self.needs_clear {
             self.err_erase_line();
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.err.print(&"error:", Some(&message), Red, false)
+=======
+        self.err.print(&"error", Some(&message), Red, false)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Prints an amber 'warning' message.
     pub fn warn<T: fmt::Display>(&mut self, message: T) -> CargoResult<()> {
         match self.verbosity {
             Verbosity::Quiet => Ok(()),
-            _ => self.print(&"warning:", Some(&message), Yellow, false),
+            _ => self.print(&"warning", Some(&message), Yellow, false),
         }
     }
 
@@ -318,6 +329,8 @@ impl ShellOut {
                     write!(stream, "{:>12}", status)?;
                 } else {
                     write!(stream, "{}", status)?;
+                    stream.set_color(ColorSpec::new().set_bold(true))?;
+                    write!(stream, ":")?;
                 }
                 stream.reset()?;
                 match message {
@@ -329,7 +342,7 @@ impl ShellOut {
                 if justified {
                     write!(w, "{:>12}", status)?;
                 } else {
-                    write!(w, "{}", status)?;
+                    write!(w, "{}:", status)?;
                 }
                 match message {
                     Some(message) => writeln!(w, " {}", message)?,
@@ -377,6 +390,11 @@ mod imp {
     pub fn stderr_width() -> Option<usize> {
         unsafe {
             let mut winsize: libc::winsize = mem::zeroed();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            // The .into() here is needed for FreeBSD which defines TIOCGWINSZ
+            // as c_uint but ioctl wants c_ulong.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             if libc::ioctl(libc::STDERR_FILENO, libc::TIOCGWINSZ.into(), &mut winsize) < 0 {
                 return None;
             }

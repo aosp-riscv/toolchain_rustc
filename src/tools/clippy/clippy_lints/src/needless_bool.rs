@@ -3,7 +3,11 @@
 //! This lint is **warn** by default
 
 use crate::utils::sugg::Sugg;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{higher, in_macro_or_desugar, span_lint, span_lint_and_sugg};
+=======
+use crate::utils::{higher, span_lint, span_lint_and_sugg};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::hir::*;
 use rustc::lint::{LateContext, LateLintPass, LintArray, LintPass};
 use rustc::{declare_lint_pass, declare_tool_lint};
@@ -30,6 +34,10 @@ declare_clippy_lint! {
     /// } else {
     ///     true
     /// }
+    /// ```
+    /// Could be written as
+    /// ```rust,ignore
+    /// !x
     /// ```
     pub NEEDLESS_BOOL,
     complexity,
@@ -129,7 +137,11 @@ declare_lint_pass!(BoolComparison => [BOOL_COMPARISON]);
 
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for BoolComparison {
     fn check_expr(&mut self, cx: &LateContext<'a, 'tcx>, e: &'tcx Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(e.span) {
+=======
+        if e.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 

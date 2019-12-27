@@ -1,9 +1,15 @@
 // edition:2018
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // run-pass
 
 #![allow(unused_variables)]
 #![deny(unused_mut)]
 #![feature(async_await)]
+=======
+// check-pass
+
+#![deny(unused_mut)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 type A = Vec<u32>;
 

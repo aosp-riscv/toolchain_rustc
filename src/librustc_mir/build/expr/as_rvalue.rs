@@ -500,6 +500,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         let mutability = match arg_place {
             Place {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
             } => this.local_decls[local].mutability,
             Place {
@@ -508,6 +509,13 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     base: None,
                     elem: ProjectionElem::Deref,
                 })
+=======
+                projection: box [],
+            } => this.local_decls[local].mutability,
+            Place {
+                base: PlaceBase::Local(local),
+                projection: box [ProjectionElem::Deref],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 debug_assert!(
                     this.local_decls[local].is_ref_for_guard(),
@@ -517,6 +525,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             }
             Place {
                 ref base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(box Projection {
                     base: ref base_proj,
                     elem: ProjectionElem::Field(upvar_index, _),
@@ -535,6 +544,21 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 let place = PlaceRef {
                     base,
                     projection: base_proj,
+=======
+                projection: box [ref proj_base @ .., ProjectionElem::Field(upvar_index, _)],
+            }
+            | Place {
+                ref base,
+                projection: box [
+                    ref proj_base @ ..,
+                    ProjectionElem::Field(upvar_index, _),
+                    ProjectionElem::Deref
+                ],
+            } => {
+                let place = PlaceRef {
+                    base,
+                    projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 };
 
                 // Not projected from the implicit `self` in a closure.
@@ -591,7 +615,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         let n = (!0u128) >> (128 - bits);
         let literal = ty::Const::from_bits(self.hir.tcx(), n, param_ty);
 
-        self.literal_operand(span, ty, literal)
+        self.literal_operand(span, literal)
     }
 
     // Helper to get the minimum value of the appropriate type
@@ -602,6 +626,6 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
         let n = 1 << (bits - 1);
         let literal = ty::Const::from_bits(self.hir.tcx(), n, param_ty);
 
-        self.literal_operand(span, ty, literal)
+        self.literal_operand(span, literal)
     }
 }

@@ -9,7 +9,10 @@ use errors::Applicability;
 use rustc_data_structures::fx::FxHashMap;
 use syntax::ast::{Ident, Item, ItemKind};
 use syntax::symbol::{sym, Symbol};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax_pos::ExpnInfo;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 declare_tool_lint! {
     pub rustc::DEFAULT_HASH_TYPES,
@@ -23,7 +26,11 @@ pub struct DefaultHashTypes {
 
 impl DefaultHashTypes {
     // we are allowed to use `HashMap` and `HashSet` as identifiers for implementing the lint itself
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[cfg_attr(not(bootstrap), allow(rustc::default_hash_types))]
+=======
+    #[allow(rustc::default_hash_types)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn new() -> Self {
         let mut map = FxHashMap::default();
         map.insert(sym::HashMap, sym::FxHashMap);
@@ -108,6 +115,7 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for TyTyKind {
                             .help("try using `Ty` instead")
                             .emit();
                         } else {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             if ty.span.ctxt().outer_expn_info().is_some() {
                                 return;
                             }
@@ -238,14 +246,60 @@ impl EarlyLintPass for LintPassImpl {
                             )
                             .help("try using `declare_lint_pass!` or `impl_lint_pass!` instead")
                             .emit();
+=======
+                            if ty.span.from_expansion() {
+                                return;
+                            }
+                            if let Some(t) = is_ty_or_ty_ctxt(cx, ty) {
+                                if path.segments.len() > 1 {
+                                    cx.struct_span_lint(
+                                        USAGE_OF_QUALIFIED_TY,
+                                        path.span,
+                                        &format!("usage of qualified `ty::{}`", t),
+                                    )
+                                    .span_suggestion(
+                                        path.span,
+                                        "try using it unqualified",
+                                        t,
+                                        // The import probably needs to be changed
+                                        Applicability::MaybeIncorrect,
+                                    )
+                                    .emit();
+                                }
+                            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         }
                     }
                 }
             }
+            TyKind::Rptr(_, MutTy { ty: inner_ty, mutbl: Mutability::MutImmutable }) => {
+                if let Some(impl_did) = cx.tcx.impl_of_method(ty.hir_id.owner_def_id()) {
+                    if cx.tcx.impl_trait_ref(impl_did).is_some() {
+                        return;
+                    }
+                }
+                if let Some(t) = is_ty_or_ty_ctxt(cx, &inner_ty) {
+                    cx.struct_span_lint(
+                        TY_PASS_BY_REFERENCE,
+                        ty.span,
+                        &format!("passing `{}` by reference", t),
+                    )
+                    .span_suggestion(
+                        ty.span,
+                        "try passing by value",
+                        t,
+                        // Changing type of function argument
+                        Applicability::MaybeIncorrect,
+                    )
+                    .emit();
+                }
+            }
+            _ => {}
         }
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn is_lint_pass_expansion(expn_info: &ExpnInfo) -> bool {
     if expn_info.kind.descr() == sym::impl_lint_pass {
         true
@@ -253,5 +307,83 @@ fn is_lint_pass_expansion(expn_info: &ExpnInfo) -> bool {
         info.kind.descr() == sym::declare_lint_pass
     } else {
         false
+=======
+fn lint_ty_kind_usage(cx: &LateContext<'_, '_>, segment: &PathSegment) -> bool {
+    if let Some(res) = segment.res {
+        if let Some(did) = res.opt_def_id() {
+            return cx.tcx.is_diagnostic_item(sym::TyKind, did);
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+    }
+}
+
+fn is_ty_or_ty_ctxt(cx: &LateContext<'_, '_>, ty: &Ty) -> Option<String> {
+    match &ty.node {
+        TyKind::Path(qpath) => {
+            if let QPath::Resolved(_, path) = qpath {
+                let did = path.res.opt_def_id()?;
+                if cx.tcx.is_diagnostic_item(sym::Ty, did) {
+                    return Some(format!("Ty{}", gen_args(path.segments.last().unwrap())));
+                } else if cx.tcx.is_diagnostic_item(sym::TyCtxt, did) {
+                    return Some(format!("TyCtxt{}", gen_args(path.segments.last().unwrap())));
+                }
+            }
+        }
+        _ => {}
+    }
+
+    None
+}
+
+fn gen_args(segment: &PathSegment) -> String {
+    if let Some(args) = &segment.args {
+        let lifetimes = args
+            .args
+            .iter()
+            .filter_map(|arg| {
+                if let GenericArg::Lifetime(lt) = arg {
+                    Some(lt.name.ident().to_string())
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+
+        if !lifetimes.is_empty() {
+            return format!("<{}>", lifetimes.join(", "));
+        }
+    }
+
+    String::new()
+}
+
+declare_tool_lint! {
+    pub rustc::LINT_PASS_IMPL_WITHOUT_MACRO,
+    Allow,
+    "`impl LintPass` without the `declare_lint_pass!` or `impl_lint_pass!` macros"
+}
+
+declare_lint_pass!(LintPassImpl => [LINT_PASS_IMPL_WITHOUT_MACRO]);
+
+impl EarlyLintPass for LintPassImpl {
+    fn check_item(&mut self, cx: &EarlyContext<'_>, item: &Item) {
+        if let ItemKind::Impl(_, _, _, _, Some(lint_pass), _, _) = &item.node {
+            if let Some(last) = lint_pass.path.segments.last() {
+                if last.ident.name == sym::LintPass {
+                    let expn_data = lint_pass.path.span.ctxt().outer_expn_data();
+                    let call_site = expn_data.call_site;
+                    if expn_data.kind.descr() != sym::impl_lint_pass &&
+                       call_site.ctxt().outer_expn_data().kind.descr() != sym::declare_lint_pass {
+                        cx.struct_span_lint(
+                            LINT_PASS_IMPL_WITHOUT_MACRO,
+                            lint_pass.path.span,
+                            "implementing `LintPass` by hand",
+                        )
+                        .help("try using `declare_lint_pass!` or `impl_lint_pass!` instead")
+                        .emit();
+                    }
+                }
+            }
+        }
     }
 }

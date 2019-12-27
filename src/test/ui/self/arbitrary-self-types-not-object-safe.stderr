@@ -1,6 +1,7 @@
 error[E0038]: the trait `Foo` cannot be made into an object
   --> $DIR/arbitrary-self-types-not-object-safe.rs:31:32
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL |     let x = Rc::new(5usize) as Rc<dyn Foo>;
    |                                ^^^^^^^^^^^ the trait `Foo` cannot be made into an object
    |
@@ -13,6 +14,23 @@ LL |     let x = Rc::new(5usize) as Rc<dyn Foo>;
    |             ^^^^^^^^^^^^^^^ the trait `Foo` cannot be made into an object
    |
    = note: method `foo`'s receiver cannot be dispatched on
+=======
+LL |     fn foo(self: &Rc<Self>) -> usize;
+   |        --- method `foo`'s `self` parameter cannot be dispatched on
+...
+LL |     let x = Rc::new(5usize) as Rc<dyn Foo>;
+   |                                ^^^^^^^^^^^ the trait `Foo` cannot be made into an object
+
+error[E0038]: the trait `Foo` cannot be made into an object
+  --> $DIR/arbitrary-self-types-not-object-safe.rs:31:13
+   |
+LL |     fn foo(self: &Rc<Self>) -> usize;
+   |        --- method `foo`'s `self` parameter cannot be dispatched on
+...
+LL |     let x = Rc::new(5usize) as Rc<dyn Foo>;
+   |             ^^^^^^^^^^^^^^^ the trait `Foo` cannot be made into an object
+   |
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    = note: required because of the requirements on the impl of `std::ops::CoerceUnsized<std::rc::Rc<dyn Foo>>` for `std::rc::Rc<usize>`
 
 error: aborting due to 2 previous errors

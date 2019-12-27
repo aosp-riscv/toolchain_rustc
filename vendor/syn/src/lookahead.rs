@@ -2,11 +2,19 @@ use std::cell::RefCell;
 
 use proc_macro2::{Delimiter, Span};
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use buffer::Cursor;
 use error::{self, Error};
 use sealed::lookahead::Sealed;
 use span::IntoSpans;
 use token::Token;
+=======
+use crate::buffer::Cursor;
+use crate::error::{self, Error};
+use crate::sealed::lookahead::Sealed;
+use crate::span::IntoSpans;
+use crate::token::Token;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /// Support for checking the next token in a stream to decide how to parse.
 ///
@@ -17,12 +25,16 @@ use token::Token;
 ///
 /// Use [`ParseStream::lookahead1`] to construct this object.
 ///
-/// [`ParseStream::peek`]: struct.ParseBuffer.html#method.peek
-/// [`ParseStream::lookahead1`]: struct.ParseBuffer.html#method.lookahead1
+/// [`ParseStream::peek`]: crate::parse::ParseBuffer::peek
+/// [`ParseStream::lookahead1`]: crate::parse::ParseBuffer::lookahead1
 ///
 /// # Example
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// ```edition2018
+=======
+/// ```
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// use syn::{ConstParam, Ident, Lifetime, LifetimeDef, Result, Token, TypeParam};
 /// use syn::parse::{Parse, ParseStream};
 ///
@@ -66,8 +78,8 @@ pub struct Lookahead1<'a> {
 
 pub fn new(scope: Span, cursor: Cursor) -> Lookahead1 {
     Lookahead1 {
-        scope: scope,
-        cursor: cursor,
+        scope,
+        cursor,
         comparisons: RefCell::new(Vec::new()),
     }
 }
@@ -142,7 +154,11 @@ impl<'a> Lookahead1<'a> {
 ///
 /// This trait is sealed and cannot be implemented for types outside of Syn.
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// [`ParseStream::peek`]: struct.ParseBuffer.html#method.peek
+=======
+/// [`ParseStream::peek`]: crate::parse::ParseBuffer::peek
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub trait Peek: Sealed {
     // Not public API.
     #[doc(hidden)]

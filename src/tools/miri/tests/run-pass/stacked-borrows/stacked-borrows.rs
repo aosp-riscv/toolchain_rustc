@@ -1,5 +1,6 @@
 // Test various stacked-borrows-related things.
 fn main() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     deref_partially_dangling_raw();
     read_does_not_invalidate1();
     read_does_not_invalidate2();
@@ -22,6 +23,19 @@ fn deref_partially_dangling_raw() {
     let xptr = &x as *const _ as *const (i32, i32, i32);
     let val = unsafe { (*xptr).1 };
     assert_eq!(val, 13);
+=======
+    read_does_not_invalidate1();
+    read_does_not_invalidate2();
+    ref_raw_int_raw();
+    mut_raw_then_mut_shr();
+    mut_shr_then_mut_raw();
+    mut_raw_mut();
+    partially_invalidate_mut();
+    drop_after_sharing();
+    direct_mut_to_const_raw();
+    two_raw();
+    shr_and_raw();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 // Make sure that reading from an `&mut` does, like reborrowing to `&`,

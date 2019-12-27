@@ -30,6 +30,7 @@ use self::move_paths::MoveData;
 
 mod at_location;
 pub mod drop_flag_effects;
+pub mod generic;
 mod graphviz;
 mod impls;
 pub mod move_paths;
@@ -56,7 +57,7 @@ where
 /// string (as well as that of rendering up-front); in exchange, you
 /// don't have to hand over ownership of your value or deal with
 /// borrowing it.
-pub(crate) struct DebugFormatted(String);
+pub struct DebugFormatted(String);
 
 impl DebugFormatted {
     pub fn new(input: &dyn fmt::Debug) -> DebugFormatted {
@@ -70,7 +71,7 @@ impl fmt::Debug for DebugFormatted {
     }
 }
 
-pub(crate) trait Dataflow<'tcx, BD: BitDenotation<'tcx>> {
+pub trait Dataflow<'tcx, BD: BitDenotation<'tcx>> {
     /// Sets up and runs the dataflow problem, using `p` to render results if
     /// implementation so chooses.
     fn dataflow<P>(&mut self, p: P) where P: Fn(&BD, BD::Idx) -> DebugFormatted {
@@ -121,7 +122,11 @@ pub struct MoveDataParamEnv<'tcx> {
     pub(crate) param_env: ty::ParamEnv<'tcx>,
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub(crate) fn do_dataflow<'a, 'tcx, BD, P>(
+=======
+pub fn do_dataflow<'a, 'tcx, BD, P>(
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     tcx: TyCtxt<'tcx>,
     body: &'a Body<'tcx>,
     def_id: DefId,
@@ -360,6 +365,7 @@ pub(crate) trait DataflowResultsConsumer<'a, 'tcx: 'a> {
     // Delegated Hooks: Provide access to the MIR and process the flow state.
 
     fn body(&self) -> &'a Body<'tcx>;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 }
 
 /// Allows iterating dataflow results in a flexible and reasonably fast way.
@@ -453,22 +459,59 @@ where
     {
         self.flow_state.each_gen_bit(f)
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub fn state_for_location<'tcx, T: BitDenotation<'tcx>>(loc: Location,
                                                         analysis: &T,
                                                         result: &DataflowResults<'tcx, T>,
                                                         body: &Body<'tcx>)
     -> BitSet<T::Idx> {
     let mut trans = GenKill::from_elem(HybridBitSet::new_empty(analysis.bits_per_block()));
+=======
+/// Allows iterating dataflow results in a flexible and reasonably fast way.
+pub struct DataflowResultsCursor<'mir, 'tcx, BD, DR = DataflowResults<'tcx, BD>>
+where
+    BD: BitDenotation<'tcx>,
+    DR: Borrow<DataflowResults<'tcx, BD>>,
+{
+    flow_state: FlowAtLocation<'tcx, BD, DR>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     for stmt in 0..loc.statement_index {
         let mut stmt_loc = loc;
         stmt_loc.statement_index = stmt;
         analysis.before_statement_effect(&mut trans, stmt_loc);
         analysis.statement_effect(&mut trans, stmt_loc);
+=======
+    // The statement (or terminator) whose effect has been reconstructed in
+    // flow_state.
+    curr_loc: Option<Location>,
+
+    body: &'mir Body<'tcx>,
+}
+
+pub type DataflowResultsRefCursor<'mir, 'tcx, BD> =
+    DataflowResultsCursor<'mir, 'tcx, BD, &'mir DataflowResults<'tcx, BD>>;
+
+impl<'mir, 'tcx, BD, DR> DataflowResultsCursor<'mir, 'tcx, BD, DR>
+where
+    BD: BitDenotation<'tcx>,
+    DR: Borrow<DataflowResults<'tcx, BD>>,
+{
+    pub fn new(result: DR, body: &'mir Body<'tcx>) -> Self {
+        DataflowResultsCursor {
+            flow_state: FlowAtLocation::new(result),
+            curr_loc: None,
+            body,
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // Apply the pre-statement effect of the statement we're evaluating.
     if loc.statement_index == body[loc.block].statements.len() {
         analysis.before_terminator_effect(&mut trans, loc);
@@ -481,6 +524,72 @@ pub fn state_for_location<'tcx, T: BitDenotation<'tcx>>(loc: Location,
     let mut state = result.sets().entry_set_for(loc.block.index()).to_owned();
     trans.apply(&mut state);
     state
+=======
+    /// Seek to the given location in MIR. This method is fast if you are
+    /// traversing your MIR statements in order.
+    ///
+    /// After calling `seek`, the current state will reflect all effects up to
+    /// and including the `before_statement_effect` of the statement at location
+    /// `loc`. The `statement_effect` of the statement at `loc` will be
+    /// available as the current effect (see e.g. `each_gen_bit`).
+    ///
+    /// If `loc.statement_index` equals the number of statements in the block,
+    /// we will reconstruct the terminator effect in the same way as described
+    /// above.
+    pub fn seek(&mut self, loc: Location) {
+        if self.curr_loc.map(|cur| loc == cur).unwrap_or(false) {
+            return;
+        }
+
+        let start_index;
+        let should_reset = match self.curr_loc {
+            None => true,
+            Some(cur)
+                if loc.block != cur.block || loc.statement_index < cur.statement_index => true,
+            _ => false,
+        };
+        if should_reset {
+            self.flow_state.reset_to_entry_of(loc.block);
+            start_index = 0;
+        } else {
+            let curr_loc = self.curr_loc.unwrap();
+            start_index = curr_loc.statement_index;
+            // Apply the effect from the last seek to the current state.
+            self.flow_state.apply_local_effect(curr_loc);
+        }
+
+        for stmt in start_index..loc.statement_index {
+            let mut stmt_loc = loc;
+            stmt_loc.statement_index = stmt;
+            self.flow_state.reconstruct_statement_effect(stmt_loc);
+            self.flow_state.apply_local_effect(stmt_loc);
+        }
+
+        if loc.statement_index == self.body[loc.block].statements.len() {
+            self.flow_state.reconstruct_terminator_effect(loc);
+        } else {
+            self.flow_state.reconstruct_statement_effect(loc);
+        }
+        self.curr_loc = Some(loc);
+    }
+
+    /// Return whether the current state contains bit `x`.
+    pub fn contains(&self, x: BD::Idx) -> bool {
+        self.flow_state.contains(x)
+    }
+
+    /// Iterate over each `gen` bit in the current effect (invoke `seek` first).
+    pub fn each_gen_bit<F>(&self, f: F)
+    where
+        F: FnMut(BD::Idx),
+    {
+        self.flow_state.each_gen_bit(f)
+    }
+
+    pub fn get(&self) -> &BitSet<BD::Idx> {
+        self.flow_state.as_dense()
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 pub struct DataflowAnalysis<'a, 'tcx, O>
@@ -565,6 +674,7 @@ pub struct GenKill<T> {
     pub(crate) kill_set: T,
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 type GenKillSet<T> = GenKill<HybridBitSet<T>>;
 
 impl<T> GenKill<T> {
@@ -586,22 +696,53 @@ impl<E:Idx> GenKillSet<E> {
     }
 
     fn gen(&mut self, e: E) {
+=======
+pub type GenKillSet<T> = GenKill<HybridBitSet<T>>;
+
+impl<T> GenKill<T> {
+    /// Creates a new tuple where `gen_set == kill_set == elem`.
+    pub(crate) fn from_elem(elem: T) -> Self
+        where T: Clone
+    {
+        GenKill {
+            gen_set: elem.clone(),
+            kill_set: elem,
+        }
+    }
+}
+
+impl<E:Idx> GenKillSet<E> {
+    pub fn clear(&mut self) {
+        self.gen_set.clear();
+        self.kill_set.clear();
+    }
+
+    pub fn gen(&mut self, e: E) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.gen_set.insert(e);
         self.kill_set.remove(e);
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn gen_all(&mut self, i: impl IntoIterator<Item: Borrow<E>>) {
+=======
+    pub fn gen_all(&mut self, i: impl IntoIterator<Item: Borrow<E>>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         for j in i {
             self.gen(*j.borrow());
         }
     }
 
-    fn kill(&mut self, e: E) {
+    pub fn kill(&mut self, e: E) {
         self.gen_set.remove(e);
         self.kill_set.insert(e);
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn kill_all(&mut self, i: impl IntoIterator<Item: Borrow<E>>) {
+=======
+    pub fn kill_all(&mut self, i: impl IntoIterator<Item: Borrow<E>>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         for j in i {
             self.kill(*j.borrow());
         }

@@ -2,6 +2,7 @@ pub(crate) use self::checkstyle::*;
 pub(crate) use self::diff::*;
 pub(crate) use self::files::*;
 pub(crate) use self::files_with_backup::*;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub(crate) use self::modified_lines::*;
 pub(crate) use self::stdout::*;
 use crate::FileName;
@@ -29,6 +30,37 @@ pub(crate) struct EmitterResult {
 pub(crate) trait Emitter {
     fn emit_formatted_file(
         &self,
+=======
+pub(crate) use self::json::*;
+pub(crate) use self::modified_lines::*;
+pub(crate) use self::stdout::*;
+use crate::FileName;
+use std::io::{self, Write};
+use std::path::Path;
+
+mod checkstyle;
+mod diff;
+mod files;
+mod files_with_backup;
+mod json;
+mod modified_lines;
+mod stdout;
+
+pub(crate) struct FormattedFile<'a> {
+    pub(crate) filename: &'a FileName,
+    pub(crate) original_text: &'a str,
+    pub(crate) formatted_text: &'a str,
+}
+
+#[derive(Debug, Default, Clone)]
+pub(crate) struct EmitterResult {
+    pub(crate) has_diff: bool,
+}
+
+pub(crate) trait Emitter {
+    fn emit_formatted_file(
+        &mut self,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         output: &mut dyn Write,
         formatted_file: FormattedFile<'_>,
     ) -> Result<EmitterResult, io::Error>;

@@ -1,5 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use core::unicode::property::Pattern_White_Space;
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::mir::*;
 use rustc::ty;
 use rustc_errors::{DiagnosticBuilder,Applicability};
@@ -91,11 +94,21 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
                 // If that ever stops being the case, then the ever initialized
                 // flow could be used.
                 if let Some(StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Place {
                         base: PlaceBase::Local(local),
                         projection: None,
                     },
                     box Rvalue::Use(Operand::Move(move_from)),
+=======
+                    box(
+                        Place {
+                            base: PlaceBase::Local(local),
+                            projection: box [],
+                        },
+                        Rvalue::Use(Operand::Move(move_from))
+                    )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )) = self.body.basic_blocks()[location.block]
                     .statements
                     .get(location.statement_index)
@@ -276,6 +289,7 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
         place: &Place<'tcx>,
         span: Span
     ) -> DiagnosticBuilder<'a> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let description = if place.projection.is_none() {
             format!("static item `{}`", self.describe_place(place.as_ref()).unwrap())
         } else {
@@ -429,6 +443,160 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
                 format!("{}.as_ref()", snippet),
                 Applicability::MaybeIncorrect,
             );
+=======
+        let description = if place.projection.is_empty() {
+            format!("static item `{}`", self.describe_place(place.as_ref()).unwrap())
+        } else {
+            let base_static = PlaceRef {
+                base: &place.base,
+                projection: &place.projection[..1],
+            };
+
+            format!(
+                "`{:?}` as `{:?}` is a static item",
+                self.describe_place(place.as_ref()).unwrap(),
+                self.describe_place(base_static).unwrap(),
+            )
+        };
+
+        self.cannot_move_out_of(span, &description)
+    }
+
+    fn report_cannot_move_from_borrowed_content(
+        &mut self,
+        move_place: &Place<'tcx>,
+        deref_target_place: &Place<'tcx>,
+        span: Span,
+    ) -> DiagnosticBuilder<'a> {
+        // Inspect the type of the content behind the
+        // borrow to provide feedback about why this
+        // was a move rather than a copy.
+        let ty = deref_target_place.ty(self.body, self.infcx.tcx).ty;
+        let upvar_field = self.prefixes(move_place.as_ref(), PrefixSet::All)
+            .find_map(|p| self.is_upvar_field_projection(p));
+
+        let deref_base = match &deref_target_place.projection {
+            box [proj_base @ .., ProjectionElem::Deref] => {
+                PlaceRef {
+                    base: &deref_target_place.base,
+                    projection: proj_base,
+                }
+            }
+            _ => bug!("deref_target_place is not a deref projection"),
+        };
+
+        if let PlaceRef {
+            base: PlaceBase::Local(local),
+            projection: [],
+        } = deref_base {
+            let decl = &self.body.local_decls[*local];
+            if decl.is_ref_for_guard() {
+                let mut err = self.cannot_move_out_of(
+                    span,
+                    &format!("`{}` in pattern guard", decl.name.unwrap()),
+                );
+                err.note(
+                    "variables bound in patterns cannot be moved from \
+                     until after the end of the pattern guard");
+                return err;
+            }
+        }
+
+        debug!("report: ty={:?}", ty);
+        let mut err = match ty.sty {
+            ty::Array(..) | ty::Slice(..) =>
+                self.cannot_move_out_of_interior_noncopy(span, ty, None),
+            ty::Closure(def_id, closure_substs)
+                if def_id == self.mir_def_id && upvar_field.is_some()
+            => {
+                let closure_kind_ty = closure_substs.closure_kind_ty(def_id, self.infcx.tcx);
+                let closure_kind = closure_kind_ty.to_opt_closure_kind();
+                let capture_description = match closure_kind {
+                    Some(ty::ClosureKind::Fn) => {
+                        "captured variable in an `Fn` closure"
+                    }
+                    Some(ty::ClosureKind::FnMut) => {
+                        "captured variable in an `FnMut` closure"
+                    }
+                    Some(ty::ClosureKind::FnOnce) => {
+                        bug!("closure kind does not match first argument type")
+                    }
+                    None => bug!("closure kind not inferred by borrowck"),
+                };
+
+                let upvar = &self.upvars[upvar_field.unwrap().index()];
+                let upvar_hir_id = upvar.var_hir_id;
+                let upvar_name = upvar.name;
+                let upvar_span = self.infcx.tcx.hir().span(upvar_hir_id);
+
+                let place_name = self.describe_place(move_place.as_ref()).unwrap();
+
+                let place_description = if self
+                    .is_upvar_field_projection(move_place.as_ref())
+                    .is_some()
+                {
+                    format!("`{}`, a {}", place_name, capture_description)
+                } else {
+                    format!(
+                        "`{}`, as `{}` is a {}",
+                        place_name,
+                        upvar_name,
+                        capture_description,
+                    )
+                };
+
+                debug!(
+                    "report: closure_kind_ty={:?} closure_kind={:?} place_description={:?}",
+                    closure_kind_ty, closure_kind, place_description,
+                );
+
+                let mut diag = self.cannot_move_out_of(span, &place_description);
+
+                diag.span_label(upvar_span, "captured outer variable");
+
+                diag
+            }
+            _ => {
+                let source = self.borrowed_content_source(deref_base);
+                match (
+                    self.describe_place(move_place.as_ref()),
+                    source.describe_for_named_place(),
+                ) {
+                    (Some(place_desc), Some(source_desc)) => {
+                        self.cannot_move_out_of(
+                            span,
+                            &format!("`{}` which is behind a {}", place_desc, source_desc),
+                        )
+                    }
+                    (_, _) => {
+                        self.cannot_move_out_of(
+                            span,
+                            &source.describe_for_unnamed_place(),
+                        )
+                    }
+                }
+            },
+        };
+        let move_ty = format!(
+            "{:?}",
+            move_place.ty(self.body, self.infcx.tcx).ty,
+        );
+        if let Ok(snippet) = self.infcx.tcx.sess.source_map().span_to_snippet(span) {
+            let is_option = move_ty.starts_with("std::option::Option");
+            let is_result = move_ty.starts_with("std::result::Result");
+            if is_option || is_result {
+                err.span_suggestion(
+                    span,
+                    &format!("consider borrowing the `{}`'s content", if is_option {
+                        "Option"
+                    } else {
+                        "Result"
+                    }),
+                    format!("{}.as_ref()", snippet),
+                    Applicability::MaybeIncorrect,
+                );
+            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         err
     }
@@ -439,13 +607,13 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
         err: &mut DiagnosticBuilder<'a>,
         span: Span,
     ) {
-        let snippet = self.infcx.tcx.sess.source_map().span_to_snippet(span).unwrap();
         match error {
             GroupedMoveError::MovesFromPlace {
                 mut binds_to,
                 move_from,
                 ..
             } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 err.span_suggestion(
                     span,
                     "consider borrowing here",
@@ -469,7 +637,37 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
                 } else {
                     binds_to.sort();
                     binds_to.dedup();
+=======
+                if let Ok(snippet) = self.infcx.tcx.sess.source_map().span_to_snippet(span) {
+                    err.span_suggestion(
+                        span,
+                        "consider borrowing here",
+                        format!("&{}", snippet),
+                        Applicability::Unspecified,
+                    );
+                }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+                if binds_to.is_empty() {
+                    let place_ty = move_from.ty(self.body, self.infcx.tcx).ty;
+                    let place_desc = match self.describe_place(move_from.as_ref()) {
+                        Some(desc) => format!("`{}`", desc),
+                        None => format!("value"),
+                    };
+
+                    self.note_type_does_not_implement_copy(
+                        err,
+                        &place_desc,
+                        place_ty,
+                        Some(span)
+                    );
+                } else {
+                    binds_to.sort();
+                    binds_to.dedup();
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     self.add_move_error_details(err, &binds_to);
                 }
             }
@@ -517,27 +715,27 @@ impl<'a, 'tcx> MirBorrowckCtxt<'a, 'tcx> {
                     ..
                 }))
             ) = bind_to.is_user_variable {
-                let pat_snippet = self.infcx.tcx.sess.source_map()
-                    .span_to_snippet(pat_span)
-                    .unwrap();
-                if pat_snippet.starts_with('&') {
-                    let pat_snippet = pat_snippet[1..].trim_start();
-                    let suggestion;
-                    let to_remove;
-                    if pat_snippet.starts_with("mut")
-                        && pat_snippet["mut".len()..].starts_with(Pattern_White_Space)
-                    {
-                        suggestion = pat_snippet["mut".len()..].trim_start();
-                        to_remove = "&mut";
-                    } else {
-                        suggestion = pat_snippet;
-                        to_remove = "&";
+                if let Ok(pat_snippet) = self.infcx.tcx.sess.source_map().span_to_snippet(pat_span)
+                {
+                    if pat_snippet.starts_with('&') {
+                        let pat_snippet = pat_snippet[1..].trim_start();
+                        let suggestion;
+                        let to_remove;
+                        if pat_snippet.starts_with("mut")
+                            && pat_snippet["mut".len()..].starts_with(rustc_lexer::is_whitespace)
+                        {
+                            suggestion = pat_snippet["mut".len()..].trim_start();
+                            to_remove = "&mut";
+                        } else {
+                            suggestion = pat_snippet;
+                            to_remove = "&";
+                        }
+                        suggestions.push((
+                            pat_span,
+                            to_remove,
+                            suggestion.to_owned(),
+                        ));
                     }
-                    suggestions.push((
-                        pat_span,
-                        to_remove,
-                        suggestion.to_owned(),
-                    ));
                 }
             }
         }

@@ -27,6 +27,7 @@ struct Function {
     instrs: &'static [&'static str],
     file: &'static str,
     required_const: &'static [usize],
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 }
 
 static F32: Type = Type::PrimFloat(32);
@@ -140,6 +141,272 @@ fn verify_all_signatures() {
 
     let mut all_valid = true;
     'outer: for rust in FUNCTIONS {
+=======
+    has_test: bool,
+}
+
+static F32: Type = Type::PrimFloat(32);
+static F64: Type = Type::PrimFloat(64);
+static I16: Type = Type::PrimSigned(16);
+static I32: Type = Type::PrimSigned(32);
+static I64: Type = Type::PrimSigned(64);
+static I8: Type = Type::PrimSigned(8);
+static U16: Type = Type::PrimUnsigned(16);
+static U32: Type = Type::PrimUnsigned(32);
+static U64: Type = Type::PrimUnsigned(64);
+static U128: Type = Type::PrimUnsigned(128);
+static U8: Type = Type::PrimUnsigned(8);
+static ORDERING: Type = Type::Ordering;
+
+static M64: Type = Type::M64;
+static M128: Type = Type::M128;
+static M128I: Type = Type::M128I;
+static M128D: Type = Type::M128D;
+static M256: Type = Type::M256;
+static M256I: Type = Type::M256I;
+static M256D: Type = Type::M256D;
+static M512: Type = Type::M512;
+static M512I: Type = Type::M512I;
+static M512D: Type = Type::M512D;
+static MMASK16: Type = Type::MMASK16;
+
+static TUPLE: Type = Type::Tuple;
+static CPUID: Type = Type::CpuidResult;
+static NEVER: Type = Type::Never;
+
+#[derive(Debug)]
+enum Type {
+    PrimFloat(u8),
+    PrimSigned(u8),
+    PrimUnsigned(u8),
+    MutPtr(&'static Type),
+    ConstPtr(&'static Type),
+    M64,
+    M128,
+    M128D,
+    M128I,
+    M256,
+    M256D,
+    M256I,
+    M512,
+    M512D,
+    M512I,
+    MMASK16,
+    Tuple,
+    CpuidResult,
+    Never,
+    Ordering,
+}
+
+stdarch_verify::x86_functions!(static FUNCTIONS);
+
+#[derive(Deserialize)]
+struct Data {
+    #[serde(rename = "intrinsic", default)]
+    intrinsics: Vec<Intrinsic>,
+}
+
+#[derive(Deserialize)]
+struct Intrinsic {
+    rettype: String,
+    name: String,
+    #[serde(rename = "CPUID", default)]
+    cpuid: Vec<String>,
+    #[serde(rename = "parameter", default)]
+    parameters: Vec<Parameter>,
+    #[serde(default)]
+    instruction: Vec<Instruction>,
+}
+
+#[derive(Deserialize)]
+struct Parameter {
+    #[serde(rename = "type")]
+    type_: String,
+}
+
+#[derive(Deserialize, Debug)]
+struct Instruction {
+    name: String,
+}
+
+macro_rules! bail {
+    ($($t:tt)*) => (return Err(format!($($t)*)))
+}
+
+#[test]
+fn verify_all_signatures() {
+    // This XML document was downloaded from Intel's site. To update this you
+    // can visit intel's intrinsics guide online documentation:
+    //
+    //   https://software.intel.com/sites/landingpage/IntrinsicsGuide/#
+    //
+    // Open up the network console and you'll see an xml file was downloaded
+    // (currently called data-3.4.xml). That's the file we downloaded
+    // here.
+    let xml = include_bytes!("../x86-intel.xml");
+
+    let xml = &xml[..];
+    let data: Data = serde_xml_rs::from_reader(xml).expect("failed to deserialize xml");
+    let mut map = HashMap::new();
+    for intrinsic in &data.intrinsics {
+        map.entry(&intrinsic.name[..])
+            .or_insert_with(Vec::new)
+            .push(intrinsic);
+    }
+
+    let mut all_valid = true;
+    'outer: for rust in FUNCTIONS {
+        if !rust.has_test {
+            // FIXME: this list should be almost empty
+            let skip = [
+                "__readeflags",
+                "__readeflags",
+                "__writeeflags",
+                "__writeeflags",
+                "_mm_comige_ss",
+                "_mm_cvt_ss2si",
+                "_mm_cvtt_ss2si",
+                "_mm_cvt_si2ss",
+                "_mm_set_ps1",
+                "_mm_load_ps1",
+                "_mm_store_ps1",
+                "_mm_getcsr",
+                "_mm_setcsr",
+                "_MM_GET_EXCEPTION_MASK",
+                "_MM_GET_EXCEPTION_STATE",
+                "_MM_GET_FLUSH_ZERO_MODE",
+                "_MM_GET_ROUNDING_MODE",
+                "_MM_SET_EXCEPTION_MASK",
+                "_MM_SET_EXCEPTION_STATE",
+                "_MM_SET_FLUSH_ZERO_MODE",
+                "_MM_SET_ROUNDING_MODE",
+                "_mm_prefetch",
+                "_mm_undefined_ps",
+                "_m_pmaxsw",
+                "_m_pmaxub",
+                "_m_pminsw",
+                "_m_pminub",
+                "_m_pavgb",
+                "_m_pavgw",
+                "_m_psadbw",
+                "_mm_cvt_pi2ps",
+                "_m_maskmovq",
+                "_m_pextrw",
+                "_m_pinsrw",
+                "_m_pmovmskb",
+                "_m_pshufw",
+                "_mm_cvtt_ps2pi",
+                "_mm_cvt_ps2pi",
+                "__cpuid_count",
+                "__cpuid",
+                "__get_cpuid_max",
+                "_xsave",
+                "_xrstor",
+                "_xsetbv",
+                "_xgetbv",
+                "_xsaveopt",
+                "_xsavec",
+                "_xsaves",
+                "_xrstors",
+                "_mm_bslli_si128",
+                "_mm_bsrli_si128",
+                "_mm_undefined_pd",
+                "_mm_undefined_si128",
+                "_mm_cvtps_ph",
+                "_mm256_cvtps_ph",
+                "_rdtsc",
+                "__rdtscp",
+                "_mm256_castps128_ps256",
+                "_mm256_castpd128_pd256",
+                "_mm256_castsi128_si256",
+                "_mm256_undefined_ps",
+                "_mm256_undefined_pd",
+                "_mm256_undefined_si256",
+                "_bextr2_u32",
+                "_mm_tzcnt_32",
+                "_mm512_setzero_si512",
+                "_mm512_setr_epi32",
+                "_mm512_set1_epi64",
+                "_m_paddb",
+                "_m_paddw",
+                "_m_paddd",
+                "_m_paddsb",
+                "_m_paddsw",
+                "_m_paddusb",
+                "_m_paddusw",
+                "_m_psubb",
+                "_m_psubw",
+                "_m_psubd",
+                "_m_psubsb",
+                "_m_psubsw",
+                "_m_psubusb",
+                "_m_psubusw",
+                "_mm_set_pi16",
+                "_mm_set_pi32",
+                "_mm_set_pi8",
+                "_mm_set1_pi16",
+                "_mm_set1_pi32",
+                "_mm_set1_pi8",
+                "_mm_setr_pi16",
+                "_mm_setr_pi32",
+                "_mm_setr_pi8",
+                "ud2",
+                "_mm_min_epi8",
+                "_mm_min_epi32",
+                "_xbegin",
+                "_xend",
+                "_rdrand16_step",
+                "_rdrand32_step",
+                "_rdseed16_step",
+                "_rdseed32_step",
+                "_fxsave",
+                "_fxrstor",
+                "_t1mskc_u64",
+                "_mm256_shuffle_epi32",
+                "_mm256_bslli_epi128",
+                "_mm256_bsrli_epi128",
+                "_mm256_unpackhi_epi8",
+                "_mm256_unpacklo_epi8",
+                "_mm256_unpackhi_epi16",
+                "_mm256_unpacklo_epi16",
+                "_mm256_unpackhi_epi32",
+                "_mm256_unpacklo_epi32",
+                "_mm256_unpackhi_epi64",
+                "_mm256_unpacklo_epi64",
+                "_xsave64",
+                "_xrstor64",
+                "_xsaveopt64",
+                "_xsavec64",
+                "_xsaves64",
+                "_xrstors64",
+                "_mm_cvtsi64x_si128",
+                "_mm_cvtsi128_si64x",
+                "_mm_cvtsi64x_sd",
+                "cmpxchg16b",
+                "_rdrand64_step",
+                "_rdseed64_step",
+                "_bextr2_u64",
+                "_mm_tzcnt_64",
+                "_fxsave64",
+                "_fxrstor64",
+            ];
+            if !skip.contains(&rust.name) {
+                println!(
+                    "missing run-time test named `test_{}` for `{}`",
+                    {
+                        let mut id = rust.name;
+                        while id.starts_with('_') {
+                            id = &id[1..];
+                        }
+                        id
+                    },
+                    rust.name
+                );
+                all_valid = false;
+            }
+        }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         match rust.name {
             // These aren't defined by Intel but they're defined by what appears
             // to be all other compilers. For more information see

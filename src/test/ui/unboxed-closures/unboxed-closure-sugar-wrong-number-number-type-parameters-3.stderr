@@ -5,10 +5,18 @@ LL | fn foo(_: &dyn Three())
    |                ^^^^^^^ expected 3 type arguments
 
 error[E0220]: associated type `Output` not found for `Three<(), [type error], [type error]>`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/unboxed-closure-sugar-wrong-number-number-type-parameters-3.rs:5:21
+=======
+  --> $DIR/unboxed-closure-sugar-wrong-number-number-type-parameters-3.rs:5:16
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | fn foo(_: &dyn Three())
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                     ^^ associated type `Output` not found
+=======
+   |                ^^^^^^^ associated type `Output` not found
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 2 previous errors
 

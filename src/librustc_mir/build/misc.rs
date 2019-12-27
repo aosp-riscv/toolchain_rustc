@@ -26,12 +26,14 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
     /// without any user type annotation.
     pub fn literal_operand(&mut self,
                            span: Span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                            ty: Ty<'tcx>,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                            literal: &'tcx ty::Const<'tcx>)
                            -> Operand<'tcx> {
         let constant = box Constant {
             span,
-            ty,
             user_ty: None,
             literal,
         };
@@ -47,7 +49,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
     pub fn zero_literal(&mut self, span: Span, ty: Ty<'tcx>) -> Operand<'tcx> {
         let literal = ty::Const::from_bits(self.hir.tcx(), 0, ty::ParamEnv::empty().and(ty));
 
-        self.literal_operand(span, ty, literal)
+        self.literal_operand(span, literal)
     }
 
     pub fn push_usize(&mut self,
@@ -61,7 +63,6 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             block, source_info, &temp,
             Constant {
                 span: source_info.span,
-                ty: self.hir.usize_ty(),
                 user_ty: None,
                 literal: self.hir.usize_literal(value),
             });

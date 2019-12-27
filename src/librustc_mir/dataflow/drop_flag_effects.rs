@@ -10,19 +10,29 @@ pub fn move_path_children_matching<'tcx, F>(move_data: &MoveData<'tcx>,
                                         path: MovePathIndex,
                                         mut cond: F)
                                         -> Option<MovePathIndex>
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     where F: FnMut(&mir::Projection<'tcx>) -> bool
+=======
+    where F: FnMut(&mir::PlaceElem<'tcx>) -> bool
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 {
     let mut next_child = move_data.move_paths[path].first_child;
     while let Some(child_index) = next_child {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         match move_data.move_paths[child_index].place.projection {
             Some(ref proj) => {
                 if cond(proj) {
                     return Some(child_index)
                 }
+=======
+        let move_path_children = &move_data.move_paths[child_index];
+        if let Some(elem) = move_path_children.place.projection.last() {
+            if cond(elem) {
+                return Some(child_index)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
-            _ => {}
         }
-        next_child = move_data.move_paths[child_index].next_sibling;
+        next_child = move_path_children.next_sibling;
     }
 
     None

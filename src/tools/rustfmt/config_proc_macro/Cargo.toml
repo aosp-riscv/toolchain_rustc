@@ -1,5 +1,6 @@
 [package]
 name = "rustfmt-config_proc_macro"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 version = "0.1.2"
 authors = ["topecongiro <seuchida@gmail.com>"]
 edition = "2018"
@@ -15,6 +16,23 @@ proc-macro = true
 proc-macro2 = "0.4"
 quote = "0.6"
 syn = { version = "0.15", features = ["full", "visit"] }
+=======
+version = "0.2.0"
+authors = ["topecongiro <seuchida@gmail.com>"]
+edition = "2018"
+description = "A collection of procedural macros for rustfmt"
+license = "Apache-2.0/MIT"
+categories = ["development-tools::procedural-macro-helpers"]
+repository = "https://github.com/rust-lang/rustfmt"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro2 = "1.0"
+quote = "1.0"
+syn = { version = "1.0", features = ["full", "visit"] }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 [dev-dependencies]
 serde = { version = "1.0", features = ["derive"] }

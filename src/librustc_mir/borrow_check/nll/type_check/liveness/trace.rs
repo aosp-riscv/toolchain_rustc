@@ -1,4 +1,3 @@
-use crate::borrow_check::location::LocationTable;
 use crate::borrow_check::nll::region_infer::values::{self, PointIndex, RegionValueElements};
 use crate::borrow_check::nll::type_check::liveness::local_use_map::LocalUseMap;
 use crate::borrow_check::nll::type_check::liveness::polonius;
@@ -38,7 +37,6 @@ pub(super) fn trace(
     flow_inits: &mut FlowAtLocation<'tcx, MaybeInitializedPlaces<'_, 'tcx>>,
     move_data: &MoveData<'tcx>,
     live_locals: Vec<Local>,
-    location_table: &LocationTable,
 ) {
     debug!("trace()");
 
@@ -52,7 +50,6 @@ pub(super) fn trace(
         local_use_map,
         move_data,
         drop_data: FxHashMap::default(),
-        location_table,
     };
 
     LivenessResults::new(cx).compute_for_all_locals(live_locals);
@@ -82,9 +79,6 @@ struct LivenessContext<'me, 'typeck, 'flow, 'tcx> {
     /// Index indicating where each variable is assigned, used, or
     /// dropped.
     local_use_map: &'me LocalUseMap,
-
-    /// Maps between a MIR Location and a LocationIndex
-    location_table: &'me LocationTable,
 }
 
 struct DropData<'tcx> {
@@ -468,13 +462,7 @@ impl LivenessContext<'_, '_, '_, 'tcx> {
     ) {
         debug!("add_use_live_facts_for(value={:?})", value);
 
-        Self::make_all_regions_live(
-            self.elements,
-            &mut self.typeck,
-            value,
-            live_at,
-            self.location_table,
-        )
+        Self::make_all_regions_live(self.elements, &mut self.typeck, value, live_at)
     }
 
     /// Some variable with type `live_ty` is "drop live" at `location`
@@ -525,6 +513,7 @@ impl LivenessContext<'_, '_, '_, 'tcx> {
         // All things in the `outlives` array may be touched by
         // the destructor and must be live at this point.
         for &kind in &drop_data.dropck_result.kinds {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Self::make_all_regions_live(
                 self.elements,
                 &mut self.typeck,
@@ -532,6 +521,9 @@ impl LivenessContext<'_, '_, '_, 'tcx> {
                 live_at,
                 self.location_table,
             );
+=======
+            Self::make_all_regions_live(self.elements, &mut self.typeck, kind, live_at);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
             polonius::add_var_drops_regions(&mut self.typeck, dropped_local, &kind);
         }
@@ -542,7 +534,6 @@ impl LivenessContext<'_, '_, '_, 'tcx> {
         typeck: &mut TypeChecker<'_, 'tcx>,
         value: impl TypeFoldable<'tcx>,
         live_at: &HybridBitSet<PointIndex>,
-        location_table: &LocationTable,
     ) {
         debug!("make_all_regions_live(value={:?})", value);
         debug!(
@@ -559,6 +550,7 @@ impl LivenessContext<'_, '_, '_, 'tcx> {
                 .constraints
                 .liveness_constraints
                 .add_elements(live_region_vid, live_at);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
             // FIXME: remove this when we can generate our own region-live-at reliably
             if let Some(facts) = typeck.borrowck_context.all_facts {
@@ -568,6 +560,8 @@ impl LivenessContext<'_, '_, '_, 'tcx> {
                     facts.region_live_at.push((live_region_vid, location_table.mid_index(loc)));
                 }
             }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         });
     }
 

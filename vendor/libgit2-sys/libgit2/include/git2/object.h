@@ -184,6 +184,7 @@ GIT_EXTERN(git_object_t) git_object_string2type(const char *str);
  * false otherwise.
  */
 GIT_EXTERN(int) git_object_typeisloose(git_object_t type);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 /**
  * Get the size in bytes for the structure which
@@ -198,6 +199,8 @@ GIT_EXTERN(int) git_object_typeisloose(git_object_t type);
  * @return size in bytes of the object
  */
 GIT_EXTERN(size_t) git_object_size(git_object_t type);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /**
  * Recursively peel an object until an object of the specified type is met.

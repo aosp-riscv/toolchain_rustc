@@ -35,7 +35,6 @@ use rustc_target::spec::abi;
 use syntax::ast;
 use syntax::ast::{Ident, MetaItemKind};
 use syntax::attr::{InlineAttr, OptimizeAttr, list_contains_name, mark_used};
-use syntax::source_map::Spanned;
 use syntax::feature_gate;
 use syntax::symbol::{InternedString, kw, Symbol, sym};
 use syntax_pos::{Span, DUMMY_SP};
@@ -520,17 +519,29 @@ fn convert_variant_ctor(tcx: TyCtxt<'_>, ctor_id: hir::HirId) {
     tcx.predicates_of(def_id);
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn convert_enum_variant_types<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, variants: &[hir::Variant]) {
+=======
+fn convert_enum_variant_types(
+    tcx: TyCtxt<'_>,
+    def_id: DefId,
+    variants: &[hir::Variant]
+) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let def = tcx.adt_def(def_id);
     let repr_type = def.repr.discr_type();
     let initial = repr_type.initial_discriminant(tcx);
-    let mut prev_discr = None::<Discr<'tcx>>;
+    let mut prev_discr = None::<Discr<'_>>;
 
     // fill the discriminant values and field types
     for variant in variants {
         let wrapped_discr = prev_discr.map_or(initial, |d| d.wrap_incr(tcx));
         prev_discr = Some(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if let Some(ref e) = variant.node.disr_expr {
+=======
+            if let Some(ref e) = variant.disr_expr {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let expr_did = tcx.hir().local_def_id(e.hir_id);
                 def.eval_explicit_discr(tcx, expr_did)
             } else if let Some(discr) = repr_type.disr_incr(tcx, prev_discr) {
@@ -546,14 +557,18 @@ fn convert_enum_variant_types<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, variants: 
                     format!("overflowed on value after {}", prev_discr.unwrap()),
                 ).note(&format!(
                     "explicitly set `{} = {}` if that is desired outcome",
-                    variant.node.ident, wrapped_discr
+                    variant.ident, wrapped_discr
                 ))
                 .emit();
                 None
             }.unwrap_or(wrapped_discr),
         );
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         for f in variant.node.data.fields() {
+=======
+        for f in variant.data.fields() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let def_id = tcx.hir().local_def_id(f.hir_id);
             tcx.generics_of(def_id);
             tcx.type_of(def_id);
@@ -562,7 +577,7 @@ fn convert_enum_variant_types<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, variants: 
 
         // Convert the ctor, if any. This also registers the variant as
         // an item.
-        if let Some(ctor_hir_id) = variant.node.data.ctor_hir_id() {
+        if let Some(ctor_hir_id) = variant.data.ctor_hir_id() {
             convert_variant_ctor(tcx, ctor_hir_id);
         }
     }
@@ -641,11 +656,16 @@ fn adt_def(tcx: TyCtxt<'_>, def_id: DefId) -> &ty::AdtDef {
             let variants = def.variants
                 .iter()
                 .map(|v| {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let variant_did = Some(tcx.hir().local_def_id(v.node.id));
                     let ctor_did = v.node.data.ctor_hir_id()
+=======
+                    let variant_did = Some(tcx.hir().local_def_id(v.id));
+                    let ctor_did = v.data.ctor_hir_id()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         .map(|hir_id| tcx.hir().local_def_id(hir_id));
 
-                    let discr = if let Some(ref e) = v.node.disr_expr {
+                    let discr = if let Some(ref e) = v.disr_expr {
                         distance_from_explicit = 0;
                         ty::VariantDiscr::Explicit(tcx.hir().local_def_id(e.hir_id))
                     } else {
@@ -653,8 +673,8 @@ fn adt_def(tcx: TyCtxt<'_>, def_id: DefId) -> &ty::AdtDef {
                     };
                     distance_from_explicit += 1;
 
-                    convert_variant(tcx, variant_did, ctor_did, v.node.ident, discr,
-                                    &v.node.data, AdtKind::Enum, def_id)
+                    convert_variant(tcx, variant_did, ctor_did, v.ident, discr,
+                                    &v.data, AdtKind::Enum, def_id)
                 })
                 .collect();
 
@@ -713,7 +733,11 @@ fn super_predicates_of(
     let icx = ItemCtxt::new(tcx, trait_def_id);
 
     // Convert the bounds that follow the colon, e.g., `Bar + Zed` in `trait Foo: Bar + Zed`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let self_param_ty = tcx.mk_self_type();
+=======
+    let self_param_ty = tcx.types.self_param;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let superbounds1 = AstConv::compute_bounds(&icx, self_param_ty, bounds, SizedByDefault::No,
         item.span);
 
@@ -896,6 +920,23 @@ fn generics_of(tcx: TyCtxt<'_>, def_id: DefId) -> &ty::Generics {
         Node::Ctor(..) | Node::Field(_) => {
             let parent_id = tcx.hir().get_parent_item(hir_id);
             Some(tcx.hir().local_def_id(parent_id))
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        }
+        // FIXME(#43408) enable this in all cases when we get lazy normalization.
+        Node::AnonConst(&anon_const) => {
+            // HACK(eddyb) this provides the correct generics when the workaround
+            // for a const parameter `AnonConst` is being used elsewhere, as then
+            // there won't be the kind of cyclic dependency blocking #43408.
+            let expr = &tcx.hir().body(anon_const.body).value;
+            let icx = ItemCtxt::new(tcx, def_id);
+            if AstConv::const_param_def_id(&icx, expr).is_some() {
+                let parent_id = tcx.hir().get_parent_item(hir_id);
+                Some(tcx.hir().local_def_id(parent_id))
+            } else {
+                None
+            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         Node::Expr(&hir::Expr {
             node: hir::ExprKind::Closure(..),
@@ -1011,6 +1052,7 @@ fn generics_of(tcx: TyCtxt<'_>, def_id: DefId) -> &ty::Generics {
                         synthetic,
                         ..
                     } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         if param.name.ident().name == kw::SelfUpper {
                             span_bug!(
                                 param.span,
@@ -1018,6 +1060,8 @@ fn generics_of(tcx: TyCtxt<'_>, def_id: DefId) -> &ty::Generics {
                             );
                         }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         if !allow_defaults && default.is_some() {
                             if !tcx.features().default_type_parameter_fallback {
                                 tcx.lint_hir(
@@ -1041,6 +1085,7 @@ fn generics_of(tcx: TyCtxt<'_>, def_id: DefId) -> &ty::Generics {
                         }
                     }
                     GenericParamKind::Const { .. } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         if param.name.ident().name == kw::SelfUpper {
                             span_bug!(
                                 param.span,
@@ -1048,6 +1093,8 @@ fn generics_of(tcx: TyCtxt<'_>, def_id: DefId) -> &ty::Generics {
                             );
                         }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         ty::GenericParamDefKind::Const
                     }
                     _ => return None,
@@ -1314,10 +1361,9 @@ pub fn checked_type_of(tcx: TyCtxt<'_>, def_id: DefId, fail: bool) -> Option<Ty<
             ForeignItemKind::Type => tcx.mk_foreign(def_id),
         },
 
-        Node::Ctor(&ref def) | Node::Variant(&Spanned {
-            node: hir::VariantKind { data: ref def, .. },
-            ..
-        }) => match *def {
+        Node::Ctor(&ref def) | Node::Variant(
+            hir::Variant { data: ref def, .. }
+        ) => match *def {
             VariantData::Unit(..) | VariantData::Struct(..) => {
                 tcx.type_of(tcx.hir().get_parent_did(hir_id))
             }
@@ -1363,12 +1409,8 @@ pub fn checked_type_of(tcx: TyCtxt<'_>, def_id: DefId, fail: bool) -> Option<Ty<
                     tcx.types.usize
                 }
 
-                Node::Variant(&Spanned {
-                    node:
-                        VariantKind {
-                            disr_expr: Some(ref e),
-                            ..
-                        },
+                Node::Variant(Variant {
+                    disr_expr: Some(ref e),
                     ..
                 }) if e.hir_id == hir_id =>
                 {
@@ -1569,7 +1611,11 @@ fn find_opaque_ty_constraints(tcx: TyCtxt<'_>, def_id: DefId) -> Ty<'_> {
                                     &format!(
                                         "defining opaque type use restricts opaque \
                                          type by using the generic parameter `{}` twice",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                         p.name
+=======
+                                        p,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                     ),
                                 );
                                 return;
@@ -1809,10 +1855,16 @@ fn fn_sig(tcx: TyCtxt<'_>, def_id: DefId) -> ty::PolyFnSig<'_> {
             compute_sig_of_foreign_fn_decl(tcx, def_id, fn_decl, abi)
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Ctor(data) | Variant(Spanned {
             node: hir::VariantKind { data, ..  },
             ..
         }) if data.ctor_hir_id().is_some() => {
+=======
+        Ctor(data) | Variant(
+            hir::Variant { data, ..  }
+        ) if data.ctor_hir_id().is_some() => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let ty = tcx.type_of(tcx.hir().get_parent_did(hir_id));
             let inputs = data.fields()
                 .iter()

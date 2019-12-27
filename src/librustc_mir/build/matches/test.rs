@@ -63,7 +63,8 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             }
 
             PatternKind::Range(range) => {
-                assert!(range.ty == match_pair.pattern.ty);
+                assert_eq!(range.lo.ty, match_pair.pattern.ty);
+                assert_eq!(range.hi.ty, match_pair.pattern.ty);
                 Test {
                     span: match_pair.pattern.span,
                     kind: TestKind::Range(range),
@@ -86,6 +87,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             PatternKind::AscribeUserType { .. } |
             PatternKind::Array { .. } |
             PatternKind::Wild |
+            PatternKind::Or { .. } |
             PatternKind::Binding { .. } |
             PatternKind::Leaf { .. } |
             PatternKind::Deref { .. } => {
@@ -129,6 +131,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             PatternKind::Slice { .. } |
             PatternKind::Array { .. } |
             PatternKind::Wild |
+            PatternKind::Or { .. } |
             PatternKind::Binding { .. } |
             PatternKind::AscribeUserType { .. } |
             PatternKind::Leaf { .. } |
@@ -270,8 +273,14 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                     );
                 } else {
                     if let [success, fail] = *make_target_blocks(self) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         let val = Operand::Copy(place.clone());
                         let expect = self.literal_operand(test.span, ty, value);
+=======
+                        assert_eq!(value.ty, ty);
+                        let expect = self.literal_operand(test.span, value);
+                        let val = Operand::Copy(place.clone());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         self.compare(block, success, fail, source_info, BinOp::Eq, expect, val);
                     } else {
                         bug!("`TestKind::Eq` should have two target blocks");
@@ -279,13 +288,22 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                 }
             }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             TestKind::Range(PatternRange { ref lo, ref hi, ty, ref end }) => {
+=======
+            TestKind::Range(PatternRange { ref lo, ref hi, ref end }) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let lower_bound_success = self.cfg.start_new_block();
                 let target_blocks = make_target_blocks(self);
 
                 // Test `val` by computing `lo <= val && val <= hi`, using primitive comparisons.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let lo = self.literal_operand(test.span, ty, lo);
                 let hi = self.literal_operand(test.span, ty, hi);
+=======
+                let lo = self.literal_operand(test.span, lo);
+                let hi = self.literal_operand(test.span, hi);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let val = Operand::Copy(place.clone());
 
                 if let [success, fail] = *target_blocks {
@@ -387,6 +405,7 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
     ) {
         use rustc::middle::lang_items::EqTraitLangItem;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut expect = self.literal_operand(source_info.span, value.ty, value);
         let mut val = Operand::Copy(place.clone());
 
@@ -450,6 +469,70 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             func: Operand::Constant(box Constant {
                 span: source_info.span,
                 ty: mty,
+=======
+        let mut expect = self.literal_operand(source_info.span, value);
+        let mut val = Operand::Copy(place.clone());
+
+        // If we're using `b"..."` as a pattern, we need to insert an
+        // unsizing coercion, as the byte string has the type `&[u8; N]`.
+        //
+        // We want to do this even when the scrutinee is a reference to an
+        // array, so we can call `<[u8]>::eq` rather than having to find an
+        // `<[u8; N]>::eq`.
+        let unsize = |ty: Ty<'tcx>| match ty.sty {
+            ty::Ref(region, rty, _) => match rty.sty {
+                ty::Array(inner_ty, n) => Some((region, inner_ty, n)),
+                _ => None,
+            },
+            _ => None,
+        };
+        let opt_ref_ty = unsize(ty);
+        let opt_ref_test_ty = unsize(value.ty);
+        match (opt_ref_ty, opt_ref_test_ty) {
+            // nothing to do, neither is an array
+            (None, None) => {},
+            (Some((region, elem_ty, _)), _) |
+            (None, Some((region, elem_ty, _))) => {
+                let tcx = self.hir.tcx();
+                // make both a slice
+                ty = tcx.mk_imm_ref(region, tcx.mk_slice(elem_ty));
+                if opt_ref_ty.is_some() {
+                    let temp = self.temp(ty, source_info.span);
+                    self.cfg.push_assign(
+                        block, source_info, &temp, Rvalue::Cast(
+                            CastKind::Pointer(PointerCast::Unsize), val, ty
+                        )
+                    );
+                    val = Operand::Move(temp);
+                }
+                if opt_ref_test_ty.is_some() {
+                    let slice = self.temp(ty, source_info.span);
+                    self.cfg.push_assign(
+                        block, source_info, &slice, Rvalue::Cast(
+                            CastKind::Pointer(PointerCast::Unsize), expect, ty
+                        )
+                    );
+                    expect = Operand::Move(slice);
+                }
+            },
+        }
+
+        let deref_ty = match ty.sty {
+            ty::Ref(_, deref_ty, _) => deref_ty,
+            _ => bug!("non_scalar_compare called on non-reference type: {}", ty),
+        };
+
+        let eq_def_id = self.hir.tcx().require_lang_item(EqTraitLangItem, None);
+        let method = self.hir.trait_method(eq_def_id, sym::eq, deref_ty, &[deref_ty.into()]);
+
+        let bool_ty = self.hir.bool_ty();
+        let eq_result = self.temp(bool_ty, source_info.span);
+        let eq_block = self.cfg.start_new_block();
+        let cleanup = self.diverge_cleanup();
+        self.cfg.terminate(block, source_info, TerminatorKind::Call {
+            func: Operand::Constant(box Constant {
+                span: source_info.span,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                 // FIXME(#54571): This constant comes from user input (a
                 // constant in a pattern).  Are there forms where users can add
@@ -656,8 +739,14 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
 
                     let tcx = self.hir.tcx();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let lo = compare_const_vals(tcx, test.lo, pat.hi, self.hir.param_env, test.ty)?;
                     let hi = compare_const_vals(tcx, test.hi, pat.lo, self.hir.param_env, test.ty)?;
+=======
+                    let test_ty = test.lo.ty;
+                    let lo = compare_const_vals(tcx, test.lo, pat.hi, self.hir.param_env, test_ty)?;
+                    let hi = compare_const_vals(tcx, test.hi, pat.lo, self.hir.param_env, test_ty)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                     match (test.end, pat.end, lo, hi) {
                         // pat < test
@@ -774,8 +863,13 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
 
         let tcx = self.hir.tcx();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let a = compare_const_vals(tcx, range.lo, value, self.hir.param_env, range.ty)?;
         let b = compare_const_vals(tcx, value, range.hi, self.hir.param_env, range.ty)?;
+=======
+        let a = compare_const_vals(tcx, range.lo, value, self.hir.param_env, range.lo.ty)?;
+        let b = compare_const_vals(tcx, value, range.hi, self.hir.param_env, range.lo.ty)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         match (b, range.end) {
             (Less, _) |

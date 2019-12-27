@@ -24,7 +24,11 @@ declare_clippy_lint! {
     /// pub fn foo<T>(t: T) where T: Copy + Clone {}
     /// ```
     pub TYPE_REPETITION_IN_BOUNDS,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     complexity,
+=======
+    pedantic,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     "Types are repeated unnecessary in trait bounds use `+` instead of using `T: _, T: _`"
 }
 

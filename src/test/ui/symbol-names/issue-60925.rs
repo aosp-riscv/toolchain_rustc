@@ -20,8 +20,13 @@ mod foo {
     impl Foo<::llvm::Foo> {
         #[rustc_symbol_name]
         //[legacy]~^ ERROR symbol-name(_ZN11issue_609253foo37Foo$LT$issue_60925..llv$u6d$..Foo$GT$3foo
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         //[legacy]~| ERROR demangling(issue_60925::foo::Foo<issue_60925::llv$u6d$..Foo$GT$::foo
         //[legacy]~| ERROR demangling-alt(issue_60925::foo::Foo<issue_60925::llv$u6d$..Foo$GT$::foo)
+=======
+        //[legacy]~| ERROR demangling(issue_60925::foo::Foo<issue_60925::llvm::Foo>::foo
+        //[legacy]~| ERROR demangling-alt(issue_60925::foo::Foo<issue_60925::llvm::Foo>::foo)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
          //[v0]~^^^^ ERROR symbol-name(_RNvMNtCs4fqI2P2rA04_11issue_609253fooINtB2_3FooNtNtB4_4llvm3FooE3foo)
             //[v0]~| ERROR demangling(<issue_60925[317d481089b8c8fe]::foo::Foo<issue_60925[317d481089b8c8fe]::llvm::Foo>>::foo)
             //[v0]~| ERROR demangling-alt(<issue_60925::foo::Foo<issue_60925::llvm::Foo>>::foo)

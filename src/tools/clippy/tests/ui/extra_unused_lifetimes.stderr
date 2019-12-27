@@ -18,5 +18,15 @@ error: this lifetime isn't used in the function definition
 LL |     fn x<'a>(&self) {}
    |          ^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: aborting due to 3 previous errors
+=======
+error: this lifetime isn't used in the function definition
+  --> $DIR/extra_unused_lifetimes.rs:67:22
+   |
+LL |         fn unused_lt<'a>(x: u8) {}
+   |                      ^^
+
+error: aborting due to 4 previous errors
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 

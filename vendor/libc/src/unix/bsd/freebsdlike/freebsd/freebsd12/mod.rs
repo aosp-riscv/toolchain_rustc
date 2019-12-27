@@ -190,6 +190,18 @@ cfg_if! {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+cfg_if! {
+    if #[cfg(not(freebsd13))] {
+        pub const ELAST: ::c_int = 96;
+    } else {
+        pub const EINTEGRITY: ::c_int = 97;
+        pub const ELAST: ::c_int = 97;
+    }
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 extern {
     pub fn setgrent();
     pub fn mprotect(addr: *mut ::c_void, len: ::size_t, prot: ::c_int)

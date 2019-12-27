@@ -2,7 +2,11 @@
 // the inherent impl requires normalization to be equal to the
 // user-provided type.
 //
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // run-pass
+=======
+// check-pass
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 trait Mirror {
     type Me;
@@ -15,7 +19,7 @@ impl<T> Mirror for T {
 struct Foo<A, B>(A, B);
 
 impl<A> Foo<A, <A as Mirror>::Me> {
-    fn m(b: A) { }
+    fn m(_: A) { }
 }
 
 fn main() {

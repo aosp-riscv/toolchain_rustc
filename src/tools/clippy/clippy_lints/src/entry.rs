@@ -1,5 +1,9 @@
 use crate::utils::SpanlessEq;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{get_item_name, higher, match_type, paths, snippet, span_lint_and_then, walk_ptrs_ty};
+=======
+use crate::utils::{get_item_name, higher, match_type, paths, snippet, snippet_opt, span_lint_and_then, walk_ptrs_ty};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use if_chain::if_chain;
 use rustc::hir::intravisit::{walk_expr, NestedVisitorMap, Visitor};
 use rustc::hir::*;
@@ -140,6 +144,7 @@ impl<'a, 'tcx, 'b> Visitor<'tcx> for InsertVisitor<'a, 'tcx, 'b> {
             if path.ident.name == sym!(insert);
             if get_item_name(self.cx, self.map) == get_item_name(self.cx, &params[0]);
             if SpanlessEq::new(self.cx).eq_expr(self.key, &params[1]);
+            if snippet_opt(self.cx, self.map.span) == snippet_opt(self.cx, params[0].span);
             then {
                 span_lint_and_then(self.cx, MAP_ENTRY, self.span,
                                    &format!("usage of `contains_key` followed by `insert` on a `{}`", self.ty), |db| {

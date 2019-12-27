@@ -1,11 +1,14 @@
 //! Adapted from [`nom`](https://github.com/Geal/nom).
 
+use crate::fallback::LexError;
 use std::str::{Bytes, CharIndices, Chars};
-
 use unicode_xid::UnicodeXID;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use fallback::LexError;
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Cursor<'a> {
     pub rest: &'a str,
@@ -95,7 +98,7 @@ pub fn whitespace(input: Cursor) -> PResult<()> {
             }
         }
         match bytes[i] {
-            b' ' | 0x09...0x0d => {
+            b' ' | 0x09..=0x0d => {
                 i += 1;
                 continue;
             }

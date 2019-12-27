@@ -1,6 +1,10 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{
     get_item_name, in_macro_or_desugar, snippet_with_applicability, span_lint, span_lint_and_sugg, walk_ptrs_ty,
 };
+=======
+use crate::utils::{get_item_name, snippet_with_applicability, span_lint, span_lint_and_sugg, walk_ptrs_ty};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::hir::def_id::DefId;
 use rustc::hir::*;
 use rustc::lint::{LateContext, LateLintPass, LintArray, LintPass};
@@ -75,7 +79,11 @@ declare_lint_pass!(LenZero => [LEN_ZERO, LEN_WITHOUT_IS_EMPTY]);
 
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for LenZero {
     fn check_item(&mut self, cx: &LateContext<'a, 'tcx>, item: &'tcx Item) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(item.span) {
+=======
+        if item.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 
@@ -87,7 +95,11 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for LenZero {
     }
 
     fn check_expr(&mut self, cx: &LateContext<'a, 'tcx>, expr: &'tcx Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(expr.span) {
+=======
+        if expr.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 

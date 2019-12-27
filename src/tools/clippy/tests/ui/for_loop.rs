@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::collections::*;
 use std::rc::Rc;
 
@@ -314,3 +315,5 @@ mod issue_2496 {
         unimplemented!()
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

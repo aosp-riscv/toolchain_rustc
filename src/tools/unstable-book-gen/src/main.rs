@@ -1,5 +1,10 @@
 //! Auto-generate stub docs for the unstable book
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![deny(warnings)]
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use tidy::features::{Feature, Features, collect_lib_features, collect_lang_features};
 use tidy::unstable_book::{collect_unstable_feature_names, collect_unstable_book_section_file_names,
                           PATH_STR, LANG_FEATURES_DIR, LIB_FEATURES_DIR};

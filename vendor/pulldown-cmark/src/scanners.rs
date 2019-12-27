@@ -30,13 +30,82 @@ use crate::strings::CowStr;
 
 use memchr::memchr;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // Allowing arbitrary depth nested parentheses inside link destinations
 // can create denial of service vulnerabilities if we're not careful.
 // The simplest countermeasure is to limit their depth, which is
 // explicitly allowed by the spec as long as the limit is at least 3:
 // https://spec.commonmark.org/0.29/#link-destination
 const LINK_MAX_NESTED_PARENS: usize = 5;
+=======
+// sorted for binary search
+const HTML_TAGS: [&str; 62] = [
+    "address",
+    "article",
+    "aside",
+    "base",
+    "basefont",
+    "blockquote",
+    "body",
+    "caption",
+    "center",
+    "col",
+    "colgroup",
+    "dd",
+    "details",
+    "dialog",
+    "dir",
+    "div",
+    "dl",
+    "dt",
+    "fieldset",
+    "figcaption",
+    "figure",
+    "footer",
+    "form",
+    "frame",
+    "frameset",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "head",
+    "header",
+    "hr",
+    "html",
+    "iframe",
+    "legend",
+    "li",
+    "link",
+    "main",
+    "menu",
+    "menuitem",
+    "nav",
+    "noframes",
+    "ol",
+    "optgroup",
+    "option",
+    "p",
+    "param",
+    "section",
+    "source",
+    "summary",
+    "table",
+    "tbody",
+    "td",
+    "tfoot",
+    "th",
+    "thead",
+    "title",
+    "tr",
+    "track",
+    "ul",
+];
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // sorted for binary search
 const HTML_TAGS: [&str; 62] = [
     "address",
@@ -273,6 +342,167 @@ impl<'a> LineStart<'a> {
         start: usize,
         mut indent: usize,
     ) -> Option<(u8, usize, usize)> {
+=======
+/// Analysis of the beginning of a line, including indentation and container
+/// markers.
+#[derive(Clone)]
+pub struct LineStart<'a> {
+    bytes: &'a [u8],
+    tab_start: usize,
+    ix: usize,
+    spaces_remaining: usize,
+    // no thematic breaks can occur before this offset.
+    // this prevents scanning over and over up to a certain point
+    min_hrule_offset: usize,
+}
+
+impl<'a> LineStart<'a> {
+    pub(crate) fn new(bytes: &[u8]) -> LineStart {
+        LineStart {
+            bytes,
+            tab_start: 0,
+            ix: 0,
+            spaces_remaining: 0,
+            min_hrule_offset: 0,
+        }
+    }
+
+    /// Try to scan a number of spaces.
+    ///
+    /// Returns true if all spaces were consumed.
+    ///
+    /// Note: consumes some spaces even if not successful.
+    pub(crate) fn scan_space(&mut self, n_space: usize) -> bool {
+        self.scan_space_inner(n_space) == 0
+    }
+
+    /// Scan a number of spaces up to a maximum.
+    ///
+    /// Returns number of spaces scanned.
+    pub(crate) fn scan_space_upto(&mut self, n_space: usize) -> usize {
+        n_space - self.scan_space_inner(n_space)
+    }
+
+    /// Returns unused remainder of spaces.
+    fn scan_space_inner(&mut self, mut n_space: usize) -> usize {
+        let n_from_remaining = self.spaces_remaining.min(n_space);
+        self.spaces_remaining -= n_from_remaining;
+        n_space -= n_from_remaining;
+        while n_space > 0 && self.ix < self.bytes.len() {
+            match self.bytes[self.ix] {
+                b' ' => {
+                    self.ix += 1;
+                    n_space -= 1;
+                }
+                b'\t' => {
+                    let spaces = 4 - (self.ix - self.tab_start) % 4;
+                    self.ix += 1;
+                    self.tab_start = self.ix;
+                    let n = spaces.min(n_space);
+                    n_space -= n;
+                    self.spaces_remaining = spaces - n;
+                }
+                _ => break,
+            }
+        }
+        n_space
+    }
+
+    /// Scan all available ASCII whitespace (not including eol).
+    pub(crate) fn scan_all_space(&mut self) {
+        self.spaces_remaining = 0;
+        self.ix += self.bytes[self.ix..]
+            .iter()
+            .take_while(|&&b| b == b' ' || b == b'\t')
+            .count();
+    }
+
+    /// Determine whether we're at end of line (includes end of file).
+    pub(crate) fn is_at_eol(&self) -> bool {
+        self.bytes
+            .get(self.ix)
+            .map(|&c| c == b'\r' || c == b'\n')
+            .unwrap_or(true)
+    }
+
+    fn scan_ch(&mut self, c: u8) -> bool {
+        if self.ix < self.bytes.len() && self.bytes[self.ix] == c {
+            self.ix += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    pub(crate) fn scan_blockquote_marker(&mut self) -> bool {
+        let save = self.clone();
+        let _ = self.scan_space(3);
+        if self.scan_ch(b'>') {
+            let _ = self.scan_space(1);
+            true
+        } else {
+            *self = save;
+            false
+        }
+    }
+
+    /// Scan a list marker.
+    ///
+    /// Return value is the character, the start index, and the indent in spaces.
+    /// For ordered list markers, the character will be one of b'.' or b')'. For
+    /// bullet list markers, it will be one of b'-', b'+', or b'*'.
+    pub(crate) fn scan_list_marker(&mut self) -> Option<(u8, u64, usize)> {
+        let save = self.clone();
+        let indent = self.scan_space_upto(3);
+        if self.ix < self.bytes.len() {
+            let c = self.bytes[self.ix];
+            if c == b'-' || c == b'+' || c == b'*' {
+                if self.ix >= self.min_hrule_offset {
+                    // there could be an hrule here
+                    if let Err(min_offset) = scan_hrule(&self.bytes[self.ix..]) {
+                        self.min_hrule_offset = min_offset;
+                    } else {
+                        *self = save;
+                        return None;
+                    }
+                }
+                self.ix += 1;
+                if self.scan_space(1) || self.is_at_eol() {
+                    return self.finish_list_marker(c, 0, indent + 2);
+                }
+            } else if c >= b'0' && c <= b'9' {
+                let start_ix = self.ix;
+                let mut ix = self.ix + 1;
+                let mut val = u64::from(c - b'0');
+                while ix < self.bytes.len() && ix - start_ix < 10 {
+                    let c = self.bytes[ix];
+                    ix += 1;
+                    if c >= b'0' && c <= b'9' {
+                        val = val * 10 + u64::from(c - b'0');
+                    } else if c == b')' || c == b'.' {
+                        self.ix = ix;
+                        if self.scan_space(1) || self.is_at_eol() {
+                            return self.finish_list_marker(c, val, indent + self.ix - start_ix);
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        *self = save;
+        None
+    }
+
+    fn finish_list_marker(
+        &mut self,
+        c: u8,
+        start: u64,
+        mut indent: usize,
+    ) -> Option<(u8, u64, usize)> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let save = self.clone();
 
         // skip the rest of the line if it's blank
@@ -523,6 +753,7 @@ pub(crate) fn scan_hrule(bytes: &[u8]) -> Result<usize, usize> {
 /// Scan an ATX heading opening sequence.
 ///
 /// Returns number of bytes in prefix and level.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub(crate) fn scan_atx_heading(data: &[u8]) -> Option<(usize, i32)> {
     let level = scan_ch_repeat(data, b'#');
     if level >= 1 && level <= 6 && data.get(level).cloned().map_or(true, is_ascii_whitespace) {
@@ -536,6 +767,21 @@ pub(crate) fn scan_atx_heading(data: &[u8]) -> Option<(usize, i32)> {
 ///
 /// Returns number of bytes in line (including trailing newline) and level.
 pub(crate) fn scan_setext_heading(data: &[u8]) -> Option<(usize, i32)> {
+=======
+pub(crate) fn scan_atx_heading(data: &[u8]) -> Option<usize> {
+    let level = scan_ch_repeat(data, b'#');
+    if level >= 1 && level <= 6 && data.get(level).cloned().map_or(true, is_ascii_whitespace) {
+        Some(level)
+    } else {
+        None
+    }
+}
+
+/// Scan a setext heading underline.
+///
+/// Returns number of bytes in line (including trailing newline) and level.
+pub(crate) fn scan_setext_heading(data: &[u8]) -> Option<(usize, u32)> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let c = *data.get(0)?;
     if !(c == b'-' || c == b'=') {
         return None;
@@ -762,6 +1008,7 @@ pub(crate) fn scan_entity(bytes: &[u8]) -> (usize, Option<CowStr<'static>>) {
     (0, None)
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // returns (bytes scanned, title cow)
 fn scan_link_title(text: &str, start_ix: usize) -> Option<(usize, CowStr<'_>)> {
     let bytes = text.as_bytes();
@@ -814,6 +1061,8 @@ fn scan_link_title(text: &str, start_ix: usize) -> Option<(usize, CowStr<'_>)> {
     None
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // FIXME: we can most likely re-use other scanners
 // returns (bytelength, title_str)
 pub(crate) fn scan_refdef_title(text: &str) -> Option<(usize, &str)> {
@@ -911,6 +1160,7 @@ pub(crate) fn scan_link_dest(
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// Returns next byte index, url and title.
 pub(crate) fn scan_inline_link(
     underlying: &str,
@@ -944,6 +1194,8 @@ pub(crate) fn scan_inline_link(
     Some((ix, dest, title))
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// Returns bytes scanned
 fn scan_attribute_name(data: &[u8]) -> Option<usize> {
     let (&c, tail) = data.split_first()?;
@@ -1148,6 +1400,7 @@ fn scan_uri(text: &str, start_ix: usize) -> Option<(usize, CowStr<'_>)> {
         return None;
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let mut ended = false;
     while i < bytes.len() {
         match bytes[i] {
@@ -1162,6 +1415,18 @@ fn scan_uri(text: &str, start_ix: usize) -> Option<(usize, CowStr<'_>)> {
     }
 
     Some((start_ix + i + 1, text[start_ix..(start_ix + i)].into()))
+=======
+    while i < bytes.len() {
+        match bytes[i] {
+            b'>' => return Some((start_ix + i + 1, text[start_ix..(start_ix + i)].into())),
+            b'\0'..=b' ' | b'<' => return None,
+            _ => (),
+        }
+        i += 1;
+    }
+
+    None
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// Returns (next_byte_offset, email)

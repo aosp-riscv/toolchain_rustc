@@ -1,7 +1,10 @@
 # backtrace-rs
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 [![Build Status](https://dev.azure.com/rust-lang/backtrace-rs/_apis/build/status/rust-lang.backtrace-rs?branchName=master)](https://dev.azure.com/rust-lang/backtrace-rs/_build/latest?definitionId=12&branchName=master)
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 [Documentation](https://docs.rs/backtrace)
 
 A library for acquiring backtraces at runtime for Rust. This library aims to

@@ -6,6 +6,7 @@
 
 extern crate proc_macro;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use proc_macro::{quote, Span, TokenStream};
 
 fn assert_same_span(a: Span, b: Span) {
@@ -30,6 +31,42 @@ pub fn make_foo(_: TokenStream) -> TokenStream {
             None => span = Some(tt.span()),
             Some(span) => assert_same_span(tt.span(), span),
         }
+=======
+use proc_macro::{quote, Span, TokenStream, TokenTree};
+
+fn assert_same_span(a: Span, b: Span) {
+    assert_eq!(a.start(), b.start());
+    assert_eq!(a.end(), b.end());
+}
+
+// This macro generates a macro with the same macro definition as `manual_foo` in
+// `same-sequence-span.rs` but with the same span for all sequences.
+#[proc_macro]
+pub fn make_foo(_: TokenStream) -> TokenStream {
+    let result = quote! {
+        macro_rules! generated_foo {
+            (1 $$x:expr $$($$y:tt,)* $$(= $$z:tt)*) => {};
+        }
+    };
+
+    // Check that all spans are equal.
+    // FIXME: `quote!` gives def-site spans to idents and literals,
+    // but leaves (default) call-site spans on groups and punctuation.
+    let mut span_call = None;
+    let mut span_def = None;
+    for tt in result.clone() {
+        match tt {
+            TokenTree::Ident(..) | TokenTree::Literal(..) => match span_def {
+                None => span_def = Some(tt.span()),
+                Some(span) => assert_same_span(tt.span(), span),
+            }
+            TokenTree::Punct(..) | TokenTree::Group(..) => match span_call {
+                None => span_call = Some(tt.span()),
+                Some(span) => assert_same_span(tt.span(), span),
+            }
+        }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     result

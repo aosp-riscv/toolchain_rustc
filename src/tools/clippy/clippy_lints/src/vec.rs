@@ -49,13 +49,23 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for UselessVec {
                 // report the error around the `vec!` not inside `<std macros>:`
                 let span = arg.span
                     .ctxt()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     .outer_expn_info()
                     .map(|info| info.call_site)
                     .expect("unable to get call_site")
+=======
+                    .outer_expn_data()
+                    .call_site
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     .ctxt()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     .outer_expn_info()
                     .map(|info| info.call_site)
                     .expect("unable to get call_site");
+=======
+                    .outer_expn_data()
+                    .call_site;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 check_vec_macro(cx, &vec_args, span);
             }
         }

@@ -21,6 +21,7 @@ pub struct Error(NonZeroU32);
 
 impl Error {
     #[deprecated(since = "0.1.7")]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub const UNKNOWN: Error = UNSUPPORTED;
     #[deprecated(since = "0.1.7")]
     pub const UNAVAILABLE: Error = UNSUPPORTED;
@@ -96,6 +97,93 @@ impl fmt::Debug for Error {
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+=======
+    /// Unknown error.
+    pub const UNKNOWN: Error = UNSUPPORTED;
+    #[deprecated(since = "0.1.7")]
+    /// System entropy source is unavailable.
+    pub const UNAVAILABLE: Error = UNSUPPORTED;
+
+    /// Codes below this point represent OS Errors (i.e. positive i32 values).
+    /// Codes at or above this point, but below [`Error::CUSTOM_START`] are
+    /// reserved for use by the `rand` and `getrandom` crates.
+    pub const INTERNAL_START: u32 = 1 << 31;
+
+    /// Codes at or above this point can be used by users to define their own
+    /// custom errors.
+    pub const CUSTOM_START: u32 = (1 << 31) + (1 << 30);
+
+    /// Extract the raw OS error code (if this error came from the OS)
+    ///
+    /// This method is identical to `std::io::Error::raw_os_error()`, except
+    /// that it works in `no_std` contexts. If this method returns `None`, the
+    /// error value can still be formatted via the `Diplay` implementation.
+    #[inline]
+    pub fn raw_os_error(self) -> Option<i32> {
+        if self.0.get() < Self::INTERNAL_START {
+            Some(self.0.get() as i32)
+        } else {
+            None
+        }
+    }
+
+    /// Extract the bare error code.
+    ///
+    /// This code can either come from the underlying OS, or be a custom error.
+    /// Use [`Error::raw_os_error()`] to disambiguate.
+    #[inline]
+    pub fn code(self) -> NonZeroU32 {
+        self.0
+    }
+}
+
+cfg_if! {
+    if #[cfg(unix)] {
+        fn os_err_desc(errno: i32, buf: &mut [u8]) -> Option<&str> {
+            let buf_ptr = buf.as_mut_ptr() as *mut libc::c_char;
+            if unsafe { libc::strerror_r(errno, buf_ptr, buf.len()) } != 0 {
+                return None;
+            }
+
+            // Take up to trailing null byte
+            let n = buf.len();
+            let idx = buf.iter().position(|&b| b == 0).unwrap_or(n);
+            core::str::from_utf8(&buf[..idx]).ok()
+        }
+    } else if #[cfg(target_os = "wasi")] {
+        fn os_err_desc(errno: i32, _buf: &mut [u8]) -> Option<&str> {
+            core::num::NonZeroU16::new(errno as u16)
+                .and_then(wasi::wasi_unstable::error_str)
+        }
+    } else {
+        fn os_err_desc(_errno: i32, _buf: &mut [u8]) -> Option<&str> {
+            None
+        }
+    }
+}
+
+impl fmt::Debug for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut dbg = f.debug_struct("Error");
+        if let Some(errno) = self.raw_os_error() {
+            dbg.field("os_error", &errno);
+            let mut buf = [0u8; 128];
+            if let Some(desc) = os_err_desc(errno, &mut buf) {
+                dbg.field("description", &desc);
+            }
+        } else if let Some(desc) = internal_desc(*self) {
+            dbg.field("internal_code", &self.0.get());
+            dbg.field("description", &desc);
+        } else {
+            dbg.field("unknown_code", &self.0.get());
+        }
+        dbg.finish()
+    }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         if let Some(errno) = self.raw_os_error() {
             let mut buf = [0u8; 128];
             match os_err_desc(errno, &mut buf) {

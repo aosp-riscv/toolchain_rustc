@@ -2,6 +2,10 @@
 // aux-build:fn-aux.rs
 
 #![feature(associated_type_bounds)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![allow(dead_code)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 extern crate fn_aux;
 

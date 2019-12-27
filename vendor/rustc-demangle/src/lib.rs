@@ -81,8 +81,24 @@ pub fn demangle(mut s: &str) -> Demangle {
         }
     }
 
+    let mut suffix = "";
+    let mut style = match legacy::demangle(s) {
+        Ok((d, s)) => {
+            suffix = s;
+            Some(DemangleStyle::Legacy(d))
+        }
+        Err(()) => match v0::demangle(s) {
+            Ok((d, s)) => {
+                suffix = s;
+                Some(DemangleStyle::V0(d))
+            }
+            Err(v0::Invalid) => None,
+        },
+    };
+
     // Output like LLVM IR adds extra period-delimited words. See if
     // we are in that case and save the trailing words if so.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let mut suffix = "";
     if let Some(i) = s.rfind("E.") {
         let (head, tail) = s.split_at(i + 1); // After the E, before the period
@@ -100,6 +116,18 @@ pub fn demangle(mut s: &str) -> Demangle {
             Err(v0::Invalid) => None,
         },
     };
+=======
+    if !suffix.is_empty() {
+        if suffix.starts_with(".") && is_symbol_like(suffix) {
+            // Keep the suffix.
+        } else {
+            // Reset the suffix and invalidate the demangling.
+            suffix = "";
+            style = None;
+        }
+    }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Demangle {
         style: style,
         original: s,

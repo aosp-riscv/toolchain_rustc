@@ -1,14 +1,11 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // build-pass (FIXME(62277): could be check-pass?)
+=======
+// check-pass
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #![feature(stmt_expr_attributes)]
 #![warn(unused_attributes)] //~ NOTE lint level defined here
-
-fn foo<#[derive(Debug)] T>() { //~ WARN unused attribute
-    match 0 {
-        #[derive(Debug)] //~ WARN unused attribute
-        _ => (),
-    }
-}
 
 fn main() {
     // fold_stmt (Item)

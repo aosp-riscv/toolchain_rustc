@@ -1,8 +1,14 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // run-pass
 
 #![feature(member_constraints)]
 
 use std::fmt::Debug;
+=======
+// check-pass
+
+#![feature(member_constraints)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 trait MultiRegionTrait<'a, 'b> {}
 impl<'a, 'b> MultiRegionTrait<'a, 'b> for (&'a u32, &'b u32) {}

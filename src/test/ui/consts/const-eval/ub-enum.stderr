@@ -1,12 +1,17 @@
 error[E0080]: it is undefined behavior to use this value
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/ub-enum.rs:22:1
+=======
+  --> $DIR/ub-enum.rs:23:1
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | const BAD_ENUM: Enum = unsafe { TransmuteEnum { in2: 1 }.out1 };
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered 1, but expected a valid enum discriminant
    |
-   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rust compiler repository if you believe it should not be considered undefined behavior
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
 
 error[E0080]: it is undefined behavior to use this value
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/ub-enum.rs:25:1
    |
 LL | const BAD_ENUM_PTR: Enum = unsafe { TransmuteEnum { in1: &1 }.out1 };
@@ -24,26 +29,54 @@ LL | const BAD_ENUM_WRAPPED: Wrap<Enum> = unsafe { TransmuteEnum { in1: &1 }.out
 
 error[E0080]: it is undefined behavior to use this value
   --> $DIR/ub-enum.rs:46:1
+=======
+  --> $DIR/ub-enum.rs:26:1
+   |
+LL | const BAD_ENUM_PTR: Enum = unsafe { TransmuteEnum { in1: &1 }.out1 };
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered a pointer, but expected a valid enum discriminant
+   |
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
+
+error[E0080]: it is undefined behavior to use this value
+  --> $DIR/ub-enum.rs:29:1
+   |
+LL | const BAD_ENUM_WRAPPED: Wrap<Enum> = unsafe { TransmuteEnum { in1: &1 }.out2 };
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered a pointer, but expected something that cannot possibly fail to be equal to 0
+   |
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
+
+error[E0080]: it is undefined behavior to use this value
+  --> $DIR/ub-enum.rs:48:1
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | const BAD_ENUM2: Enum2 = unsafe { TransmuteEnum2 { in1: 0 }.out1 };
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered 0, but expected a valid enum discriminant
    |
-   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rust compiler repository if you believe it should not be considered undefined behavior
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
 
 error[E0080]: it is undefined behavior to use this value
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/ub-enum.rs:48:1
+=======
+  --> $DIR/ub-enum.rs:50:1
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | const BAD_ENUM2_PTR: Enum2 = unsafe { TransmuteEnum2 { in2: &0 }.out1 };
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered a pointer, but expected a valid enum discriminant
    |
-   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rust compiler repository if you believe it should not be considered undefined behavior
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
 
 error[E0080]: it is undefined behavior to use this value
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/ub-enum.rs:50:1
+=======
+  --> $DIR/ub-enum.rs:52:1
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | const BAD_ENUM2_WRAPPED: Wrap<Enum2> = unsafe { TransmuteEnum2 { in2: &0 }.out2 };
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered a pointer, but expected something that cannot possibly fail to be equal to 2
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rust compiler repository if you believe it should not be considered undefined behavior
 
 error[E0080]: it is undefined behavior to use this value
@@ -61,15 +94,42 @@ LL | const BAD_ENUM2_OPTION_PTR: Option<Enum2> = unsafe { TransmuteEnum2 { in2: 
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered a pointer, but expected a valid enum discriminant
    |
    = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rust compiler repository if you believe it should not be considered undefined behavior
+=======
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error[E0080]: it is undefined behavior to use this value
   --> $DIR/ub-enum.rs:68:1
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+LL | const BAD_OPTION_CHAR: Option<(char, char)> = Some(('x', unsafe { TransmuteChar { a: !0 }.b }));
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered 4294967295 at .<downcast-variant(Some)>.0.1, but expected something less or equal to 1114111
+=======
+LL | const BAD_ENUM2_UNDEF : Enum2 = unsafe { TransmuteEnum2 { in3: () }.out1 };
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered uninitialized bytes, but expected a valid enum discriminant
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+   |
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+error[E0080]: it is undefined behavior to use this value
+  --> $DIR/ub-enum.rs:60:1
+   |
+LL | const BAD_ENUM2_OPTION_PTR: Option<Enum2> = unsafe { TransmuteEnum2 { in2: &0 }.out3 };
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered a pointer, but expected a valid enum discriminant
+   |
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
+
+error[E0080]: it is undefined behavior to use this value
+  --> $DIR/ub-enum.rs:71:1
+   |
 LL | const BAD_OPTION_CHAR: Option<(char, char)> = Some(('x', unsafe { TransmuteChar { a: !0 }.b }));
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type validation failed: encountered 4294967295 at .<downcast-variant(Some)>.0.1, but expected something less or equal to 1114111
    |
-   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rust compiler repository if you believe it should not be considered undefined behavior
+   = note: The rules on what exactly is undefined behavior aren't clear, so this check might be overzealous. Please open an issue on the rustc repository if you believe it should not be considered undefined behavior.
 
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 error: aborting due to 9 previous errors
 
 For more information about this error, try `rustc --explain E0080`.

@@ -66,6 +66,7 @@ pub(crate) mod modules;
 mod overflow;
 mod pairs;
 mod patterns;
+mod release_channel;
 mod reorder;
 mod rewrite;
 pub(crate) mod rustfmt_diff;
@@ -482,10 +483,20 @@ pub(crate) fn create_emitter<'a>(config: &Config) -> Box<dyn Emitter + 'a> {
         EmitMode::Files if config.make_backup() => {
             Box::new(emitter::FilesWithBackupEmitter::default())
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         EmitMode::Files => Box::new(emitter::FilesEmitter::default()),
         EmitMode::Stdout | EmitMode::Coverage => {
             Box::new(emitter::StdoutEmitter::new(config.verbose()))
         }
+=======
+        EmitMode::Files => Box::new(emitter::FilesEmitter::new(
+            config.print_misformatted_file_names(),
+        )),
+        EmitMode::Stdout | EmitMode::Coverage => {
+            Box::new(emitter::StdoutEmitter::new(config.verbose()))
+        }
+        EmitMode::Json => Box::new(emitter::JsonEmitter::default()),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         EmitMode::ModifiedLines => Box::new(emitter::ModifiedLinesEmitter::default()),
         EmitMode::Checkstyle => Box::new(emitter::CheckstyleEmitter::default()),
         EmitMode::Diff => Box::new(emitter::DiffEmitter::new(config.clone())),

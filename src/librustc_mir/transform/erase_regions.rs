@@ -49,8 +49,13 @@ impl MutVisitor<'tcx> for EraseRegionsVisitor<'tcx> {
 
 pub struct EraseRegions;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for EraseRegions {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, _: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for EraseRegions {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, _: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         EraseRegionsVisitor::new(tcx).visit_body(body);
     }
 }

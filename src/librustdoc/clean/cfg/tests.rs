@@ -3,6 +3,7 @@ use super::*;
 use syntax_pos::DUMMY_SP;
 use syntax::ast::*;
 use syntax::attr;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax::source_map::dummy_spanned;
 use syntax::symbol::Symbol;
 use syntax::with_default_globals;
@@ -182,6 +183,187 @@ fn test_parse_ok() {
         let mi = attr::mk_name_value_item_str(
             Ident::from_str("all"),
             dummy_spanned(Symbol::intern("done"))
+=======
+use syntax::symbol::Symbol;
+use syntax::with_default_globals;
+
+fn word_cfg(s: &str) -> Cfg {
+    Cfg::Cfg(Symbol::intern(s), None)
+}
+
+fn name_value_cfg(name: &str, value: &str) -> Cfg {
+    Cfg::Cfg(Symbol::intern(name), Some(Symbol::intern(value)))
+}
+
+fn dummy_meta_item_word(name: &str) -> MetaItem {
+    MetaItem {
+        path: Path::from_ident(Ident::from_str(name)),
+        node: MetaItemKind::Word,
+        span: DUMMY_SP,
+    }
+}
+
+macro_rules! dummy_meta_item_list {
+    ($name:ident, [$($list:ident),* $(,)?]) => {
+        MetaItem {
+            path: Path::from_ident(Ident::from_str(stringify!($name))),
+            node: MetaItemKind::List(vec![
+                $(
+                    NestedMetaItem::MetaItem(
+                        dummy_meta_item_word(stringify!($list)),
+                    ),
+                )*
+            ]),
+            span: DUMMY_SP,
+        }
+    };
+
+    ($name:ident, [$($list:expr),* $(,)?]) => {
+        MetaItem {
+            path: Path::from_ident(Ident::from_str(stringify!($name))),
+            node: MetaItemKind::List(vec![
+                $(
+                    NestedMetaItem::MetaItem($list),
+                )*
+            ]),
+            span: DUMMY_SP,
+        }
+    };
+}
+
+#[test]
+fn test_cfg_not() {
+    with_default_globals(|| {
+        assert_eq!(!Cfg::False, Cfg::True);
+        assert_eq!(!Cfg::True, Cfg::False);
+        assert_eq!(!word_cfg("test"), Cfg::Not(Box::new(word_cfg("test"))));
+        assert_eq!(
+            !Cfg::All(vec![word_cfg("a"), word_cfg("b")]),
+            Cfg::Not(Box::new(Cfg::All(vec![word_cfg("a"), word_cfg("b")])))
+        );
+        assert_eq!(
+            !Cfg::Any(vec![word_cfg("a"), word_cfg("b")]),
+            Cfg::Not(Box::new(Cfg::Any(vec![word_cfg("a"), word_cfg("b")])))
+        );
+        assert_eq!(!Cfg::Not(Box::new(word_cfg("test"))), word_cfg("test"));
+    })
+}
+
+#[test]
+fn test_cfg_and() {
+    with_default_globals(|| {
+        let mut x = Cfg::False;
+        x &= Cfg::True;
+        assert_eq!(x, Cfg::False);
+
+        x = word_cfg("test");
+        x &= Cfg::False;
+        assert_eq!(x, Cfg::False);
+
+        x = word_cfg("test2");
+        x &= Cfg::True;
+        assert_eq!(x, word_cfg("test2"));
+
+        x = Cfg::True;
+        x &= word_cfg("test3");
+        assert_eq!(x, word_cfg("test3"));
+
+        x &= word_cfg("test4");
+        assert_eq!(x, Cfg::All(vec![word_cfg("test3"), word_cfg("test4")]));
+
+        x &= word_cfg("test5");
+        assert_eq!(x, Cfg::All(vec![word_cfg("test3"), word_cfg("test4"), word_cfg("test5")]));
+
+        x &= Cfg::All(vec![word_cfg("test6"), word_cfg("test7")]);
+        assert_eq!(x, Cfg::All(vec![
+            word_cfg("test3"),
+            word_cfg("test4"),
+            word_cfg("test5"),
+            word_cfg("test6"),
+            word_cfg("test7"),
+        ]));
+
+        let mut y = Cfg::Any(vec![word_cfg("a"), word_cfg("b")]);
+        y &= x;
+        assert_eq!(y, Cfg::All(vec![
+            word_cfg("test3"),
+            word_cfg("test4"),
+            word_cfg("test5"),
+            word_cfg("test6"),
+            word_cfg("test7"),
+            Cfg::Any(vec![word_cfg("a"), word_cfg("b")]),
+        ]));
+
+        assert_eq!(
+            word_cfg("a") & word_cfg("b") & word_cfg("c"),
+            Cfg::All(vec![word_cfg("a"), word_cfg("b"), word_cfg("c")])
+        );
+    })
+}
+
+#[test]
+fn test_cfg_or() {
+    with_default_globals(|| {
+        let mut x = Cfg::True;
+        x |= Cfg::False;
+        assert_eq!(x, Cfg::True);
+
+        x = word_cfg("test");
+        x |= Cfg::True;
+        assert_eq!(x, Cfg::True);
+
+        x = word_cfg("test2");
+        x |= Cfg::False;
+        assert_eq!(x, word_cfg("test2"));
+
+        x = Cfg::False;
+        x |= word_cfg("test3");
+        assert_eq!(x, word_cfg("test3"));
+
+        x |= word_cfg("test4");
+        assert_eq!(x, Cfg::Any(vec![word_cfg("test3"), word_cfg("test4")]));
+
+        x |= word_cfg("test5");
+        assert_eq!(x, Cfg::Any(vec![word_cfg("test3"), word_cfg("test4"), word_cfg("test5")]));
+
+        x |= Cfg::Any(vec![word_cfg("test6"), word_cfg("test7")]);
+        assert_eq!(x, Cfg::Any(vec![
+            word_cfg("test3"),
+            word_cfg("test4"),
+            word_cfg("test5"),
+            word_cfg("test6"),
+            word_cfg("test7"),
+        ]));
+
+        let mut y = Cfg::All(vec![word_cfg("a"), word_cfg("b")]);
+        y |= x;
+        assert_eq!(y, Cfg::Any(vec![
+            word_cfg("test3"),
+            word_cfg("test4"),
+            word_cfg("test5"),
+            word_cfg("test6"),
+            word_cfg("test7"),
+            Cfg::All(vec![word_cfg("a"), word_cfg("b")]),
+        ]));
+
+        assert_eq!(
+            word_cfg("a") | word_cfg("b") | word_cfg("c"),
+            Cfg::Any(vec![word_cfg("a"), word_cfg("b"), word_cfg("c")])
+        );
+    })
+}
+
+#[test]
+fn test_parse_ok() {
+    with_default_globals(|| {
+        let mi = dummy_meta_item_word("all");
+        assert_eq!(Cfg::parse(&mi), Ok(word_cfg("all")));
+
+        let mi = attr::mk_name_value_item_str(
+            Ident::from_str("all"),
+            Symbol::intern("done"),
+            DUMMY_SP,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         );
         assert_eq!(Cfg::parse(&mi), Ok(name_value_cfg("all", "done")));
 

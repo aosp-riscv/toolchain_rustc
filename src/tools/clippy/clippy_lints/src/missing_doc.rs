@@ -5,7 +5,11 @@
 // [`missing_doc`]: https://github.com/rust-lang/rust/blob/d6d05904697d89099b55da3331155392f1db9c00/src/librustc_lint/builtin.rs#L246
 //
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, span_lint};
+=======
+use crate::utils::span_lint;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use if_chain::if_chain;
 use rustc::hir;
 use rustc::lint::{LateContext, LateLintPass, LintArray, LintContext, LintPass};
@@ -85,7 +89,11 @@ impl MissingDoc {
             return;
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(sp) {
+=======
+        if sp.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 
@@ -196,7 +204,7 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for MissingDoc {
         }
     }
 
-    fn check_variant(&mut self, cx: &LateContext<'a, 'tcx>, v: &'tcx hir::Variant, _: &hir::Generics) {
-        self.check_missing_docs_attrs(cx, &v.node.attrs, v.span, "a variant");
+    fn check_variant(&mut self, cx: &LateContext<'a, 'tcx>, v: &'tcx hir::Variant) {
+        self.check_missing_docs_attrs(cx, &v.attrs, v.span, "a variant");
     }
 }

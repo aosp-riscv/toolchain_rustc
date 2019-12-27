@@ -248,4 +248,18 @@ fn out_return_type_lts<'a>(e: &'a str) -> Cow<'a> {
     unimplemented!()
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+// Make sure we still warn on implementations
+mod issue4291 {
+    trait BadTrait {
+        fn needless_lt<'a>(x: &'a u8) {}
+    }
+
+    impl BadTrait for () {
+        fn needless_lt<'a>(_x: &'a u8) {}
+    }
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 fn main() {}

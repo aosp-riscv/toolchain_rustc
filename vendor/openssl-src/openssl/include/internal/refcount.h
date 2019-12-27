@@ -105,7 +105,11 @@ static __inline int CRYPTO_DOWN_REF(volatile int *val, int *ret, void *lock)
 #    if _WIN32_WCE >= 0x600
       extern long __cdecl _InterlockedExchangeAdd(long volatile*, long);
 #    else
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
       // under Windows CE we still have old-style Interlocked* functions
+=======
+      /* under Windows CE we still have old-style Interlocked* functions */
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
       extern long __cdecl InterlockedExchangeAdd(long volatile*, long);
 #     define _InterlockedExchangeAdd InterlockedExchangeAdd
 #    endif

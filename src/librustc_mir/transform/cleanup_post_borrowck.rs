@@ -26,8 +26,13 @@ pub struct CleanupNonCodegenStatements;
 
 pub struct DeleteNonCodegenStatements;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for CleanupNonCodegenStatements {
     fn run_pass<'tcx>(&self, _tcx: TyCtxt<'tcx>, _source: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for CleanupNonCodegenStatements {
+    fn run_pass(&self, _tcx: TyCtxt<'tcx>, _source: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let mut delete = DeleteNonCodegenStatements;
         delete.visit_body(body);
     }
@@ -39,7 +44,7 @@ impl<'tcx> MutVisitor<'tcx> for DeleteNonCodegenStatements {
                        location: Location) {
         match statement.kind {
             StatementKind::AscribeUserType(..)
-            | StatementKind::Assign(_, box Rvalue::Ref(_, BorrowKind::Shallow, _))
+            | StatementKind::Assign(box(_, Rvalue::Ref(_, BorrowKind::Shallow, _)))
             | StatementKind::FakeRead(..) => statement.make_nop(),
             _ => (),
         }

@@ -39,7 +39,11 @@ use std::borrow::Cow;
 use syntax::ast;
 use syntax::source_map::{original_sp, DUMMY_SP};
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, snippet, snippet_block, span_help_and_lint, trim_multiline};
+=======
+use crate::utils::{snippet, snippet_block, span_help_and_lint, trim_multiline};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 declare_clippy_lint! {
     /// **What it does:** The lint checks for `if`-statements appearing in loops
@@ -120,7 +124,11 @@ declare_lint_pass!(NeedlessContinue => [NEEDLESS_CONTINUE]);
 
 impl EarlyLintPass for NeedlessContinue {
     fn check_expr(&mut self, ctx: &EarlyContext<'_>, expr: &ast::Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if !in_macro_or_desugar(expr.span) {
+=======
+        if !expr.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             check_and_warn(ctx, expr);
         }
     }

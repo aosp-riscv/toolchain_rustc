@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! Module that constructs a control-flow graph representing an item.
 //! Uses `Graph` as the underlying representation.
 
@@ -58,3 +59,5 @@ impl CFG {
                   .any(|idx| self.graph.node_data(idx).id() == id)
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

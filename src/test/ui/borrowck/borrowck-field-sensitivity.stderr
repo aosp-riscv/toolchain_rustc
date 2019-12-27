@@ -108,23 +108,47 @@ LL |     let _z = A { a: 4, .. x };
    |
    = note: move occurs because `x.b` has type `std::boxed::Box<isize>`, which does not implement the `Copy` trait
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `x`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/borrowck-field-sensitivity.rs:81:5
    |
 LL |     x.a = 1;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |     ^^^^^^^ use of possibly uninitialized `x`
+=======
+   |     ^^^^^^^ use of possibly-uninitialized `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `x`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/borrowck-field-sensitivity.rs:87:5
    |
 LL |     x.a = 1;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |     ^^^^^^^ use of possibly uninitialized `x`
+=======
+   |     ^^^^^^^ use of possibly-uninitialized `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `x`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/borrowck-field-sensitivity.rs:94:5
    |
 LL |     x.b = box 1;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |     ^^^ use of possibly uninitialized `x`
+=======
+   |     ^^^ use of possibly-uninitialized `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 14 previous errors
 

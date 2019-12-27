@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::cfg::*;
 use crate::middle::region;
 use rustc_data_structures::graph::implementation as graph;
@@ -526,3 +527,5 @@ enum ScopeCfKind {
     Break,
     Continue,
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

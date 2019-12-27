@@ -1,10 +1,19 @@
+//! This crate is responsible for the part of name resolution that doesn't require type checker.
+//!
+//! Module structure of the crate is built here.
+//! Paths in macros, imports, expressions, types, patterns are resolved here.
+//! Label names are resolved here as well.
+//!
+//! Type-relative name resolution (methods, fields, associated items) happens in `librustc_typeck`.
+//! Lifetime names are resolved in `librustc/middle/resolve_lifetime.rs`.
+
 #![doc(html_root_url = "https://doc.rust-lang.org/nightly/")]
 
+#![feature(inner_deref)]
 #![feature(crate_visibility_modifier)]
 #![feature(label_break_value)]
 #![feature(mem_take)]
 #![feature(nll)]
-#![feature(rustc_diagnostic_macros)]
 
 #![recursion_limit="256"]
 
@@ -31,7 +40,11 @@ use rustc_metadata::cstore::CStore;
 use syntax::ext::hygiene::{ExpnId, Transparency, SyntaxContext};
 use syntax::ast::{self, Name, NodeId, Ident, FloatTy, IntTy, UintTy};
 use syntax::ext::base::{SyntaxExtension, MacroKind, SpecialDerives};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax::symbol::{Symbol, kw, sym};
+=======
+use syntax::symbol::{kw, sym};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use syntax::visit::{self, Visitor};
 use syntax::attr;
@@ -54,13 +67,23 @@ use diagnostics::{Suggestion, ImportSuggestion};
 use diagnostics::{find_span_of_binding_until_next_binding, extend_span_to_previous_binding};
 use late::{PathSource, Rib, RibKind::*};
 use resolve_imports::{ImportDirective, ImportDirectiveSubclass, NameResolution, ImportResolver};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use macros::{InvocationData, LegacyBinding, LegacyScope};
 
 type Res = def::Res<NodeId>;
+=======
+use macros::{LegacyBinding, LegacyScope};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // N.B., this module needs to be declared first so diagnostics are
 // registered before they are used.
 mod error_codes;
+=======
+type Res = def::Res<NodeId>;
+
+pub mod error_codes;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 mod diagnostics;
 mod late;
 mod macros;
@@ -122,12 +145,34 @@ enum ScopeSet {
 /// Serves as a starting point for the scope visitor.
 /// This struct is currently used only for early resolution (imports and macros),
 /// but not for late resolution yet.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[derive(Clone, Debug)]
 pub struct ParentScope<'a> {
     module: Module<'a>,
     expansion: ExpnId,
     legacy: LegacyScope<'a>,
     derives: Vec<ast::Path>,
+=======
+#[derive(Clone, Copy, Debug)]
+pub struct ParentScope<'a> {
+    module: Module<'a>,
+    expansion: ExpnId,
+    legacy: LegacyScope<'a>,
+    derives: &'a [ast::Path],
+}
+
+impl<'a> ParentScope<'a> {
+    /// Creates a parent scope with the passed argument used as the module scope component,
+    /// and other scope components set to default empty values.
+    pub fn module(module: Module<'a>) -> ParentScope<'a> {
+        ParentScope {
+            module,
+            expansion: ExpnId::root(),
+            legacy: LegacyScope::Empty,
+            derives: &[],
+        }
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 #[derive(Eq)]
@@ -221,7 +266,7 @@ impl Segment {
 
     fn names_to_string(segments: &[Segment]) -> String {
         names_to_string(&segments.iter()
-                            .map(|seg| seg.ident)
+                            .map(|seg| seg.ident.name)
                             .collect::<Vec<_>>())
     }
 }
@@ -274,7 +319,11 @@ impl<'tcx> Visitor<'tcx> for UsePlacementFinder {
                 ItemKind::Use(..) => {
                     // don't suggest placing a use before the prelude
                     // import or other generated ones
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     if item.span.ctxt().outer_expn_info().is_none() {
+=======
+                    if !item.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         self.span = Some(item.span.shrink_to_lo());
                         self.found_use = true;
                         return;
@@ -284,7 +333,11 @@ impl<'tcx> Visitor<'tcx> for UsePlacementFinder {
                 ItemKind::ExternCrate(_) => {}
                 // but place them before the first other item
                 _ => if self.span.map_or(true, |span| item.span < span ) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     if item.span.ctxt().outer_expn_info().is_none() {
+=======
+                    if !item.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         // don't insert between attributes and an item
                         if item.attrs.is_empty() {
                             self.span = Some(item.span.shrink_to_lo());
@@ -397,6 +450,19 @@ enum ModuleKind {
     /// * A trait or an enum (it implicitly contains associated types, methods and variant
     ///   constructors).
     Def(DefKind, DefId, Name),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+}
+
+impl ModuleKind {
+    /// Get name of the module.
+    pub fn name(&self) -> Option<Name> {
+        match self {
+            ModuleKind::Block(..) => None,
+            ModuleKind::Def(.., name) => Some(*name),
+        }
+    }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 impl ModuleKind {
@@ -409,6 +475,8 @@ impl ModuleKind {
     }
 }
 
+type Resolutions<'a> = RefCell<FxHashMap<(Ident, Namespace), &'a RefCell<NameResolution<'a>>>>;
+
 /// One node in the tree of modules.
 pub struct ModuleData<'a> {
     parent: Option<Module<'a>>,
@@ -417,15 +485,27 @@ pub struct ModuleData<'a> {
     // The def id of the closest normal module (`mod`) ancestor (including this module).
     normal_ancestor_id: DefId,
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     resolutions: RefCell<FxHashMap<(Ident, Namespace), &'a RefCell<NameResolution<'a>>>>,
     single_segment_macro_resolutions: RefCell<Vec<(Ident, MacroKind, ParentScope<'a>,
                                                    Option<&'a NameBinding<'a>>)>>,
     multi_segment_macro_resolutions: RefCell<Vec<(Vec<Segment>, Span, MacroKind, ParentScope<'a>,
                                                   Option<Res>)>>,
     builtin_attrs: RefCell<Vec<(Ident, ParentScope<'a>)>>,
+=======
+    // Mapping between names and their (possibly in-progress) resolutions in this module.
+    // Resolutions in modules from other crates are not populated until accessed.
+    lazy_resolutions: Resolutions<'a>,
+    // True if this is a module from other crate that needs to be populated on access.
+    populate_on_access: Cell<bool>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     // Macro invocations that can expand into items in this module.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     unresolved_invocations: RefCell<FxHashSet<ExpnId>>,
+=======
+    unexpanded_invocations: RefCell<FxHashSet<ExpnId>>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     no_implicit_prelude: bool,
 
@@ -434,11 +514,6 @@ pub struct ModuleData<'a> {
 
     // Used to memoize the traits in this module for faster searches through all traits in scope.
     traits: RefCell<Option<Box<[(Ident, &'a NameBinding<'a>)]>>>,
-
-    // Whether this module is populated. If not populated, any attempt to
-    // access the children must be preceded with a
-    // `populate_module_if_necessary` call.
-    populated: Cell<bool>,
 
     /// Span of the module itself. Used for error reporting.
     span: Span,
@@ -458,33 +533,34 @@ impl<'a> ModuleData<'a> {
             parent,
             kind,
             normal_ancestor_id,
-            resolutions: Default::default(),
-            single_segment_macro_resolutions: RefCell::new(Vec::new()),
-            multi_segment_macro_resolutions: RefCell::new(Vec::new()),
-            builtin_attrs: RefCell::new(Vec::new()),
-            unresolved_invocations: Default::default(),
+            lazy_resolutions: Default::default(),
+            populate_on_access: Cell::new(!normal_ancestor_id.is_local()),
+            unexpanded_invocations: Default::default(),
             no_implicit_prelude: false,
             glob_importers: RefCell::new(Vec::new()),
             globs: RefCell::new(Vec::new()),
             traits: RefCell::new(None),
-            populated: Cell::new(normal_ancestor_id.is_local()),
             span,
             expansion,
         }
     }
 
-    fn for_each_child<F: FnMut(Ident, Namespace, &'a NameBinding<'a>)>(&self, mut f: F) {
-        for (&(ident, ns), name_resolution) in self.resolutions.borrow().iter() {
-            name_resolution.borrow().binding.map(|binding| f(ident, ns, binding));
+    fn for_each_child<R, F>(&'a self, resolver: &mut R, mut f: F)
+        where R: AsMut<Resolver<'a>>, F: FnMut(&mut R, Ident, Namespace, &'a NameBinding<'a>)
+    {
+        for (&(ident, ns), name_resolution) in resolver.as_mut().resolutions(self).borrow().iter() {
+            name_resolution.borrow().binding.map(|binding| f(resolver, ident, ns, binding));
         }
     }
 
-    fn for_each_child_stable<F: FnMut(Ident, Namespace, &'a NameBinding<'a>)>(&self, mut f: F) {
-        let resolutions = self.resolutions.borrow();
+    fn for_each_child_stable<R, F>(&'a self, resolver: &mut R, mut f: F)
+        where R: AsMut<Resolver<'a>>, F: FnMut(&mut R, Ident, Namespace, &'a NameBinding<'a>)
+    {
+        let resolutions = resolver.as_mut().resolutions(self).borrow();
         let mut resolutions = resolutions.iter().collect::<Vec<_>>();
         resolutions.sort_by_cached_key(|&(&(ident, ns), _)| (ident.as_str(), ns));
         for &(&(ident, ns), &resolution) in resolutions.iter() {
-            resolution.borrow().binding.map(|binding| f(ident, ns, binding));
+            resolution.borrow().binding.map(|binding| f(resolver, ident, ns, binding));
         }
     }
 
@@ -518,7 +594,11 @@ impl<'a> ModuleData<'a> {
     }
 
     fn nearest_item_scope(&'a self) -> Module<'a> {
-        if self.is_trait() { self.parent.unwrap() } else { self }
+        match self.kind {
+            ModuleKind::Def(DefKind::Enum, ..) | ModuleKind::Def(DefKind::Trait, ..) =>
+                self.parent.expect("enum or trait module without a parent"),
+            _ => self,
+        }
     }
 
     fn is_ancestor_of(&self, mut other: &Self) -> bool {
@@ -807,7 +887,7 @@ pub struct Resolver<'a> {
 
     pub definitions: Definitions,
 
-    graph_root: Module<'a>,
+    pub graph_root: Module<'a>,
 
     prelude: Option<Module<'a>>,
     pub extern_prelude: FxHashMap<Ident, ExternPreludeEntry<'a>>,
@@ -860,6 +940,10 @@ pub struct Resolver<'a> {
     /// There will be an anonymous module created around `g` with the ID of the
     /// entry block for `f`.
     block_map: NodeMap<Module<'a>>,
+    /// A fake module that contains no definition and no prelude. Used so that
+    /// some AST passes can generate identifiers that only resolve to local or
+    /// language items.
+    empty_module: Module<'a>,
     module_map: FxHashMap<DefId, Module<'a>>,
     extern_module_map: FxHashMap<(DefId, bool /* MacrosOnly? */), Module<'a>>,
     binding_parent_modules: FxHashMap<PtrKey<'a, NameBinding<'a>>, Module<'a>>,
@@ -894,6 +978,7 @@ pub struct Resolver<'a> {
     non_macro_attrs: [Lrc<SyntaxExtension>; 2],
     macro_defs: FxHashMap<ExpnId, DefId>,
     local_macro_def_scopes: FxHashMap<NodeId, Module<'a>>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     unused_macros: NodeMap<Span>,
     proc_macro_stubs: NodeSet,
     /// Some built-in derives mark items they are applied to so they are treated specially later.
@@ -905,6 +990,29 @@ pub struct Resolver<'a> {
 
     /// Maps the `ExpnId` of an expansion to its containing module or block.
     invocations: FxHashMap<ExpnId, &'a InvocationData<'a>>,
+=======
+    ast_transform_scopes: FxHashMap<ExpnId, Module<'a>>,
+    unused_macros: NodeMap<Span>,
+    proc_macro_stubs: NodeSet,
+    /// Traces collected during macro resolution and validated when it's complete.
+    single_segment_macro_resolutions: Vec<(Ident, MacroKind, ParentScope<'a>,
+                                           Option<&'a NameBinding<'a>>)>,
+    multi_segment_macro_resolutions: Vec<(Vec<Segment>, Span, MacroKind, ParentScope<'a>,
+                                          Option<Res>)>,
+    builtin_attrs: Vec<(Ident, ParentScope<'a>)>,
+    /// Some built-in derives mark items they are applied to so they are treated specially later.
+    /// Derive macros cannot modify the item themselves and have to store the markers in the global
+    /// context, so they attach the markers to derive container IDs using this resolver table.
+    /// FIXME: Find a way for `PartialEq` and `Eq` to emulate `#[structural_match]`
+    /// by marking the produced impls rather than the original items.
+    special_derives: FxHashMap<ExpnId, SpecialDerives>,
+    /// Parent scopes in which the macros were invoked.
+    /// FIXME: `derives` are missing in these parent scopes and need to be taken from elsewhere.
+    invocation_parent_scopes: FxHashMap<ExpnId, ParentScope<'a>>,
+    /// Legacy scopes *produced* by expanding the macro invocations,
+    /// include all the `macro_rules` items and other invocations generated by them.
+    output_legacy_scopes: FxHashMap<ExpnId, LegacyScope<'a>>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     /// Avoid duplicated errors for "name already defined".
     name_already_seen: FxHashMap<Name, Span>,
@@ -916,7 +1024,15 @@ pub struct Resolver<'a> {
     struct_constructors: DefIdMap<(Res, ty::Visibility)>,
 
     /// Features enabled for this crate.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     active_features: FxHashSet<Symbol>,
+=======
+    active_features: FxHashSet<Name>,
+
+    /// Stores enum visibilities to properly build a reduced graph
+    /// when visiting the correspondent variants.
+    variant_vis: DefIdMap<ty::Visibility>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// Nothing really interesting here; it just provides memory for the rest of the crate.
@@ -927,8 +1043,8 @@ pub struct ResolverArenas<'a> {
     name_bindings: arena::TypedArena<NameBinding<'a>>,
     import_directives: arena::TypedArena<ImportDirective<'a>>,
     name_resolutions: arena::TypedArena<RefCell<NameResolution<'a>>>,
-    invocation_data: arena::TypedArena<InvocationData<'a>>,
     legacy_bindings: arena::TypedArena<LegacyBinding<'a>>,
+    ast_paths: arena::TypedArena<ast::Path>,
 }
 
 impl<'a> ResolverArenas<'a> {
@@ -952,15 +1068,21 @@ impl<'a> ResolverArenas<'a> {
     fn alloc_name_resolution(&'a self) -> &'a RefCell<NameResolution<'a>> {
         self.name_resolutions.alloc(Default::default())
     }
-    fn alloc_invocation_data(&'a self, expansion_data: InvocationData<'a>)
-                             -> &'a InvocationData<'a> {
-        self.invocation_data.alloc(expansion_data)
-    }
     fn alloc_legacy_binding(&'a self, binding: LegacyBinding<'a>) -> &'a LegacyBinding<'a> {
         self.legacy_bindings.alloc(binding)
     }
+    fn alloc_ast_paths(&'a self, paths: &[ast::Path]) -> &'a [ast::Path] {
+        self.ast_paths.alloc_from_iter(paths.iter().cloned())
+    }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+impl<'a> AsMut<Resolver<'a>> for Resolver<'a> {
+    fn as_mut(&mut self) -> &mut Resolver<'a> { self }
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 impl<'a, 'b> ty::DefIdTree for &'a Resolver<'b> {
     fn parent(self, id: DefId) -> Option<DefId> {
         match id.krate {
@@ -976,8 +1098,13 @@ impl<'a> hir::lowering::Resolver for Resolver<'a> {
     fn resolve_str_path(
         &mut self,
         span: Span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         crate_root: Option<Symbol>,
         components: &[Symbol],
+=======
+        crate_root: Option<Name>,
+        components: &[Name],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         ns: Namespace,
     ) -> (ast::Path, Res) {
         let root = if crate_root.is_some() {
@@ -985,11 +1112,19 @@ impl<'a> hir::lowering::Resolver for Resolver<'a> {
         } else {
             kw::Crate
         };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let segments = iter::once(Ident::with_empty_ctxt(root))
+=======
+        let segments = iter::once(Ident::with_dummy_span(root))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             .chain(
                 crate_root.into_iter()
                     .chain(components.iter().cloned())
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     .map(Ident::with_empty_ctxt)
+=======
+                    .map(Ident::with_dummy_span)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             ).map(|i| self.new_ast_path_segment(i)).collect::<Vec<_>>();
 
         let path = ast::Path {
@@ -997,7 +1132,11 @@ impl<'a> hir::lowering::Resolver for Resolver<'a> {
             segments,
         };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let parent_scope = &self.dummy_parent_scope();
+=======
+        let parent_scope = &ParentScope::module(self.graph_root);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let res = match self.resolve_ast_path(&path, ns, parent_scope) {
             Ok(res) => res,
             Err((span, error)) => {
@@ -1048,6 +1187,24 @@ impl<'a> Resolver<'a> {
         let graph_root = arenas.alloc_module(ModuleData {
             no_implicit_prelude: attr::contains_name(&krate.attrs, sym::no_implicit_prelude),
             ..ModuleData::new(None, root_module_kind, root_def_id, ExpnId::root(), krate.span)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        });
+        let empty_module_kind = ModuleKind::Def(
+            DefKind::Mod,
+            root_def_id,
+            kw::Invalid,
+        );
+        let empty_module = arenas.alloc_module(ModuleData {
+            no_implicit_prelude: true,
+            ..ModuleData::new(
+                Some(graph_root),
+                empty_module_kind,
+                root_def_id,
+                ExpnId::root(),
+                DUMMY_SP,
+            )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         });
         let mut module_map = FxHashMap::default();
         module_map.insert(DefId::local(CRATE_DEF_INDEX), graph_root);
@@ -1060,18 +1217,33 @@ impl<'a> Resolver<'a> {
                                        .collect();
 
         if !attr::contains_name(&krate.attrs, sym::no_core) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             extern_prelude.insert(Ident::with_empty_ctxt(sym::core), Default::default());
             if !attr::contains_name(&krate.attrs, sym::no_std) {
                 extern_prelude.insert(Ident::with_empty_ctxt(sym::std), Default::default());
+=======
+            extern_prelude.insert(Ident::with_dummy_span(sym::core), Default::default());
+            if !attr::contains_name(&krate.attrs, sym::no_std) {
+                extern_prelude.insert(Ident::with_dummy_span(sym::std), Default::default());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if session.rust_2018() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     extern_prelude.insert(Ident::with_empty_ctxt(sym::meta), Default::default());
+=======
+                    extern_prelude.insert(Ident::with_dummy_span(sym::meta), Default::default());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             }
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut invocations = FxHashMap::default();
         invocations.insert(ExpnId::root(),
                            arenas.alloc_invocation_data(InvocationData::root(graph_root)));
+=======
+        let mut invocation_parent_scopes = FxHashMap::default();
+        invocation_parent_scopes.insert(ExpnId::root(), ParentScope::module(graph_root));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         let mut macro_defs = FxHashMap::default();
         macro_defs.insert(ExpnId::root(), root_def_id);
@@ -1109,10 +1281,12 @@ impl<'a> Resolver<'a> {
             label_res_map: Default::default(),
             export_map: FxHashMap::default(),
             trait_map: Default::default(),
+            empty_module,
             module_map,
             block_map: Default::default(),
             extern_module_map: FxHashMap::default(),
             binding_parent_modules: FxHashMap::default(),
+            ast_transform_scopes: FxHashMap::default(),
 
             glob_map: Default::default(),
 
@@ -1143,7 +1317,12 @@ impl<'a> Resolver<'a> {
             dummy_ext_bang: Lrc::new(SyntaxExtension::dummy_bang(session.edition())),
             dummy_ext_derive: Lrc::new(SyntaxExtension::dummy_derive(session.edition())),
             non_macro_attrs: [non_macro_attr(false), non_macro_attr(true)],
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             invocations,
+=======
+            invocation_parent_scopes,
+            output_legacy_scopes: Default::default(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             macro_defs,
             local_macro_def_scopes: FxHashMap::default(),
             name_already_seen: FxHashMap::default(),
@@ -1151,11 +1330,23 @@ impl<'a> Resolver<'a> {
             struct_constructors: Default::default(),
             unused_macros: Default::default(),
             proc_macro_stubs: Default::default(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             special_derives: Default::default(),
             active_features:
                 features.declared_lib_features.iter().map(|(feat, ..)| *feat)
                     .chain(features.declared_lang_features.iter().map(|(feat, ..)| *feat))
                     .collect(),
+=======
+            single_segment_macro_resolutions: Default::default(),
+            multi_segment_macro_resolutions: Default::default(),
+            builtin_attrs: Default::default(),
+            special_derives: Default::default(),
+            active_features:
+                features.declared_lib_features.iter().map(|(feat, ..)| *feat)
+                    .chain(features.declared_lang_features.iter().map(|(feat, ..)| *feat))
+                    .collect(),
+            variant_vis: Default::default()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
@@ -1182,9 +1373,14 @@ impl<'a> Resolver<'a> {
         f(self, MacroNS);
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn is_builtin_macro(&mut self, def_id: Option<DefId>) -> bool {
         def_id.and_then(|def_id| self.get_macro_by_def_id(def_id))
               .map_or(false, |ext| ext.is_builtin)
+=======
+    fn is_builtin_macro(&mut self, res: Res) -> bool {
+        self.get_macro(res).map_or(false, |ext| ext.is_builtin)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn macro_def(&self, mut ctxt: SyntaxContext) -> DefId {
@@ -1203,6 +1399,10 @@ impl<'a> Resolver<'a> {
     /// Entry point to crate resolution.
     pub fn resolve_crate(&mut self, krate: &Crate) {
         ImportResolver { r: self }.finalize_imports();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        self.finalize_macro_resolutions();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         self.late_resolve_crate(krate);
 
@@ -1221,6 +1421,20 @@ impl<'a> Resolver<'a> {
     ) -> Module<'a> {
         let module = ModuleData::new(Some(parent), kind, normal_ancestor_id, expn_id, span);
         self.arenas.alloc_module(module)
+    }
+
+    fn resolutions(&mut self, module: Module<'a>) -> &'a Resolutions<'a> {
+        if module.populate_on_access.get() {
+            module.populate_on_access.set(false);
+            self.build_reduced_graph_external(module);
+        }
+        &module.lazy_resolutions
+    }
+
+    fn resolution(&mut self, module: Module<'a>, ident: Ident, ns: Namespace)
+                  -> &'a RefCell<NameResolution<'a>> {
+        *self.resolutions(module).borrow_mut().entry((ident.modern(), ns))
+               .or_insert_with(|| self.arenas.alloc_name_resolution())
     }
 
     fn record_use(&mut self, ident: Ident, ns: Namespace,
@@ -1319,6 +1533,7 @@ impl<'a> Resolver<'a> {
             ScopeSet::AbsolutePath(ns) => (ns, true),
             ScopeSet::Macro(_) => (MacroNS, false),
         };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut scope = match ns {
             _ if is_absolute_path => Scope::CrateRoot,
             TypeNS | ValueNS => Scope::Module(parent_scope.module),
@@ -1359,6 +1574,51 @@ impl<'a> Resolver<'a> {
                         invoc.output_legacy_scope.get().unwrap_or(invoc.parent_legacy_scope)
                     ),
                     LegacyScope::Empty => Scope::Module(parent_scope.module),
+=======
+        // Jump out of trait or enum modules, they do not act as scopes.
+        let module = parent_scope.module.nearest_item_scope();
+        let mut scope = match ns {
+            _ if is_absolute_path => Scope::CrateRoot,
+            TypeNS | ValueNS => Scope::Module(module),
+            MacroNS => Scope::DeriveHelpers,
+        };
+        let mut ident = ident.modern();
+        let mut use_prelude = !module.no_implicit_prelude;
+
+        loop {
+            let visit = match scope {
+                Scope::DeriveHelpers => true,
+                Scope::MacroRules(..) => true,
+                Scope::CrateRoot => true,
+                Scope::Module(..) => true,
+                Scope::MacroUsePrelude => use_prelude || rust_2015,
+                Scope::BuiltinAttrs => true,
+                Scope::LegacyPluginHelpers => use_prelude || rust_2015,
+                Scope::ExternPrelude => use_prelude || is_absolute_path,
+                Scope::ToolPrelude => use_prelude,
+                Scope::StdLibPrelude => use_prelude || ns == MacroNS,
+                Scope::BuiltinTypes => true,
+            };
+
+            if visit {
+                if let break_result @ Some(..) = visitor(self, scope, use_prelude, ident) {
+                    return break_result;
+                }
+            }
+
+            scope = match scope {
+                Scope::DeriveHelpers =>
+                    Scope::MacroRules(parent_scope.legacy),
+                Scope::MacroRules(legacy_scope) => match legacy_scope {
+                    LegacyScope::Binding(binding) => Scope::MacroRules(
+                        binding.parent_legacy_scope
+                    ),
+                    LegacyScope::Invocation(invoc_id) => Scope::MacroRules(
+                        self.output_legacy_scopes.get(&invoc_id).cloned()
+                            .unwrap_or(self.invocation_parent_scopes[&invoc_id].legacy)
+                    ),
+                    LegacyScope::Empty => Scope::Module(module),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
                 Scope::CrateRoot => match ns {
                     TypeNS => {
@@ -1430,7 +1690,11 @@ impl<'a> Resolver<'a> {
         }
         let (general_span, modern_span) = if ident.name == kw::SelfUpper {
             // FIXME(jseyfried) improve `Self` hygiene
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let empty_span = ident.span.with_ctxt(SyntaxContext::empty());
+=======
+            let empty_span = ident.span.with_ctxt(SyntaxContext::root());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             (empty_span, empty_span)
         } else if ns == TypeNS {
             let modern_span = ident.span.modern();
@@ -1448,7 +1712,11 @@ impl<'a> Resolver<'a> {
             debug!("walk rib\n{:?}", ribs[i].bindings);
             // Use the rib kind to determine whether we are resolving parameters
             // (modern hygiene) or local variables (legacy hygiene).
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let rib_ident = if let AssocItemRibKind | ItemRibKind = ribs[i].kind {
+=======
+            let rib_ident = if ribs[i].kind.contains_params() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 modern_ident
             } else {
                 ident
@@ -1501,7 +1769,11 @@ impl<'a> Resolver<'a> {
                 self.hygienic_lexical_parent(module, &mut ident.span)
             };
             module = unwrap_or!(opt_module, break);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let adjusted_parent_scope = &ParentScope { module, ..parent_scope.clone() };
+=======
+            let adjusted_parent_scope = &ParentScope { module, ..*parent_scope };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let result = self.resolve_ident_in_module_unadjusted(
                 ModuleOrUniformRoot::Module(module),
                 ident,
@@ -1566,7 +1838,7 @@ impl<'a> Resolver<'a> {
         }
 
         if let ModuleKind::Block(..) = module.kind {
-            return Some(module.parent.unwrap());
+            return Some(module.parent.unwrap().nearest_item_scope());
         }
 
         None
@@ -1596,10 +1868,21 @@ impl<'a> Resolver<'a> {
             if module.expansion != parent.expansion &&
             module.expansion.is_descendant_of(parent.expansion) {
                 // The macro is a proc macro derive
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if module.expansion.looks_like_proc_macro_derive() {
                     if parent.expansion.outer_expn_is_descendant_of(span.ctxt()) {
                         *poisoned = Some(node_id);
                         return module.parent;
+=======
+                if let Some(&def_id) = self.macro_defs.get(&module.expansion) {
+                    if let Some(ext) = self.get_macro_by_def_id(def_id) {
+                        if !ext.is_builtin && ext.macro_kind() == MacroKind::Derive {
+                            if parent.expansion.outer_expn_is_descendant_of(span.ctxt()) {
+                                *poisoned = Some(node_id);
+                                return module.parent;
+                            }
+                        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     }
                 }
             }
@@ -1637,7 +1920,11 @@ impl<'a> Resolver<'a> {
             ModuleOrUniformRoot::Module(m) => {
                 if let Some(def) = ident.span.modernize_and_adjust(m.expansion) {
                     tmp_parent_scope =
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         ParentScope { module: self.macro_def_scope(def), ..parent_scope.clone() };
+=======
+                        ParentScope { module: self.macro_def_scope(def), ..*parent_scope };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     adjusted_parent_scope = &tmp_parent_scope;
                 }
             }
@@ -2471,7 +2758,7 @@ impl<'a> Resolver<'a> {
     fn add_suggestion_for_rename_of_use(
         &self,
         err: &mut DiagnosticBuilder<'_>,
-        name: Symbol,
+        name: Name,
         directive: &ImportDirective<'_>,
         binding_span: Span,
     ) {
@@ -2606,13 +2893,94 @@ impl<'a> Resolver<'a> {
                     return None;
                 };
                 let crate_root = self.get_module(DefId { krate: crate_id, index: CRATE_DEF_INDEX });
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.populate_module_if_necessary(&crate_root);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 Some((crate_root, ty::Visibility::Public, DUMMY_SP, ExpnId::root())
                     .to_name_binding(self.arenas))
             }
         })
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 
+    /// Rustdoc uses this to resolve things in a recoverable way. `ResolutionError<'a>`
+    /// isn't something that can be returned because it can't be made to live that long,
+    /// and also it's a private type. Fortunately rustdoc doesn't need to know the error,
+    /// just that an error occurred.
+    // FIXME(Manishearth): intra-doc links won't get warned of epoch changes.
+    pub fn resolve_str_path_error(
+        &mut self, span: Span, path_str: &str, ns: Namespace, module_id: NodeId
+    ) -> Result<(ast::Path, Res), ()> {
+        let path = if path_str.starts_with("::") {
+            ast::Path {
+                span,
+                segments: iter::once(Ident::with_dummy_span(kw::PathRoot))
+                    .chain({
+                        path_str.split("::").skip(1).map(Ident::from_str)
+                    })
+                    .map(|i| self.new_ast_path_segment(i))
+                    .collect(),
+            }
+        } else {
+            ast::Path {
+                span,
+                segments: path_str
+                    .split("::")
+                    .map(Ident::from_str)
+                    .map(|i| self.new_ast_path_segment(i))
+                    .collect(),
+            }
+        };
+        let module = self.block_map.get(&module_id).copied().unwrap_or_else(|| {
+            let def_id = self.definitions.local_def_id(module_id);
+            self.module_map.get(&def_id).copied().unwrap_or(self.graph_root)
+        });
+        let parent_scope = &ParentScope::module(module);
+        let res = self.resolve_ast_path(&path, ns, parent_scope).map_err(|_| ())?;
+        Ok((path, res))
+    }
+
+    // Resolve a path passed from rustdoc or HIR lowering.
+    fn resolve_ast_path(
+        &mut self,
+        path: &ast::Path,
+        ns: Namespace,
+        parent_scope: &ParentScope<'a>,
+    ) -> Result<Res, (Span, ResolutionError<'a>)> {
+        match self.resolve_path(
+            &Segment::from_path(path), Some(ns), parent_scope, true, path.span, CrateLint::No
+        ) {
+            PathResult::Module(ModuleOrUniformRoot::Module(module)) =>
+                Ok(module.res().unwrap()),
+            PathResult::NonModule(path_res) if path_res.unresolved_segments() == 0 =>
+                Ok(path_res.base_res()),
+            PathResult::NonModule(..) => {
+                Err((path.span, ResolutionError::FailedToResolve {
+                    label: String::from("type-relative paths are not supported in this context"),
+                    suggestion: None,
+                }))
+            }
+            PathResult::Module(..) | PathResult::Indeterminate => unreachable!(),
+            PathResult::Failed { span, label, suggestion, .. } => {
+                Err((span, ResolutionError::FailedToResolve {
+                    label,
+                    suggestion,
+                }))
+            }
+        }
+    }
+
+    fn new_ast_path_segment(&self, ident: Ident) -> ast::PathSegment {
+        let mut seg = ast::PathSegment::from_ident(ident);
+        seg.id = self.session.next_node_id();
+        seg
+    }
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Rustdoc uses this to resolve things in a recoverable way. `ResolutionError<'a>`
     /// isn't something that can be returned because it can't be made to live that long,
     /// and also it's a private type. Fortunately rustdoc doesn't need to know the error,
@@ -2688,21 +3056,29 @@ impl<'a> Resolver<'a> {
 }
 
 fn names_to_string(idents: &[Ident]) -> String {
+=======
+fn names_to_string(names: &[Name]) -> String {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let mut result = String::new();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     for (i, ident) in idents.iter()
                             .filter(|ident| ident.name != kw::PathRoot)
+=======
+    for (i, name) in names.iter()
+                            .filter(|name| **name != kw::PathRoot)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             .enumerate() {
         if i > 0 {
             result.push_str("::");
         }
-        result.push_str(&ident.as_str());
+        result.push_str(&name.as_str());
     }
     result
 }
 
 fn path_names_to_string(path: &Path) -> String {
     names_to_string(&path.segments.iter()
-                        .map(|seg| seg.ident)
+                        .map(|seg| seg.ident.name)
                         .collect::<Vec<_>>())
 }
 
@@ -2710,15 +3086,18 @@ fn path_names_to_string(path: &Path) -> String {
 fn module_to_string(module: Module<'_>) -> Option<String> {
     let mut names = Vec::new();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn collect_mod(names: &mut Vec<Ident>, module: Module<'_>) {
+=======
+    fn collect_mod(names: &mut Vec<Name>, module: Module<'_>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         if let ModuleKind::Def(.., name) = module.kind {
             if let Some(parent) = module.parent {
-                names.push(Ident::with_empty_ctxt(name));
+                names.push(name);
                 collect_mod(names, parent);
             }
         } else {
-            // danger, shouldn't be ident?
-            names.push(Ident::from_str("<opaque>"));
+            names.push(Name::intern("<opaque>"));
             collect_mod(names, module.parent.unwrap());
         }
     }
@@ -2727,9 +3106,14 @@ fn module_to_string(module: Module<'_>) -> Option<String> {
     if names.is_empty() {
         return None;
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     Some(names_to_string(&names.into_iter()
                         .rev()
                         .collect::<Vec<_>>()))
+=======
+    names.reverse();
+    Some(names_to_string(&names))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -2763,5 +3147,3 @@ impl CrateLint {
         }
     }
 }
-
-__build_diagnostic_array! { librustc_resolve, DIAGNOSTICS }

@@ -2,13 +2,21 @@ error[E0107]: wrong number of type arguments: expected 0, found 1
   --> $DIR/unboxed-closure-sugar-wrong-number-number-type-parameters.rs:5:19
    |
 LL | fn foo(_: dyn Zero())
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                   ^^ unexpected type argument
+=======
+   |               ^^^^^^ unexpected type argument
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error[E0220]: associated type `Output` not found for `Zero`
   --> $DIR/unboxed-closure-sugar-wrong-number-number-type-parameters.rs:5:19
    |
 LL | fn foo(_: dyn Zero())
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                   ^^ associated type `Output` not found
+=======
+   |               ^^^^^^ associated type `Output` not found
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 2 previous errors
 

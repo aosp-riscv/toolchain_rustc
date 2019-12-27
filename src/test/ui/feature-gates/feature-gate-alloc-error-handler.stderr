@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0658]: `#[alloc_error_handler]` is an unstable feature
+=======
+error[E0658]: the `#[alloc_error_handler]` attribute is an experimental feature
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-alloc-error-handler.rs:8:1
    |
 LL | #[alloc_error_handler]

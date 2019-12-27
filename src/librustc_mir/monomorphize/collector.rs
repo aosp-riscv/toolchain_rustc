@@ -180,12 +180,20 @@ use rustc::hir::itemlikevisit::ItemLikeVisitor;
 use rustc::hir::def_id::{DefId, LOCAL_CRATE};
 use rustc::mir::interpret::{AllocId, ConstValue};
 use rustc::middle::lang_items::{ExchangeMallocFnLangItem, StartFnLangItem};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::ty::subst::{InternalSubsts, SubstsRef};
+=======
+use rustc::ty::subst::{InternalSubsts, Subst, SubstsRef};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::ty::{self, TypeFoldable, Ty, TyCtxt, GenericParamDefKind, Instance};
 use rustc::ty::print::obsolete::DefPathBasedNames;
 use rustc::ty::adjustment::{CustomCoerceUnsized, PointerCast};
 use rustc::session::config::EntryFnType;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::mir::{self, Location, PlaceBase, Promoted, Static, StaticKind};
+=======
+use rustc::mir::{self, Location, PlaceBase, Static, StaticKind};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::mir::visit::Visitor as MirVisitor;
 use rustc::mir::mono::{MonoItem, InstantiationMode};
 use rustc::mir::interpret::{Scalar, GlobalId, GlobalAlloc, ErrorHandled};
@@ -661,7 +669,11 @@ impl<'a, 'tcx> MirVisitor<'tcx> for MirNeighborCollector<'a, 'tcx> {
                         _context: mir::visit::PlaceContext,
                         location: Location) {
         match place_base {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             PlaceBase::Static(box Static { kind: StaticKind::Static(def_id), .. }) => {
+=======
+            PlaceBase::Static(box Static { kind: StaticKind::Static, def_id, .. }) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 debug!("visiting static {:?} @ {:?}", def_id, location);
 
                 let tcx = self.tcx;
@@ -670,8 +682,29 @@ impl<'a, 'tcx> MirVisitor<'tcx> for MirNeighborCollector<'a, 'tcx> {
                     self.output.push(MonoItem::Static(*def_id));
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             PlaceBase::Static(box Static { kind: StaticKind::Promoted(_), .. }) => {
                 // FIXME: should we handle promoteds here instead of eagerly in collect_neighbours?
+=======
+            PlaceBase::Static(box Static {
+                kind: StaticKind::Promoted(promoted, substs),
+                def_id,
+                ..
+            }) => {
+                let param_env = ty::ParamEnv::reveal_all();
+                let cid = GlobalId {
+                    instance: Instance::new(*def_id, substs.subst(self.tcx, self.param_substs)),
+                    promoted: Some(*promoted),
+                };
+                match self.tcx.const_eval(param_env.and(cid)) {
+                    Ok(val) => collect_const(self.tcx, val, substs, self.output),
+                    Err(ErrorHandled::Reported) => {},
+                    Err(ErrorHandled::TooGeneric) => {
+                        let span = self.tcx.promoted_mir(*def_id)[*promoted].span;
+                        span_bug!(span, "collection encountered polymorphic constant")
+                    },
+                }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             PlaceBase::Local(_) => {
                 // Locals have no relevance for collector
@@ -1202,7 +1235,7 @@ fn collect_miri<'tcx>(tcx: TyCtxt<'tcx>, alloc_id: AllocId, output: &mut Vec<Mon
         }
         Some(GlobalAlloc::Memory(alloc)) => {
             trace!("collecting {:?} with {:#?}", alloc_id, alloc);
-            for &((), inner) in alloc.relocations.values() {
+            for &((), inner) in alloc.relocations().values() {
                 collect_miri(tcx, inner, output);
             }
         },
@@ -1222,6 +1255,10 @@ fn collect_neighbours<'tcx>(
     instance: Instance<'tcx>,
     output: &mut Vec<MonoItem<'tcx>>,
 ) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    debug!("collect_neighbours: {:?}", instance.def_id());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let body = tcx.instance_mir(instance.def);
 
     MirNeighborCollector {
@@ -1230,6 +1267,7 @@ fn collect_neighbours<'tcx>(
         output,
         param_substs: instance.substs,
     }.visit_body(&body);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let param_env = ty::ParamEnv::reveal_all();
     for i in 0..body.promoted.len() {
         use rustc_data_structures::indexed_vec::Idx;
@@ -1246,6 +1284,8 @@ fn collect_neighbours<'tcx>(
             ),
         }
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 fn def_id_to_string(tcx: TyCtxt<'_>, def_id: DefId) -> String {
@@ -1268,7 +1308,11 @@ fn collect_const<'tcx>(
             collect_miri(tcx, ptr.alloc_id, output),
         ConstValue::Slice { data: alloc, start: _, end: _ } |
         ConstValue::ByRef { alloc, .. } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             for &((), id) in alloc.relocations.values() {
+=======
+            for &((), id) in alloc.relocations().values() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 collect_miri(tcx, id, output);
             }
         }

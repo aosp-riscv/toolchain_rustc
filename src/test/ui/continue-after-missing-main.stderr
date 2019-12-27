@@ -1,6 +1,19 @@
 error[E0601]: `main` function not found in crate `continue_after_missing_main`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |
    = note: consider adding a `main` function to `$DIR/continue-after-missing-main.rs`
+=======
+  --> $DIR/continue-after-missing-main.rs:1:1
+   |
+LL | / #![allow(dead_code)]
+LL | |
+LL | | // error-pattern:`main` function not found in crate
+LL | |
+...  |
+LL | |
+LL | | }
+   | |_^ consider adding a `main` function to `$DIR/continue-after-missing-main.rs`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error[E0623]: lifetime mismatch
   --> $DIR/continue-after-missing-main.rs:30:56

@@ -1,7 +1,11 @@
 // edition:2018
 // run-rustfix
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await, async_closure)]
+=======
+#![feature(async_closure)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 fn take_u32(_x: u32) {}
 

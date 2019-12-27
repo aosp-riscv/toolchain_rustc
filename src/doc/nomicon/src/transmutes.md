@@ -36,4 +36,8 @@ pointer casts.
 
 [unbounded lifetime]: unbounded-lifetimes.html
 [transmute]: ../std/mem/fn.transmute.html
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 [transmute_copy]: ../std/mem/fn.transmute.html
+=======
+[transmute_copy]: ../std/mem/fn.transmute_copy.html
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

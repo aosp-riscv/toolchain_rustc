@@ -12,7 +12,7 @@
 use crate::source_map::{SourceMap, FilePathMapping};
 
 use errors::registry::Registry;
-use errors::{DiagnosticBuilder, SubDiagnostic, CodeSuggestion, SourceMapper};
+use errors::{SubDiagnostic, CodeSuggestion, SourceMapper};
 use errors::{DiagnosticId, Applicability};
 use errors::emitter::{Emitter, HumanReadableErrorType};
 
@@ -32,6 +32,10 @@ pub struct JsonEmitter {
     pretty: bool,
     ui_testing: bool,
     json_rendered: HumanReadableErrorType,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    external_macro_backtrace: bool,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 impl JsonEmitter {
@@ -40,6 +44,10 @@ impl JsonEmitter {
         source_map: Lrc<SourceMap>,
         pretty: bool,
         json_rendered: HumanReadableErrorType,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        external_macro_backtrace: bool,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     ) -> JsonEmitter {
         JsonEmitter {
             dst: Box::new(io::stderr()),
@@ -48,13 +56,29 @@ impl JsonEmitter {
             pretty,
             ui_testing: false,
             json_rendered,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            external_macro_backtrace,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn basic(pretty: bool, json_rendered: HumanReadableErrorType) -> JsonEmitter {
+=======
+    pub fn basic(
+        pretty: bool,
+        json_rendered: HumanReadableErrorType,
+        external_macro_backtrace: bool,
+    ) -> JsonEmitter {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let file_path_mapping = FilePathMapping::empty();
         JsonEmitter::stderr(None, Lrc::new(SourceMap::new(file_path_mapping)),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             pretty, json_rendered)
+=======
+                            pretty, json_rendered, external_macro_backtrace)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     pub fn new(
@@ -63,6 +87,10 @@ impl JsonEmitter {
         source_map: Lrc<SourceMap>,
         pretty: bool,
         json_rendered: HumanReadableErrorType,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        external_macro_backtrace: bool,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     ) -> JsonEmitter {
         JsonEmitter {
             dst,
@@ -71,6 +99,10 @@ impl JsonEmitter {
             pretty,
             ui_testing: false,
             json_rendered,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            external_macro_backtrace,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
@@ -80,8 +112,13 @@ impl JsonEmitter {
 }
 
 impl Emitter for JsonEmitter {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn emit_diagnostic(&mut self, db: &DiagnosticBuilder<'_>) {
         let data = Diagnostic::from_diagnostic_builder(db, self);
+=======
+    fn emit_diagnostic(&mut self, db: &errors::Diagnostic) {
+        let data = Diagnostic::from_errors_diagnostic(db, self);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let result = if self.pretty {
             writeln!(&mut self.dst, "{}", as_pretty_json(&data))
         } else {
@@ -189,7 +226,7 @@ struct ArtifactNotification<'a> {
 }
 
 impl Diagnostic {
-    fn from_diagnostic_builder(db: &DiagnosticBuilder<'_>,
+    fn from_errors_diagnostic(db: &errors::Diagnostic,
                                je: &JsonEmitter)
                                -> Diagnostic {
         let sugg = db.suggestions.iter().map(|sugg| {
@@ -219,8 +256,14 @@ impl Diagnostic {
         }
         let buf = BufWriter::default();
         let output = buf.clone();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         je.json_rendered.new_emitter(Box::new(buf), Some(je.sm.clone()), false)
             .ui_testing(je.ui_testing).emit_diagnostic(db);
+=======
+        je.json_rendered.new_emitter(
+            Box::new(buf), Some(je.sm.clone()), false, None, je.external_macro_backtrace
+        ).ui_testing(je.ui_testing).emit_diagnostic(db);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let output = Arc::try_unwrap(output.0).unwrap().into_inner().unwrap();
         let output = String::from_utf8(output).unwrap();
 

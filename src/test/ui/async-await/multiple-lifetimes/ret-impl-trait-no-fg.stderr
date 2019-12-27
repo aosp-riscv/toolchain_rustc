@@ -1,5 +1,9 @@
 error: ambiguous lifetime bound in `impl Trait`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/ret-impl-trait-no-fg.rs:11:64
+=======
+  --> $DIR/ret-impl-trait-no-fg.rs:9:64
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | async fn async_ret_impl_trait<'a, 'b>(a: &'a u8, b: &'b u8) -> impl Trait<'a, 'b> {
    |                                                                ^^^^^^^^^^^^^^^^^^ neither `'a` nor `'b` outlives the other

@@ -1,11 +1,23 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: expected one of `)`, `,`, or `@`, found `[`
+=======
+error: expected one of `)`, `,`, `@`, or `|`, found `[`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/pat-lt-bracket-7.rs:5:16
    |
 LL |     for Thing(x[]) in foo {}
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                ^ expected one of `)`, `,`, or `@` here
+=======
+   |                ^ expected one of `)`, `,`, `@`, or `|` here
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error[E0308]: mismatched types
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/pat-lt-bracket-7.rs:8:30
+=======
+  --> $DIR/pat-lt-bracket-7.rs:9:30
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | const RECOVERY_WITNESS: () = 0;
    |                              ^ expected (), found integer

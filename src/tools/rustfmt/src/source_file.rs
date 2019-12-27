@@ -28,11 +28,19 @@ pub(crate) fn write_all_files<T>(
 where
     T: Write,
 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let emitter = create_emitter(config);
+=======
+    let mut emitter = create_emitter(config);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     emitter.emit_header(out)?;
     for &(ref filename, ref text) in source_file {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         write_file(None, filename, text, out, &*emitter)?;
+=======
+        write_file(None, filename, text, out, &mut *emitter)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
     emitter.emit_footer(out)?;
 
@@ -44,7 +52,11 @@ pub(crate) fn write_file<T>(
     filename: &FileName,
     formatted_text: &str,
     out: &mut T,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     emitter: &dyn Emitter,
+=======
+    emitter: &mut dyn Emitter,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 ) -> Result<emitter::EmitterResult, io::Error>
 where
     T: Write,

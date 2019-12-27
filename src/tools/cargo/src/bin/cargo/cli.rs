@@ -36,6 +36,10 @@ Available unstable (nightly-only) flags:
     -Z config-profile   -- Read profiles from .cargo/config files
     -Z install-upgrade  -- `cargo install` will upgrade instead of failing
     -Z cache-messages   -- Cache compiler messages
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    -Z timings          -- Display concurrency information
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 Run with 'cargo -Z [FLAG] [SUBCOMMAND]'"
         );

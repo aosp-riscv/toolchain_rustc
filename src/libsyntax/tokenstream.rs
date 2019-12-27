@@ -6,7 +6,7 @@
 //!
 //! ## Ownership
 //!
-//! `TokenStreams` are persistent data structures constructed as ropes with reference
+//! `TokenStream`s are persistent data structures constructed as ropes with reference
 //! counted-children. In general, this means that calling an operation on a `TokenStream`
 //! (such as `slice`) produces an entirely new `TokenStream` from the borrowed reference to
 //! the original. This essentially coerces `TokenStream`s into 'views' of their subparts,
@@ -19,7 +19,11 @@ use crate::parse::Directory;
 use crate::parse::token::{self, DelimToken, Token, TokenKind};
 use crate::print::pprust;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax_pos::{BytePos, ExpnId, Span, DUMMY_SP};
+=======
+use syntax_pos::{BytePos, Span, DUMMY_SP};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[cfg(target_arch = "x86_64")]
 use rustc_data_structures::static_assert_size;
 use rustc_data_structures::sync::Lrc;
@@ -147,9 +151,8 @@ impl TokenTree {
     }
 }
 
-/// # Token Streams
-///
 /// A `TokenStream` is an abstract sequence of tokens, organized into `TokenTree`s.
+///
 /// The goal is for procedural macros to work with `TokenStream`s and `TokenTree`s
 /// instead of a representation of the abstract syntax tree.
 /// Today's `TokenTree`s can still contain AST via `token::Interpolated` for back-compat.
@@ -304,7 +307,7 @@ impl TokenStream {
         Cursor::new(self)
     }
 
-    /// Compares two TokenStreams, checking equality without regarding span information.
+    /// Compares two `TokenStream`s, checking equality without regarding span information.
     pub fn eq_unspanned(&self, other: &TokenStream) -> bool {
         let mut t1 = self.trees();
         let mut t2 = other.trees();
@@ -414,7 +417,11 @@ impl TokenStreamBuilder {
         let last_tree_if_joint = self.0.last().and_then(TokenStream::last_tree_if_joint);
         if let Some(TokenTree::Token(last_token)) = last_tree_if_joint {
             if let Some((TokenTree::Token(token), is_joint)) = stream.first_tree_and_joint() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if let Some(glued_tok) = last_token.glue(token) {
+=======
+                if let Some(glued_tok) = last_token.glue(&token) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     let last_stream = self.0.pop().unwrap();
                     self.push_all_but_last_tree(&last_stream);
                     let glued_tt = TokenTree::Token(glued_tok);
@@ -506,7 +513,7 @@ impl Cursor {
 
 impl fmt::Display for TokenStream {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(&pprust::tokens_to_string(self.clone()))
+        f.write_str(&pprust::tts_to_string(self.clone()))
     }
 }
 
@@ -547,6 +554,7 @@ impl DelimSpan {
     pub fn entire(self) -> Span {
         self.open.with_hi(self.close.hi())
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
     pub fn apply_mark(self, expn_id: ExpnId) -> Self {
         DelimSpan {
@@ -554,4 +562,6 @@ impl DelimSpan {
             close: self.close.apply_mark(expn_id),
         }
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

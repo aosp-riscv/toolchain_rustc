@@ -4,12 +4,15 @@
 #![feature(box_syntax)]
 
 #[macro_use] extern crate rustc;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 extern crate rustc_plugin;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 extern crate rustc_driver;
 extern crate syntax;
 
 use rustc::lint::{LateContext, LintContext, LintPass, LateLintPass, LateLintPassObject, LintArray};
-use rustc_plugin::Registry;
+use rustc_driver::plugin::Registry;
 use rustc::hir;
 use syntax::attr;
 use syntax::symbol::Symbol;

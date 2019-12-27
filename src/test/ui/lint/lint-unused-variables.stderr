@@ -17,6 +17,7 @@ LL |     b: i32,
    |     ^ help: consider prefixing with an underscore: `_b`
 
 error: unused variable: `a`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/lint-unused-variables.rs:53:9
    |
 LL |         a: i32,
@@ -53,4 +54,60 @@ LL |         b: i32,
    |         ^ help: consider prefixing with an underscore: `_b`
 
 error: aborting due to 8 previous errors
+=======
+  --> $DIR/lint-unused-variables.rs:68:9
+   |
+LL |         a: i32,
+   |         ^ help: consider prefixing with an underscore: `_a`
+
+error: unused variable: `b`
+  --> $DIR/lint-unused-variables.rs:74:9
+   |
+LL |         b: i32,
+   |         ^ help: consider prefixing with an underscore: `_b`
+
+error: unused variable: `b`
+  --> $DIR/lint-unused-variables.rs:42:9
+   |
+LL |         b: i32,
+   |         ^ help: consider prefixing with an underscore: `_b`
+
+error: unused variable: `b`
+  --> $DIR/lint-unused-variables.rs:47:9
+   |
+LL |         b: i32,
+   |         ^ help: consider prefixing with an underscore: `_b`
+
+error: unused variable: `a`
+  --> $DIR/lint-unused-variables.rs:22:9
+   |
+LL |         a: i32,
+   |         ^ help: consider prefixing with an underscore: `_a`
+
+error: unused variable: `b`
+  --> $DIR/lint-unused-variables.rs:29:9
+   |
+LL |         b: i32,
+   |         ^ help: consider prefixing with an underscore: `_b`
+
+error: unused variable: `b`
+  --> $DIR/lint-unused-variables.rs:34:9
+   |
+LL |         b: i32,
+   |         ^ help: consider prefixing with an underscore: `_b`
+
+error: unused variable: `b`
+  --> $DIR/lint-unused-variables.rs:55:9
+   |
+LL |         b: i32,
+   |         ^ help: consider prefixing with an underscore: `_b`
+
+error: unused variable: `b`
+  --> $DIR/lint-unused-variables.rs:60:9
+   |
+LL |         b: i32,
+   |         ^ help: consider prefixing with an underscore: `_b`
+
+error: aborting due to 11 previous errors
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 

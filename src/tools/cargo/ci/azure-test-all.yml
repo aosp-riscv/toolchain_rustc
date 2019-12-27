@@ -26,3 +26,9 @@ steps:
 # fix the link errors.
 - bash: cargo test --features 'deny-warnings curl/force-system-lib-on-osx'
   displayName: "cargo test"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+- bash: cargo test -p cargo-test-support
+  displayName: "cargo test -p cargo-test-support"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

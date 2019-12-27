@@ -4,12 +4,27 @@ Change Log
 All notable changes to this project will be documented in this file. This
 project adheres to [Semantic Versioning](http://semver.org/).
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 # 2.1.25
 - Update version of rustc-ap-syntax
 
 # 2.1.24
 - Rust 2018 (#1051)
 - Update version of rustc-ap-syntax
+=======
+# 2.1.27
+- Update the version of rustc-ap-syntax
+
+# 2.1.26
+- Update the version of rustc-ap-syntax
+
+# 2.1.25
+- Update the version of rustc-ap-syntax
+
+# 2.1.24
+- Rust 2018 (#1051)
+- Update the version of rustc-ap-syntax
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 # 2.1.22
 - Fix completion for `super::super::...`(#1053)

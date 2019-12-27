@@ -1,5 +1,9 @@
 use crate::utils::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     in_macro_or_desugar, match_def_path,
+=======
+    match_def_path,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     paths::{BEGIN_PANIC, BEGIN_PANIC_FMT},
     resolve_node, snippet_opt, span_lint_and_then,
 };
@@ -138,7 +142,11 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for ImplicitReturn {
 
         // checking return type through MIR, HIR is not able to determine inferred closure return types
         // make sure it's not a macro
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if !mir.return_ty().is_unit() && !in_macro_or_desugar(span) {
+=======
+        if !mir.return_ty().is_unit() && !span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             expr_match(cx, &body.value);
         }
     }

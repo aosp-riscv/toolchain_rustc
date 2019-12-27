@@ -8,17 +8,21 @@
 // is 100% safe but the implementation is fragile internally.
 
 #[cfg(all(
-    not(all(target_arch = "wasm32", target_os = "unknown")),
+    not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
     feature = "proc-macro"
 ))]
-use proc_macro as pm;
+use crate::proc_macro as pm;
 use proc_macro2::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 
 use std::marker::PhantomData;
 use std::ptr;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use private;
 use Lifetime;
+=======
+use crate::Lifetime;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /// Internal type which is used instead of `TokenTree` to represent a token tree
 /// within a `TokenBuffer`.
@@ -102,7 +106,7 @@ impl TokenBuffer {
     /// *This method is available if Syn is built with both the `"parsing"` and
     /// `"proc-macro"` features.*
     #[cfg(all(
-        not(all(target_arch = "wasm32", target_os = "unknown")),
+        not(all(target_arch = "wasm32", any(target_os = "unknown", target_os = "wasi"))),
         feature = "proc-macro"
     ))]
     pub fn new(stream: pm::TokenStream) -> TokenBuffer {
@@ -184,8 +188,8 @@ impl<'a> Cursor<'a> {
         }
 
         Cursor {
-            ptr: ptr,
-            scope: scope,
+            ptr,
+            scope,
             marker: PhantomData,
         }
     }
@@ -208,7 +212,7 @@ impl<'a> Cursor<'a> {
     ///
     /// WARNING: This mutates its argument.
     fn ignore_none(&mut self) {
-        if let Entry::Group(ref group, ref buf) = *self.entry() {
+        if let Entry::Group(group, buf) = self.entry() {
             if group.delimiter() == Delimiter::None {
                 // NOTE: We call `Cursor::create` here to make sure that
                 // situations where we should immediately exit the span after
@@ -238,7 +242,7 @@ impl<'a> Cursor<'a> {
             self.ignore_none();
         }
 
-        if let Entry::Group(ref group, ref buf) = *self.entry() {
+        if let Entry::Group(group, buf) = self.entry() {
             if group.delimiter() == delim {
                 return Some((buf.begin(), group.span(), unsafe { self.bump() }));
             }
@@ -251,8 +255,8 @@ impl<'a> Cursor<'a> {
     /// pointing at the next `TokenTree`.
     pub fn ident(mut self) -> Option<(Ident, Cursor<'a>)> {
         self.ignore_none();
-        match *self.entry() {
-            Entry::Ident(ref ident) => Some((ident.clone(), unsafe { self.bump() })),
+        match self.entry() {
+            Entry::Ident(ident) => Some((ident.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }
@@ -261,10 +265,8 @@ impl<'a> Cursor<'a> {
     /// pointing at the next `TokenTree`.
     pub fn punct(mut self) -> Option<(Punct, Cursor<'a>)> {
         self.ignore_none();
-        match *self.entry() {
-            Entry::Punct(ref op) if op.as_char() != '\'' => {
-                Some((op.clone(), unsafe { self.bump() }))
-            }
+        match self.entry() {
+            Entry::Punct(op) if op.as_char() != '\'' => Some((op.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }
@@ -273,8 +275,8 @@ impl<'a> Cursor<'a> {
     /// pointing at the next `TokenTree`.
     pub fn literal(mut self) -> Option<(Literal, Cursor<'a>)> {
         self.ignore_none();
-        match *self.entry() {
-            Entry::Literal(ref lit) => Some((lit.clone(), unsafe { self.bump() })),
+        match self.entry() {
+            Entry::Literal(lit) => Some((lit.clone(), unsafe { self.bump() })),
             _ => None,
         }
     }
@@ -283,14 +285,14 @@ impl<'a> Cursor<'a> {
     /// cursor pointing at the next `TokenTree`.
     pub fn lifetime(mut self) -> Option<(Lifetime, Cursor<'a>)> {
         self.ignore_none();
-        match *self.entry() {
-            Entry::Punct(ref op) if op.as_char() == '\'' && op.spacing() == Spacing::Joint => {
+        match self.entry() {
+            Entry::Punct(op) if op.as_char() == '\'' && op.spacing() == Spacing::Joint => {
                 let next = unsafe { self.bump() };
                 match next.ident() {
                     Some((ident, rest)) => {
                         let lifetime = Lifetime {
                             apostrophe: op.span(),
-                            ident: ident,
+                            ident,
                         };
                         Some((lifetime, rest))
                     }
@@ -321,11 +323,11 @@ impl<'a> Cursor<'a> {
     /// This method does not treat `None`-delimited groups as transparent, and
     /// will return a `Group(None, ..)` if the cursor is looking at one.
     pub fn token_tree(self) -> Option<(TokenTree, Cursor<'a>)> {
-        let tree = match *self.entry() {
-            Entry::Group(ref group, _) => group.clone().into(),
-            Entry::Literal(ref lit) => lit.clone().into(),
-            Entry::Ident(ref ident) => ident.clone().into(),
-            Entry::Punct(ref op) => op.clone().into(),
+        let tree = match self.entry() {
+            Entry::Group(group, _) => group.clone().into(),
+            Entry::Literal(lit) => lit.clone().into(),
+            Entry::Ident(ident) => ident.clone().into(),
+            Entry::Punct(op) => op.clone().into(),
             Entry::End(..) => {
                 return None;
             }
@@ -337,16 +339,17 @@ impl<'a> Cursor<'a> {
     /// Returns the `Span` of the current token, or `Span::call_site()` if this
     /// cursor points to eof.
     pub fn span(self) -> Span {
-        match *self.entry() {
-            Entry::Group(ref group, _) => group.span(),
-            Entry::Literal(ref l) => l.span(),
-            Entry::Ident(ref t) => t.span(),
-            Entry::Punct(ref o) => o.span(),
+        match self.entry() {
+            Entry::Group(group, _) => group.span(),
+            Entry::Literal(l) => l.span(),
+            Entry::Ident(t) => t.span(),
+            Entry::Punct(o) => o.span(),
             Entry::End(..) => Span::call_site(),
         }
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl private {
     #[cfg(procmacro2_semver_exempt)]
     pub fn open_span_of_group(cursor: Cursor) -> Span {
@@ -362,5 +365,22 @@ impl private {
             Entry::Group(ref group, _) => group.span_close(),
             _ => cursor.span(),
         }
+=======
+pub(crate) fn same_scope(a: Cursor, b: Cursor) -> bool {
+    a.scope == b.scope
+}
+
+pub(crate) fn open_span_of_group(cursor: Cursor) -> Span {
+    match cursor.entry() {
+        Entry::Group(group, _) => group.span_open(),
+        _ => cursor.span(),
+    }
+}
+
+pub(crate) fn close_span_of_group(cursor: Cursor) -> Span {
+    match cursor.entry() {
+        Entry::Group(group, _) => group.span_close(),
+        _ => cursor.span(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }

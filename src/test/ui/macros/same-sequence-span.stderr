@@ -17,6 +17,7 @@ LL |                $(= $z:tt)*
 error: `$x:expr` may be followed by `$y:tt`, which is not allowed for `expr` fragments
   --> $DIR/same-sequence-span.rs:20:1
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL | proc_macro_sequence::make_foo!();
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not allowed after `expr` fragments
    |
@@ -27,6 +28,28 @@ error: `$x:expr` may be followed by `=`, which is not allowed for `expr` fragmen
    |
 LL | proc_macro_sequence::make_foo!();
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ not allowed after `expr` fragments
+=======
+LL |   proc_macro_sequence::make_foo!();
+   |   ^--------------------------------
+   |   |
+   |  _in this macro invocation
+   | |
+LL | |
+LL | |
+LL | | fn main() {}
+...  |
+   |
+   = note: allowed there are: `=>`, `,` or `;`
+
+error: `$x:expr` may be followed by `=`, which is not allowed for `expr` fragments
+  --> $DIR/same-sequence-span.rs:20:1
+   |
+LL | proc_macro_sequence::make_foo!();
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   | |
+   | not allowed after `expr` fragments
+   | in this macro invocation
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = note: allowed there are: `=>`, `,` or `;`
 

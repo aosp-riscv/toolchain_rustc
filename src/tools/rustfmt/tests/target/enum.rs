@@ -273,3 +273,20 @@ enum PublishedFileVisibility {
     Private =
         sys::ERemoteStoragePublishedFileVisibility_k_ERemoteStoragePublishedFileVisibilityPrivate,
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+// #3771
+//#![feature(arbitrary_enum_discriminant)]
+#[repr(u32)]
+pub enum E {
+    A {
+        a: u32,
+    } = 0x100,
+    B {
+        field1: u32,
+        field2: u8,
+        field3: m::M,
+    } = 0x300, // comment
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

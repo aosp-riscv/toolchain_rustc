@@ -547,6 +547,7 @@ impl char {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Returns `true` if this `char` satisfies the `XID_Start` Unicode property, and false
     /// otherwise.
     ///
@@ -580,6 +581,8 @@ impl char {
         derived_property::XID_Continue(self)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Returns `true` if this `char` is lowercase.
     ///
     /// 'Lowercase' is defined according to the terms of the Unicode Derived Core

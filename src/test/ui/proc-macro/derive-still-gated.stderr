@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `derive_Empty` in this scope
+=======
+error: cannot find attribute `derive_Empty` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/derive-still-gated.rs:6:3
    |
 LL | #[derive_Empty]

@@ -9,6 +9,7 @@ trait Test {
     fn test(&self, value: &Self::V) -> bool;
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 ///////////////////////////////////////////////////////////////////////////
 
 struct TesterPair<T:Test> {
@@ -27,6 +28,22 @@ impl<T:Test> TesterPair<T> {
 }
 
 ///////////////////////////////////////////////////////////////////////////
+=======
+struct TesterPair<T:Test> {
+    tester: T,
+    value: T::V,
+}
+
+impl<T:Test> TesterPair<T> {
+    fn new(tester: T, value: T::V) -> TesterPair<T> {
+        TesterPair { tester: tester, value: value }
+    }
+
+    fn test(&self) -> bool {
+        self.tester.test(&self.value)
+    }
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 struct EqU32(u32);
 impl Test for EqU32 {

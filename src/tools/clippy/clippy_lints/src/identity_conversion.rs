@@ -1,6 +1,10 @@
 use crate::utils::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     in_macro_or_desugar, match_def_path, match_trait_method, same_tys, snippet, snippet_with_macro_callsite,
     span_lint_and_then,
+=======
+    match_def_path, match_trait_method, same_tys, snippet, snippet_with_macro_callsite, span_lint_and_then,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
 use crate::utils::{paths, resolve_node};
 use rustc::hir::*;
@@ -34,7 +38,11 @@ impl_lint_pass!(IdentityConversion => [IDENTITY_CONVERSION]);
 
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for IdentityConversion {
     fn check_expr(&mut self, cx: &LateContext<'a, 'tcx>, e: &'tcx Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(e.span) {
+=======
+        if e.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 

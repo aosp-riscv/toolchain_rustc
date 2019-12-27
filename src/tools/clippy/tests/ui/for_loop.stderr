@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: this range is empty so this for loop will never run
   --> $DIR/for_loop.rs:40:14
    |
@@ -162,3 +163,5 @@ LL |     vec.iter().cloned().map(|x| out.push(x)).collect::<Vec<_>>();
 
 error: aborting due to 22 previous errors
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

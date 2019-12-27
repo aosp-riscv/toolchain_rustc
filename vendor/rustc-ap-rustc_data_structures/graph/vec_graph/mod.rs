@@ -2,7 +2,11 @@ use crate::indexed_vec::{Idx, IndexVec};
 use crate::graph::{DirectedGraph, WithNumNodes, WithNumEdges, WithSuccessors, GraphSuccessors};
 
 #[cfg(test)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 mod test;
+=======
+mod tests;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 pub struct VecGraph<N: Idx> {
     /// Maps from a given node to an index where the set of successors

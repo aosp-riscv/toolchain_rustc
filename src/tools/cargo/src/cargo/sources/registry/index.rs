@@ -65,6 +65,7 @@
 //! Note that this is just a high-level overview, there's of course lots of
 //! details like invalidating caches and whatnot which are handled below, but
 //! hopefully those are more obvious inline in the code itself.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 use std::collections::{HashMap, HashSet};
 use std::fs;
@@ -73,11 +74,23 @@ use std::str;
 
 use log::info;
 use semver::{Version, VersionReq};
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use crate::core::dependency::Dependency;
 use crate::core::{InternedString, PackageId, SourceId, Summary};
 use crate::sources::registry::{RegistryData, RegistryPackage};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use crate::util::paths;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::util::{internal, CargoResult, Config, Filesystem, ToSemver};
+use log::info;
+use semver::{Version, VersionReq};
+use std::collections::{HashMap, HashSet};
+use std::fs;
+use std::path::Path;
+use std::str;
 
 /// Crates.io treats hyphen and underscores as interchangeable, but the index and old Cargo do not.
 /// Therefore, the index must store uncanonicalized version of the name so old Cargo's can find it.
@@ -211,12 +224,19 @@ enum MaybeIndexSummary {
 
 /// A parsed representation of a summary from the index.
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// In addition to a full `Summary` we have a few auxiliary pieces of
 /// information liked `yanked` and what the checksum hash is.
 pub struct IndexSummary {
     pub summary: Summary,
     pub yanked: bool,
     pub hash: String,
+=======
+/// In addition to a full `Summary` we have information on whether it is `yanked`.
+pub struct IndexSummary {
+    pub summary: Summary,
+    pub yanked: bool,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// A representation of the cache on disk that Cargo maintains of summaries.
@@ -243,6 +263,7 @@ impl<'cfg> RegistryIndex<'cfg> {
     }
 
     /// Returns the hash listed for a specified `PackageId`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn hash(&mut self, pkg: PackageId, load: &mut dyn RegistryData) -> CargoResult<String> {
         let req = VersionReq::exact(pkg.version());
         let summary = self
@@ -250,6 +271,18 @@ impl<'cfg> RegistryIndex<'cfg> {
             .next()
             .ok_or_else(|| internal(format!("no hash listed for {}", pkg)))?;
         Ok(summary.hash.clone())
+=======
+    pub fn hash(&mut self, pkg: PackageId, load: &mut dyn RegistryData) -> CargoResult<&str> {
+        let req = VersionReq::exact(pkg.version());
+        let summary = self
+            .summaries(pkg.name(), &req, load)?
+            .next()
+            .ok_or_else(|| internal(format!("no hash listed for {}", pkg)))?;
+        summary
+            .summary
+            .checksum()
+            .ok_or_else(|| internal(format!("no hash listed for {}", pkg)))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Load a list of summaries for `name` package in this registry which
@@ -559,6 +592,7 @@ impl Summaries {
         // This is opportunistic so we ignore failure here but are sure to log
         // something in case of error.
         if let Some(cache_bytes) = cache_bytes {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if fs::create_dir_all(cache_path.parent().unwrap()).is_ok() {
                 let path = Filesystem::new(cache_path.clone());
                 config.assert_package_cache_locked(&path);
@@ -728,6 +762,176 @@ impl IndexSummary {
             summary,
             yanked: yanked.unwrap_or(false),
             hash: cksum,
+=======
+            if paths::create_dir_all(cache_path.parent().unwrap()).is_ok() {
+                let path = Filesystem::new(cache_path.clone());
+                config.assert_package_cache_locked(&path);
+                if let Err(e) = fs::write(cache_path, cache_bytes) {
+                    log::info!("failed to write cache: {}", e);
+                }
+            }
+        }
+
+        Ok(Some(ret))
+    }
+
+    /// Parses an open `File` which represents information previously cached by
+    /// Cargo.
+    pub fn parse_cache(contents: Vec<u8>, last_index_update: &str) -> CargoResult<Summaries> {
+        let cache = SummariesCache::parse(&contents, last_index_update)?;
+        let mut ret = Summaries::default();
+        for (version, summary) in cache.versions {
+            let (start, end) = subslice_bounds(&contents, summary);
+            ret.versions
+                .insert(version, MaybeIndexSummary::Unparsed { start, end });
+        }
+        ret.raw_data = contents;
+        return Ok(ret);
+
+        // Returns the start/end offsets of `inner` with `outer`. Asserts that
+        // `inner` is a subslice of `outer`.
+        fn subslice_bounds(outer: &[u8], inner: &[u8]) -> (usize, usize) {
+            let outer_start = outer.as_ptr() as usize;
+            let outer_end = outer_start + outer.len();
+            let inner_start = inner.as_ptr() as usize;
+            let inner_end = inner_start + inner.len();
+            assert!(inner_start >= outer_start);
+            assert!(inner_end <= outer_end);
+            (inner_start - outer_start, inner_end - outer_start)
+        }
+    }
+}
+
+// Implementation of serializing/deserializing the cache of summaries on disk.
+// Currently the format looks like:
+//
+// +--------------+-------------+---+
+// | version byte | git sha rev | 0 |
+// +--------------+-------------+---+
+//
+// followed by...
+//
+// +----------------+---+------------+---+
+// | semver version | 0 |  JSON blob | 0 | ...
+// +----------------+---+------------+---+
+//
+// The idea is that this is a very easy file for Cargo to parse in future
+// invocations. The read from disk should be quite fast and then afterwards all
+// we need to know is what versions correspond to which JSON blob.
+//
+// The leading version byte is intended to ensure that there's some level of
+// future compatibility against changes to this cache format so if different
+// versions of Cargo share the same cache they don't get too confused. The git
+// sha lets us know when the file needs to be regenerated (it needs regeneration
+// whenever the index itself updates).
+
+const CURRENT_CACHE_VERSION: u8 = 1;
+
+impl<'a> SummariesCache<'a> {
+    fn parse(data: &'a [u8], last_index_update: &str) -> CargoResult<SummariesCache<'a>> {
+        // NB: keep this method in sync with `serialize` below
+        let (first_byte, rest) = data
+            .split_first()
+            .ok_or_else(|| failure::format_err!("malformed cache"))?;
+        if *first_byte != CURRENT_CACHE_VERSION {
+            failure::bail!("looks like a different Cargo's cache, bailing out");
+        }
+        let mut iter = split(rest, 0);
+        if let Some(update) = iter.next() {
+            if update != last_index_update.as_bytes() {
+                failure::bail!(
+                    "cache out of date: current index ({}) != cache ({})",
+                    last_index_update,
+                    str::from_utf8(update)?,
+                )
+            }
+        } else {
+            failure::bail!("malformed file");
+        }
+        let mut ret = SummariesCache::default();
+        while let Some(version) = iter.next() {
+            let version = str::from_utf8(version)?;
+            let version = Version::parse(version)?;
+            let summary = iter.next().unwrap();
+            ret.versions.push((version, summary));
+        }
+        Ok(ret)
+    }
+
+    fn serialize(&self, index_version: &str) -> Vec<u8> {
+        // NB: keep this method in sync with `parse` above
+        let size = self
+            .versions
+            .iter()
+            .map(|(_version, data)| (10 + data.len()))
+            .sum();
+        let mut contents = Vec::with_capacity(size);
+        contents.push(CURRENT_CACHE_VERSION);
+        contents.extend_from_slice(index_version.as_bytes());
+        contents.push(0);
+        for (version, data) in self.versions.iter() {
+            contents.extend_from_slice(version.to_string().as_bytes());
+            contents.push(0);
+            contents.extend_from_slice(data);
+            contents.push(0);
+        }
+        contents
+    }
+}
+
+impl MaybeIndexSummary {
+    /// Parses this "maybe a summary" into a `Parsed` for sure variant.
+    ///
+    /// Does nothing if this is already `Parsed`, and otherwise the `raw_data`
+    /// passed in is sliced with the bounds in `Unparsed` and then actually
+    /// parsed.
+    fn parse(&mut self, raw_data: &[u8], source_id: SourceId) -> CargoResult<&IndexSummary> {
+        let (start, end) = match self {
+            MaybeIndexSummary::Unparsed { start, end } => (*start, *end),
+            MaybeIndexSummary::Parsed(summary) => return Ok(summary),
+        };
+        let summary = IndexSummary::parse(&raw_data[start..end], source_id)?;
+        *self = MaybeIndexSummary::Parsed(summary);
+        match self {
+            MaybeIndexSummary::Unparsed { .. } => unreachable!(),
+            MaybeIndexSummary::Parsed(summary) => Ok(summary),
+        }
+    }
+}
+
+impl From<IndexSummary> for MaybeIndexSummary {
+    fn from(summary: IndexSummary) -> MaybeIndexSummary {
+        MaybeIndexSummary::Parsed(summary)
+    }
+}
+
+impl IndexSummary {
+    /// Parses a line from the registry's index file into an `IndexSummary` for
+    /// a package.
+    ///
+    /// The `line` provided is expected to be valid JSON.
+    fn parse(line: &[u8], source_id: SourceId) -> CargoResult<IndexSummary> {
+        let RegistryPackage {
+            name,
+            vers,
+            cksum,
+            deps,
+            features,
+            yanked,
+            links,
+        } = serde_json::from_slice(line)?;
+        log::trace!("json parsed registry {}/{}", name, vers);
+        let pkgid = PackageId::new(name, &vers, source_id)?;
+        let deps = deps
+            .into_iter()
+            .map(|dep| dep.into_dep(source_id))
+            .collect::<CargoResult<Vec<_>>>()?;
+        let mut summary = Summary::new(pkgid, deps, &features, links, false)?;
+        summary.set_checksum(cksum);
+        Ok(IndexSummary {
+            summary,
+            yanked: yanked.unwrap_or(false),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         })
     }
 }

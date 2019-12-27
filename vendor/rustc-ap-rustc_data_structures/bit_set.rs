@@ -10,6 +10,9 @@ extern crate test;
 #[cfg(test)]
 use test::Bencher;
 
+#[cfg(test)]
+mod tests;
+
 pub type Word = u64;
 pub const WORD_BYTES: usize = mem::size_of::<Word>();
 pub const WORD_BITS: usize = WORD_BYTES * 8;
@@ -983,6 +986,7 @@ fn word_index_and_mask<T: Idx>(elem: T) -> (usize, Word) {
     let mask = 1 << (elem % WORD_BITS);
     (word_index, mask)
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 #[test]
 fn test_new_filled() {
@@ -1348,3 +1352,5 @@ fn union_hybrid_sparse_full_small_domain(b: &mut Bencher) {
         sparse.union(&dense);
     })
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

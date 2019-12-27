@@ -89,13 +89,22 @@
 //!
 //! When cross-compiling, the layout is the same, except it appears in
 //! `target/$TRIPLE`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use crate::core::Workspace;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::util::{CargoResult, FileLock};
+=======
+use crate::util::paths;
+use crate::util::{CargoResult, FileLock};
+use std::path::{Path, PathBuf};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /// Contains the paths of all target output locations.
 ///
@@ -183,21 +192,23 @@ impl Layout {
     }
 
     /// Makes sure all directories stored in the Layout exist on the filesystem.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn prepare(&mut self) -> io::Result<()> {
         mkdir(&self.deps)?;
         mkdir(&self.incremental)?;
         mkdir(&self.fingerprint)?;
         mkdir(&self.examples)?;
         mkdir(&self.build)?;
+=======
+    pub fn prepare(&mut self) -> CargoResult<()> {
+        paths::create_dir_all(&self.deps)?;
+        paths::create_dir_all(&self.incremental)?;
+        paths::create_dir_all(&self.fingerprint)?;
+        paths::create_dir_all(&self.examples)?;
+        paths::create_dir_all(&self.build)?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         return Ok(());
-
-        fn mkdir(dir: &Path) -> io::Result<()> {
-            if fs::metadata(&dir).is_err() {
-                fs::create_dir(dir)?;
-            }
-            Ok(())
-        }
     }
 
     /// Fetch the destination path for final artifacts  (`/…/target/debug`).

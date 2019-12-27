@@ -1,5 +1,9 @@
 error[E0382]: use of moved value: `s.x`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/no-move-across-await-struct.rs:10:5
+=======
+  --> $DIR/no-move-across-await-struct.rs:8:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     needs_vec(s.x).await;
    |               --- value moved here

@@ -1,11 +1,14 @@
 use rustc::middle::privacy::{AccessLevels, AccessLevel};
 use rustc::hir::def::{Res, DefKind};
 use rustc::hir::def_id::{CrateNum, CRATE_DEF_INDEX, DefId};
-use rustc::ty::Visibility;
+use rustc::ty::{TyCtxt, Visibility};
 use rustc::util::nodemap::FxHashSet;
 use syntax::symbol::sym;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 use std::cell::RefMut;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use crate::clean::{AttributesExt, NestedAttributesExt};
 
@@ -14,9 +17,9 @@ use crate::clean::{AttributesExt, NestedAttributesExt};
 /// Similar to `librustc_privacy::EmbargoVisitor`, but also takes
 /// specific rustdoc annotations into account (i.e., `doc(hidden)`)
 pub struct LibEmbargoVisitor<'a, 'tcx> {
-    cx: &'a crate::core::DocContext<'tcx>,
+    tcx: TyCtxt<'tcx>,
     // Accessibility levels for reachable nodes
-    access_levels: RefMut<'a, AccessLevels<DefId>>,
+    access_levels: &'a mut AccessLevels<DefId>,
     // Previous accessibility level, None means unreachable
     prev_level: Option<AccessLevel>,
     // Keeps track of already visited modules, in case a module re-exports its parent
@@ -25,13 +28,13 @@ pub struct LibEmbargoVisitor<'a, 'tcx> {
 
 impl<'a, 'tcx> LibEmbargoVisitor<'a, 'tcx> {
     pub fn new(
-        cx: &'a crate::core::DocContext<'tcx>
+        cx: &'a mut crate::core::DocContext<'tcx>
     ) -> LibEmbargoVisitor<'a, 'tcx> {
         LibEmbargoVisitor {
-            cx,
-            access_levels: RefMut::map(cx.renderinfo.borrow_mut(), |ri| &mut ri.access_levels),
+            tcx: cx.tcx,
+            access_levels: &mut cx.renderinfo.get_mut().access_levels,
             prev_level: Some(AccessLevel::Public),
-            visited_mods: FxHashSet::default()
+            visited_mods: FxHashSet::default(),
         }
     }
 
@@ -43,7 +46,11 @@ impl<'a, 'tcx> LibEmbargoVisitor<'a, 'tcx> {
 
     // Updates node level and returns the updated level
     fn update(&mut self, did: DefId, level: Option<AccessLevel>) -> Option<AccessLevel> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let is_hidden = self.cx.tcx.get_attrs(did).lists(sym::doc).has_word(sym::hidden);
+=======
+        let is_hidden = self.tcx.get_attrs(did).lists(sym::doc).has_word(sym::hidden);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         let old_level = self.access_levels.map.get(&did).cloned();
         // Accessibility levels can only grow
@@ -60,9 +67,15 @@ impl<'a, 'tcx> LibEmbargoVisitor<'a, 'tcx> {
             return;
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         for item in self.cx.tcx.item_children(def_id).iter() {
             if let Some(def_id) = item.res.opt_def_id() {
                 if self.cx.tcx.def_key(def_id).parent.map_or(false, |d| d == def_id.index) ||
+=======
+        for item in self.tcx.item_children(def_id).iter() {
+            if let Some(def_id) = item.res.opt_def_id() {
+                if self.tcx.def_key(def_id).parent.map_or(false, |d| d == def_id.index) ||
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     item.vis == Visibility::Public {
                     self.visit_item(item.res);
                 }
@@ -72,7 +85,11 @@ impl<'a, 'tcx> LibEmbargoVisitor<'a, 'tcx> {
 
     fn visit_item(&mut self, res: Res) {
         let def_id = res.def_id();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let vis = self.cx.tcx.visibility(def_id);
+=======
+        let vis = self.tcx.visibility(def_id);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let inherited_item_level = if vis == Visibility::Public {
             self.prev_level
         } else {

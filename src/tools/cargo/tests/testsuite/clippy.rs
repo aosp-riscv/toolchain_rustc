@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::support::{clippy_is_available, project, registry::Package};
+=======
+use cargo_test_support::{clippy_is_available, project, registry::Package};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #[cargo_test]
 // Clippy should never be considered fresh.

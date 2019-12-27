@@ -8,8 +8,11 @@
 //   all of the bindings for that scope.
 // * No drop flags are used.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(nll, bind_by_move_pattern_guards)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 fn complicated_match(cond: bool, items: (bool, bool, String)) -> i32 {
     match items {
         (false, a, s) | (a, false, s) if if cond { return 3 } else { a } => 1,

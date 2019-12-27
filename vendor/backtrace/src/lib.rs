@@ -86,6 +86,12 @@ mod types;
 #[cfg(feature = "std")]
 pub use crate::symbolize::clear_symbol_cache;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+mod print;
+pub use print::{BacktraceFmt, BacktraceFrameFmt, PrintFmt};
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 cfg_if::cfg_if! {
     if #[cfg(feature = "std")] {
         pub use crate::backtrace::trace;

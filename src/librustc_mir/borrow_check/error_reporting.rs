@@ -41,7 +41,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         let mut target = place.local_or_deref_local();
         for stmt in &self.body[location.block].statements[location.statement_index..] {
             debug!("add_moved_or_invoked_closure_note: stmt={:?} target={:?}", stmt, target);
-            if let StatementKind::Assign(into, box Rvalue::Use(from)) = &stmt.kind {
+            if let StatementKind::Assign(box(into, Rvalue::Use(from))) = &stmt.kind {
                 debug!("add_fnonce_closure_note: into={:?} from={:?}", into, from);
                 match from {
                     Operand::Copy(ref place) |
@@ -152,35 +152,60 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         match place {
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 self.append_local_to_string(*local, buf)?;
             }
             PlaceRef {
                 base:
                     PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         kind: StaticKind::Promoted(_),
                         ..
                     }),
                 projection: None,
+=======
+                        kind: StaticKind::Promoted(..),
+                        ..
+                    }),
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 buf.push_str("promoted");
             }
             PlaceRef {
                 base:
                     PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         kind: StaticKind::Static(def_id),
                         ..
                     }),
                 projection: None,
+=======
+                        kind: StaticKind::Static,
+                        def_id,
+                        ..
+                    }),
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 buf.push_str(&self.infcx.tcx.item_name(*def_id).to_string());
             }
             PlaceRef {
                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(ref proj),
             } => {
                 match proj.elem {
+=======
+                projection: [proj_base @ .., elem],
+            } => {
+                match elem {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     ProjectionElem::Deref => {
                         let upvar_field_projection =
                             self.is_upvar_field_projection(place);
@@ -198,13 +223,18 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                                 self.append_place_to_string(
                                     PlaceRef {
                                         base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                         projection: &proj.base,
+=======
+                                        projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                     },
                                     buf,
                                     autoderef,
                                     &including_downcast,
                                 )?;
                             } else {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 match (&proj.base, base) {
                                     (None, PlaceBase::Local(local)) => {
                                         if self.body.local_decls[*local].is_ref_for_guard() {
@@ -238,6 +268,41 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                                             PlaceRef {
                                                 base,
                                                 projection: &proj.base,
+=======
+                                match (proj_base, base) {
+                                    ([], PlaceBase::Local(local)) => {
+                                        if self.body.local_decls[*local].is_ref_for_guard() {
+                                            self.append_place_to_string(
+                                                PlaceRef {
+                                                    base,
+                                                    projection: proj_base,
+                                                },
+                                                buf,
+                                                autoderef,
+                                                &including_downcast,
+                                            )?;
+                                        } else {
+                                            // FIXME deduplicate this and the _ => body below
+                                            buf.push_str(&"*");
+                                            self.append_place_to_string(
+                                                PlaceRef {
+                                                    base,
+                                                    projection: proj_base,
+                                                },
+                                                buf,
+                                                autoderef,
+                                                &including_downcast,
+                                            )?;
+                                        }
+                                    }
+
+                                    _ => {
+                                        buf.push_str(&"*");
+                                        self.append_place_to_string(
+                                            PlaceRef {
+                                                base,
+                                                projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                             },
                                             buf,
                                             autoderef,
@@ -252,7 +317,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         self.append_place_to_string(
                             PlaceRef {
                                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: &proj.base,
+=======
+                                projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             },
                             buf,
                             autoderef,
@@ -274,12 +343,21 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         } else {
                             let field_name = self.describe_field(PlaceRef {
                                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: &proj.base,
                             }, field);
+=======
+                                projection: proj_base,
+                            }, *field);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             self.append_place_to_string(
                                 PlaceRef {
                                     base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                     projection: &proj.base,
+=======
+                                    projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                 },
                                 buf,
                                 autoderef,
@@ -294,14 +372,18 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         self.append_place_to_string(
                             PlaceRef {
                                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: &proj.base,
+=======
+                                projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             },
                             buf,
                             autoderef,
                             &including_downcast,
                         )?;
                         buf.push_str("[");
-                        if self.append_local_to_string(index, buf).is_err() {
+                        if self.append_local_to_string(*index, buf).is_err() {
                             buf.push_str("_");
                         }
                         buf.push_str("]");
@@ -314,7 +396,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                         self.append_place_to_string(
                             PlaceRef {
                                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 projection: &proj.base,
+=======
+                                projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             },
                             buf,
                             autoderef,
@@ -335,7 +421,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         let local = &self.body.local_decls[local_index];
         match local.name {
             Some(name) if !local.from_compiler_desugaring() => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 buf.push_str(name.as_str().get());
+=======
+                buf.push_str(&name.as_str());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 Ok(())
             }
             _ => Err(()),
@@ -348,28 +438,51 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
         match place {
             PlaceRef {
                 base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } => {
                 let local = &self.body.local_decls[*local];
                 self.describe_field_from_ty(&local.ty, field, None)
             }
             PlaceRef {
                 base: PlaceBase::Static(static_),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } =>
                 self.describe_field_from_ty(&static_.ty, field, None),
             PlaceRef {
                 base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: Some(proj),
             } => match proj.elem {
                 ProjectionElem::Deref => self.describe_field(PlaceRef {
                     base,
                     projection: &proj.base,
                 }, field),
+=======
+                projection: [proj_base @ .., elem],
+            } => match elem {
+                ProjectionElem::Deref => {
+                    self.describe_field(PlaceRef {
+                        base,
+                        projection: proj_base,
+                    }, field)
+                }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ProjectionElem::Downcast(_, variant_index) => {
                     let base_ty =
                         Place::ty_from(place.base, place.projection, self.body, self.infcx.tcx).ty;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     self.describe_field_from_ty(&base_ty, field, Some(variant_index))
+=======
+                    self.describe_field_from_ty(&base_ty, field, Some(*variant_index))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
                 ProjectionElem::Field(_, field_type) => {
                     self.describe_field_from_ty(&field_type, field, None)
@@ -379,7 +492,11 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
                 | ProjectionElem::Subslice { .. } => {
                     self.describe_field(PlaceRef {
                         base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         projection: &proj.base,
+=======
+                        projection: proj_base,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     }, field)
                 }
             },
@@ -440,10 +557,18 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
     pub fn is_place_thread_local(&self, place_ref: PlaceRef<'cx, 'tcx>) -> bool {
         if let PlaceRef {
             base: PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 kind: StaticKind::Static(def_id),
                 ..
             }),
             projection: None,
+=======
+                kind: StaticKind::Static,
+                def_id,
+                ..
+            }),
+            projection: [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } = place_ref {
             let attrs = self.infcx.tcx.get_attrs(*def_id);
             let is_thread_local = attrs.iter().any(|attr| attr.check_name(sym::thread_local));
@@ -788,8 +913,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
         debug!("move_spans: moved_place={:?} location={:?} stmt={:?}", moved_place, location, stmt);
         if let  StatementKind::Assign(
-            _,
-            box Rvalue::Aggregate(ref kind, ref places)
+            box(_, Rvalue::Aggregate(ref kind, ref places))
         ) = stmt.kind {
             let (def_id, is_generator) = match kind {
                 box AggregateKind::Closure(def_id, _) => (def_id, false),
@@ -826,10 +950,17 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
             .get(location.statement_index)
         {
             Some(&Statement {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 kind: StatementKind::Assign(Place {
                     base: PlaceBase::Local(local),
                     projection: None,
                 }, _),
+=======
+                kind: StatementKind::Assign(box(Place {
+                    base: PlaceBase::Local(local),
+                    projection: box [],
+                }, _)),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ..
             }) => local,
             _ => return OtherUse(use_span),
@@ -842,7 +973,7 @@ impl<'cx, 'tcx> MirBorrowckCtxt<'cx, 'tcx> {
 
         for stmt in &self.body[location.block].statements[location.statement_index + 1..] {
             if let StatementKind::Assign(
-                _, box Rvalue::Aggregate(ref kind, ref places)
+                box(_, Rvalue::Aggregate(ref kind, ref places))
             ) = stmt.kind {
                 let (def_id, is_generator) = match kind {
                     box AggregateKind::Closure(def_id, _) => (def_id, false),

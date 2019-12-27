@@ -1,8 +1,12 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: use of possibly uninitialized variable: `x`
+=======
+error[E0381]: use of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/borrowck-storage-dead.rs:16:17
    |
 LL |         let _ = x + 1;
-   |                 ^ use of possibly uninitialized `x`
+   |                 ^ use of possibly-uninitialized `x`
 
 error: aborting due to previous error
 

@@ -1,5 +1,9 @@
 #[cfg(test)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 mod test;
+=======
+mod tests;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /// Uses a sorted slice `data: &[E]` as a kind of "multi-map". The
 /// `key_fn` extracts a key of type `K` from the data, and this

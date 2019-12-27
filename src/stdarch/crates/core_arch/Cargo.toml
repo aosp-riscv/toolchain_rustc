@@ -18,8 +18,12 @@ build = "build.rs"
 edition = "2018"
 
 [badges]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 travis-ci = { repository = "rust-lang/stdarch" }
 appveyor = { repository = "rust-lang/stdarch"  }
+=======
+azure-devops = { project = "stdarch", pipeline = "rust-lang2.stdarch"  }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 is-it-maintained-issue-resolution = { repository = "rust-lang/stdarch" }
 is-it-maintained-open-issues = { repository = "rust-lang/stdarch" }
 maintenance = { status = "experimental" }

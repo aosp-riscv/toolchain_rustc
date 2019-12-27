@@ -20,7 +20,10 @@ pub fn target() -> TargetResult {
         options: TargetOptions {
             // feature msync would disable instruction 'fsync' which is not supported by fsl_p1p2
             features: "+secure-plt,+msync".to_string(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             target_mcount: "_mcount".to_string(),
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             .. base
         },
     })

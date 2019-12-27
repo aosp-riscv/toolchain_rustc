@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `C` in this scope
+=======
+error: cannot find attribute `C` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/proc-macro-attributes.rs:7:3
    |
 LL | #[C]

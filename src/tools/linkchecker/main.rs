@@ -14,6 +14,11 @@
 //! A few whitelisted exceptions are allowed as there's known bugs in rustdoc,
 //! but this should catch the majority of "broken link" cases.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![deny(warnings)]
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::collections::hash_map::Entry;
 use std::collections::{HashMap, HashSet};
 use std::env;

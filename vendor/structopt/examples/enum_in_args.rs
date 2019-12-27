@@ -1,6 +1,7 @@
 //! current `clap::arg_enum!` uses "non-ident macro path" feature, which was stabilized in
 //! Rust 1.31.0.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 extern crate clap;
 extern crate structopt;
 
@@ -20,6 +21,24 @@ arg_enum! {
 struct Opt {
     /// Important argument.
     #[structopt(raw(possible_values = "&Baz::variants()", case_insensitive = "true"))]
+=======
+use clap::arg_enum;
+use structopt::StructOpt;
+
+arg_enum! {
+    #[derive(Debug)]
+    enum Baz {
+        Foo,
+        Bar,
+        FooBar
+    }
+}
+
+#[derive(StructOpt, Debug)]
+struct Opt {
+    /// Important argument.
+    #[structopt(possible_values = &Baz::variants(), case_insensitive = true)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     i: Baz,
 }
 

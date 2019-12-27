@@ -143,6 +143,7 @@ pub fn main() {
     v[0].descend_into_self(&mut c);
     assert!(!c.saw_prev_marked); // <-- different from below, b/c acyclic above
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if PRINT { println!(""); }
 
     // Cycle 1: { v[0] -> v[1], v[1] -> v[0] };
@@ -414,6 +415,279 @@ pub fn main() {
     assert!(c.saw_prev_marked);
 
     if PRINT { println!(""); }
+=======
+    if PRINT { println!(); }
+
+    // Cycle 1: { v[0] -> v[1], v[1] -> v[0] };
+    // does not exercise `v` itself
+    let v: Vec<S> = vec![Named::new("s0"),
+                         Named::new("s1")];
+    v[0].next.set(Some(&v[1]));
+    v[1].next.set(Some(&v[0]));
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 10;
+    assert!(!c.saw_prev_marked);
+    v[0].descend_into_self(&mut c);
+    assert!(c.saw_prev_marked);
+
+    if PRINT { println!(); }
+
+    // Cycle 2: { v[0] -> v, v[1] -> v }
+    let v: V = Named::new("v");
+    v.contents[0].set(Some(&v));
+    v.contents[1].set(Some(&v));
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 20;
+    assert!(!c.saw_prev_marked);
+    v.descend_into_self(&mut c);
+    assert!(c.saw_prev_marked);
+
+    if PRINT { println!(); }
+
+    // Cycle 3: { hk0 -> hv0, hv0 -> hk0, hk1 -> hv1, hv1 -> hk1 };
+    // does not exercise `h` itself
+
+    let mut h: HashMap<H,H> = HashMap::new();
+    h.insert(Named::new("hk0"), Named::new("hv0"));
+    h.insert(Named::new("hk1"), Named::new("hv1"));
+    for (key, val) in h.iter() {
+        val.next.set(Some(key));
+        key.next.set(Some(val));
+    }
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 30;
+    for (key, _) in h.iter() {
+        c.curr_mark += 1;
+        c.saw_prev_marked = false;
+        key.descend_into_self(&mut c);
+        assert!(c.saw_prev_marked);
+    }
+
+    if PRINT { println!(); }
+
+    // Cycle 4: { h -> (hmk0,hmv0,hmk1,hmv1), {hmk0,hmv0,hmk1,hmv1} -> h }
+
+    let mut h: HashMap<HM,HM> = HashMap::new();
+    h.insert(Named::new("hmk0"), Named::new("hmv0"));
+    h.insert(Named::new("hmk0"), Named::new("hmv0"));
+    for (key, val) in h.iter() {
+        val.contents.set(Some(&h));
+        key.contents.set(Some(&h));
+    }
+
+    let mut c = c_orig.clone();
+    c.max_depth = 2;
+    c.curr_mark = 40;
+    for (key, _) in h.iter() {
+        c.curr_mark += 1;
+        c.saw_prev_marked = false;
+        key.descend_into_self(&mut c);
+        assert!(c.saw_prev_marked);
+        // break;
+    }
+
+    if PRINT { println!(); }
+
+    // Cycle 5: { vd[0] -> vd[1], vd[1] -> vd[0] };
+    // does not exercise vd itself
+    let mut vd: VecDeque<S> = VecDeque::new();
+    vd.push_back(Named::new("d0"));
+    vd.push_back(Named::new("d1"));
+    vd[0].next.set(Some(&vd[1]));
+    vd[1].next.set(Some(&vd[0]));
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 50;
+    assert!(!c.saw_prev_marked);
+    vd[0].descend_into_self(&mut c);
+    assert!(c.saw_prev_marked);
+
+    if PRINT { println!(); }
+
+    // Cycle 6: { vd -> (vd0, vd1), {vd0, vd1} -> vd }
+    let mut vd: VecDeque<VD> = VecDeque::new();
+    vd.push_back(Named::new("vd0"));
+    vd.push_back(Named::new("vd1"));
+    vd[0].contents.set(Some(&vd));
+    vd[1].contents.set(Some(&vd));
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 60;
+    assert!(!c.saw_prev_marked);
+    vd[0].descend_into_self(&mut c);
+    assert!(c.saw_prev_marked);
+
+    if PRINT { println!(); }
+
+    // Cycle 7: { vm -> (vm0, vm1), {vm0, vm1} -> vm }
+    let mut vm: HashMap<usize, VM> = HashMap::new();
+    vm.insert(0, Named::new("vm0"));
+    vm.insert(1, Named::new("vm1"));
+    vm[&0].contents.set(Some(&vm));
+    vm[&1].contents.set(Some(&vm));
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 70;
+    assert!(!c.saw_prev_marked);
+    vm[&0].descend_into_self(&mut c);
+    assert!(c.saw_prev_marked);
+
+    if PRINT { println!(); }
+
+    // Cycle 8: { ll -> (ll0, ll1), {ll0, ll1} -> ll }
+    let mut ll: LinkedList<LL> = LinkedList::new();
+    ll.push_back(Named::new("ll0"));
+    ll.push_back(Named::new("ll1"));
+    for e in &ll {
+        e.contents.set(Some(&ll));
+    }
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 80;
+    for e in &ll {
+        c.curr_mark += 1;
+        c.saw_prev_marked = false;
+        e.descend_into_self(&mut c);
+        assert!(c.saw_prev_marked);
+        // break;
+    }
+
+    if PRINT { println!(); }
+
+    // Cycle 9: { bh -> (bh0, bh1), {bh0, bh1} -> bh }
+    let mut bh: BinaryHeap<BH> = BinaryHeap::new();
+    bh.push(Named::new("bh0"));
+    bh.push(Named::new("bh1"));
+    for b in bh.iter() {
+        b.contents.set(Some(&bh));
+    }
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 90;
+    for b in &bh {
+        c.curr_mark += 1;
+        c.saw_prev_marked = false;
+        b.descend_into_self(&mut c);
+        assert!(c.saw_prev_marked);
+        // break;
+    }
+
+    if PRINT { println!(); }
+
+    // Cycle 10: { btm -> (btk0, btv1), {bt0, bt1} -> btm }
+    let mut btm: BTreeMap<BTM, BTM> = BTreeMap::new();
+    btm.insert(Named::new("btk0"), Named::new("btv0"));
+    btm.insert(Named::new("btk1"), Named::new("btv1"));
+    for (k, v) in btm.iter() {
+        k.contents.set(Some(&btm));
+        v.contents.set(Some(&btm));
+    }
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 100;
+    for (k, _) in &btm {
+        c.curr_mark += 1;
+        c.saw_prev_marked = false;
+        k.descend_into_self(&mut c);
+        assert!(c.saw_prev_marked);
+        // break;
+    }
+
+    if PRINT { println!(); }
+
+    // Cycle 10: { bts -> (bts0, bts1), {bts0, bts1} -> btm }
+    let mut bts: BTreeSet<BTS> = BTreeSet::new();
+    bts.insert(Named::new("bts0"));
+    bts.insert(Named::new("bts1"));
+    for v in bts.iter() {
+        v.contents.set(Some(&bts));
+    }
+
+    let mut c = c_orig.clone();
+    c.curr_mark = 100;
+    for b in &bts {
+        c.curr_mark += 1;
+        c.saw_prev_marked = false;
+        b.descend_into_self(&mut c);
+        assert!(c.saw_prev_marked);
+        // break;
+    }
+
+    if PRINT { println!(); }
+
+    // Cycle 11: { rc0 -> (rc1, rc2), rc1 -> (), rc2 -> rc0 }
+    let (rc0, rc1, rc2): (RCRC, RCRC, RCRC);
+    rc0 = RCRC::new("rcrc0");
+    rc1 = RCRC::new("rcrc1");
+    rc2 = RCRC::new("rcrc2");
+    rc0.0.borrow_mut().children.0 = Some(&rc1);
+    rc0.0.borrow_mut().children.1 = Some(&rc2);
+    rc2.0.borrow_mut().children.0 = Some(&rc0);
+
+    let mut c = c_orig.clone();
+    c.control_bits = 0b1;
+    c.curr_mark = 110;
+    assert!(!c.saw_prev_marked);
+    rc0.descend_into_self(&mut c);
+    assert!(c.saw_prev_marked);
+
+    if PRINT { println!(); }
+
+    // We want to take the previous Rc case and generalize it to Arc.
+    //
+    // We can use refcells if we're single-threaded (as this test is).
+    // If one were to generalize these constructions to a
+    // multi-threaded context, then it might seem like we could choose
+    // between either a RwLock or a Mutex to hold the owned arcs on
+    // each node.
+    //
+    // Part of the point of this test is to actually confirm that the
+    // cycle exists by traversing it. We can do that just fine with an
+    // RwLock (since we can grab the child pointers in read-only
+    // mode), but we cannot lock a std::sync::Mutex to guard reading
+    // from each node via the same pattern, since once you hit the
+    // cycle, you'll be trying to acquiring the same lock twice.
+    // (We deal with this by exiting the traversal early if try_lock fails.)
+
+    // Cycle 12: { arc0 -> (arc1, arc2), arc1 -> (), arc2 -> arc0 }, refcells
+    let (arc0, arc1, arc2): (ARCRC, ARCRC, ARCRC);
+    arc0 = ARCRC::new("arcrc0");
+    arc1 = ARCRC::new("arcrc1");
+    arc2 = ARCRC::new("arcrc2");
+    arc0.0.borrow_mut().children.0 = Some(&arc1);
+    arc0.0.borrow_mut().children.1 = Some(&arc2);
+    arc2.0.borrow_mut().children.0 = Some(&arc0);
+
+    let mut c = c_orig.clone();
+    c.control_bits = 0b1;
+    c.curr_mark = 110;
+    assert!(!c.saw_prev_marked);
+    arc0.descend_into_self(&mut c);
+    assert!(c.saw_prev_marked);
+
+    if PRINT { println!(); }
+
+    // Cycle 13: { arc0 -> (arc1, arc2), arc1 -> (), arc2 -> arc0 }, rwlocks
+    let (arc0, arc1, arc2): (ARCRW, ARCRW, ARCRW);
+    arc0 = ARCRW::new("arcrw0");
+    arc1 = ARCRW::new("arcrw1");
+    arc2 = ARCRW::new("arcrw2");
+    arc0.0.write().unwrap().children.0 = Some(&arc1);
+    arc0.0.write().unwrap().children.1 = Some(&arc2);
+    arc2.0.write().unwrap().children.0 = Some(&arc0);
+
+    let mut c = c_orig.clone();
+    c.control_bits = 0b1;
+    c.curr_mark = 110;
+    assert!(!c.saw_prev_marked);
+    arc0.descend_into_self(&mut c);
+    assert!(c.saw_prev_marked);
+
+    if PRINT { println!(); }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     // Cycle 14: { arc0 -> (arc1, arc2), arc1 -> (), arc2 -> arc0 }, mutexs
     let (arc0, arc1, arc2): (ARCM, ARCM, ARCM);

@@ -3,7 +3,10 @@
 // run-pass
 
 #![allow(unused_variables)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await)]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 // Test that the drop order for parameters in a fn and async fn matches up. Also test that
 // parameters (used or unused) are not dropped until the async fn completes execution.

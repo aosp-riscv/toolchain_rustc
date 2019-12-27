@@ -8,6 +8,7 @@
 
 //! Implementation for WASI
 use crate::Error;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use core::num::NonZeroU32;
 
 pub fn getrandom_inner(dest: &mut [u8]) -> Result<(), Error> {
@@ -19,4 +20,14 @@ pub fn getrandom_inner(dest: &mut [u8]) -> Result<(), Error> {
     } else {
         Ok(()) // Zero means success for WASI
     }
+=======
+use core::num;
+use wasi::wasi_unstable::random_get;
+
+pub fn getrandom_inner(dest: &mut [u8]) -> Result<(), Error> {
+    random_get(dest).map_err(|e: num::NonZeroU16| {
+        // convert wasi's NonZeroU16 error into getrandom's NonZeroU32 error
+        num::NonZeroU32::new(e.get() as u32).unwrap().into()
+    })
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

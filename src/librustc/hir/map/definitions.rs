@@ -7,10 +7,16 @@
 use crate::hir;
 use crate::hir::def_id::{CrateNum, DefId, DefIndex, LOCAL_CRATE, CRATE_DEF_INDEX};
 use crate::ich::Fingerprint;
+use crate::session::CrateDisambiguator;
+use crate::util::nodemap::NodeMap;
+
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::indexed_vec::{IndexVec};
 use rustc_data_structures::stable_hasher::StableHasher;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::session::CrateDisambiguator;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::borrow::Borrow;
 use std::fmt::Write;
 use std::hash::Hash;
@@ -18,12 +24,18 @@ use syntax::ast;
 use syntax::ext::hygiene::ExpnId;
 use syntax::symbol::{Symbol, sym, InternedString};
 use syntax_pos::{Span, DUMMY_SP};
-use crate::util::nodemap::NodeMap;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// The DefPathTable maps DefIndexes to DefKeys and vice versa.
 /// Internally the DefPathTable holds a tree of DefKeys, where each DefKey
 /// stores the DefIndex of its parent.
 /// There is one DefPathTable for each crate.
+=======
+/// The `DefPathTable` maps `DefIndex`es to `DefKey`s and vice versa.
+/// Internally the `DefPathTable` holds a tree of `DefKey`s, where each `DefKey`
+/// stores the `DefIndex` of its parent.
+/// There is one `DefPathTable` for each crate.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[derive(Clone, Default, RustcDecodable, RustcEncodable)]
 pub struct DefPathTable {
     index_to_key: Vec<DefKey>,
@@ -103,6 +115,11 @@ pub struct Definitions {
     /// When collecting definitions from an AST fragment produced by a macro invocation `ExpnId`
     /// we know what parent node that fragment should be attached to thanks to this table.
     invocation_parents: FxHashMap<ExpnId, DefIndex>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    /// Indices of unnamed struct or variant fields with unresolved attributes.
+    pub(super) placeholder_field_indices: NodeMap<usize>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// A unique identifier that we can use to lookup a definition
@@ -121,7 +138,7 @@ impl DefKey {
     fn compute_stable_hash(&self, parent_hash: DefPathHash) -> DefPathHash {
         let mut hasher = StableHasher::new();
 
-        // We hash a 0u8 here to disambiguate between regular DefPath hashes,
+        // We hash a `0u8` here to disambiguate between regular `DefPath` hashes,
         // and the special "root_parent" below.
         0u8.hash(&mut hasher);
         parent_hash.hash(&mut hasher);
@@ -145,8 +162,7 @@ impl DefKey {
                                crate_disambiguator: CrateDisambiguator)
                                -> DefPathHash {
         let mut hasher = StableHasher::new();
-        // Disambiguate this from a regular DefPath hash,
-        // see compute_stable_hash() above.
+        // Disambiguate this from a regular `DefPath` hash; see `compute_stable_hash()` above.
         1u8.hash(&mut hasher);
         crate_name.hash(&mut hasher);
         crate_disambiguator.hash(&mut hasher);
@@ -155,10 +171,10 @@ impl DefKey {
 }
 
 /// A pair of `DefPathData` and an integer disambiguator. The integer is
-/// normally 0, but in the event that there are multiple defs with the
+/// normally `0`, but in the event that there are multiple defs with the
 /// same `parent` and `data`, we use this field to disambiguate
 /// between them. This introduces some artificial ordering dependency
-/// but means that if you have (e.g.) two impls for the same type in
+/// but means that if you have, e.g., two impls for the same type in
 /// the same module, they do get distinct `DefId`s.
 #[derive(Clone, PartialEq, Debug, Hash, RustcEncodable, RustcDecodable)]
 pub struct DisambiguatedDefPathData {
@@ -277,29 +293,55 @@ impl DefPath {
 pub enum DefPathData {
     // Root: these should only be used for the root nodes, because
     // they are treated specially by the `def_path` function.
-    /// The crate root (marker)
+
+    /// The crate root (marker).
     CrateRoot,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // Catch-all for random DefId things like `DUMMY_NODE_ID`
+=======
+    // Catch-all for random `DefId` things like `DUMMY_NODE_ID`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Misc,
+
     // Different kinds of items and item-like things:
-    /// An impl
+
+    /// An impl.
     Impl,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Something in the type NS
+=======
+    /// Something in the type namespace.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     TypeNs(InternedString),
-    /// Something in the value NS
+    /// Something in the value namespace.
     ValueNs(InternedString),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Something in the macro NS
     MacroNs(InternedString),
     /// Something in the lifetime NS
     LifetimeNs(InternedString),
     /// A closure expression
+=======
+    /// Something in the macro namespace.
+    MacroNs(InternedString),
+    /// Something in the lifetime namespace.
+    LifetimeNs(InternedString),
+    /// A closure expression.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     ClosureExpr,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // Subportions of items
     /// Implicit ctor for a unit or tuple-like struct or enum variant.
+=======
+
+    // Subportions of items:
+
+    /// Implicit constructor for a unit or tuple-like struct or enum variant.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Ctor,
-    /// A constant expression (see {ast,hir}::AnonConst).
+    /// A constant expression (see `{ast,hir}::AnonConst`).
     AnonConst,
-    /// An `impl Trait` type node
+    /// An `impl Trait` type node.
     ImplTrait,
     /// Identifies a piece of crate metadata that is global to a whole crate
     /// (as opposed to just one item). `GlobalMetaData` components are only
@@ -411,10 +453,13 @@ impl Definitions {
     }
 
     /// Adds a root definition (no parent) and a few other reserved definitions.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ///
     /// After the initial definitions are created the first `FIRST_FREE_DEF_INDEX` indexes
     /// are taken, so the "user" indexes will be allocated starting with `FIRST_FREE_DEF_INDEX`
     /// in ascending order.
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn create_root_def(&mut self,
                            crate_name: &str,
                            crate_disambiguator: CrateDisambiguator)
@@ -439,7 +484,7 @@ impl Definitions {
         self.node_to_def_index.insert(ast::CRATE_NODE_ID, root_index);
         self.set_invocation_parent(ExpnId::root(), root_index);
 
-        // Allocate some other DefIndices that always must exist.
+        // Allocate some other `DefIndex`es that always must exist.
         GlobalMetaDataKind::allocate_def_indices(self);
 
         root_index
@@ -462,7 +507,7 @@ impl Definitions {
                 data,
                 self.table.def_key(self.node_to_def_index[&node_id]));
 
-        // The root node must be created with create_root_def()
+        // The root node must be created with `create_root_def()`.
         assert!(data != DefPathData::CrateRoot);
 
         // Find the next free disambiguator for this key.
@@ -490,9 +535,9 @@ impl Definitions {
         assert_eq!(index.index(), self.def_index_to_node.len());
         self.def_index_to_node.push(node_id);
 
-        // Some things for which we allocate DefIndices don't correspond to
-        // anything in the AST, so they don't have a NodeId. For these cases
-        // we don't need a mapping from NodeId to DefIndex.
+        // Some things for which we allocate `DefIndex`es don't correspond to
+        // anything in the AST, so they don't have a `NodeId`. For these cases
+        // we don't need a mapping from `NodeId` to `DefIndex`.
         if node_id != ast::DUMMY_NODE_ID {
             debug!("create_def_with_parent: def_index_to_node[{:?} <-> {:?}", index, node_id);
             self.node_to_def_index.insert(node_id, index);
@@ -502,7 +547,7 @@ impl Definitions {
             self.expansions_that_defined.insert(index, expn_id);
         }
 
-        // The span is added if it isn't dummy
+        // The span is added if it isn't dummy.
         if !span.is_dummy() {
             self.def_index_to_span.insert(index, span);
         }
@@ -510,12 +555,12 @@ impl Definitions {
         index
     }
 
-    /// Initialize the `ast::NodeId` to `HirId` mapping once it has been generated during
+    /// Initializes the `ast::NodeId` to `HirId` mapping once it has been generated during
     /// AST to HIR lowering.
     pub fn init_node_id_to_hir_id_mapping(&mut self,
                                           mapping: IndexVec<ast::NodeId, hir::HirId>) {
         assert!(self.node_to_hir_id.is_empty(),
-                "Trying initialize NodeId -> HirId mapping twice");
+                "trying to initialize `NodeId` -> `HirId` mapping twice");
         self.node_to_hir_id = mapping;
     }
 
@@ -537,7 +582,11 @@ impl Definitions {
 
     pub fn set_invocation_parent(&mut self, invoc_id: ExpnId, parent: DefIndex) {
         let old_parent = self.invocation_parents.insert(invoc_id, parent);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         assert!(old_parent.is_none(), "parent def-index is reset for an invocation");
+=======
+        assert!(old_parent.is_none(), "parent `DefIndex` is reset for an invocation");
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
@@ -589,6 +638,7 @@ impl DefPathData {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// Evaluates to the number of tokens passed to it.
 ///
 /// Logarithmic counting: every one or two recursive expansions, the number of
@@ -603,8 +653,11 @@ macro_rules! count {
 }
 
 // We define the GlobalMetaDataKind enum with this macro because we want to
+=======
+// We define the `GlobalMetaDataKind` enum with this macro because we want to
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // make sure that we exhaustively iterate over all variants when registering
-// the corresponding DefIndices in the DefTable.
+// the corresponding `DefIndex`es in the `DefTable`.
 macro_rules! define_global_metadata_kind {
     (pub enum GlobalMetaDataKind {
         $($variant:ident),*
@@ -614,8 +667,11 @@ macro_rules! define_global_metadata_kind {
             $($variant),*
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         pub const FIRST_FREE_DEF_INDEX: usize = 1 + count!($($variant)*);
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         impl GlobalMetaDataKind {
             fn allocate_def_indices(definitions: &mut Definitions) {
                 $({
@@ -628,7 +684,7 @@ macro_rules! define_global_metadata_kind {
                         DUMMY_SP
                     );
 
-                    // Make sure calling def_index does not crash.
+                    // Make sure calling `def_index` does not crash.
                     instance.def_index(&definitions.table);
                 })*
             }
@@ -642,7 +698,7 @@ macro_rules! define_global_metadata_kind {
                     }
                 };
 
-                // These DefKeys are all right after the root,
+                // These `DefKey`s are all right after the root,
                 // so a linear search is fine.
                 let index = def_path_table.index_to_key
                                           .iter()

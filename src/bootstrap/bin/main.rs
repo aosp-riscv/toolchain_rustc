@@ -5,9 +5,12 @@
 //! parent directory, and otherwise documentation can be found throughout the `build`
 //! directory in each respective module.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // NO-RUSTC-WRAPPER
 #![deny(warnings, rust_2018_idioms, unused_lifetimes)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::env;
 
 use bootstrap::{Config, Build};

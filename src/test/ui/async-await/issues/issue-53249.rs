@@ -1,7 +1,11 @@
 // build-pass (FIXME(62277): could be check-pass?)
 // edition:2018
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(arbitrary_self_types, async_await)]
+=======
+#![feature(arbitrary_self_types)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use std::task::{self, Poll};
 use std::future::Future;

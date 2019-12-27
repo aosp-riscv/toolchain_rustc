@@ -453,6 +453,7 @@ pub const fn needs_drop<T>() -> bool {
 /// ```
 #[inline]
 #[stable(feature = "rust1", since = "1.0.0")]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg_attr(bootstrap, allow(deprecated_in_future))]
 #[allow(deprecated)]
 pub unsafe fn zeroed<T>() -> T {
@@ -482,6 +483,37 @@ pub unsafe fn zeroed<T>() -> T {
 #[rustc_deprecated(since = "1.39.0", reason = "use `mem::MaybeUninit` instead")]
 #[stable(feature = "rust1", since = "1.0.0")]
 #[cfg_attr(bootstrap, allow(deprecated_in_future))]
+=======
+#[allow(deprecated_in_future)]
+#[allow(deprecated)]
+pub unsafe fn zeroed<T>() -> T {
+    intrinsics::panic_if_uninhabited::<T>();
+    intrinsics::init()
+}
+
+/// Bypasses Rust's normal memory-initialization checks by pretending to
+/// produce a value of type `T`, while doing nothing at all.
+///
+/// **This function is deprecated.** Use [`MaybeUninit<T>`] instead.
+///
+/// The reason for deprecation is that the function basically cannot be used
+/// correctly: [the Rust compiler assumes][inv] that values are properly initialized.
+/// As a consequence, calling e.g. `mem::uninitialized::<bool>()` causes immediate
+/// undefined behavior for returning a `bool` that is not definitely either `true`
+/// or `false`. Worse, truly uninitialized memory like what gets returned here
+/// is special in that the compiler knows that it does not have a fixed value.
+/// This makes it undefined behavior to have uninitialized data in a variable even
+/// if that variable has an integer type.
+/// (Notice that the rules around uninitialized integers are not finalized yet, but
+/// until they are, it is advisable to avoid them.)
+///
+/// [`MaybeUninit<T>`]: union.MaybeUninit.html
+/// [inv]: union.MaybeUninit.html#initialization-invariant
+#[inline]
+#[rustc_deprecated(since = "1.39.0", reason = "use `mem::MaybeUninit` instead")]
+#[stable(feature = "rust1", since = "1.0.0")]
+#[allow(deprecated_in_future)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[allow(deprecated)]
 pub unsafe fn uninitialized<T>() -> T {
     intrinsics::panic_if_uninhabited::<T>();

@@ -4,7 +4,11 @@
 
 [Documentation](https://docs.rs/unicase)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 Compare strings when case is not important.
+=======
+Compare strings when case is not important (using Unicode Case-folding).
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 ```rust
 // ignore ASCII case

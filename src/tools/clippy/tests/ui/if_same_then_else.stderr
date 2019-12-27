@@ -197,7 +197,11 @@ error: this `if` has identical blocks
 LL |       } else {
    |  ____________^
 LL | |         //~ ERROR same body as `if` block
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL | |         r#try!(Ok("foo"));
+=======
+LL | |         Ok("foo")?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 LL | |     }
    | |_____^
    |
@@ -206,7 +210,11 @@ note: same as this
    |
 LL |       if true {
    |  _____________^
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL | |         r#try!(Ok("foo"));
+=======
+LL | |         Ok("foo")?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 LL | |     } else {
    | |_____^
 

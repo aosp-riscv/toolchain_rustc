@@ -1,4 +1,5 @@
 error: immediately dereferencing a reference
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/deref_addrof_double_trigger.rs:8:14
    |
 LL |     let b = **&&a;
@@ -14,6 +15,23 @@ LL |         let y = *&mut x;
 
 error: immediately dereferencing a reference
   --> $DIR/deref_addrof_double_trigger.rs:19:18
+=======
+  --> $DIR/deref_addrof_double_trigger.rs:10:14
+   |
+LL |     let b = **&&a;
+   |              ^^^^ help: try this: `&a`
+   |
+   = note: `-D clippy::deref-addrof` implied by `-D warnings`
+
+error: immediately dereferencing a reference
+  --> $DIR/deref_addrof_double_trigger.rs:14:17
+   |
+LL |         let y = *&mut x;
+   |                 ^^^^^^^ help: try this: `x`
+
+error: immediately dereferencing a reference
+  --> $DIR/deref_addrof_double_trigger.rs:21:18
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |         let y = **&mut &mut x;
    |                  ^^^^^^^^^^^^ help: try this: `&mut x`

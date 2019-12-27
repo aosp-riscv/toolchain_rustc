@@ -8,6 +8,10 @@ else
   FOREIGN_TARGET=i686-unknown-linux-gnu
 fi
 export CARGO_EXTRA_FLAGS="--all-features"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+export RUSTC_EXTRA_FLAGS="-D warnings"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 # Prepare
 echo "Build and install miri"

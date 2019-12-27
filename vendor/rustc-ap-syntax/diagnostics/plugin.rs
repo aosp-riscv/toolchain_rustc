@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::collections::BTreeMap;
 use std::env;
 
@@ -210,3 +211,5 @@ pub fn expand_build_diagnostic_array<'cx>(ecx: &'cx mut ExtCtxt<'_>,
         })
     ])
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

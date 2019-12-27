@@ -18,9 +18,13 @@ use rustc::{declare_lint_pass, declare_tool_lint};
 use syntax::ast;
 
 use crate::utils::sugg::Sugg;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{
     in_macro_or_desugar, snippet_block, snippet_block_with_applicability, span_lint_and_sugg, span_lint_and_then,
 };
+=======
+use crate::utils::{snippet_block, snippet_block_with_applicability, span_lint_and_sugg, span_lint_and_then};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc_errors::Applicability;
 
 declare_clippy_lint! {
@@ -77,7 +81,11 @@ declare_lint_pass!(CollapsibleIf => [COLLAPSIBLE_IF]);
 
 impl EarlyLintPass for CollapsibleIf {
     fn check_expr(&mut self, cx: &EarlyContext<'_>, expr: &ast::Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if !in_macro_or_desugar(expr.span) {
+=======
+        if !expr.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             check_if(cx, expr)
         }
     }
@@ -108,7 +116,11 @@ fn check_collapsible_maybe_if_let(cx: &EarlyContext<'_>, else_: &ast::Expr) {
         if let ast::ExprKind::Block(ref block, _) = else_.node;
         if !block_starts_with_comment(cx, block);
         if let Some(else_) = expr_block(block);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if !in_macro_or_desugar(else_.span);
+=======
+        if !else_.span.from_expansion();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         if let ast::ExprKind::If(..) = else_.node;
         then {
             let mut applicability = Applicability::MachineApplicable;

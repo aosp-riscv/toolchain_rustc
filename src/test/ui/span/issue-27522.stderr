@@ -1,10 +1,14 @@
-error[E0307]: invalid method receiver type: &SomeType
+error[E0307]: invalid `self` parameter type: &SomeType
   --> $DIR/issue-27522.rs:6:22
    |
 LL |     fn handler(self: &SomeType);
    |                      ^^^^^^^^^
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    = note: type must be `Self` or a type that dereferences to it
+=======
+   = note: type of `self` must be `Self` or a type that dereferences to it
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    = help: consider changing to `self`, `&self`, `&mut self`, `self: Box<Self>`, `self: Rc<Self>`, `self: Arc<Self>`, or `self: Pin<P>` (where P is one of the previous types except `Self`)
 
 error: aborting due to previous error

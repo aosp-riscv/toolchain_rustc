@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// This module provides linkage between rustc::middle::graph and
 /// libgraphviz traits.
 
@@ -121,3 +122,5 @@ impl<'a, 'hir> dot::GraphWalk<'a> for LabelledCFG<'a, 'hir>
     fn source(&'a self, edge: &Edge<'a>) -> Node<'a> { self.cfg.source(edge) }
     fn target(&'a self, edge: &Edge<'a>) -> Node<'a> { self.cfg.target(edge) }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

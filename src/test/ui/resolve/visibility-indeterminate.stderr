@@ -4,6 +4,7 @@ error[E0578]: cannot determine resolution for the visibility
 LL | pub(in ::bar) struct Baz {}
    |        ^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find macro `foo!` in this scope
   --> $DIR/visibility-indeterminate.rs:3:1
    |
@@ -17,3 +18,13 @@ error[E0601]: `main` function not found in crate `visibility_indeterminate`
 error: aborting due to 3 previous errors
 
 For more information about this error, try `rustc --explain E0601`.
+=======
+error: cannot find macro `foo` in this scope
+  --> $DIR/visibility-indeterminate.rs:3:1
+   |
+LL | foo!();
+   | ^^^
+
+error: aborting due to 2 previous errors
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

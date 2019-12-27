@@ -28,9 +28,12 @@ typedef struct {
 int git_parse_ctx_init(git_parse_ctx *ctx, const char *content, size_t content_len);
 void git_parse_ctx_clear(git_parse_ctx *ctx);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #define git_parse_err(...) \
 	( git_error_set(GIT_ERROR_PATCH, __VA_ARGS__), -1 )
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #define git_parse_ctx_contains_s(ctx, str) \
 	git_parse_ctx_contains(ctx, str, sizeof(str) - 1)
 

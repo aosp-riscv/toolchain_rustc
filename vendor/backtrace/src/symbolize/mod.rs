@@ -496,6 +496,7 @@ cfg_if::cfg_if! {
         unsafe fn clear_symbol_cache_imp() {}
     } else if #[cfg(all(unix,
                         not(target_os = "emscripten"),
+                        not(target_os = "fuchsia"),
                         feature = "dladdr"))] {
         mod dladdr_resolve;
         use self::dladdr_resolve::resolve as resolve_imp;
@@ -505,6 +506,10 @@ cfg_if::cfg_if! {
         mod noop;
         use self::noop::resolve as resolve_imp;
         use self::noop::Symbol as SymbolImp;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        #[allow(unused)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         unsafe fn clear_symbol_cache_imp() {}
     }
 }

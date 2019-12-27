@@ -48,6 +48,7 @@ impl MultiItemModifier for BuiltinDerive {
               meta_item: &MetaItem,
               item: Annotatable)
               -> Vec<Annotatable> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut items = Vec::new();
         (self.0)(ecx, span, meta_item, &item, &mut |a| items.push(a));
         items
@@ -79,6 +80,15 @@ fn hygienic_type_parameter(item: &Annotatable, base: &str) -> String {
     }
 
     typaram
+=======
+        // FIXME: Built-in derives often forget to give spans contexts,
+        // so we are doing it here in a centralized way.
+        let span = ecx.with_def_site_ctxt(span);
+        let mut items = Vec::new();
+        (self.0)(ecx, span, meta_item, &item, &mut |a| items.push(a));
+        items
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// Constructs an expression that calls an intrinsic
@@ -87,7 +97,11 @@ fn call_intrinsic(cx: &ExtCtxt<'_>,
                   intrinsic: &str,
                   args: Vec<P<ast::Expr>>)
                   -> P<ast::Expr> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let span = span.with_ctxt(cx.backtrace());
+=======
+    let span = cx.with_def_site_ctxt(span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let path = cx.std_path(&[sym::intrinsics, Symbol::intern(intrinsic)]);
     let call = cx.expr_call_global(span, path, args);
 

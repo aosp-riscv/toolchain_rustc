@@ -11,6 +11,7 @@
 # will likely look very different (and much more reasonable)
 
 [package]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 name = "structopt-derive"
 version = "0.2.18"
 authors = ["Guillaume Pinot <texitoi@texitoi.eu>"]
@@ -37,6 +38,38 @@ version = "0.15"
 
 [features]
 nightly = ["proc-macro2/nightly"]
+=======
+edition = "2018"
+name = "structopt-derive"
+version = "0.3.1"
+authors = ["Guillaume Pinot <texitoi@texitoi.eu>"]
+description = "Parse command line argument by defining a struct, derive crate."
+documentation = "https://docs.rs/structopt-derive"
+keywords = ["clap", "cli", "derive", "docopt"]
+categories = ["command-line-interface"]
+license = "Apache-2.0/MIT"
+repository = "https://github.com/TeXitoi/structopt"
+
+[lib]
+proc-macro = true
+[dependencies.heck]
+version = "0.3.0"
+
+[dependencies.proc-macro-error]
+version = "0.2.6"
+
+[dependencies.proc-macro2]
+version = "1"
+
+[dependencies.quote]
+version = "1"
+
+[dependencies.syn]
+version = "1"
+features = ["full"]
+
+[features]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 paw = []
 [badges.travis-ci]
 repository = "TeXitoi/structopt"

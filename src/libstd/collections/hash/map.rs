@@ -6,7 +6,11 @@ use hashbrown::hash_map as base;
 
 use crate::borrow::Borrow;
 use crate::cell::Cell;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::collections::CollectionAllocErr;
+=======
+use crate::collections::TryReserveError;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::fmt::{self, Debug};
 #[allow(deprecated)]
 use crate::hash::{BuildHasher, Hash, Hasher, SipHasher13};
@@ -588,7 +592,11 @@ where
     /// ```
     #[inline]
     #[unstable(feature = "try_reserve", reason = "new API", issue = "48043")]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn try_reserve(&mut self, additional: usize) -> Result<(), CollectionAllocErr> {
+=======
+    pub fn try_reserve(&mut self, additional: usize) -> Result<(), TryReserveError> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.base
             .try_reserve(additional)
             .map_err(map_collection_alloc_err)
@@ -2542,10 +2550,20 @@ fn map_entry<'a, K: 'a, V: 'a>(raw: base::RustcEntry<'a, K, V>) -> Entry<'a, K, 
 }
 
 #[inline]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn map_collection_alloc_err(err: hashbrown::CollectionAllocErr) -> CollectionAllocErr {
     match err {
         hashbrown::CollectionAllocErr::CapacityOverflow => CollectionAllocErr::CapacityOverflow,
         hashbrown::CollectionAllocErr::AllocErr => CollectionAllocErr::AllocErr,
+=======
+fn map_collection_alloc_err(err: hashbrown::CollectionAllocErr) -> TryReserveError {
+    match err {
+        hashbrown::CollectionAllocErr::CapacityOverflow => TryReserveError::CapacityOverflow,
+        hashbrown::CollectionAllocErr::AllocErr { layout } => TryReserveError::AllocError {
+            layout,
+            non_exhaustive: (),
+        },
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
@@ -2605,7 +2623,11 @@ mod test_map {
     use super::RandomState;
     use crate::cell::RefCell;
     use rand::{thread_rng, Rng};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     use realstd::collections::CollectionAllocErr::*;
+=======
+    use realstd::collections::TryReserveError::*;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     use realstd::usize;
 
     // https://github.com/rust-lang/rust/issues/62301
@@ -3405,7 +3427,11 @@ mod test_map {
             panic!("usize::MAX should trigger an overflow!");
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if let Err(AllocErr) = empty_bytes.try_reserve(MAX_USIZE / 8) {
+=======
+        if let Err(AllocError { .. }) = empty_bytes.try_reserve(MAX_USIZE / 8) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } else {
             panic!("usize::MAX / 8 should trigger an OOM!")
         }

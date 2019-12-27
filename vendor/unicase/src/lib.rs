@@ -1,6 +1,10 @@
 #![cfg_attr(test, deny(missing_docs))]
 #![cfg_attr(test, deny(warnings))]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![doc(html_root_url = "https://docs.rs/unicase/2.4.0")]
+=======
+#![doc(html_root_url = "https://docs.rs/unicase/2.5.1")]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![cfg_attr(feature = "nightly", feature(test))]
 
 //! # UniCase

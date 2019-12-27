@@ -1,5 +1,9 @@
 warning: the feature `impl_trait_in_bindings` is incomplete and may cause the compiler to crash
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/bound-normalization-pass.rs:6:12
+=======
+  --> $DIR/bound-normalization-pass.rs:5:12
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | #![feature(impl_trait_in_bindings)]
    |            ^^^^^^^^^^^^^^^^^^^^^^

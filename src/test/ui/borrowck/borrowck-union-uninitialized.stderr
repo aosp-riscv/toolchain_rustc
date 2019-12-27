@@ -1,14 +1,30 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `s`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `s`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/borrowck-union-uninitialized.rs:13:9
    |
 LL |         s.a = 0;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |         ^^^^^^^ use of possibly uninitialized `s`
+=======
+   |         ^^^^^^^ use of possibly-uninitialized `s`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `u`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `u`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/borrowck-union-uninitialized.rs:14:9
    |
 LL |         u.a = 0;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |         ^^^^^^^ use of possibly uninitialized `u`
+=======
+   |         ^^^^^^^ use of possibly-uninitialized `u`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 2 previous errors
 

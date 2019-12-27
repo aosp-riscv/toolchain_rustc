@@ -1,10 +1,18 @@
 error[E0038]: the trait `A` cannot be made into an object
   --> $DIR/wf-object-safe.rs:9:13
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL |     let _x: &dyn A;
    |             ^^^^^^ the trait `A` cannot be made into an object
    |
    = note: method `foo` references the `Self` type in its arguments or return type
+=======
+LL |     fn foo(&self, _x: &Self);
+   |        --- method `foo` references the `Self` type in its parameters or return type
+...
+LL |     let _x: &dyn A;
+   |             ^^^^^^ the trait `A` cannot be made into an object
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

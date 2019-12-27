@@ -119,8 +119,13 @@ impl<'mir, 'tcx> BitDenotation<'tcx> for RequiresStorage<'mir, 'tcx> {
         match stmt.kind {
             StatementKind::StorageLive(l) => sets.gen(l),
             StatementKind::StorageDead(l) => sets.kill(l),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             StatementKind::Assign(ref place, _)
             | StatementKind::SetDiscriminant { ref place, .. } => {
+=======
+            StatementKind::Assign(box(ref place, _))
+            | StatementKind::SetDiscriminant { box ref place, .. } => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if let PlaceBase::Local(local) = place.base {
                     sets.gen(local);
                 }

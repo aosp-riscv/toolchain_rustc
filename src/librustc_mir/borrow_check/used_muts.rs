@@ -89,7 +89,11 @@ impl<'visit, 'cx, 'tcx> Visitor<'tcx> for GatherUsedMutsVisitor<'visit, 'cx, 'tc
         _location: Location,
     ) {
         match &statement.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             StatementKind::Assign(into, _) => {
+=======
+            StatementKind::Assign(box(into, _)) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if let PlaceBase::Local(local) = into.base {
                     debug!(
                         "visit_statement: statement={:?} local={:?} \
@@ -120,7 +124,11 @@ impl<'visit, 'cx, 'tcx> Visitor<'tcx> for GatherUsedMutsVisitor<'visit, 'cx, 'tc
                 );
                 if let Place {
                     base: PlaceBase::Local(user_local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     projection: None,
+=======
+                    projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 } = path.place {
                     self.mbcx.used_mut.insert(user_local);
                 }

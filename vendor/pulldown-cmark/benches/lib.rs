@@ -14,6 +14,7 @@ mod to_html {
     }
 
     #[bench]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn pathological_links(b: &mut test::Bencher) {
         let input = "[a](<".repeat(1000);
 
@@ -147,5 +148,38 @@ mod to_html {
         let input = "a <!A ".repeat(1000);
 
         b.iter(|| render_html(&input, Options::empty()));
+=======
+    fn pathological_codeblocks1(b: &mut test::Bencher) {
+        // Note that `buf` grows quadratically with number of
+        // iterations. The point here is that the render time shouldn't
+        // grow faster than that.
+        let mut buf = String::new();
+        for i in 1..1000 {
+            for _ in 0..i {
+                buf.push('`');
+            }
+            buf.push(' ');
+        }
+
+        b.iter(|| render_html(&buf, Options::empty()));
+    }
+
+    #[bench]
+    fn advanced_pathological_codeblocks(b: &mut test::Bencher) {
+        let mut buf = String::new();
+        let mut i = 1;
+        while buf.len() < 1250 {
+            for _ in 0..i {
+                buf.push('`');
+            }
+            buf.push(' ');
+            i += 1;
+        }
+        for _ in 0..buf.len() {
+            buf.push_str("*a* ");
+        }
+
+        b.iter(|| render_html(&buf, Options::empty()));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }

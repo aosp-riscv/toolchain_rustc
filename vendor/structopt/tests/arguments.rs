@@ -6,6 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[macro_use]
 extern crate structopt;
 
@@ -57,6 +58,42 @@ fn argument_with_raw_default() {
     #[derive(StructOpt, PartialEq, Debug)]
     struct Opt {
         #[structopt(raw(default_value = r#""42""#))]
+=======
+use structopt::clap;
+use structopt::StructOpt;
+
+#[test]
+fn required_argument() {
+    #[derive(StructOpt, PartialEq, Debug)]
+    struct Opt {
+        arg: i32,
+    }
+    assert_eq!(Opt { arg: 42 }, Opt::from_iter(&["test", "42"]));
+    assert!(Opt::clap().get_matches_from_safe(&["test"]).is_err());
+    assert!(Opt::clap()
+        .get_matches_from_safe(&["test", "42", "24"])
+        .is_err());
+}
+
+#[test]
+fn optional_argument() {
+    #[derive(StructOpt, PartialEq, Debug)]
+    struct Opt {
+        arg: Option<i32>,
+    }
+    assert_eq!(Opt { arg: Some(42) }, Opt::from_iter(&["test", "42"]));
+    assert_eq!(Opt { arg: None }, Opt::from_iter(&["test"]));
+    assert!(Opt::clap()
+        .get_matches_from_safe(&["test", "42", "24"])
+        .is_err());
+}
+
+#[test]
+fn argument_with_default() {
+    #[derive(StructOpt, PartialEq, Debug)]
+    struct Opt {
+        #[structopt(default_value = "42")]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         arg: i32,
     }
     assert_eq!(Opt { arg: 24 }, Opt::from_iter(&["test", "24"]));

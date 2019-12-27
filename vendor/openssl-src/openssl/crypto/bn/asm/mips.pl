@@ -801,7 +801,11 @@ $code.=<<___;
 #if 0
 /*
  * The bn_div_3_words entry point is re-used for constant-time interface.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
  * Implementation is retained as hystorical reference.
+=======
+ * Implementation is retained as historical reference.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
  */
 .align 5
 .globl	bn_div_3_words

@@ -228,7 +228,10 @@
 // std is implemented with unstable features, many of which are internal
 // compiler details that will never be stable
 // NB: the following list is sorted to minimize merge conflicts.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![cfg_attr(not(bootstrap), feature(__rust_unstable_column))]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(alloc_error_handler)]
 #![feature(alloc_layout_extra)]
 #![feature(allocator_api)]
@@ -239,18 +242,22 @@
 #![feature(array_error_internals)]
 #![feature(asm)]
 #![feature(associated_type_bounds)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(bind_by_move_pattern_guards)]
+=======
+#![cfg_attr(bootstrap, feature(bind_by_move_pattern_guards))]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(box_syntax)]
 #![feature(c_variadic)]
 #![feature(cfg_target_has_atomic)]
 #![feature(cfg_target_thread_local)]
 #![feature(char_error_internals)]
-#![feature(checked_duration_since)]
 #![feature(clamp)]
 #![feature(compiler_builtins_lib)]
 #![feature(concat_idents)]
 #![feature(const_cstr_unchecked)]
 #![feature(const_raw_ptr_deref)]
+#![feature(container_error_extra)]
 #![feature(core_intrinsics)]
 #![feature(custom_test_frameworks)]
 #![feature(doc_alias)]
@@ -453,6 +460,7 @@ pub mod f64;
 #[macro_use]
 pub mod thread;
 pub mod ascii;
+pub mod backtrace;
 pub mod collections;
 pub mod env;
 pub mod error;
@@ -513,6 +521,7 @@ pub use std_detect::detect;
 
 // Re-export macros defined in libcore.
 #[stable(feature = "rust1", since = "1.0.0")]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[allow(deprecated_in_future)]
 pub use core::{
     // Stable
@@ -552,6 +561,45 @@ pub use core::{
     stringify,
     // Unstable
     __rust_unstable_column,
+=======
+#[allow(deprecated, deprecated_in_future)]
+pub use core::{
+    // Stable
+    assert_eq,
+    assert_ne,
+    debug_assert_eq,
+    debug_assert_ne,
+    debug_assert,
+    r#try,
+    unimplemented,
+    unreachable,
+    write,
+    writeln,
+    // Unstable
+    todo,
+};
+
+// Re-export built-in macros defined through libcore.
+#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+pub use core::{
+    // Stable
+    assert,
+    cfg,
+    column,
+    compile_error,
+    concat,
+    env,
+    file,
+    format_args,
+    include,
+    include_bytes,
+    include_str,
+    line,
+    module_path,
+    option_env,
+    stringify,
+    // Unstable
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     asm,
     concat_idents,
     format_args_nl,

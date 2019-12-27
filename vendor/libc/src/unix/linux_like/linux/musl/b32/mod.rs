@@ -56,6 +56,12 @@ cfg_if! {
     } else if #[cfg(any(target_arch = "powerpc"))] {
         mod powerpc;
         pub use self::powerpc::*;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    } else if #[cfg(any(target_arch = "hexagon"))] {
+        mod hexagon;
+        pub use self::hexagon::*;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     } else {
         // Unknown target_arch
     }

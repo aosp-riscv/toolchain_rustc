@@ -46,6 +46,7 @@ pub use crate::option::Option::{self, Some, None};
 pub use crate::result::Result::{self, Ok, Err};
 
 // Re-exported built-in macros
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg(not(bootstrap))]
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(no_inline)]
@@ -84,6 +85,41 @@ pub use crate::{
 };
 
 #[cfg(not(bootstrap))]
+=======
+#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+#[doc(no_inline)]
+pub use crate::fmt::macros::Debug;
+#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+#[doc(no_inline)]
+pub use crate::hash::macros::Hash;
+
+#[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+#[doc(no_inline)]
+pub use crate::{
+    asm,
+    assert,
+    cfg,
+    column,
+    compile_error,
+    concat,
+    concat_idents,
+    env,
+    file,
+    format_args,
+    format_args_nl,
+    global_asm,
+    include,
+    include_bytes,
+    include_str,
+    line,
+    log_syntax,
+    module_path,
+    option_env,
+    stringify,
+    trace_macros,
+};
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[allow(deprecated)]
 #[doc(no_inline)]

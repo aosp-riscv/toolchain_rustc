@@ -12,6 +12,7 @@
 
 [package]
 name = "unicase"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 version = "2.4.0"
 authors = ["Sean McArthur <sean@seanmonstar.com>"]
 build = "build.rs"
@@ -19,6 +20,17 @@ exclude = ["scripts/*"]
 description = "A case-insensitive wrapper around strings."
 documentation = "https://docs.rs/unicase"
 keywords = ["lowercase", "case", "case-insensitive", "case-folding"]
+=======
+version = "2.5.1"
+authors = ["Sean McArthur <sean@seanmonstar.com>"]
+build = "build.rs"
+exclude = ["scripts/*"]
+description = "A case-insensitive wrapper around strings."
+documentation = "https://docs.rs/unicase"
+readme = "README.md"
+keywords = ["lowercase", "case", "case-insensitive", "case-folding"]
+categories = ["internationalization", "text-processing"]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 license = "MIT/Apache-2.0"
 repository = "https://github.com/seanmonstar/unicase"
 [build-dependencies.version_check]

@@ -6,6 +6,7 @@
 extern crate syntax;
 extern crate syntax_pos;
 extern crate rustc;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 extern crate rustc_plugin;
 extern crate rustc_driver;
 
@@ -18,6 +19,19 @@ use syntax::symbol::Symbol;
 use syntax_pos::Span;
 use syntax::tokenstream::TokenStream;
 use rustc_plugin::Registry;
+=======
+extern crate rustc_driver;
+
+use std::borrow::ToOwned;
+use syntax::ast;
+use syntax::ext::base::{SyntaxExtension, SyntaxExtensionKind};
+use syntax::ext::base::{TTMacroExpander, ExtCtxt, MacResult, MacEager};
+use syntax::print::pprust;
+use syntax::symbol::Symbol;
+use syntax_pos::Span;
+use syntax::tokenstream::TokenStream;
+use rustc_driver::plugin::Registry;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 struct Expander {
     args: Vec<ast::NestedMetaItem>,

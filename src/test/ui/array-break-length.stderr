@@ -1,14 +1,18 @@
-error[E0268]: `break` outside of loop
+error[E0268]: `break` outside of a loop
   --> $DIR/array-break-length.rs:3:17
    |
 LL |         |_: [_; break]| {}
-   |                 ^^^^^ cannot break outside of a loop
+   |                 ^^^^^ cannot `break` outside of a loop
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0268]: `continue` outside of loop
+=======
+error[E0268]: `continue` outside of a loop
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/array-break-length.rs:8:17
    |
 LL |         |_: [_; continue]| {}
-   |                 ^^^^^^^^ cannot break outside of a loop
+   |                 ^^^^^^^^ cannot `continue` outside of a loop
 
 error[E0308]: mismatched types
   --> $DIR/array-break-length.rs:3:9

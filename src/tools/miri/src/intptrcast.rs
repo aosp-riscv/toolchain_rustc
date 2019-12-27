@@ -47,6 +47,7 @@ impl<'mir, 'tcx> GlobalState {
         }
 
         let global_state = memory.extra.intptrcast.borrow();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         
         Ok(match global_state.int_to_ptr_map.binary_search_by_key(&int, |(addr, _)| *addr) {
             Ok(pos) => {
@@ -109,6 +110,70 @@ impl<'mir, 'tcx> GlobalState {
                 // Given that `next_base_addr` increases in each allocation, pushing the
                 // corresponding tuple keeps `int_to_ptr_map` sorted
                 global_state.int_to_ptr_map.push((base_addr, ptr.alloc_id)); 
+=======
+
+        Ok(match global_state.int_to_ptr_map.binary_search_by_key(&int, |(addr, _)| *addr) {
+            Ok(pos) => {
+                let (_, alloc_id) = global_state.int_to_ptr_map[pos];
+                // `int` is equal to the starting address for an allocation, the offset should be
+                // zero. The pointer is untagged because it was created from a cast
+                Pointer::new_with_tag(alloc_id, Size::from_bytes(0), Tag::Untagged)
+            },
+            Err(0) => throw_unsup!(DanglingPointerDeref),
+            Err(pos) => {
+                // This is the largest of the adresses smaller than `int`,
+                // i.e. the greatest lower bound (glb)
+                let (glb, alloc_id) = global_state.int_to_ptr_map[pos - 1];
+                // This never overflows because `int >= glb`
+                let offset = int - glb;
+                // If the offset exceeds the size of the allocation, this access is illegal
+                if offset <= memory.get(alloc_id)?.size.bytes() {
+                    // This pointer is untagged because it was created from a cast
+                    Pointer::new_with_tag(alloc_id, Size::from_bytes(offset), Tag::Untagged)
+                } else {
+                    throw_unsup!(DanglingPointerDeref)
+                }
+            }
+        })
+    }
+
+    pub fn ptr_to_int(
+        ptr: Pointer<Tag>,
+        memory: &Memory<'mir, 'tcx, Evaluator<'tcx>>,
+    ) -> InterpResult<'tcx, u64> {
+        let mut global_state = memory.extra.intptrcast.borrow_mut();
+        let global_state = &mut *global_state;
+
+        // There is nothing wrong with a raw pointer being cast to an integer only after
+        // it became dangling.  Hence `MaybeDead`.
+        let (size, align) = memory.get_size_and_align(ptr.alloc_id, AllocCheck::MaybeDead)?;
+
+        let base_addr = match global_state.base_addr.entry(ptr.alloc_id) {
+            Entry::Occupied(entry) => *entry.get(),
+            Entry::Vacant(entry) => {
+                // This allocation does not have a base address yet, pick one.
+                // Leave some space to the previous allocation, to give it some chance to be less aligned.
+                let slack = {
+                    let mut rng = memory.extra.rng.borrow_mut();
+                    // This means that `(global_state.next_base_addr + slack) % 16` is uniformly distributed.
+                    rng.gen_range(0, 16)
+                };
+                // From next_base_addr + slack, round up to adjust for alignment.
+                let base_addr = global_state.next_base_addr.checked_add(slack).unwrap();
+                let base_addr = Self::align_addr(base_addr, align.bytes());
+                entry.insert(base_addr);
+                trace!(
+                    "Assigning base address {:#x} to allocation {:?} (slack: {}, align: {})",
+                    base_addr, ptr.alloc_id, slack, align.bytes(),
+                );
+
+                // Remember next base address.  If this allocation is zero-sized, leave a gap
+                // of at least 1 to avoid two allocations having the same base address.
+                global_state.next_base_addr = base_addr.checked_add(max(size.bytes(), 1)).unwrap();
+                // Given that `next_base_addr` increases in each allocation, pushing the
+                // corresponding tuple keeps `int_to_ptr_map` sorted
+                global_state.int_to_ptr_map.push((base_addr, ptr.alloc_id));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                 base_addr
             }

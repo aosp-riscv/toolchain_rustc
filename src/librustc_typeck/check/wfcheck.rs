@@ -191,7 +191,7 @@ fn check_associated_item(
         let item = fcx.tcx.associated_item(fcx.tcx.hir().local_def_id(item_id));
 
         let (mut implied_bounds, self_ty) = match item.container {
-            ty::TraitContainer(_) => (vec![], fcx.tcx.mk_self_type()),
+            ty::TraitContainer(_) => (vec![], fcx.tcx.types.self_param),
             ty::ImplContainer(def_id) => (fcx.impl_implied_bounds(def_id, span),
                                           fcx.tcx.type_of(def_id))
         };
@@ -203,7 +203,10 @@ fn check_associated_item(
                 fcx.register_wf_obligation(ty, span, code.clone());
             }
             ty::AssocKind::Method => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 reject_shadowing_parameters(fcx.tcx, item.def_id);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let sig = fcx.tcx.fn_sig(item.def_id);
                 let sig = fcx.normalize_associated_types_in(span, &sig);
                 check_fn_or_method(tcx, fcx, span, sig,
@@ -288,7 +291,7 @@ fn check_type_defn<'tcx, F>(
                 let last = idx == variant.fields.len() - 1;
                 fcx.register_bound(
                     field.ty,
-                    fcx.tcx.require_lang_item(lang_items::SizedTraitLangItem),
+                    fcx.tcx.require_lang_item(lang_items::SizedTraitLangItem, None),
                     traits::ObligationCause::new(
                         field.span,
                         fcx.body_id,
@@ -376,7 +379,7 @@ fn check_item_type(
         if forbid_unsized {
             fcx.register_bound(
                 item_ty,
-                fcx.tcx.require_lang_item(lang_items::SizedTraitLangItem),
+                fcx.tcx.require_lang_item(lang_items::SizedTraitLangItem, None),
                 traits::ObligationCause::new(ty_span, fcx.body_id, traits::MiscObligation),
             );
         }
@@ -507,7 +510,7 @@ fn check_where_clauses<'tcx, 'fcx>(
     });
 
     // Now we build the substituted predicates.
-    let default_obligations = predicates.predicates.iter().flat_map(|&(pred, _)| {
+    let default_obligations = predicates.predicates.iter().flat_map(|&(pred, sp)| {
         #[derive(Default)]
         struct CountParams { params: FxHashSet<u32> }
         impl<'tcx> ty::fold::TypeVisitor<'tcx> for CountParams {
@@ -540,9 +543,13 @@ fn check_where_clauses<'tcx, 'fcx>(
             // Avoid duplication of predicates that contain no parameters, for example.
             None
         } else {
-            Some(substituted_pred)
+            Some((substituted_pred, sp))
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     }).map(|pred| {
+=======
+    }).map(|(pred, sp)| {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // Convert each of those into an obligation. So if you have
         // something like `struct Foo<T: Copy = String>`, we would
         // take that predicate `T: Copy`, substitute to `String: Copy`
@@ -552,8 +559,8 @@ fn check_where_clauses<'tcx, 'fcx>(
         // Note the subtle difference from how we handle `predicates`
         // below: there, we are not trying to prove those predicates
         // to be *true* but merely *well-formed*.
-        let pred = fcx.normalize_associated_types_in(span, &pred);
-        let cause = traits::ObligationCause::new(span, fcx.body_id, traits::ItemObligation(def_id));
+        let pred = fcx.normalize_associated_types_in(sp, &pred);
+        let cause = traits::ObligationCause::new(sp, fcx.body_id, traits::ItemObligation(def_id));
         traits::Obligation::new(cause, fcx.param_env, pred)
     });
 
@@ -763,6 +770,7 @@ fn check_opaque_types<'fcx, 'tcx>(
     substituted_predicates
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn check_method_receiver<'fcx, 'tcx>(
     fcx: &FnCtxt<'fcx, 'tcx>,
     method_sig: &hir::MethodSig,
@@ -776,6 +784,21 @@ fn check_method_receiver<'fcx, 'tcx>(
     // Check that the method has a valid receiver type, given the type `Self`.
     debug!("check_method_receiver({:?}, self_ty={:?})",
            method, self_ty);
+=======
+const HELP_FOR_SELF_TYPE: &str =
+    "consider changing to `self`, `&self`, `&mut self`, `self: Box<Self>`, \
+     `self: Rc<Self>`, `self: Arc<Self>`, or `self: Pin<P>` (where P is one \
+     of the previous types except `Self`)";
+
+fn check_method_receiver<'fcx, 'tcx>(
+    fcx: &FnCtxt<'fcx, 'tcx>,
+    method_sig: &hir::MethodSig,
+    method: &ty::AssocItem,
+    self_ty: Ty<'tcx>,
+) {
+    // Check that the method has a valid receiver type, given the type `Self`.
+    debug!("check_method_receiver({:?}, self_ty={:?})", method, self_ty);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     if !method.method_has_self_argument {
         return;
@@ -806,12 +829,16 @@ fn check_method_receiver<'fcx, 'tcx>(
     if fcx.tcx.features().arbitrary_self_types {
         if !receiver_is_valid(fcx, span, receiver_ty, self_ty, true) {
             // Report error; `arbitrary_self_types` was enabled.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             fcx.tcx.sess.diagnostic().mut_span_err(
                 span, &format!("invalid method receiver type: {:?}", receiver_ty)
             ).note("type of `self` must be `Self` or a type that dereferences to it")
             .help(HELP_FOR_SELF_TYPE)
             .code(DiagnosticId::Error("E0307".into()))
             .emit();
+=======
+            e0307(fcx, span, receiver_ty);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     } else {
         if !receiver_is_valid(fcx, span, receiver_ty, self_ty, false) {
@@ -831,17 +858,34 @@ fn check_method_receiver<'fcx, 'tcx>(
                 .emit();
             } else {
                 // Report error; would not have worked with `arbitrary_self_types`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 fcx.tcx.sess.diagnostic().mut_span_err(
                     span, &format!("invalid method receiver type: {:?}", receiver_ty)
                 ).note("type must be `Self` or a type that dereferences to it")
                 .help(HELP_FOR_SELF_TYPE)
                 .code(DiagnosticId::Error("E0307".into()))
                 .emit();
+=======
+                e0307(fcx, span, receiver_ty);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+fn e0307(fcx: &FnCtxt<'fcx, 'tcx>, span: Span, receiver_ty: Ty<'_>) {
+    fcx.tcx.sess.diagnostic().mut_span_err(
+        span,
+        &format!("invalid `self` parameter type: {:?}", receiver_ty)
+    ).note("type of `self` must be `Self` or a type that dereferences to it")
+    .help(HELP_FOR_SELF_TYPE)
+    .code(DiagnosticId::Error("E0307".into()))
+    .emit();
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// Returns whether `receiver_ty` would be considered a valid receiver type for `self_ty`. If
 /// `arbitrary_self_types` is enabled, `receiver_ty` must transitively deref to `self_ty`, possibly
 /// through a `*const/mut T` raw pointer. If the feature is not enabled, the requirements are more
@@ -998,6 +1042,7 @@ fn report_bivariance(tcx: TyCtxt<'_>, span: Span, param_name: ast::Name) {
     err.emit();
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn reject_shadowing_parameters(tcx: TyCtxt<'_>, def_id: DefId) {
     let generics = tcx.generics_of(def_id);
     let parent = tcx.generics_of(generics.parent.unwrap());
@@ -1026,6 +1071,8 @@ fn reject_shadowing_parameters(tcx: TyCtxt<'_>, def_id: DefId) {
     }
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// Feature gates RFC 2056 -- trivial bounds, checking for global bounds that
 /// aren't true.
 fn check_false_global_bounds(fcx: &FnCtxt<'_, '_>, span: Span, id: hir::HirId) {
@@ -1119,7 +1166,7 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
 
     fn enum_variants(&self, enum_def: &hir::EnumDef) -> Vec<AdtVariant<'tcx>> {
         enum_def.variants.iter()
-            .map(|variant| self.non_enum_variant(&variant.node.data))
+            .map(|variant| self.non_enum_variant(&variant.data))
             .collect()
     }
 
@@ -1152,6 +1199,7 @@ fn error_392(
     err.span_label(span, "unused parameter");
     err
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 fn error_194(tcx: TyCtxt<'_>, span: Span, trait_decl_span: Span, name: &str) {
     struct_span_err!(tcx.sess, span, E0194,
@@ -1161,3 +1209,5 @@ fn error_194(tcx: TyCtxt<'_>, span: Span, trait_decl_span: Span, name: &str) {
         .span_label(trait_decl_span, format!("first `{}` declared here", name))
         .emit();
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

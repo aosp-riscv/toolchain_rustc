@@ -1,5 +1,9 @@
 error[E0716]: temporary value dropped while borrowed
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/promoted_const_fn_fail_deny_const_err.rs:21:27
+=======
+  --> $DIR/promoted_const_fn_fail_deny_const_err.rs:22:27
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     let x: &'static u8 = &(bar() + 1);
    |            -----------    ^^^^^^^^^^^ creates a temporary which is freed while still in use

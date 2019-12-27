@@ -12,7 +12,11 @@
 
 [package]
 name = "getopts"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 version = "0.2.19"
+=======
+version = "0.2.21"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 authors = ["The Rust Project Developers"]
 description = "getopts-like option parsing.\n"
 homepage = "https://github.com/rust-lang/getopts"
@@ -21,7 +25,26 @@ readme = "README.md"
 categories = ["command-line-interface"]
 license = "MIT/Apache-2.0"
 repository = "https://github.com/rust-lang/getopts"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+[dependencies.core]
+version = "1.0"
+optional = true
+package = "rustc-std-workspace-core"
+
+[dependencies.std]
+version = "1.0"
+optional = true
+package = "rustc-std-workspace-std"
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 [dependencies.unicode-width]
 version = "0.1.5"
 [dev-dependencies.log]
 version = "0.4"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+[features]
+rustc-dep-of-std = ["unicode-width/rustc-dep-of-std", "std", "core"]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

@@ -46,7 +46,11 @@ fn main() {
 }
 ```
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 ### See also
+=======
+### See also:
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 [std::rc][1] and [Arc][2].
 

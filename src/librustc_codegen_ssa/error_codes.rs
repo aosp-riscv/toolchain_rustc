@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 register_long_diagnostics! {
+=======
+syntax::register_diagnostics! {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 E0668: r##"
 Malformed inline assembly rejected by LLVM.

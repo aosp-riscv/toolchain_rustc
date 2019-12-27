@@ -13,12 +13,20 @@ use crate::util as mir_util;
 
 pub struct Marker(pub &'static str);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for Marker {
+=======
+impl<'tcx> MirPass<'tcx> for Marker {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn name(&self) -> Cow<'_, str> {
         Cow::Borrowed(self.0)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn run_pass<'tcx>(&self, _tcx: TyCtxt<'tcx>, _source: MirSource<'tcx>, _body: &mut Body<'tcx>) {
+=======
+    fn run_pass(&self, _tcx: TyCtxt<'tcx>, _source: MirSource<'tcx>, _body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 

@@ -125,6 +125,20 @@ RUSTFLAGS="-Cprofile-use=/tmp/pgo-data/merged.profdata" \
     cargo build --release --target=x86_64-unknown-linux-gnu
 ```
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+### Troubleshooting
+
+- It is recommended to pass `-Cllvm-args=-pgo-warn-missing-function` during the
+  `-Cprofile-use` phase. LLVM by default does not warn if it cannot find
+  profiling data for a given function. Enabling this warning will make it
+  easier to spot errors in your setup.
+
+- There is a [known issue](https://github.com/rust-lang/cargo/issues/7416) in
+  Cargo prior to version 1.39 that will prevent PGO from working correctly. Be
+  sure to use Cargo 1.39 or newer when doing PGO.
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 ## Further Reading
 
 `rustc`'s PGO support relies entirely on LLVM's implementation of the feature

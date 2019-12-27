@@ -1,6 +1,10 @@
 [package]
 name = "rls-analysis"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 version = "0.18.0"
+=======
+version = "0.18.1"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 edition = "2018"
 authors = ["Nick Cameron <ncameron@mozilla.com>"]
 description = "Library for processing rustc's save-analysis data for the RLS"
@@ -11,10 +15,19 @@ exclude = [
     "test_data/*",
 ]
 
+[features]
+default = []
+idents = ["rls-span/nightly"]
+derive = ["rls-data/derive", "rls-span/derive"]
+
 [dependencies]
 log = "0.4"
 rls-data = "= 0.19"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 rls-span = "0.5"
+=======
+rls-span = "0.5.2"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 derive-new = "0.5"
 fst = { version = "0.3", default-features = false }
 itertools = "0.8"
@@ -25,7 +38,10 @@ serde_json = "1.0"
 [dev-dependencies]
 lazy_static = "1"
 env_logger = "0.5"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 [features]
 default = []
 derive = ["rls-data/derive", "rls-span/derive"]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

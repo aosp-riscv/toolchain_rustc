@@ -69,7 +69,11 @@
 #![warn(missing_debug_implementations)]
 #![deny(intra_doc_link_resolution_failure)] // rustdoc is run without -D warnings
 #![allow(explicit_outlives_requirements)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![cfg_attr(not(bootstrap), allow(incomplete_features))]
+=======
+#![allow(incomplete_features)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #![cfg_attr(not(test), feature(generator_trait))]
 #![cfg_attr(test, feature(test))]
@@ -84,9 +88,17 @@
 #![feature(coerce_unsized)]
 #![feature(const_generic_impls_guard)]
 #![feature(const_generics)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![cfg_attr(not(bootstrap), feature(const_in_array_repeat_expressions))]
+=======
+#![feature(const_in_array_repeat_expressions)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(dispatch_from_dyn)]
 #![feature(core_intrinsics)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![feature(container_error_extra)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(dropck_eyepatch)]
 #![feature(exact_size_is_empty)]
 #![feature(fmt_internals)]
@@ -116,9 +128,13 @@
 #![feature(allocator_internals)]
 #![feature(on_unimplemented)]
 #![feature(rustc_const_unstable)]
-#![feature(const_vec_new)]
+#![cfg_attr(bootstrap, feature(const_vec_new))]
 #![feature(slice_partition_dedup)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(maybe_uninit_extra, maybe_uninit_slice, maybe_uninit_array)]
+=======
+#![feature(maybe_uninit_extra, maybe_uninit_slice)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(alloc_layout_extra)]
 #![feature(try_trait)]
 #![feature(mem_take)]
@@ -169,4 +185,10 @@ pub mod vec;
 #[cfg(not(test))]
 mod std {
     pub use core::ops; // RangeFull
+}
+
+#[doc(hidden)]
+#[unstable(feature = "liballoc_internals", issue = "0", reason = "implementation detail")]
+pub mod __export {
+    pub use core::format_args;
 }

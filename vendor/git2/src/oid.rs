@@ -197,7 +197,11 @@ mod tests {
     use super::Error;
     use super::Oid;
     use crate::ObjectType;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     use tempdir::TempDir;
+=======
+    use tempfile::TempDir;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     #[test]
     fn conversions() {
@@ -246,7 +250,7 @@ mod tests {
 
     #[test]
     fn hash_file() {
-        let td = TempDir::new("test").unwrap();
+        let td = TempDir::new().unwrap();
         let path = td.path().join("hello.txt");
         let mut file = File::create(&path).unwrap();
         file.write_all("Hello".as_bytes()).unwrap();

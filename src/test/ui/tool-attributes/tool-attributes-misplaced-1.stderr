@@ -4,6 +4,7 @@ error: cannot find derive macro `rustfmt` in this scope
 LL | #[derive(rustfmt)]
    |          ^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `rustfmt` in this scope
   --> $DIR/tool-attributes-misplaced-1.rs:8:3
    |
@@ -11,6 +12,15 @@ LL | #[rustfmt]
    |   ^^^^^^^
 
 error: cannot find macro `rustfmt!` in this scope
+=======
+error: cannot find attribute `rustfmt` in this scope
+  --> $DIR/tool-attributes-misplaced-1.rs:8:3
+   |
+LL | #[rustfmt]
+   |   ^^^^^^^
+
+error: cannot find macro `rustfmt` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/tool-attributes-misplaced-1.rs:14:5
    |
 LL |     rustfmt!();

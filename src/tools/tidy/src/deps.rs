@@ -15,6 +15,10 @@ const LICENSES: &[&str] = &[
     "Apache-2.0 / MIT",
     "MIT OR Apache-2.0",
     "Apache-2.0 OR MIT",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT", // wasi license
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     "MIT",
     "Unlicense/MIT",
     "Unlicense OR MIT",
@@ -90,15 +94,21 @@ const WHITELIST: &[Crate<'_>] = &[
     Crate("crossbeam-epoch"),
     Crate("crossbeam-utils"),
     Crate("datafrog"),
+    Crate("dlmalloc"),
     Crate("either"),
     Crate("ena"),
     Crate("env_logger"),
     Crate("filetime"),
     Crate("flate2"),
+    Crate("fortanix-sgx-abi"),
     Crate("fuchsia-zircon"),
     Crate("fuchsia-zircon-sys"),
     Crate("getopts"),
     Crate("getrandom"),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    Crate("hashbrown"),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Crate("humantime"),
     Crate("indexmap"),
     Crate("itertools"),
@@ -159,6 +169,7 @@ const WHITELIST: &[Crate<'_>] = &[
     Crate("termcolor"),
     Crate("terminon"),
     Crate("termion"),
+    Crate("term_size"),
     Crate("thread_local"),
     Crate("ucd-util"),
     Crate("unicode-width"),
@@ -168,6 +179,7 @@ const WHITELIST: &[Crate<'_>] = &[
     Crate("vcpkg"),
     Crate("version_check"),
     Crate("void"),
+    Crate("wasi"),
     Crate("winapi"),
     Crate("winapi-build"),
     Crate("winapi-i686-pc-windows-gnu"),

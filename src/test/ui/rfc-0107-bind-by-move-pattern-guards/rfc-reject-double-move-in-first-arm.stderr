@@ -1,5 +1,9 @@
 error[E0507]: cannot move out of `v` in pattern guard
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/rfc-reject-double-move-in-first-arm.rs:8:30
+=======
+  --> $DIR/rfc-reject-double-move-in-first-arm.rs:6:30
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |         A { a: v } if { drop(v); true } => v,
    |                              ^ move occurs because `v` has type `std::boxed::Box<i32>`, which does not implement the `Copy` trait

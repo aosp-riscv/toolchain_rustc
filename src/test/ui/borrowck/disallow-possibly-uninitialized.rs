@@ -4,6 +4,7 @@
 fn main() {
     let mut t: (u64, u64);
     t.0 = 1;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     //~^ ERROR assign to part of possibly uninitialized variable: `t` [E0381]
     t.1 = 1;
 
@@ -19,4 +20,21 @@ fn main() {
     let mut t: (u64,);
     t.0 = 1;
     //~^ ERROR assign to part of possibly uninitialized variable: `t` [E0381]
+=======
+    //~^ ERROR assign to part of possibly-uninitialized variable: `t` [E0381]
+    t.1 = 1;
+
+    let mut t: (u64, u64);
+    t.1 = 1;
+    //~^ ERROR assign to part of possibly-uninitialized variable: `t` [E0381]
+    t.0 = 1;
+
+    let mut t: (u64, u64);
+    t.0 = 1;
+    //~^ ERROR assign to part of possibly-uninitialized variable: `t` [E0381]
+
+    let mut t: (u64,);
+    t.0 = 1;
+    //~^ ERROR assign to part of possibly-uninitialized variable: `t` [E0381]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

@@ -14,8 +14,13 @@
 /*
  * Set the error message for this thread, formatting as needed.
  */
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 void git_error_set(int error_class, const char *string, ...) GIT_FORMAT_PRINTF(2, 3);
+=======
+void git_error_set(int error_class, const char *fmt, ...) GIT_FORMAT_PRINTF(2, 3);
+void git_error_vset(int error_class, const char *fmt, va_list ap);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 /**
  * Set the error message for a regex failure, using the internal regex

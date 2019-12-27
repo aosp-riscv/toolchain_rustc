@@ -1,3 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use crate::ast;
+use crate::attr::{self, TransparencyError};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::edition::Edition;
 use crate::ext::base::{DummyResult, ExtCtxt, MacResult, TTMacroExpander};
 use crate::ext::base::{SyntaxExtension, SyntaxExtensionKind};
@@ -17,8 +22,16 @@ use crate::symbol::{kw, sym, Symbol};
 use crate::tokenstream::{DelimSpan, TokenStream, TokenTree};
 use crate::{ast, attr, attr::TransparencyError};
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use errors::FatalError;
+=======
+use errors::{DiagnosticBuilder, FatalError};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use log::debug;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use syntax_pos::hygiene::Transparency;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax_pos::Span;
 
 use rustc_data_structures::fx::FxHashMap;
@@ -41,6 +54,18 @@ pub struct ParserAnyMacro<'a> {
     /// The ident of the macro we're parsing
     macro_ident: ast::Ident,
     arm_span: Span,
+}
+
+pub fn annotate_err_with_kind(err: &mut DiagnosticBuilder<'_>, kind: AstFragmentKind, span: Span) {
+    match kind {
+        AstFragmentKind::Ty => {
+            err.span_label(span, "this macro call doesn't expand to a type");
+        }
+        AstFragmentKind::Pat => {
+            err.span_label(span, "this macro call doesn't expand to a pattern");
+        }
+        _ => {}
+    };
 }
 
 impl<'a> ParserAnyMacro<'a> {
@@ -70,6 +95,32 @@ impl<'a> ParserAnyMacro<'a> {
             } else if !parser.sess.source_map().span_to_filename(parser.token.span).is_real() {
                 e.span_label(site_span, "in this macro invocation");
             }
+            match kind {
+                AstFragmentKind::Pat if macro_ident.name == sym::vec => {
+                    let mut suggestion = None;
+                    if let Ok(code) = parser.sess.source_map().span_to_snippet(site_span) {
+                        if let Some(bang) = code.find('!') {
+                            suggestion = Some(code[bang + 1..].to_string());
+                        }
+                    }
+                    if let Some(suggestion) = suggestion {
+                        e.span_suggestion(
+                            site_span,
+                            "use a slice pattern here instead",
+                            suggestion,
+                            Applicability::MachineApplicable,
+                        );
+                    } else {
+                        e.span_label(
+                            site_span,
+                            "use a slice pattern here instead",
+                        );
+                    }
+                    e.help("for more information, see https://doc.rust-lang.org/edition-guide/\
+                            rust-2018/slice-patterns.html");
+                }
+                _ => annotate_err_with_kind(&mut e, kind, site_span),
+            };
             e
         }));
 
@@ -90,6 +141,10 @@ impl<'a> ParserAnyMacro<'a> {
 struct MacroRulesMacroExpander {
     name: ast::Ident,
     span: Span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    transparency: Transparency,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     lhses: Vec<quoted::TokenTree>,
     rhses: Vec<quoted::TokenTree>,
     valid: bool,
@@ -105,7 +160,13 @@ impl TTMacroExpander for MacroRulesMacroExpander {
         if !self.valid {
             return DummyResult::any(sp);
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         generic_extension(cx, sp, self.span, self.name, input, &self.lhses, &self.rhses)
+=======
+        generic_extension(
+            cx, sp, self.span, self.name, self.transparency, input, &self.lhses, &self.rhses
+        )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
@@ -120,6 +181,10 @@ fn generic_extension<'cx>(
     sp: Span,
     def_span: Span,
     name: ast::Ident,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    transparency: Transparency,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     arg: TokenStream,
     lhses: &[quoted::TokenTree],
     rhses: &[quoted::TokenTree],
@@ -149,7 +214,11 @@ fn generic_extension<'cx>(
 
                 let rhs_spans = rhs.iter().map(|t| t.span()).collect::<Vec<_>>();
                 // rhs has holes ( `$id` and `$(...)` that need filled)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let mut tts = transcribe(cx, &named_matches, rhs);
+=======
+                let mut tts = transcribe(cx, &named_matches, rhs, transparency);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                 // Replace all the tokens for the corresponding positions in the macro, to maintain
                 // proper positions in error reporting, while maintaining the macro_backtrace.
@@ -173,6 +242,10 @@ fn generic_extension<'cx>(
                 let mut p = Parser::new(cx.parse_sess(), tts, Some(directory), true, false, None);
                 p.root_module_name =
                     cx.current_expansion.module.mod_path.last().map(|id| id.as_str().to_string());
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+                p.last_type_ascription = cx.current_expansion.prior_type_ascription;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                 p.process_potential_macro_variable();
                 // Let the context choose how to interpret the result.
@@ -246,6 +319,10 @@ pub fn compile(
     def: &ast::Item,
     edition: Edition,
 ) -> SyntaxExtension {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    let diag = &sess.span_diagnostic;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let lhs_nm = ast::Ident::new(sym::lhs, def.span);
     let rhs_nm = ast::Ident::new(sym::rhs, def.span);
     let tt_spec = ast::Ident::new(sym::tt, def.span);
@@ -282,7 +359,14 @@ pub fn compile(
         quoted::TokenTree::Sequence(
             DelimSpan::dummy(),
             Lrc::new(quoted::SequenceRepetition {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 tts: vec![quoted::TokenTree::token(token::Semi, def.span)],
+=======
+                tts: vec![quoted::TokenTree::token(
+                    if body.legacy { token::Semi } else { token::Comma },
+                    def.span,
+                )],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 separator: None,
                 kleene: quoted::KleeneToken::new(quoted::KleeneOp::ZeroOrMore, def.span),
                 num_captures: 0,
@@ -367,12 +451,35 @@ pub fn compile(
     // don't abort iteration early, so that errors for multiple lhses can be reported
     for lhs in &lhses {
         valid &= check_lhs_no_empty_seq(sess, slice::from_ref(lhs));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
     }
 
     // We use CRATE_NODE_ID instead of `def.id` otherwise we may emit buffered lints for a node id
     // that is not lint-checked and trigger the "failed to process buffered lint here" bug.
     valid &= macro_check::check_meta_variables(sess, ast::CRATE_NODE_ID, def.span, &lhses, &rhses);
 
+    let (transparency, transparency_error) = attr::find_transparency(&def.attrs, body.legacy);
+    match transparency_error {
+        Some(TransparencyError::UnknownTransparency(value, span)) =>
+            diag.span_err(span, &format!("unknown macro transparency: `{}`", value)),
+        Some(TransparencyError::MultipleTransparencyAttrs(old_span, new_span)) =>
+            diag.span_err(vec![old_span, new_span], "multiple macro transparency attributes"),
+        None => {}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+    }
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+    // We use CRATE_NODE_ID instead of `def.id` otherwise we may emit buffered lints for a node id
+    // that is not lint-checked and trigger the "failed to process buffered lint here" bug.
+    valid &= macro_check::check_meta_variables(sess, ast::CRATE_NODE_ID, def.span, &lhses, &rhses);
+=======
+    let expander: Box<_> = Box::new(MacroRulesMacroExpander {
+        name: def.ident, span: def.span, transparency, lhses, rhses, valid
+    });
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let expander: Box<_> =
         Box::new(MacroRulesMacroExpander { name: def.ident, span: def.span, lhses, rhses, valid });
 
@@ -439,6 +546,17 @@ pub fn compile(
         edition,
         is_builtin: attr::contains_name(&def.attrs, sym::rustc_builtin_macro),
     }
+=======
+    SyntaxExtension::new(
+        sess,
+        SyntaxExtensionKind::LegacyBang(expander),
+        def.span,
+        Vec::new(),
+        edition,
+        def.ident.name,
+        &def.attrs,
+    )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 fn check_lhs_nt_follows(
@@ -748,7 +866,7 @@ impl TokenSet {
 }
 
 // Checks that `matcher` is internally consistent and that it
-// can legally by followed by a token N, for all N in `follow`.
+// can legally be followed by a token `N`, for all `N` in `follow`.
 // (If `follow` is empty, then it imposes no constraint on
 // the `matcher`.)
 //

@@ -25,17 +25,29 @@ fn check_bang1() {
     my_macro!(); //~ ERROR can't use a procedural macro from the same crate that defines it
 }
 fn check_bang2() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     my_macro_attr!(); //~ ERROR cannot find macro `my_macro_attr!` in this scope
+=======
+    my_macro_attr!(); //~ ERROR cannot find macro `my_macro_attr` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     crate::my_macro_attr!(); //~ ERROR can't use a procedural macro from the same crate that defines
                              //~| ERROR expected macro, found attribute macro `crate::my_macro_attr`
 }
 fn check_bang3() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     MyTrait!(); //~ ERROR cannot find macro `MyTrait!` in this scope
+=======
+    MyTrait!(); //~ ERROR cannot find macro `MyTrait` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     crate::MyTrait!(); //~ ERROR can't use a procedural macro from the same crate that defines it
                        //~| ERROR expected macro, found derive macro `crate::MyTrait`
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[my_macro] //~ ERROR cannot find attribute macro `my_macro` in this scope
+=======
+#[my_macro] //~ ERROR cannot find attribute `my_macro` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[crate::my_macro] //~ ERROR can't use a procedural macro from the same crate that defines it
                    //~| ERROR expected attribute, found macro `crate::my_macro`
 fn check_attr1() {}

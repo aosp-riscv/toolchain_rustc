@@ -1,5 +1,9 @@
 error[E0728]: `await` is only allowed inside `async` functions and blocks
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/issue-51751.rs:11:20
+=======
+  --> $DIR/issue-51751.rs:9:20
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | fn main() {
    |    ---- this is not `async`

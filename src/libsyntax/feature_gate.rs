@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! # Feature gating
 //!
 //! This module implements the gating necessary for preventing certain compiler
@@ -2523,3 +2524,5 @@ fn maybe_stage_features(span_handler: &Handler, krate: &ast::Crate,
         }
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

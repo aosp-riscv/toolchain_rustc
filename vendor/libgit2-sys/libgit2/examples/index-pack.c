@@ -1,5 +1,6 @@
 #include "common.h"
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -76,6 +77,68 @@ int lg2_index_pack(git_repository *repo, int argc, char **argv)
 		goto cleanup;
 
 	printf("\rIndexing %d of %d\n", stats.indexed_objects, stats.total_objects);
+=======
+/*
+ * This could be run in the main loop whilst the application waits for
+ * the indexing to finish in a worker thread
+ */
+static int index_cb(const git_indexer_progress *stats, void *data)
+{
+	(void)data;
+	printf("\rProcessing %u of %u", stats->indexed_objects, stats->total_objects);
+
+	return 0;
+}
+
+int lg2_index_pack(git_repository *repo, int argc, char **argv)
+{
+	git_indexer *idx;
+	git_indexer_progress stats = {0, 0};
+	int error;
+	char hash[GIT_OID_HEXSZ + 1] = {0};
+	int fd;
+	ssize_t read_bytes;
+	char buf[512];
+
+	(void)repo;
+
+	if (argc < 2) {
+		fprintf(stderr, "usage: %s index-pack <packfile>\n", argv[-1]);
+		return EXIT_FAILURE;
+	}
+
+	if (git_indexer_new(&idx, ".", 0, NULL, NULL) < 0) {
+		puts("bad idx");
+		return -1;
+	}
+
+	if ((fd = open(argv[1], 0)) < 0) {
+		perror("open");
+		return -1;
+	}
+
+	do {
+		read_bytes = read(fd, buf, sizeof(buf));
+		if (read_bytes < 0)
+			break;
+
+		if ((error = git_indexer_append(idx, buf, read_bytes, &stats)) < 0)
+			goto cleanup;
+
+		index_cb(&stats, NULL);
+	} while (read_bytes > 0);
+
+	if (read_bytes < 0) {
+		error = -1;
+		perror("failed reading");
+		goto cleanup;
+	}
+
+	if ((error = git_indexer_commit(idx, &stats)) < 0)
+		goto cleanup;
+
+	printf("\rIndexing %u of %u\n", stats.indexed_objects, stats.total_objects);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 	git_oid_fmt(hash, git_indexer_hash(idx));
 	puts(hash);

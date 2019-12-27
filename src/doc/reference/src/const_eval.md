@@ -37,8 +37,8 @@ to be run.
 * Index expressions, [array indexing] or [slice] with a `usize`.
 * [Range expressions].
 * [Closure expressions] which don't capture variables from the environment.
-* Built in [negation], [arithmetic, logical], [comparison] or [lazy boolean]
-  operators used on integer and floating point types, `bool` and `char`.
+* Built-in [negation], [arithmetic], [logical], [comparison] or [lazy boolean]
+  operators used on integer and floating point types, `bool`, and `char`.
 * Shared [borrow]s, except if applied to a type with [interior mutability].
 * The [dereference operator].
 * [Grouped] expressions.
@@ -57,6 +57,7 @@ A _const context_ is one of the following:
   * [statics]
   * [enum discriminants]
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 [arithmetic, logical]:  expressions/operator-expr.md#arithmetic-and-logical-binary-operators
 [array expressions]:    expressions/array-expr.md
 [array indexing]:       expressions/array-expr.md#array-and-slice-indexing-expressions
@@ -84,6 +85,36 @@ A _const context_ is one of the following:
 [lazy boolean]:         expressions/operator-expr.md#lazy-boolean-operators
 [let statements]:       statements.md#let-statements
 [literals]:             expressions/literal-expr.md
+=======
+[arithmetic]:           expressions/operator-expr.md#arithmetic-and-logical-binary-operators
+[array expressions]:    expressions/array-expr.md
+[array indexing]:       expressions/array-expr.md#array-and-slice-indexing-expressions
+[array indexing]:       expressions/array-expr.md#array-and-slice-indexing-expressions
+[array type length expressions]: types/array.md
+[assignment expressions]: expressions/operator-expr.md#assignment-expressions
+[assignment operator expressions]: expressions/operator-expr.md#compound-assignment-expressions
+[block expressions]:    expressions/block-expr.md
+[borrow]:               expressions/operator-expr.md#borrow-operators
+[cast]:                 expressions/operator-expr.md#type-cast-expressions
+[closure expressions]:  expressions/closure-expr.md
+[comparison]:           expressions/operator-expr.md#comparison-operators
+[const functions]:      items/functions.md#const-functions
+[constants]:            items/constant-items.md
+[dereference operator]: expressions/operator-expr.md#the-dereference-operator
+[destructors]:          destructors.md
+[enum discriminants]:   items/enumerations.md#custom-discriminant-values-for-field-less-enumerations
+[enum variant]:         expressions/enum-variant-expr.md
+[expression statements]: statements.md#expression-statements
+[expressions]:          expressions.md
+[field]:                expressions/field-expr.md
+[functions]:            items/functions.md
+[grouped]:              expressions/grouped-expr.md
+[interior mutability]:  interior-mutability.md
+[lazy boolean]:         expressions/operator-expr.md#lazy-boolean-operators
+[let statements]:       statements.md#let-statements
+[literals]:             expressions/literal-expr.md
+[logical]:              expressions/operator-expr.md#arithmetic-and-logical-binary-operators
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 [negation]:             expressions/operator-expr.md#negation-operators
 [overflow]:             expressions/operator-expr.md#overflow
 [paths]:                expressions/path-expr.md

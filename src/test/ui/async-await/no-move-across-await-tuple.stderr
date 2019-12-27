@@ -1,5 +1,9 @@
 error[E0382]: use of moved value: `x.1`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/no-move-across-await-tuple.rs:11:5
+=======
+  --> $DIR/no-move-across-await-tuple.rs:9:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     drop(x.1);
    |          --- value moved here

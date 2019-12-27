@@ -148,7 +148,7 @@ impl Transport {
             obj: Box::new(subtransport),
         });
         let mut defn = raw::git_smart_subtransport_definition {
-            callback: smart_factory,
+            callback: Some(smart_factory),
             rpc: rpc as c_uint,
             param: &mut *raw as *mut _ as *mut _,
         };
@@ -190,7 +190,11 @@ impl Transport {
 impl Drop for Transport {
     fn drop(&mut self) {
         if self.owned {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             unsafe { ((*self.raw).free)(self.raw) }
+=======
+            unsafe { (*self.raw).free.unwrap()(self.raw) }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 }

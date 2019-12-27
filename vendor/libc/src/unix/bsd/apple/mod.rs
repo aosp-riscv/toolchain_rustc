@@ -2178,9 +2178,12 @@ pub const PF_PPP: ::c_int =  AF_PPP;
 pub const NET_RT_DUMP: ::c_int = 1;
 pub const NET_RT_FLAGS: ::c_int = 2;
 pub const NET_RT_IFLIST: ::c_int = 3;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[doc(hidden)]
 #[deprecated(since = "0.2.55")]
 pub const NET_RT_MAXID: ::c_int = 10;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 pub const SOMAXCONN: ::c_int = 128;
 

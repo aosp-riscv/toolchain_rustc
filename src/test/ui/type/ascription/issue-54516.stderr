@@ -1,8 +1,16 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: expected token: `,`
   --> $DIR/issue-54516.rs:4:58
    |
 LL |     println!("{}", std::mem:size_of::<BTreeMap<u32, u32>>());
    |                            -                             ^ expected `,`
+=======
+error: expected one of `!`, `,`, or `::`, found `(`
+  --> $DIR/issue-54516.rs:4:58
+   |
+LL |     println!("{}", std::mem:size_of::<BTreeMap<u32, u32>>());
+   |                            -                             ^ expected one of `!`, `,`, or `::` here
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |                            |
    |                            help: maybe write a path separator here: `::`
    |

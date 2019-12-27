@@ -1,4 +1,5 @@
 error: lifetime may not live long enough
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/regions-outlives-projection-container.rs:40:13
    |
 LL | fn with_assoc<'a,'b>() {
@@ -33,6 +34,42 @@ LL |     call::<&'a WithAssoc<TheType<'b>>>();
 
 error: lifetime may not live long enough
   --> $DIR/regions-outlives-projection-container.rs:74:5
+=======
+  --> $DIR/regions-outlives-projection-container.rs:36:13
+   |
+LL | fn with_assoc<'a,'b>() {
+   |               -- -- lifetime `'b` defined here
+   |               |
+   |               lifetime `'a` defined here
+...
+LL |     let _x: &'a WithAssoc<TheType<'b>> = loop { };
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^ type annotation requires that `'b` must outlive `'a`
+
+error: lifetime may not live long enough
+  --> $DIR/regions-outlives-projection-container.rs:54:13
+   |
+LL | fn without_assoc<'a,'b>() {
+   |                  -- -- lifetime `'b` defined here
+   |                  |
+   |                  lifetime `'a` defined here
+...
+LL |     let _x: &'a WithoutAssoc<TheType<'b>> = loop { };
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type annotation requires that `'b` must outlive `'a`
+
+error: lifetime may not live long enough
+  --> $DIR/regions-outlives-projection-container.rs:63:5
+   |
+LL | fn call_with_assoc<'a,'b>() {
+   |                    -- -- lifetime `'b` defined here
+   |                    |
+   |                    lifetime `'a` defined here
+...
+LL |     call::<&'a WithAssoc<TheType<'b>>>();
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ requires that `'b` must outlive `'a`
+
+error: lifetime may not live long enough
+  --> $DIR/regions-outlives-projection-container.rs:70:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | fn call_without_assoc<'a,'b>() {
    |                       -- -- lifetime `'b` defined here

@@ -3,7 +3,11 @@ use crate::borrow_check::places_conflict;
 use crate::borrow_check::AccessDepth;
 use crate::dataflow::indexes::BorrowIndex;
 use rustc::mir::{BasicBlock, Location, Body, Place, PlaceBase};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::mir::{ProjectionElem, BorrowKind};
+=======
+use rustc::mir::BorrowKind;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::ty::{self, TyCtxt};
 use rustc_data_structures::graph::dominators::Dominators;
 
@@ -133,12 +137,18 @@ pub(super) fn is_active<'tcx>(
 /// Determines if a given borrow is borrowing local data
 /// This is called for all Yield statements on movable generators
 pub(super) fn borrow_of_local_data(place: &Place<'_>) -> bool {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     place.iterate(|place_base, place_projection| {
         match place_base {
             PlaceBase::Static(..) => return false,
             PlaceBase::Local(..) => {},
         }
+=======
+    match place.base {
+        PlaceBase::Static(_) => false,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         for proj in place_projection {
             // Reborrow of already borrowed data is ignored
             // Any errors will be caught on the initial borrow
@@ -149,4 +159,10 @@ pub(super) fn borrow_of_local_data(place: &Place<'_>) -> bool {
 
         true
     })
+=======
+        // Reborrow of already borrowed data is ignored
+        // Any errors will be caught on the initial borrow
+        PlaceBase::Local(_) => !place.is_indirect(),
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

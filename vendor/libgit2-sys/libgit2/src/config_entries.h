@@ -14,6 +14,10 @@ typedef struct git_config_entries git_config_entries;
 
 int git_config_entries_new(git_config_entries **out);
 int git_config_entries_dup(git_config_entries **out, git_config_entries *entries);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+int git_config_entries_dup_entry(git_config_entries *entries, const git_config_entry *entry);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 void git_config_entries_incref(git_config_entries *entries);
 void git_config_entries_free(git_config_entries *entries);
 /* Add or append the new config option */

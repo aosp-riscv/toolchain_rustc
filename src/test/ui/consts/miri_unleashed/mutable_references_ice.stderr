@@ -6,7 +6,11 @@ LL |         *MUH.x.get() = 99;
 
 thread 'rustc' panicked at 'assertion failed: `(left != right)`
   left: `Const`,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
  right: `Const`: UnsafeCells are not allowed behind references in constants. This should have been prevented statically by const qualification. If this were allowed one would be able to change a constant at one use site and other use sites may arbitrarily decide to change, too.', src/librustc_mir/interpret/intern.rs:LL:CC
+=======
+ right: `Const`: UnsafeCells are not allowed behind references in constants. This should have been prevented statically by const qualification. If this were allowed one would be able to change a constant at one use site and other use sites could observe that mutation.', src/librustc_mir/interpret/intern.rs:LL:CC
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace.
 
 error: internal compiler error: unexpected panic

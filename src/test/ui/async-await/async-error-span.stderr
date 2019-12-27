@@ -1,4 +1,5 @@
 error[E0698]: type inside `async` object must be known in this context
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/async-error-span.rs:13:9
    |
 LL |     let a;
@@ -6,6 +7,15 @@ LL |     let a;
    |
 note: the type is part of the `async` object because of this `await`
   --> $DIR/async-error-span.rs:14:5
+=======
+  --> $DIR/async-error-span.rs:12:9
+   |
+LL |     let a;
+   |         ^ cannot infer type
+   |
+note: the type is part of the `async` object because of this `await`
+  --> $DIR/async-error-span.rs:13:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     get_future().await;
    |     ^^^^^^^^^^^^^^^^^^

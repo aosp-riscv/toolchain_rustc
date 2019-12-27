@@ -2,7 +2,11 @@ error[E0599]: no method named `foo` found for type `&dyn Foo` in the current sco
   --> $DIR/issue-5153.rs:10:27
    |
 LL |     (&5isize as &dyn Foo).foo();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                           ^^^
+=======
+   |                           ^^^ method not found in `&dyn Foo`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = help: items from traits can only be used if the trait is implemented and in scope
    = note: the following trait defines an item `foo`, perhaps you need to implement it:

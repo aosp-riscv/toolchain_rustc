@@ -1,4 +1,5 @@
 error[E0133]: call to unsafe function is unsafe and requires unsafe function or block
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/async-unsafe-fn-call-in-safe.rs:14:5
    |
 LL |     S::f();
@@ -24,6 +25,33 @@ LL |     S::f();
 
 error[E0133]: call to unsafe function is unsafe and requires unsafe function or block
   --> $DIR/async-unsafe-fn-call-in-safe.rs:20:5
+=======
+  --> $DIR/async-unsafe-fn-call-in-safe.rs:12:5
+   |
+LL |     S::f();
+   |     ^^^^^^ call to unsafe function
+   |
+   = note: consult the function's documentation for information on how to avoid undefined behavior
+
+error[E0133]: call to unsafe function is unsafe and requires unsafe function or block
+  --> $DIR/async-unsafe-fn-call-in-safe.rs:13:5
+   |
+LL |     f();
+   |     ^^^ call to unsafe function
+   |
+   = note: consult the function's documentation for information on how to avoid undefined behavior
+
+error[E0133]: call to unsafe function is unsafe and requires unsafe function or block
+  --> $DIR/async-unsafe-fn-call-in-safe.rs:17:5
+   |
+LL |     S::f();
+   |     ^^^^^^ call to unsafe function
+   |
+   = note: consult the function's documentation for information on how to avoid undefined behavior
+
+error[E0133]: call to unsafe function is unsafe and requires unsafe function or block
+  --> $DIR/async-unsafe-fn-call-in-safe.rs:18:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     f();
    |     ^^^ call to unsafe function

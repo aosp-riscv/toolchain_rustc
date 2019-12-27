@@ -11,6 +11,7 @@ const SIGNUM_POS: i32 = 10i32.signum();
 const SIGNUM_NIL: i32 = 0i32.signum();
 const SIGNUM_NEG: i32 = (-42i32).signum();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn main() {
     assert!(NEGATIVE_A);
     assert!(!NEGATIVE_B);
@@ -20,4 +21,21 @@ fn main() {
     assert_eq!(SIGNUM_POS, 1);
     assert_eq!(SIGNUM_NIL, 0);
     assert_eq!(SIGNUM_NEG, -1);
+=======
+const ABS_A: i32 = 10i32.abs();
+const ABS_B: i32 = (-10i32).abs();
+
+fn main() {
+    assert!(NEGATIVE_A);
+    assert!(!NEGATIVE_B);
+    assert!(!POSITIVE_A);
+    assert!(POSITIVE_B);
+
+    assert_eq!(SIGNUM_POS, 1);
+    assert_eq!(SIGNUM_NIL, 0);
+    assert_eq!(SIGNUM_NEG, -1);
+
+    assert_eq!(ABS_A, 10);
+    assert_eq!(ABS_B, 10);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

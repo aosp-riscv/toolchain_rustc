@@ -473,5 +473,17 @@ pub fn fold_abi<V: Fold + ?Sized>(_visitor: &mut V, _i: Abi) -> Abi {
 // #3463
 x ! {()}
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+// #3746
+f!(match a {
+    4 =>
+        &[
+            (3, false), // Missing
+            (4, true)   // I-frame
+        ]  [..],
+});
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // #3583
 foo!(|x = y|);

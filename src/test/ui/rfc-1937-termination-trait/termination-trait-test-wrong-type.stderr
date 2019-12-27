@@ -1,13 +1,26 @@
 error[E0277]: `main` has invalid return type `std::result::Result<f32, std::num::ParseFloatError>`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/termination-trait-test-wrong-type.rs:6:1
+=======
+  --> $DIR/termination-trait-test-wrong-type.rs:8:1
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | / fn can_parse_zero_as_f32() -> Result<f32, ParseFloatError> {
 LL | |     "0".parse()
 LL | | }
    | |_^ `main` can only return types that implement `std::process::Termination`
+   | 
+  ::: $SRC_DIR/libtest/lib.rs:LL:COL
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    = help: the trait `std::process::Termination` is not implemented for `std::result::Result<f32, std::num::ParseFloatError>`
    = note: required by `test::assert_test_result`
+=======
+LL |   pub fn assert_test_result<T: Termination>(result: T) {
+   |                                ----------- required by this bound in `test::assert_test_result`
+   |
+   = help: the trait `std::process::Termination` is not implemented for `std::result::Result<f32, std::num::ParseFloatError>`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

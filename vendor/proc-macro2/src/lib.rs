@@ -1,5 +1,9 @@
 //! A wrapper around the procedural macro API of the compiler's [`proc_macro`]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! crate. This library serves three purposes:
+=======
+//! crate. This library serves two purposes:
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 //!
 //! [`proc_macro`]: https://doc.rust-lang.org/proc_macro/
 //!
@@ -18,6 +22,7 @@
 //!   a macro to be testable in isolation, they must be implemented using
 //!   `proc_macro2`.
 //!
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! - **Provide the latest and greatest APIs across all compiler versions.**
 //!   Procedural macros were first introduced to Rust in 1.15.0 with an
 //!   extremely minimal interface. Since then, many improvements have landed to
@@ -25,10 +30,19 @@
 //!   procedural macro API of the most recent stable compiler but employs a
 //!   polyfill to provide that API consistently across any compiler since
 //!   1.15.0.
-//!
+=======
 //! [syn]: https://github.com/dtolnay/syn
 //! [quote]: https://github.com/dtolnay/quote
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 //!
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+//! [syn]: https://github.com/dtolnay/syn
+//! [quote]: https://github.com/dtolnay/quote
+=======
+//! # Usage
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+//!
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! # Usage
 //!
 //! The skeleton of a typical procedural macro typically looks like this:
@@ -67,6 +81,45 @@
 //! rustc. As usual, we will polyfill those nightly-only APIs all the way back
 //! to Rust 1.15.0. As these are unstable APIs that track the nightly compiler,
 //! minor versions of proc-macro2 may make breaking changes to them at any time.
+=======
+//! The skeleton of a typical procedural macro typically looks like this:
+//!
+//! ```
+//! extern crate proc_macro;
+//!
+//! # const IGNORE: &str = stringify! {
+//! #[proc_macro_derive(MyDerive)]
+//! # };
+//! # #[cfg(wrap_proc_macro)]
+//! pub fn my_derive(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+//!     let input = proc_macro2::TokenStream::from(input);
+//!
+//!     let output: proc_macro2::TokenStream = {
+//!         /* transform input */
+//!         # input
+//!     };
+//!
+//!     proc_macro::TokenStream::from(output)
+//! }
+//! ```
+//!
+//! If parsing with [Syn], you'll use [`parse_macro_input!`] instead to
+//! propagate parse errors correctly back to the compiler when parsing fails.
+//!
+//! [`parse_macro_input!`]: https://docs.rs/syn/1.0/syn/macro.parse_macro_input.html
+//!
+//! # Unstable features
+//!
+//! The default feature set of proc-macro2 tracks the most recent stable
+//! compiler API. Functionality in `proc_macro` that is not yet stable is not
+//! exposed by proc-macro2 by default.
+//!
+//! To opt into the additional APIs available in the most recent nightly
+//! compiler, the `procmacro2_semver_exempt` config flag must be passed to
+//! rustc. We will polyfill those nightly-only APIs back to Rust 1.31.0. As
+//! these are unstable APIs that track the nightly compiler, minor versions of
+//! proc-macro2 may make breaking changes to them at any time.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 //!
 //! ```sh
 //! RUSTFLAGS='--cfg procmacro2_semver_exempt' cargo build
@@ -77,15 +130,27 @@
 //! as a reminder that you are outside of the normal semver guarantees.
 //!
 //! Semver exempt methods are marked as such in the proc-macro2 documentation.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+//!
+//! # Thread-Safety
+//!
+//! Most types in this crate are `!Sync` because the underlying compiler
+//! types make use of thread-local memory, meaning they cannot be accessed from
+//! a different thread.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 // Proc-macro2 types in rustdoc of other crates get linked to here.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![doc(html_root_url = "https://docs.rs/proc-macro2/0.4.30")]
+=======
+#![doc(html_root_url = "https://docs.rs/proc-macro2/1.0.3")]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![cfg_attr(any(proc_macro_span, super_unstable), feature(proc_macro_span))]
 #![cfg_attr(super_unstable, feature(proc_macro_raw_ident, proc_macro_def_site))]
 
 #[cfg(use_proc_macro)]
 extern crate proc_macro;
-extern crate unicode_xid;
 
 use std::cmp::Ordering;
 use std::fmt;
@@ -102,7 +167,11 @@ mod strnom;
 mod fallback;
 
 #[cfg(not(wrap_proc_macro))]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use fallback as imp;
+=======
+use crate::fallback as imp;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[path = "wrapper.rs"]
 #[cfg(wrap_proc_macro)]
 mod imp;
@@ -129,7 +198,7 @@ pub struct LexError {
 impl TokenStream {
     fn _new(inner: imp::TokenStream) -> TokenStream {
         TokenStream {
-            inner: inner,
+            inner,
             _marker: marker::PhantomData,
         }
     }
@@ -144,11 +213,6 @@ impl TokenStream {
     /// Returns an empty `TokenStream` containing no token trees.
     pub fn new() -> TokenStream {
         TokenStream::_new(imp::TokenStream::new())
-    }
-
-    #[deprecated(since = "0.4.4", note = "please use TokenStream::new")]
-    pub fn empty() -> TokenStream {
-        TokenStream::new()
     }
 
     /// Checks if this `TokenStream` is empty.
@@ -196,6 +260,12 @@ impl From<proc_macro::TokenStream> for TokenStream {
 impl From<TokenStream> for proc_macro::TokenStream {
     fn from(inner: TokenStream) -> proc_macro::TokenStream {
         inner.inner.into()
+    }
+}
+
+impl From<TokenTree> for TokenStream {
+    fn from(token: TokenTree) -> Self {
+        TokenStream::_new(imp::TokenStream::from(token))
     }
 }
 
@@ -261,7 +331,7 @@ pub struct SourceFile {
 impl SourceFile {
     fn _new(inner: imp::SourceFile) -> Self {
         SourceFile {
-            inner: inner,
+            inner,
             _marker: marker::PhantomData,
         }
     }
@@ -321,7 +391,7 @@ pub struct Span {
 impl Span {
     fn _new(inner: imp::Span) -> Span {
         Span {
-            inner: inner,
+            inner,
             _marker: marker::PhantomData,
         }
     }
@@ -404,10 +474,7 @@ impl Span {
     #[cfg(span_locations)]
     pub fn start(&self) -> LineColumn {
         let imp::LineColumn { line, column } = self.inner.start();
-        LineColumn {
-            line: line,
-            column: column,
-        }
+        LineColumn { line, column }
     }
 
     /// Get the ending line/column in the source file for this span.
@@ -416,23 +483,23 @@ impl Span {
     #[cfg(span_locations)]
     pub fn end(&self) -> LineColumn {
         let imp::LineColumn { line, column } = self.inner.end();
-        LineColumn {
-            line: line,
-            column: column,
-        }
+        LineColumn { line, column }
     }
 
     /// Create a new span encompassing `self` and `other`.
     ///
     /// Returns `None` if `self` and `other` are from different files.
     ///
-    /// This method is semver exempt and not exposed by default.
-    #[cfg(procmacro2_semver_exempt)]
+    /// Warning: the underlying [`proc_macro::Span::join`] method is
+    /// nightly-only. When called from within a procedural macro not using a
+    /// nightly compiler, this method will always return `None`.
+    ///
+    /// [`proc_macro::Span::join`]: https://doc.rust-lang.org/proc_macro/struct.Span.html#method.join
     pub fn join(&self, other: Span) -> Option<Span> {
         self.inner.join(other.inner).map(Span::_new)
     }
 
-    /// Compares to spans to see if they're equal.
+    /// Compares two spans to see if they're equal.
     ///
     /// This method is semver exempt and not exposed by default.
     #[cfg(procmacro2_semver_exempt)]
@@ -576,7 +643,11 @@ pub enum Delimiter {
 
 impl Group {
     fn _new(inner: imp::Group) -> Self {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Group { inner: inner }
+=======
+        Group { inner }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn _new_stable(inner: fallback::Group) -> Self {
@@ -626,7 +697,6 @@ impl Group {
     /// pub fn span_open(&self) -> Span {
     ///                 ^
     /// ```
-    #[cfg(procmacro2_semver_exempt)]
     pub fn span_open(&self) -> Span {
         Span::_new(self.inner.span_open())
     }
@@ -637,7 +707,6 @@ impl Group {
     /// pub fn span_close(&self) -> Span {
     ///                        ^
     /// ```
-    #[cfg(procmacro2_semver_exempt)]
     pub fn span_close(&self) -> Span {
         Span::_new(self.inner.span_close())
     }
@@ -685,7 +754,7 @@ pub struct Punct {
 pub enum Spacing {
     /// E.g. `+` is `Alone` in `+ =`, `+ident` or `+()`.
     Alone,
-    /// E.g. `+` is `Joint` in `+=` or `'#`.
+    /// E.g. `+` is `Joint` in `+=` or `'` is `Joint` in `'#`.
     ///
     /// Additionally, single quote `'` can join with identifiers to form
     /// lifetimes `'ident`.
@@ -702,8 +771,8 @@ impl Punct {
     /// which can be further configured with the `set_span` method below.
     pub fn new(op: char, spacing: Spacing) -> Punct {
         Punct {
-            op: op,
-            spacing: spacing,
+            op,
+            spacing,
             span: Span::call_site(),
         }
     }
@@ -765,7 +834,7 @@ impl fmt::Debug for Punct {
 /// Rust keywords. Use `input.call(Ident::parse_any)` when parsing to match the
 /// behaviour of `Ident::new`.
 ///
-/// [`Parse`]: https://docs.rs/syn/0.15/syn/parse/trait.Parse.html
+/// [`Parse`]: https://docs.rs/syn/1.0/syn/parse/trait.Parse.html
 ///
 /// # Examples
 ///
@@ -773,7 +842,11 @@ impl fmt::Debug for Punct {
 /// A span must be provided explicitly which governs the name resolution
 /// behavior of the resulting identifier.
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// ```edition2018
+=======
+/// ```
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// use proc_macro2::{Ident, Span};
 ///
 /// fn main() {
@@ -785,7 +858,11 @@ impl fmt::Debug for Punct {
 ///
 /// An ident can be interpolated into a token stream using the `quote!` macro.
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// ```edition2018
+=======
+/// ```
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// use proc_macro2::{Ident, Span};
 /// use quote::quote;
 ///
@@ -804,7 +881,11 @@ impl fmt::Debug for Punct {
 /// A string representation of the ident is available through the `to_string()`
 /// method.
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// ```edition2018
+=======
+/// ```
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// # use proc_macro2::{Ident, Span};
 /// #
 /// # let ident = Ident::new("another_identifier", Span::call_site());
@@ -824,7 +905,7 @@ pub struct Ident {
 impl Ident {
     fn _new(inner: imp::Ident) -> Ident {
         Ident {
-            inner: inner,
+            inner,
             _marker: marker::PhantomData,
         }
     }
@@ -856,7 +937,11 @@ impl Ident {
     /// Panics if the input string is neither a keyword nor a legal variable
     /// name. If you are not sure whether the string contains an identifier and
     /// need to handle an error case, use
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// <a href="https://docs.rs/syn/0.15/syn/fn.parse_str.html"><code
+=======
+    /// <a href="https://docs.rs/syn/1.0/syn/fn.parse_str.html"><code
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     ///   style="padding-right:0;">syn::parse_str</code></a><code
     ///   style="padding-left:0;">::&lt;Ident&gt;</code>
     /// rather than `Ident::new`.
@@ -992,7 +1077,7 @@ macro_rules! unsuffixed_int_literals {
 impl Literal {
     fn _new(inner: imp::Literal) -> Literal {
         Literal {
-            inner: inner,
+            inner,
             _marker: marker::PhantomData,
         }
     }
@@ -1009,18 +1094,14 @@ impl Literal {
         u16_suffixed => u16,
         u32_suffixed => u32,
         u64_suffixed => u64,
+        u128_suffixed => u128,
         usize_suffixed => usize,
         i8_suffixed => i8,
         i16_suffixed => i16,
         i32_suffixed => i32,
         i64_suffixed => i64,
-        isize_suffixed => isize,
-    }
-
-    #[cfg(u128)]
-    suffixed_int_literals! {
-        u128_suffixed => u128,
         i128_suffixed => i128,
+        isize_suffixed => isize,
     }
 
     unsuffixed_int_literals! {
@@ -1028,25 +1109,47 @@ impl Literal {
         u16_unsuffixed => u16,
         u32_unsuffixed => u32,
         u64_unsuffixed => u64,
+        u128_unsuffixed => u128,
         usize_unsuffixed => usize,
         i8_unsuffixed => i8,
         i16_unsuffixed => i16,
         i32_unsuffixed => i32,
         i64_unsuffixed => i64,
+        i128_unsuffixed => i128,
         isize_unsuffixed => isize,
     }
 
-    #[cfg(u128)]
-    unsuffixed_int_literals! {
-        u128_unsuffixed => u128,
-        i128_unsuffixed => i128,
-    }
-
+    /// Creates a new unsuffixed floating-point literal.
+    ///
+    /// This constructor is similar to those like `Literal::i8_unsuffixed` where
+    /// the float's value is emitted directly into the token but no suffix is
+    /// used, so it may be inferred to be a `f64` later in the compiler.
+    /// Literals created from negative numbers may not survive rountrips through
+    /// `TokenStream` or strings and may be broken into two tokens (`-` and
+    /// positive literal).
+    ///
+    /// # Panics
+    ///
+    /// This function requires that the specified float is finite, for example
+    /// if it is infinity or NaN this function will panic.
     pub fn f64_unsuffixed(f: f64) -> Literal {
         assert!(f.is_finite());
         Literal::_new(imp::Literal::f64_unsuffixed(f))
     }
 
+    /// Creates a new suffixed floating-point literal.
+    ///
+    /// This constructor will create a literal like `1.0f64` where the value
+    /// specified is the preceding part of the token and `f64` is the suffix of
+    /// the token. This token will always be inferred to be an `f64` in the
+    /// compiler. Literals created from negative numbers may not survive
+    /// rountrips through `TokenStream` or strings and may be broken into two
+    /// tokens (`-` and positive literal).
+    ///
+    /// # Panics
+    ///
+    /// This function requires that the specified float is finite, for example
+    /// if it is infinity or NaN this function will panic.
     pub fn f64_suffixed(f: f64) -> Literal {
         assert!(f.is_finite());
         Literal::_new(imp::Literal::f64_suffixed(f))
@@ -1070,27 +1173,45 @@ impl Literal {
         Literal::_new(imp::Literal::f32_unsuffixed(f))
     }
 
+    /// Creates a new suffixed floating-point literal.
+    ///
+    /// This constructor will create a literal like `1.0f32` where the value
+    /// specified is the preceding part of the token and `f32` is the suffix of
+    /// the token. This token will always be inferred to be an `f32` in the
+    /// compiler. Literals created from negative numbers may not survive
+    /// rountrips through `TokenStream` or strings and may be broken into two
+    /// tokens (`-` and positive literal).
+    ///
+    /// # Panics
+    ///
+    /// This function requires that the specified float is finite, for example
+    /// if it is infinity or NaN this function will panic.
     pub fn f32_suffixed(f: f32) -> Literal {
         assert!(f.is_finite());
         Literal::_new(imp::Literal::f32_suffixed(f))
     }
 
+    /// String literal.
     pub fn string(string: &str) -> Literal {
         Literal::_new(imp::Literal::string(string))
     }
 
+    /// Character literal.
     pub fn character(ch: char) -> Literal {
         Literal::_new(imp::Literal::character(ch))
     }
 
+    /// Byte string literal.
     pub fn byte_string(s: &[u8]) -> Literal {
         Literal::_new(imp::Literal::byte_string(s))
     }
 
+    /// Returns the span encompassing this literal.
     pub fn span(&self) -> Span {
         Span::_new(self.inner.span())
     }
 
+    /// Configures the span associated for this literal.
     pub fn set_span(&mut self, span: Span) {
         self.inner.set_span(span.inner);
     }
@@ -1114,9 +1235,8 @@ pub mod token_stream {
     use std::marker;
     use std::rc::Rc;
 
-    use imp;
-    pub use TokenStream;
-    use TokenTree;
+    pub use crate::TokenStream;
+    use crate::{imp, TokenTree};
 
     /// An iterator over `TokenStream`'s `TokenTree`s.
     ///

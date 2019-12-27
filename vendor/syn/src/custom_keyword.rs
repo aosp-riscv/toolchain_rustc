@@ -7,6 +7,7 @@
 /// module called `kw` or `keyword` and that the resulting parser be invoked
 /// with a `kw::` or `keyword::` prefix.
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// ```edition2018
 /// mod kw {
 ///     syn::custom_keyword!(whatever);
@@ -44,6 +45,45 @@
 /// by crates that need to use them as such.
 ///
 /// ```edition2018
+=======
+/// ```
+/// mod kw {
+///     syn::custom_keyword!(whatever);
+/// }
+/// ```
+///
+/// The generated syntax tree node supports the following operations just like
+/// any built-in keyword token.
+///
+/// - [Peeking] — `input.peek(kw::whatever)`
+///
+/// - [Parsing] — `input.parse::<kw::whatever>()?`
+///
+/// - [Printing] — `quote!( ... #whatever_token ... )`
+///
+/// - Construction from a [`Span`] — `let whatever_token = kw::whatever(sp)`
+///
+/// - Field access to its span — `let sp = whatever_token.span`
+///
+/// [Peeking]: parse::ParseBuffer::peek
+/// [Parsing]: parse::ParseBuffer::parse
+/// [Printing]: quote::ToTokens
+/// [`Span`]: proc_macro2::Span
+///
+/// # Example
+///
+/// This example parses input that looks like `bool = true` or `str = "value"`.
+/// The key must be either the identifier `bool` or the identifier `str`. If
+/// `bool`, the value may be either `true` or `false`. If `str`, the value may
+/// be any string literal.
+///
+/// The symbols `bool` and `str` are not reserved keywords in Rust so these are
+/// not considered keywords in the `syn::token` module. Like any other
+/// identifier that is not a keyword, these can be declared as custom keywords
+/// by crates that need to use them as such.
+///
+/// ```
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// use syn::{LitBool, LitStr, Result, Token};
 /// use syn::parse::{Parse, ParseStream};
 ///

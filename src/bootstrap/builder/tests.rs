@@ -366,6 +366,7 @@ fn dist_with_same_targets_and_hosts() {
         ]
     );
     assert_eq!(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         first(builder.cache.all::<compile::Test>()),
         &[
             compile::Test {
@@ -580,6 +581,197 @@ fn build_with_target_flag() {
             compile::Test {
                 compiler: Compiler { host: b, stage: 2 },
                 target: c,
+=======
+        first(builder.cache.all::<compile::Assemble>()),
+        &[
+            compile::Assemble {
+                target_compiler: Compiler { host: a, stage: 0 },
+            },
+            compile::Assemble {
+                target_compiler: Compiler { host: a, stage: 1 },
+            },
+            compile::Assemble {
+                target_compiler: Compiler { host: a, stage: 2 },
+            },
+            compile::Assemble {
+                target_compiler: Compiler { host: b, stage: 2 },
+            },
+        ]
+    );
+}
+
+#[test]
+fn build_default() {
+    let build = Build::new(configure(&["B"], &["C"]));
+    let mut builder = Builder::new(&build);
+    builder.run_step_descriptions(&Builder::get_step_descriptions(Kind::Build), &[]);
+
+    let a = INTERNER.intern_str("A");
+    let b = INTERNER.intern_str("B");
+    let c = INTERNER.intern_str("C");
+
+    assert_eq!(
+        first(builder.cache.all::<compile::Std>()),
+        &[
+            compile::Std {
+                compiler: Compiler { host: a, stage: 0 },
+                target: a,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 1 },
+                target: a,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 2 },
+                target: a,
+            },
+            compile::Std {
+                compiler: Compiler { host: b, stage: 2 },
+                target: a,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 1 },
+                target: b,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 2 },
+                target: b,
+            },
+            compile::Std {
+                compiler: Compiler { host: b, stage: 2 },
+                target: b,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 2 },
+                target: c,
+            },
+            compile::Std {
+                compiler: Compiler { host: b, stage: 2 },
+                target: c,
+            },
+        ]
+    );
+    assert!(!builder.cache.all::<compile::Assemble>().is_empty());
+    assert_eq!(
+        first(builder.cache.all::<compile::Rustc>()),
+        &[
+            compile::Rustc {
+                compiler: Compiler { host: a, stage: 0 },
+                target: a,
+            },
+            compile::Rustc {
+                compiler: Compiler { host: a, stage: 1 },
+                target: a,
+            },
+            compile::Rustc {
+                compiler: Compiler { host: a, stage: 2 },
+                target: a,
+            },
+            compile::Rustc {
+                compiler: Compiler { host: b, stage: 2 },
+                target: a,
+            },
+            compile::Rustc {
+                compiler: Compiler { host: a, stage: 1 },
+                target: b,
+            },
+            compile::Rustc {
+                compiler: Compiler { host: a, stage: 2 },
+                target: b,
+            },
+            compile::Rustc {
+                compiler: Compiler { host: b, stage: 2 },
+                target: b,
+            },
+        ]
+    );
+}
+
+#[test]
+fn build_with_target_flag() {
+    let mut config = configure(&["B"], &["C"]);
+    config.skip_only_host_steps = true;
+    let build = Build::new(config);
+    let mut builder = Builder::new(&build);
+    builder.run_step_descriptions(&Builder::get_step_descriptions(Kind::Build), &[]);
+
+    let a = INTERNER.intern_str("A");
+    let b = INTERNER.intern_str("B");
+    let c = INTERNER.intern_str("C");
+
+    assert_eq!(
+        first(builder.cache.all::<compile::Std>()),
+        &[
+            compile::Std {
+                compiler: Compiler { host: a, stage: 0 },
+                target: a,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 1 },
+                target: a,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 2 },
+                target: a,
+            },
+            compile::Std {
+                compiler: Compiler { host: b, stage: 2 },
+                target: a,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 1 },
+                target: b,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 2 },
+                target: b,
+            },
+            compile::Std {
+                compiler: Compiler { host: b, stage: 2 },
+                target: b,
+            },
+            compile::Std {
+                compiler: Compiler { host: a, stage: 2 },
+                target: c,
+            },
+            compile::Std {
+                compiler: Compiler { host: b, stage: 2 },
+                target: c,
+            },
+        ]
+    );
+    assert_eq!(
+        first(builder.cache.all::<compile::Assemble>()),
+        &[
+            compile::Assemble {
+                target_compiler: Compiler { host: a, stage: 0 },
+            },
+            compile::Assemble {
+                target_compiler: Compiler { host: a, stage: 1 },
+            },
+            compile::Assemble {
+                target_compiler: Compiler { host: a, stage: 2 },
+            },
+            compile::Assemble {
+                target_compiler: Compiler { host: b, stage: 2 },
+            },
+        ]
+    );
+    assert_eq!(
+        first(builder.cache.all::<compile::Rustc>()),
+        &[
+            compile::Rustc {
+                compiler: Compiler { host: a, stage: 0 },
+                target: a,
+            },
+            compile::Rustc {
+                compiler: Compiler { host: a, stage: 1 },
+                target: a,
+            },
+            compile::Rustc {
+                compiler: Compiler { host: a, stage: 1 },
+                target: b,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             },
         ]
     );

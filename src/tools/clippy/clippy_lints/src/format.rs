@@ -1,7 +1,11 @@
 use crate::utils::paths;
 use crate::utils::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     in_macro_or_desugar, is_expn_of, last_path_segment, match_def_path, match_type, resolve_node, snippet,
     span_lint_and_then, walk_ptrs_ty,
+=======
+    is_expn_of, last_path_segment, match_def_path, match_type, resolve_node, snippet, span_lint_and_then, walk_ptrs_ty,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
 use if_chain::if_chain;
 use rustc::hir::*;
@@ -39,7 +43,11 @@ declare_lint_pass!(UselessFormat => [USELESS_FORMAT]);
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for UselessFormat {
     fn check_expr(&mut self, cx: &LateContext<'a, 'tcx>, expr: &'tcx Expr) {
         let span = match is_expn_of(expr.span, "format") {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Some(s) if !in_macro_or_desugar(s) => s,
+=======
+            Some(s) if !s.from_expansion() => s,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             _ => return,
         };
 

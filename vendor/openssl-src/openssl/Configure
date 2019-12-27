@@ -87,9 +87,12 @@ my $usage="Usage: Configure [no-<cipher> ...] [enable-<cipher> ...] [-Dxxx] [-lx
 #               linked openssl executable has rather debugging value than
 #               production quality.
 #
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 # DEBUG_SAFESTACK use type-safe stacks to enforce type-safety on stack items
 #               provided to stack calls. Generates unique stack functions for
 #               each possible stack type.
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 # BN_LLONG      use the type 'long long' in crypto/bn/bn.h
 # RC4_CHAR      use 'char' instead of 'int' for RC4_INT in crypto/rc4/rc4.h
 # Following are set automatically by this script
@@ -145,6 +148,7 @@ my @gcc_devteam_warn = qw(
 #       -Wunused-macros -- no, too tricky for BN and _XOPEN_SOURCE etc
 #       -Wextended-offsetof -- no, needed in CMS ASN1 code
 my @clang_devteam_warn = qw(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     -Wswitch-default
     -Wno-parentheses-equality
     -Wno-language-extension-token
@@ -152,6 +156,15 @@ my @clang_devteam_warn = qw(
     -Wconditional-uninitialized
     -Wincompatible-pointer-types-discards-qualifiers
     -Wno-unknown-warning-option
+=======
+    -Wno-unknown-warning-option
+    -Wswitch-default
+    -Wno-parentheses-equality
+    -Wno-language-extension-token
+    -Wno-extended-offsetof
+    -Wconditional-uninitialized
+    -Wincompatible-pointer-types-discards-qualifiers
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     -Wmissing-variable-declarations
 );
 

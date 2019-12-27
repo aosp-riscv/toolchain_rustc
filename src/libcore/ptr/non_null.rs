@@ -125,7 +125,11 @@ impl<T: ?Sized> NonNull<T> {
         &mut *self.as_ptr()
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Cast to a pointer of another type
+=======
+    /// Casts to a pointer of another type.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     #[stable(feature = "nonnull_cast", since = "1.27.0")]
     #[inline]
     pub const fn cast<U>(self) -> NonNull<U> {

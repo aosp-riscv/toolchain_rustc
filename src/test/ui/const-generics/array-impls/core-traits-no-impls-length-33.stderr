@@ -8,10 +8,17 @@ LL |     println!("{:?}", [0_usize; 33]);
    = note: required by `std::fmt::Debug::fmt`
 
 error[E0277]: arrays only have std trait implementations for lengths 0..=32
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/core-traits-no-impls-length-33.rs:9:9
    |
 LL |     set.insert([0_usize; 33]);
    |         ^^^^^^ the trait `std::array::LengthAtMost32` is not implemented for `[usize; 33]`
+=======
+  --> $DIR/core-traits-no-impls-length-33.rs:9:16
+   |
+LL |     set.insert([0_usize; 33]);
+   |                ^^^^^^^^^^^^^ the trait `std::array::LengthAtMost32` is not implemented for `[usize; 33]`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = note: required because of the requirements on the impl of `std::cmp::Eq` for `[usize; 33]`
 

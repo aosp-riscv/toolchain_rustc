@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0658]: kind="static-nobundle" is feature gated
+=======
+error[E0658]: kind="static-nobundle" is unstable
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-static-nobundle.rs:1:1
    |
 LL | #[link(name="foo", kind="static-nobundle")]

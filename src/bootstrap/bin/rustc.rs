@@ -15,11 +15,13 @@
 //! switching compilers for the bootstrap and for build scripts will probably
 //! never get replaced.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // NO-RUSTC-WRAPPER
 #![deny(warnings, rust_2018_idioms, unused_lifetimes)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::env;
-use std::ffi::OsString;
 use std::io;
 use std::path::PathBuf;
 use std::process::Command;
@@ -27,35 +29,7 @@ use std::str::FromStr;
 use std::time::Instant;
 
 fn main() {
-    let mut args = env::args_os().skip(1).collect::<Vec<_>>();
-
-    // Append metadata suffix for internal crates. See the corresponding entry
-    // in bootstrap/lib.rs for details.
-    if let Ok(s) = env::var("RUSTC_METADATA_SUFFIX") {
-        for i in 1..args.len() {
-            // Dirty code for borrowing issues
-            let mut new = None;
-            if let Some(current_as_str) = args[i].to_str() {
-                if (&*args[i - 1] == "-C" && current_as_str.starts_with("metadata")) ||
-                   current_as_str.starts_with("-Cmetadata") {
-                    new = Some(format!("{}-{}", current_as_str, s));
-                }
-            }
-            if let Some(new) = new { args[i] = new.into(); }
-        }
-    }
-
-    // Drop `--error-format json` because despite our desire for json messages
-    // from Cargo we don't want any from rustc itself.
-    if let Some(n) = args.iter().position(|n| n == "--error-format") {
-        args.remove(n);
-        args.remove(n);
-    }
-
-    if let Some(s) = env::var_os("RUSTC_ERROR_FORMAT") {
-        args.push("--error-format".into());
-        args.push(s);
-    }
+    let args = env::args_os().skip(1).collect::<Vec<_>>();
 
     // Detect whether or not we're a build script depending on whether --target
     // is passed (a bit janky...)
@@ -101,6 +75,7 @@ fn main() {
     if let Some(crate_name) = crate_name {
         if let Some(target) = env::var_os("RUSTC_TIME") {
             if target == "all" ||
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                target.into_string().unwrap().split(",").any(|c| c.trim() == crate_name)
             {
                 cmd.arg("-Ztime");
@@ -112,6 +87,13 @@ fn main() {
     // compiler libraries and such from stage 1 to 2.
     if stage == "0" {
         cmd.arg("--cfg").arg("bootstrap");
+=======
+                target.into_string().unwrap().split(",").any(|c| c.trim() == crate_name)
+            {
+                cmd.arg("-Ztime");
+            }
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     // Print backtrace in case of ICE
@@ -119,6 +101,7 @@ fn main() {
         cmd.env("RUST_BACKTRACE", "1");
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     cmd.env("RUSTC_BREAK_ON_ICE", "1");
 
     if let Ok(debuginfo_level) = env::var("RUSTC_DEBUGINFO_LEVEL") {
@@ -142,11 +125,15 @@ fn main() {
     }
 
     if let Some(target) = target {
+=======
+    if target.is_some() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // The stage0 compiler has a special sysroot distinct from what we
         // actually downloaded, so we just always pass the `--sysroot` option,
         // unless one is already set.
         if !args.iter().any(|arg| arg == "--sysroot") {
             cmd.arg("--sysroot").arg(&sysroot);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         }
 
         cmd.arg("-Zexternal-macro-backtrace");
@@ -155,8 +142,11 @@ fn main() {
         // to actually run the macros
         if env::var_os("RUST_DUAL_PROC_MACROS").is_some() {
             cmd.arg("-Zdual-proc-macros");
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // When we build Rust dylibs they're all intended for intermediate
         // usage, so make sure we pass the -Cprefer-dynamic flag instead of
         // linking all deps statically into the dylib.
@@ -186,6 +176,8 @@ fn main() {
             cmd.arg(format!("-Clinker={}", target_linker));
         }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // If we're compiling specifically the `panic_abort` crate then we pass
         // the `-C panic=abort` option. Note that we do not do this for any
         // other crate intentionally as this is the only crate for now that we
@@ -212,11 +204,18 @@ fn main() {
 
         // The compiler builtins are pretty sensitive to symbols referenced in
         // libcore and such, so we never compile them with debug assertions.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        //
+        // FIXME(rust-lang/cargo#7253) we should be doing this in `builder.rs`
+        // with env vars instead of doing it here in this script.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         if crate_name == Some("compiler_builtins") {
             cmd.arg("-C").arg("debug-assertions=no");
         } else {
             cmd.arg("-C").arg(format!("debug-assertions={}", debug_assertions));
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
         if let Ok(s) = env::var("RUSTC_CODEGEN_UNITS") {
             cmd.arg("-C").arg(format!("codegen-units={}", s));
@@ -291,7 +290,12 @@ fn main() {
         if let Ok(map) = env::var("RUSTC_DEBUGINFO_MAP") {
             cmd.arg("--remap-path-prefix").arg(&map);
         }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     } else {
+        // FIXME(rust-lang/cargo#5754) we shouldn't be using special env vars
+        // here, but rather Cargo should know what flags to pass rustc itself.
+
         // Override linker if necessary.
         if let Ok(host_linker) = env::var("RUSTC_HOST_LINKER") {
             cmd.arg(format!("-Clinker={}", host_linker));
@@ -307,6 +311,13 @@ fn main() {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    if let Ok(map) = env::var("RUSTC_DEBUGINFO_MAP") {
+        cmd.arg("--remap-path-prefix").arg(&map);
+    }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     // Force all crates compiled by this compiler to (a) be unstable and (b)
     // allow the `rustc_private` feature to link to other unstable crates
     // also in the sysroot. We also do this for host crates, since those
@@ -315,10 +326,13 @@ fn main() {
         cmd.arg("-Z").arg("force-unstable-if-unmarked");
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if env::var_os("RUSTC_PARALLEL_COMPILER").is_some() {
         cmd.arg("--cfg").arg("parallel_compiler");
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     if verbose > 1 {
         eprintln!(
             "rustc command: {:?}={:?} {:?}",

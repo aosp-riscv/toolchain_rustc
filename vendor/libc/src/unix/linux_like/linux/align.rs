@@ -60,6 +60,7 @@ macro_rules! expand_align {
             #[cfg_attr(all(target_pointer_width = "32",
                            any(target_arch = "mips",
                                target_arch = "arm",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                target_arch = "powerpc",
                                target_arch = "x86_64",
                                target_arch = "x86")),
@@ -86,6 +87,38 @@ macro_rules! expand_align {
             #[cfg_attr(any(target_pointer_width = "64",
                            not(any(target_arch = "mips",
                                    target_arch = "arm",
+=======
+                               target_arch = "hexagon",
+                               target_arch = "powerpc",
+                               target_arch = "x86_64",
+                               target_arch = "x86")),
+                       repr(align(4)))]
+            #[cfg_attr(any(target_pointer_width = "64",
+                           not(any(target_arch = "mips",
+                                   target_arch = "arm",
+                                   target_arch = "hexagon",
+                                   target_arch = "powerpc",
+                                   target_arch = "x86_64",
+                                   target_arch = "x86"))),
+                       repr(align(8)))]
+            pub struct pthread_mutex_t {
+                #[doc(hidden)]
+                size: [u8; ::__SIZEOF_PTHREAD_MUTEX_T],
+            }
+
+            #[cfg_attr(all(target_pointer_width = "32",
+                           any(target_arch = "mips",
+                               target_arch = "arm",
+                               target_arch = "hexagon",
+                               target_arch = "powerpc",
+                               target_arch = "x86_64",
+                               target_arch = "x86")),
+                       repr(align(4)))]
+            #[cfg_attr(any(target_pointer_width = "64",
+                           not(any(target_arch = "mips",
+                                   target_arch = "arm",
+                                   target_arch = "hexagon",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                    target_arch = "powerpc",
                                    target_arch = "x86_64",
                                    target_arch = "x86"))),

@@ -8,20 +8,31 @@ mod fingerprint;
 mod job;
 mod job_queue;
 mod layout;
+mod links;
 mod output_depinfo;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 mod unit;
+=======
+pub mod standard_lib;
+mod timings;
+mod unit;
+pub mod unit_dependencies;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::fs::{self, File};
 use std::io::Write;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::path::{Path, PathBuf};
+=======
+use std::path::PathBuf;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::sync::Arc;
 
 use failure::Error;
 use lazycell::LazyCell;
 use log::debug;
-use same_file::is_same_file;
 use serde::Serialize;
 
 pub use self::build_config::{BuildConfig, CompileMode, MessageFormat};
@@ -35,6 +46,10 @@ use self::job::{Job, Work};
 use self::job_queue::{JobQueue, JobState};
 pub use self::layout::is_bad_artifact_name;
 use self::output_depinfo::output_depinfo;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use self::unit_dependencies::UnitDep;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub use crate::core::compiler::unit::{Unit, UnitInterner};
 use crate::core::manifest::TargetSourcePath;
 use crate::core::profiles::{Lto, PanicStrategy, Profile};
@@ -121,7 +136,6 @@ fn compile<'a, 'cfg: 'a>(
     // we've got everything constructed.
     let p = profile::start(format!("preparing: {}/{}", unit.pkg, unit.target.name()));
     fingerprint::prepare_init(cx, unit)?;
-    cx.links.validate(bcx.resolve, unit)?;
 
     let job = if unit.mode.is_run_custom_build() {
         custom_build::prepare(cx, unit)?
@@ -297,7 +311,11 @@ fn rustc<'a, 'cfg>(
                 &mut |line| on_stderr_line(state, line, package_id, &target, &mut output_options),
             )
             .map_err(internal_if_simple_exit_code)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             .chain_err(|| format!("Could not compile `{}`.", name))?;
+=======
+            .chain_err(|| format!("could not compile `{}`.", name))?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
 
         if do_rename && real_name != crate_name {
@@ -408,12 +426,16 @@ fn link_targets<'a, 'cfg>(
     let package_id = unit.pkg.package_id();
     let profile = unit.profile;
     let unit_mode = unit.mode;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let features = bcx
         .resolve
         .features_sorted(package_id)
         .into_iter()
         .map(|s| s.to_owned())
         .collect();
+=======
+    let features = unit.features.iter().map(|s| s.to_string()).collect();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let json_messages = bcx.build_config.emit_json();
     let executable = cx.get_executable(unit)?;
     let mut target = unit.target.clone();
@@ -444,14 +466,12 @@ fn link_targets<'a, 'cfg>(
                 }
             };
             destinations.push(dst.clone());
-            hardlink_or_copy(src, dst)?;
+            paths::link_or_copy(src, dst)?;
             if let Some(ref path) = output.export_path {
                 let export_dir = export_dir.as_ref().unwrap();
-                if !export_dir.exists() {
-                    fs::create_dir_all(export_dir)?;
-                }
+                paths::create_dir_all(export_dir)?;
 
-                hardlink_or_copy(src, path)?;
+                paths::link_or_copy(src, path)?;
             }
         }
 
@@ -480,6 +500,7 @@ fn link_targets<'a, 'cfg>(
     }))
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// Hardlink (file) or symlink (dir) src to dst if possible, otherwise copy it.
 fn hardlink_or_copy(src: &Path, dst: &Path) -> CargoResult<()> {
     debug!("linking {} to {}", src.display(), dst.display());
@@ -523,6 +544,8 @@ fn hardlink_or_copy(src: &Path, dst: &Path) -> CargoResult<()> {
     Ok(())
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // For all plugin dependencies, add their -L paths (now calculated and present
 // in `build_script_outputs`) to the dynamic library load path for the command
 // to execute.
@@ -623,11 +646,11 @@ fn rustdoc<'a, 'cfg>(cx: &mut Context<'a, 'cfg>, unit: &Unit<'a>) -> CargoResult
     // Create the documentation directory ahead of time as rustdoc currently has
     // a bug where concurrent invocations will race to create this directory if
     // it doesn't already exist.
-    fs::create_dir_all(&doc_dir)?;
+    paths::create_dir_all(&doc_dir)?;
 
     rustdoc.arg("-o").arg(doc_dir);
 
-    for feat in bcx.resolve.features_sorted(unit.pkg.package_id()) {
+    for feat in &unit.features {
         rustdoc.arg("--cfg").arg(&format!("feature=\"{}\"", feat));
     }
 
@@ -910,10 +933,7 @@ fn build_base_args<'a, 'cfg>(
         cmd.arg("--cfg").arg("test");
     }
 
-    // We ideally want deterministic invocations of rustc to ensure that
-    // rustc-caching strategies like sccache are able to cache more, so sort the
-    // feature list here.
-    for feat in bcx.resolve.features_sorted(unit.pkg.package_id()) {
+    for feat in &unit.features {
         cmd.arg("--cfg").arg(&format!("feature=\"{}\"", feat));
     }
 
@@ -990,38 +1010,49 @@ fn build_deps_args<'a, 'cfg>(
         });
     }
 
-    let dep_targets = cx.dep_targets(unit);
+    // Create Vec since mutable cx is needed in closure below.
+    let deps = Vec::from(cx.unit_deps(unit));
 
     // If there is not one linkable target but should, rustc fails later
     // on if there is an `extern crate` for it. This may turn into a hard
     // error in the future (see PR #4797).
-    if !dep_targets
+    if !deps
         .iter()
-        .any(|u| !u.mode.is_doc() && u.target.linkable())
+        .any(|dep| !dep.unit.mode.is_doc() && dep.unit.target.linkable())
     {
-        if let Some(u) = dep_targets
+        if let Some(dep) = deps
             .iter()
-            .find(|u| !u.mode.is_doc() && u.target.is_lib())
+            .find(|dep| !dep.unit.mode.is_doc() && dep.unit.target.is_lib())
         {
             bcx.config.shell().warn(format!(
                 "The package `{}` \
                  provides no linkable target. The compiler might raise an error while compiling \
                  `{}`. Consider adding 'dylib' or 'rlib' to key `crate-type` in `{}`'s \
                  Cargo.toml. This warning might turn into a hard error in the future.",
-                u.target.crate_name(),
+                dep.unit.target.crate_name(),
                 unit.target.crate_name(),
-                u.target.crate_name()
+                dep.unit.target.crate_name()
             ))?;
         }
     }
 
     let mut unstable_opts = false;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     for dep in dep_targets {
         if dep.mode.is_run_custom_build() {
             cmd.env("OUT_DIR", &cx.files().build_script_out_dir(&dep));
+=======
+    for dep in deps {
+        if dep.unit.mode.is_run_custom_build() {
+            cmd.env("OUT_DIR", &cx.files().build_script_out_dir(&dep.unit));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if dep.target.linkable() && !dep.mode.is_doc() {
+=======
+        if dep.unit.target.linkable() && !dep.unit.mode.is_doc() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             link_to(cmd, cx, unit, &dep, &mut unstable_opts)?;
         }
     }
@@ -1038,9 +1069,14 @@ fn build_deps_args<'a, 'cfg>(
         cmd: &mut ProcessBuilder,
         cx: &mut Context<'a, 'cfg>,
         current: &Unit<'a>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         dep: &Unit<'a>,
+=======
+        dep: &UnitDep<'a>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         need_unstable_opts: &mut bool,
     ) -> CargoResult<()> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let bcx = cx.bcx;
 
         let mut value = OsString::new();
@@ -1058,6 +1094,23 @@ fn build_deps_args<'a, 'cfg>(
                 .require(Feature::public_dependency())
                 .is_ok()
                 && !bcx.is_public_dependency(current, dep)
+=======
+        let mut value = OsString::new();
+        value.push(dep.extern_crate_name.as_str());
+        value.push("=");
+
+        let mut pass = |file| {
+            let mut value = value.clone();
+            value.push(file);
+
+            if current
+                .pkg
+                .manifest()
+                .features()
+                .require(Feature::public_dependency())
+                .is_ok()
+                && !dep.public
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             {
                 cmd.arg("--extern-private");
                 *need_unstable_opts = true;
@@ -1068,6 +1121,7 @@ fn build_deps_args<'a, 'cfg>(
             cmd.arg(&value);
         };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let outputs = cx.outputs(dep)?;
         let mut outputs = outputs.iter().filter_map(|output| match output.flavor {
             FileFlavor::Linkable { rmeta } => Some((output, rmeta)),
@@ -1075,6 +1129,15 @@ fn build_deps_args<'a, 'cfg>(
         });
 
         if cx.only_requires_rmeta(current, dep) {
+=======
+        let outputs = cx.outputs(&dep.unit)?;
+        let mut outputs = outputs.iter().filter_map(|output| match output.flavor {
+            FileFlavor::Linkable { rmeta } => Some((output, rmeta)),
+            _ => None,
+        });
+
+        if cx.only_requires_rmeta(current, &dep.unit) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let (output, _rmeta) = outputs
                 .find(|(_output, rmeta)| *rmeta)
                 .expect("failed to find rlib dep for pipelined dep");

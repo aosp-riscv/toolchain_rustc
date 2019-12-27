@@ -45,7 +45,10 @@
 #![feature(non_exhaustive)]
 #![feature(optin_builtin_traits)]
 #![feature(range_is_empty)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(rustc_diagnostic_macros)]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(slice_patterns)]
 #![feature(specialization)]
 #![feature(unboxed_closures)]
@@ -62,12 +65,15 @@
 #![feature(log_syntax)]
 #![feature(mem_take)]
 #![feature(associated_type_bounds)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#![feature(rustc_attrs)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 #![recursion_limit="512"]
 
 #[macro_use] extern crate bitflags;
 extern crate getopts;
-#[macro_use] extern crate lazy_static;
 #[macro_use] extern crate scoped_tls;
 #[cfg(windows)]
 extern crate libc;
@@ -87,8 +93,11 @@ mod tests;
 #[macro_use]
 mod macros;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // N.B., this module needs to be declared first so diagnostics are
 // registered before they are used.
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub mod error_codes;
 
 #[macro_use]
@@ -96,7 +105,10 @@ pub mod query;
 
 #[macro_use]
 pub mod arena;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub mod cfg;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub mod dep_graph;
 pub mod hir;
 pub mod ich;
@@ -109,6 +121,7 @@ pub mod middle {
     pub mod cstore;
     pub mod dead;
     pub mod dependency_format;
+    pub mod diagnostic_items;
     pub mod entry;
     pub mod exported_symbols;
     pub mod free_region;
@@ -141,6 +154,9 @@ pub mod util {
 
 // Allows macros to refer to this crate as `::rustc`
 extern crate self as rustc;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 // Build the diagnostics array at the end so that the metadata includes error use sites.
 __build_diagnostic_array! { librustc, DIAGNOSTICS }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

@@ -69,7 +69,7 @@ pub enum Fixity {
 
 impl AssocOp {
     /// Creates a new AssocOP from a token
-    pub fn from_token(t: &Token) -> Option<AssocOp> {
+    crate fn from_token(t: &Token) -> Option<AssocOp> {
         use AssocOp::*;
         match t.kind {
             token::BinOpEq(k) => Some(AssignOp(k)),
@@ -97,6 +97,11 @@ impl AssocOp {
             // DotDotDot is no longer supported, but we need some way to display the error
             token::DotDotDot => Some(DotDotEq),
             token::Colon => Some(Colon),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            // `<-` should probably be `< -`
+            token::LArrow => Some(Less),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             _ if t.is_keyword(kw::As) => Some(As),
             _ => None
         }

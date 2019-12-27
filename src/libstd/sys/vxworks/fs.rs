@@ -529,7 +529,11 @@ pub fn stat(p: &Path) -> io::Result<FileAttr> {
     let p = cstr(p)?;
     let mut stat: stat64 = unsafe { mem::zeroed() };
     cvt(unsafe {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         libc::lstat(p.as_ptr(), &mut stat as *mut _ as *mut _)
+=======
+        libc::stat(p.as_ptr(), &mut stat as *mut _ as *mut _)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     })?;
     Ok(FileAttr { stat })
 }

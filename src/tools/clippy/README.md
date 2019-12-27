@@ -6,7 +6,11 @@
 
 A collection of lints to catch common mistakes and improve your [Rust](https://github.com/rust-lang/rust) code.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 [There are 309 lints included in this crate!](https://rust-lang.github.io/rust-clippy/master/index.html)
+=======
+[There are 315 lints included in this crate!](https://rust-lang.github.io/rust-clippy/master/index.html)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 We have a bunch of lint categories to allow you to choose how much Clippy is supposed to ~~annoy~~ help you:
 

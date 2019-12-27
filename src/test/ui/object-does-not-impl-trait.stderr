@@ -1,4 +1,5 @@
 error[E0277]: the trait bound `std::boxed::Box<dyn Foo>: Foo` is not satisfied
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/object-does-not-impl-trait.rs:6:35
    |
 LL | fn take_object(f: Box<dyn Foo>) { take_foo(f); }
@@ -6,9 +7,14 @@ LL | fn take_object(f: Box<dyn Foo>) { take_foo(f); }
    |
 note: required by `take_foo`
   --> $DIR/object-does-not-impl-trait.rs:5:1
+=======
+  --> $DIR/object-does-not-impl-trait.rs:6:44
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | fn take_foo<F:Foo>(f: F) {}
-   | ^^^^^^^^^^^^^^^^^^^^^^^^
+   |    --------   --- required by this bound in `take_foo`
+LL | fn take_object(f: Box<dyn Foo>) { take_foo(f); }
+   |                                            ^ the trait `Foo` is not implemented for `std::boxed::Box<dyn Foo>`
 
 error: aborting due to previous error
 

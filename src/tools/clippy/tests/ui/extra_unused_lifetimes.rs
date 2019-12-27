@@ -61,4 +61,18 @@ impl X {
     fn explicit_self_with_lifetime<'a>(self: &'a Self) {}
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+// Methods implementing traits must have matching lifetimes
+mod issue4291 {
+    trait BadTrait {
+        fn unused_lt<'a>(x: u8) {}
+    }
+
+    impl BadTrait for () {
+        fn unused_lt<'a>(_x: u8) {}
+    }
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 fn main() {}

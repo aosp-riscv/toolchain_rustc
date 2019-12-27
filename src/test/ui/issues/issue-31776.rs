@@ -13,6 +13,7 @@ mod m {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // ------------------------------------------------------
 
 pub trait Tr {
@@ -50,6 +51,43 @@ mod m1 {
 }
 
 // ------------------------------------------------------
+=======
+// Scenario 1
+
+pub trait Tr {
+    type A;
+}
+pub struct S1;
+
+fn f() {
+    pub struct Z;
+
+    impl ::Tr for ::S1 {
+        type A = Z; // Private-in-public error unless `struct Z` is pub
+    }
+}
+
+// Scenario 2
+
+trait Tr1 {
+    type A;
+    fn pull(&self) -> Self::A;
+}
+struct S2;
+
+mod m1 {
+    fn f() {
+        pub struct Z {
+            pub field: u8
+        }
+
+        impl ::Tr1 for ::S2 {
+            type A = Z;
+            fn pull(&self) -> Self::A { Z{field: 10} }
+        }
+    }
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 fn main() {
     S.s(); // Privacy error, unless `fn s` is pub

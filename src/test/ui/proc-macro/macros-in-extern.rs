@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // aux-build:test-macros.rs
 // ignore-wasm32
 
@@ -22,3 +23,5 @@ extern {
     identity!(fn rust_dbg_extern_identity_u32(arg: u32) -> u32;);
     //~^ ERROR macro invocations in `extern {}` blocks are experimental
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

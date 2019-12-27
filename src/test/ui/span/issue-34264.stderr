@@ -1,14 +1,18 @@
-error: expected one of `:` or `@`, found `<`
+error: expected one of `:`, `@`, or `|`, found `<`
   --> $DIR/issue-34264.rs:1:14
    |
 LL | fn foo(Option<i32>, String) {}
-   |              ^ expected one of `:` or `@` here
+   |              ^ expected one of `:`, `@`, or `|` here
 
-error: expected one of `:` or `@`, found `)`
+error: expected one of `:`, `@`, or `|`, found `)`
   --> $DIR/issue-34264.rs:1:27
    |
 LL | fn foo(Option<i32>, String) {}
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |                           ^ expected one of `:` or `@` here
+=======
+   |                           ^ expected one of `:`, `@`, or `|` here
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = note: anonymous parameters are removed in the 2018 edition (see RFC 1685)
 help: if this was a parameter name, give it a type
@@ -20,11 +24,15 @@ help: if this is a type, explicitly ignore the parameter name
 LL | fn foo(Option<i32>, _: String) {}
    |                     ^^^^^^^^^
 
-error: expected one of `:` or `@`, found `,`
+error: expected one of `:`, `@`, or `|`, found `,`
   --> $DIR/issue-34264.rs:3:9
    |
 LL | fn bar(x, y: usize) {}
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |         ^ expected one of `:` or `@` here
+=======
+   |         ^ expected one of `:`, `@`, or `|` here
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = note: anonymous parameters are removed in the 2018 edition (see RFC 1685)
 help: if this was a parameter name, give it a type

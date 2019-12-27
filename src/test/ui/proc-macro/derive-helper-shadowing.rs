@@ -19,7 +19,12 @@ struct S {
         struct U;
 
         mod inner {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             #[empty_helper] //~ ERROR cannot find attribute macro `empty_helper` in this scope
+=======
+            // FIXME No ambiguity, attributes in non-macro positions are not resolved properly
+            #[empty_helper]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             struct V;
         }
 

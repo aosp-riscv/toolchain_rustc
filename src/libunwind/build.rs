@@ -4,17 +4,26 @@ fn main() {
     println!("cargo:rerun-if-changed=build.rs");
     let target = env::var("TARGET").expect("TARGET was not set");
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // FIXME: the not(bootstrap) part is needed because of the issue addressed by #62286,
     // and could be removed once that change is in beta.
     if cfg!(all(not(bootstrap), feature = "llvm-libunwind")) &&
         (target.contains("linux") ||
+=======
+    if cfg!(feature = "llvm-libunwind") &&
+        ((target.contains("linux") && !target.contains("musl")) ||
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
          target.contains("fuchsia")) {
         // Build the unwinding from libunwind C/C++ source code.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         #[cfg(all(not(bootstrap), feature = "llvm-libunwind"))]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         llvm_libunwind::compile();
     } else if target.contains("linux") {
         if target.contains("musl") {
-            // musl is handled in lib.rs
+            // linking for musl is handled in lib.rs
+            llvm_libunwind::compile();
         } else if !target.contains("android") {
             println!("cargo:rustc-link-lib=gcc_s");
         }
@@ -25,7 +34,11 @@ fn main() {
     } else if target.contains("netbsd") {
         println!("cargo:rustc-link-lib=gcc_s");
     } else if target.contains("openbsd") {
-        println!("cargo:rustc-link-lib=c++abi");
+        if target.contains("sparc64") {
+            println!("cargo:rustc-link-lib=gcc");
+        } else {
+            println!("cargo:rustc-link-lib=c++abi");
+        }
     } else if target.contains("solaris") {
         println!("cargo:rustc-link-lib=gcc_s");
     } else if target.contains("dragonfly") {
@@ -46,7 +59,10 @@ fn main() {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg(all(not(bootstrap), feature = "llvm-libunwind"))]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 mod llvm_libunwind {
     use std::env;
     use std::path::Path;
@@ -96,6 +112,15 @@ mod llvm_libunwind {
         cfg.include(root.join("include"));
         for src in unwind_sources {
             cfg.file(root.join("src").join(src));
+        }
+
+        if target_env == "musl" {
+            // use the same C compiler command to compile C++ code so we do not need to setup the
+            // C++ compiler env variables on the builders
+            cfg.cpp(false);
+            // linking for musl is handled in lib.rs
+            cfg.cargo_metadata(false);
+            println!("cargo:rustc-link-search=native={}", env::var("OUT_DIR").unwrap());
         }
 
         cfg.compile("unwind");

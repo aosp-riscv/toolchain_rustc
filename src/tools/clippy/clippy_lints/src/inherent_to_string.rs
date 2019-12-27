@@ -4,6 +4,7 @@ use rustc::lint::{LateContext, LateLintPass, LintArray, LintPass};
 use rustc::{declare_lint_pass, declare_tool_lint};
 
 use crate::utils::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     get_trait_def_id, implements_trait, in_macro_or_desugar, match_type, paths, return_ty, span_help_and_lint,
     trait_ref_of_method, walk_ptrs_ty,
 };
@@ -104,6 +105,109 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for InherentToString {
             if impl_item.ident.name.as_str() == "to_string";
             let decl = &signature.decl;
             if decl.implicit_self.has_implicit_self();
+=======
+    get_trait_def_id, implements_trait, match_type, paths, return_ty, span_help_and_lint, trait_ref_of_method,
+    walk_ptrs_ty,
+};
+
+declare_clippy_lint! {
+    /// **What id does:** Checks for the definition of inherent methods with a signature of `to_string(&self) -> String`.
+    ///
+    /// **Why is this bad?** This method is also implicitly defined if a type implements the `Display` trait. As the functionality of `Display` is much more versatile, it should be preferred.
+    ///
+    /// **Known problems:** None
+    ///
+    /// ** Example:**
+    ///
+    /// ```rust
+    /// // Bad
+    /// pub struct A;
+    ///
+    /// impl A {
+    ///     pub fn to_string(&self) -> String {
+    ///         "I am A".to_string()
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```rust
+    /// // Good
+    /// use std::fmt;
+    ///
+    /// pub struct A;
+    ///
+    /// impl fmt::Display for A {
+    ///     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    ///         write!(f, "I am A")
+    ///     }
+    /// }
+    /// ```
+    pub INHERENT_TO_STRING,
+    style,
+    "type implements inherent method `to_string()`, but should instead implement the `Display` trait"
+}
+
+declare_clippy_lint! {
+    /// **What id does:** Checks for the definition of inherent methods with a signature of `to_string(&self) -> String` and if the type implementing this method also implements the `Display` trait.
+    ///
+    /// **Why is this bad?** This method is also implicitly defined if a type implements the `Display` trait. The less versatile inherent method will then shadow the implementation introduced by `Display`.
+    ///
+    /// **Known problems:** None
+    ///
+    /// ** Example:**
+    ///
+    /// ```rust
+    /// // Bad
+    /// use std::fmt;
+    ///
+    /// pub struct A;
+    ///
+    /// impl A {
+    ///     pub fn to_string(&self) -> String {
+    ///         "I am A".to_string()
+    ///     }
+    /// }
+    ///
+    /// impl fmt::Display for A {
+    ///     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    ///         write!(f, "I am A, too")
+    ///     }
+    /// }
+    /// ```
+    ///
+    /// ```rust
+    /// // Good
+    /// use std::fmt;
+    ///
+    /// pub struct A;
+    ///
+    /// impl fmt::Display for A {
+    ///     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    ///         write!(f, "I am A")
+    ///     }
+    /// }
+    /// ```
+    pub INHERENT_TO_STRING_SHADOW_DISPLAY,
+    correctness,
+    "type implements inherent method `to_string()`, which gets shadowed by the implementation of the `Display` trait "
+}
+
+declare_lint_pass!(InherentToString => [INHERENT_TO_STRING, INHERENT_TO_STRING_SHADOW_DISPLAY]);
+
+impl<'a, 'tcx> LateLintPass<'a, 'tcx> for InherentToString {
+    fn check_impl_item(&mut self, cx: &LateContext<'a, 'tcx>, impl_item: &'tcx ImplItem) {
+        if impl_item.span.from_expansion() {
+            return;
+        }
+
+        if_chain! {
+            // Check if item is a method, called to_string and has a parameter 'self'
+            if let ImplItemKind::Method(ref signature, _) = impl_item.node;
+            if impl_item.ident.name.as_str() == "to_string";
+            let decl = &signature.decl;
+            if decl.implicit_self.has_implicit_self();
+            if decl.inputs.len() == 1;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
             // Check if return type is String
             if match_type(cx, return_ty(cx, impl_item.hir_id), &paths::STRING);

@@ -1,10 +1,18 @@
 error[E0038]: the trait `Bar` cannot be made into an object
   --> $DIR/issue-18959.rs:11:1
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL | fn foo(b: &dyn Bar) {
    | ^^^^^^^^^^^^^^^^^^^ the trait `Bar` cannot be made into an object
    |
    = note: method `foo` has generic type parameters
+=======
+LL | pub trait Foo { fn foo<T>(&self, ext_thing: &T); }
+   |                    --- method `foo` has generic type parameters
+...
+LL | fn foo(b: &dyn Bar) {
+   | ^^^^^^^^^^^^^^^^^^^ the trait `Bar` cannot be made into an object
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

@@ -1,33 +1,50 @@
-use crate::ast::{self, Ident, Generics, Expr, BlockCheckMode, UnOp, PatKind};
+use crate::ast::{self, Ident, Expr, BlockCheckMode, UnOp, PatKind};
 use crate::attr;
-use crate::source_map::{dummy_spanned, respan, Spanned};
+use crate::source_map::{respan, Spanned};
 use crate::ext::base::ExtCtxt;
 use crate::ptr::P;
 use crate::symbol::{kw, sym, Symbol};
 use crate::ThinVec;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc_target::spec::abi::Abi;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax_pos::{Pos, Span};
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // Left so that Cargo tests don't break, this can be removed once those no longer use it
 pub trait AstBuilder {}
 
 impl<'a> ExtCtxt<'a> {
     pub fn path(&self, span: Span, strs: Vec<ast::Ident> ) -> ast::Path {
         self.path_all(span, false, strs, vec![], vec![])
+=======
+impl<'a> ExtCtxt<'a> {
+    pub fn path(&self, span: Span, strs: Vec<ast::Ident> ) -> ast::Path {
+        self.path_all(span, false, strs, vec![])
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
     pub fn path_ident(&self, span: Span, id: ast::Ident) -> ast::Path {
         self.path(span, vec![id])
     }
     pub fn path_global(&self, span: Span, strs: Vec<ast::Ident> ) -> ast::Path {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.path_all(span, true, strs, vec![], vec![])
+=======
+        self.path_all(span, true, strs, vec![])
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
     pub fn path_all(&self,
                 span: Span,
                 global: bool,
                 mut idents: Vec<ast::Ident> ,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 args: Vec<ast::GenericArg>,
                 constraints: Vec<ast::AssocTyConstraint> )
+=======
+                args: Vec<ast::GenericArg>)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 -> ast::Path {
         assert!(!idents.is_empty());
         let add_root = global && !idents[0].is_path_segment_keyword();
@@ -39,8 +56,13 @@ impl<'a> ExtCtxt<'a> {
         segments.extend(idents.into_iter().map(|ident| {
             ast::PathSegment::from_ident(ident.with_span_pos(span))
         }));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let args = if !args.is_empty() || !constraints.is_empty() {
             ast::AngleBracketedArgs { args, constraints, span }.into()
+=======
+        let args = if !args.is_empty() {
+            ast::AngleBracketedArgs { args, constraints: Vec::new(), span }.into()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } else {
             None
         };
@@ -52,6 +74,7 @@ impl<'a> ExtCtxt<'a> {
         ast::Path { span, segments }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Constructs a qualified path.
     ///
     /// Constructs a path like `<self_type as trait_path>::ident`.
@@ -88,6 +111,8 @@ impl<'a> ExtCtxt<'a> {
         }, path)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn ty_mt(&self, ty: P<ast::Ty>, mutbl: ast::Mutability) -> ast::MutTy {
         ast::MutTy {
             ty,
@@ -149,10 +174,13 @@ impl<'a> ExtCtxt<'a> {
                 ast::TyKind::Ptr(self.ty_mt(ty, mutbl)))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn ty_infer(&self, span: Span) -> P<ast::Ty> {
         self.ty(span, ast::TyKind::Infer)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn typaram(&self,
                span: Span,
                ident: ast::Ident,
@@ -166,7 +194,8 @@ impl<'a> ExtCtxt<'a> {
             bounds,
             kind: ast::GenericParamKind::Type {
                 default,
-            }
+            },
+            is_placeholder: false
         }
     }
 
@@ -207,6 +236,7 @@ impl<'a> ExtCtxt<'a> {
             attrs: attrs.into(),
             bounds,
             kind: ast::GenericParamKind::Lifetime,
+            is_placeholder: false
         }
     }
 
@@ -218,6 +248,7 @@ impl<'a> ExtCtxt<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn stmt_semi(&self, expr: P<ast::Expr>) -> ast::Stmt {
         ast::Stmt {
             id: ast::DUMMY_NODE_ID,
@@ -226,6 +257,8 @@ impl<'a> ExtCtxt<'a> {
         }
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn stmt_let(&self, sp: Span, mutbl: bool, ident: ast::Ident,
                 ex: P<ast::Expr>) -> ast::Stmt {
         let pat = if mutbl {
@@ -249,6 +282,7 @@ impl<'a> ExtCtxt<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn stmt_let_typed(&self,
                       sp: Span,
                       mutbl: bool,
@@ -277,6 +311,8 @@ impl<'a> ExtCtxt<'a> {
         }
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     // Generates `let _: Type;`, which is usually used for type assertions.
     pub fn stmt_let_type_only(&self, span: Span, ty: P<ast::Ty>) -> ast::Stmt {
         let local = P(ast::Local {
@@ -331,16 +367,23 @@ impl<'a> ExtCtxt<'a> {
         self.expr(path.span, ast::ExprKind::Path(None, path))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Constructs a `QPath` expression.
     pub fn expr_qpath(&self, span: Span, qself: ast::QSelf, path: ast::Path) -> P<ast::Expr> {
         self.expr(span, ast::ExprKind::Path(Some(qself), path))
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn expr_ident(&self, span: Span, id: ast::Ident) -> P<ast::Expr> {
         self.expr_path(self.path_ident(span, id))
     }
     pub fn expr_self(&self, span: Span) -> P<ast::Expr> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.expr_ident(span, Ident::with_empty_ctxt(kw::SelfLower))
+=======
+        self.expr_ident(span, Ident::with_dummy_span(kw::SelfLower))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     pub fn expr_binary(&self, sp: Span, op: ast::BinOpKind,
@@ -349,12 +392,17 @@ impl<'a> ExtCtxt<'a> {
     }
 
     pub fn expr_deref(&self, sp: Span, e: P<ast::Expr>) -> P<ast::Expr> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.expr_unary(sp, UnOp::Deref, e)
     }
     pub fn expr_unary(&self, sp: Span, op: ast::UnOp, e: P<ast::Expr>) -> P<ast::Expr> {
         self.expr(sp, ast::ExprKind::Unary(op, e))
+=======
+        self.expr(sp, ast::ExprKind::Unary(UnOp::Deref, e))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn expr_field_access(
         &self, sp: Span, expr: P<ast::Expr>, ident: ast::Ident,
     ) -> P<ast::Expr> {
@@ -364,12 +412,17 @@ impl<'a> ExtCtxt<'a> {
         let ident = Ident::from_str(&idx.to_string()).with_span_pos(sp);
         self.expr(sp, ast::ExprKind::Field(expr, ident))
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn expr_addr_of(&self, sp: Span, e: P<ast::Expr>) -> P<ast::Expr> {
         self.expr(sp, ast::ExprKind::AddrOf(ast::Mutability::Immutable, e))
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn expr_mut_addr_of(&self, sp: Span, e: P<ast::Expr>) -> P<ast::Expr> {
         self.expr(sp, ast::ExprKind::AddrOf(ast::Mutability::Mutable, e))
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     pub fn expr_call(
         &self, span: Span, expr: P<ast::Expr>, args: Vec<P<ast::Expr>>,
@@ -403,6 +456,8 @@ impl<'a> ExtCtxt<'a> {
             span,
             is_shorthand: false,
             attrs: ThinVec::new(),
+            id: ast::DUMMY_NODE_ID,
+            is_placeholder: false,
         }
     }
     pub fn expr_struct(
@@ -423,6 +478,7 @@ impl<'a> ExtCtxt<'a> {
         self.expr_lit(span, ast::LitKind::Int(i as u128,
                                               ast::LitIntType::Unsigned(ast::UintTy::Usize)))
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn expr_isize(&self, sp: Span, i: isize) -> P<ast::Expr> {
         if i < 0 {
             let i = (-i) as u128;
@@ -434,10 +490,13 @@ impl<'a> ExtCtxt<'a> {
                                                 ast::LitIntType::Signed(ast::IntTy::Isize)))
         }
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn expr_u32(&self, sp: Span, u: u32) -> P<ast::Expr> {
         self.expr_lit(sp, ast::LitKind::Int(u as u128,
                                             ast::LitIntType::Unsigned(ast::UintTy::U32)))
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn expr_u16(&self, sp: Span, u: u16) -> P<ast::Expr> {
         self.expr_lit(sp, ast::LitKind::Int(u as u128,
                                             ast::LitIntType::Unsigned(ast::UintTy::U16)))
@@ -445,6 +504,8 @@ impl<'a> ExtCtxt<'a> {
     pub fn expr_u8(&self, sp: Span, u: u8) -> P<ast::Expr> {
         self.expr_lit(sp, ast::LitKind::Int(u as u128, ast::LitIntType::Unsigned(ast::UintTy::U8)))
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn expr_bool(&self, sp: Span, value: bool) -> P<ast::Expr> {
         self.expr_lit(sp, ast::LitKind::Bool(value))
     }
@@ -452,10 +513,13 @@ impl<'a> ExtCtxt<'a> {
     pub fn expr_vec(&self, sp: Span, exprs: Vec<P<ast::Expr>>) -> P<ast::Expr> {
         self.expr(sp, ast::ExprKind::Array(exprs))
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn expr_vec_ng(&self, sp: Span) -> P<ast::Expr> {
         self.expr_call_global(sp, self.std_path(&[sym::vec, sym::Vec, sym::new]),
                               Vec::new())
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn expr_vec_slice(&self, sp: Span, exprs: Vec<P<ast::Expr>>) -> P<ast::Expr> {
         self.expr_addr_of(sp, self.expr_vec(sp, exprs))
     }
@@ -472,6 +536,7 @@ impl<'a> ExtCtxt<'a> {
         self.expr_call_global(sp, some, vec![expr])
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn expr_none(&self, sp: Span) -> P<ast::Expr> {
         let none = self.std_path(&[sym::option, sym::Option, sym::None]);
         let none = self.path_global(sp, none);
@@ -482,6 +547,8 @@ impl<'a> ExtCtxt<'a> {
         self.expr(sp, ast::ExprKind::Break(None, None))
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn expr_tuple(&self, sp: Span, exprs: Vec<P<ast::Expr>>) -> P<ast::Expr> {
         self.expr(sp, ast::ExprKind::Tup(exprs))
     }
@@ -510,18 +577,21 @@ impl<'a> ExtCtxt<'a> {
         self.expr_call_global(sp, ok, vec![expr])
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn expr_err(&self, sp: Span, expr: P<ast::Expr>) -> P<ast::Expr> {
         let err = self.std_path(&[sym::result, sym::Result, sym::Err]);
         self.expr_call_global(sp, err, vec![expr])
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn expr_try(&self, sp: Span, head: P<ast::Expr>) -> P<ast::Expr> {
         let ok = self.std_path(&[sym::result, sym::Result, sym::Ok]);
         let ok_path = self.path_global(sp, ok);
         let err = self.std_path(&[sym::result, sym::Result, sym::Err]);
         let err_path = self.path_global(sp, err);
 
-        let binding_variable = self.ident_of("__try_var");
+        let binding_variable = self.ident_of("__try_var", sp);
         let binding_pat = self.pat_ident(sp, binding_variable);
         let binding_expr = self.expr_ident(sp, binding_variable);
 
@@ -536,9 +606,15 @@ impl<'a> ExtCtxt<'a> {
         let err_expr = self.expr(sp, ast::ExprKind::Ret(Some(err_inner_expr)));
 
         // `Ok(__try_var) => __try_var`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let ok_arm = self.arm(sp, vec![ok_pat], binding_expr);
         // `Err(__try_var) => return Err(__try_var)`
         let err_arm = self.arm(sp, vec![err_pat], err_expr);
+=======
+        let ok_arm = self.arm(sp, ok_pat, binding_expr);
+        // `Err(__try_var) => return Err(__try_var)`
+        let err_arm = self.arm(sp, err_pat, err_expr);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         // `match head { Ok() => ..., Err() => ... }`
         self.expr_match(sp, head, vec![ok_arm, err_arm])
@@ -574,7 +650,11 @@ impl<'a> ExtCtxt<'a> {
         self.pat(span, PatKind::TupleStruct(path, subpats))
     }
     pub fn pat_struct(&self, span: Span, path: ast::Path,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                   field_pats: Vec<Spanned<ast::FieldPat>>) -> P<ast::Pat> {
+=======
+                      field_pats: Vec<ast::FieldPat>) -> P<ast::Pat> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.pat(span, PatKind::Struct(path, field_pats, false))
     }
     pub fn pat_tuple(&self, span: Span, pats: Vec<P<ast::Pat>>) -> P<ast::Pat> {
@@ -605,18 +685,31 @@ impl<'a> ExtCtxt<'a> {
         self.pat_tuple_struct(span, path, vec![pat])
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn arm(&self, span: Span, pats: Vec<P<ast::Pat>>, expr: P<ast::Expr>) -> ast::Arm {
+=======
+    pub fn arm(&self, span: Span, pat: P<ast::Pat>, expr: P<ast::Expr>) -> ast::Arm {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         ast::Arm {
             attrs: vec![],
-            pats,
+            pat,
             guard: None,
             body: expr,
             span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            id: ast::DUMMY_NODE_ID,
+            is_placeholder: false,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
     pub fn arm_unreachable(&self, span: Span) -> ast::Arm {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.arm(span, vec![self.pat_wild(span)], self.expr_unreachable(span))
+=======
+        self.arm(span, self.pat_wild(span), self.expr_unreachable(span))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     pub fn expr_match(&self, span: Span, arg: P<ast::Expr>, arms: Vec<ast::Arm>) -> P<Expr> {
@@ -629,10 +722,13 @@ impl<'a> ExtCtxt<'a> {
         self.expr(span, ast::ExprKind::If(cond, self.block_expr(then), els))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn expr_loop(&self, span: Span, block: P<ast::Block>) -> P<ast::Expr> {
         self.expr(span, ast::ExprKind::Loop(block, None))
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn lambda_fn_decl(&self,
                       span: Span,
                       fn_decl: P<ast::FnDecl>,
@@ -653,7 +749,7 @@ impl<'a> ExtCtxt<'a> {
               body: P<ast::Expr>)
               -> P<ast::Expr> {
         let fn_decl = self.fn_decl(
-            ids.iter().map(|id| self.arg(span, *id, self.ty_infer(span))).collect(),
+            ids.iter().map(|id| self.param(span, *id, self.ty(span, ast::TyKind::Infer))).collect(),
             ast::FunctionRetTy::Default(span));
 
         // FIXME -- We are using `span` as the span of the `|...|`
@@ -676,6 +772,7 @@ impl<'a> ExtCtxt<'a> {
         self.lambda(span, vec![ident], body)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn lambda_stmts(&self,
                     span: Span,
                     ids: Vec<ast::Ident>,
@@ -686,24 +783,42 @@ impl<'a> ExtCtxt<'a> {
     pub fn lambda_stmts_0(&self, span: Span, stmts: Vec<ast::Stmt>) -> P<ast::Expr> {
         self.lambda0(span, self.expr_block(self.block(span, stmts)))
     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn lambda_stmts_1(&self, span: Span, stmts: Vec<ast::Stmt>,
                       ident: ast::Ident) -> P<ast::Expr> {
         self.lambda1(span, self.expr_block(self.block(span, stmts)), ident)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn arg(&self, span: Span, ident: ast::Ident, ty: P<ast::Ty>) -> ast::Arg {
+=======
+    pub fn param(&self, span: Span, ident: ast::Ident, ty: P<ast::Ty>) -> ast::Param {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let arg_pat = self.pat_ident(span, ident);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         ast::Arg {
+=======
+        ast::Param {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             attrs: ThinVec::default(),
             id: ast::DUMMY_NODE_ID,
             pat: arg_pat,
             span,
             ty,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            is_placeholder: false,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
     // FIXME: unused `self`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn fn_decl(&self, inputs: Vec<ast::Arg>, output: ast::FunctionRetTy) -> P<ast::FnDecl> {
+=======
+    pub fn fn_decl(&self, inputs: Vec<ast::Param>, output: ast::FunctionRetTy) -> P<ast::FnDecl> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         P(ast::FnDecl {
             inputs,
             output,
@@ -726,6 +841,7 @@ impl<'a> ExtCtxt<'a> {
         })
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn item_fn_poly(&self,
                     span: Span,
                     name: Ident,
@@ -763,6 +879,8 @@ impl<'a> ExtCtxt<'a> {
             body)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn variant(&self, span: Span, ident: Ident, tys: Vec<P<ast::Ty>> ) -> ast::Variant {
         let fields: Vec<_> = tys.into_iter().map(|ty| {
             ast::StructField {
@@ -772,6 +890,7 @@ impl<'a> ExtCtxt<'a> {
                 vis: respan(span.shrink_to_lo(), ast::VisibilityKind::Inherited),
                 attrs: Vec::new(),
                 id: ast::DUMMY_NODE_ID,
+                is_placeholder: false,
             }
         }).collect();
 
@@ -781,6 +900,7 @@ impl<'a> ExtCtxt<'a> {
             ast::VariantData::Tuple(fields, ast::DUMMY_NODE_ID)
         };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         respan(span,
                ast::Variant_ {
                    ident,
@@ -806,13 +926,20 @@ impl<'a> ExtCtxt<'a> {
     pub fn item_struct(&self, span: Span, name: Ident,
                    struct_def: ast::VariantData) -> P<ast::Item> {
         self.item_struct_poly(
+=======
+        ast::Variant {
+            attrs: Vec::new(),
+            data: vdata,
+            disr_expr: None,
+            id: ast::DUMMY_NODE_ID,
+            ident,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             span,
-            name,
-            struct_def,
-            Generics::default()
-        )
+            is_placeholder: false,
+        }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn item_struct_poly(&self, span: Span, name: Ident,
         struct_def: ast::VariantData, generics: Generics) -> P<ast::Item> {
         self.item(span, name, Vec::new(), ast::ItemKind::Struct(struct_def, generics))
@@ -837,6 +964,8 @@ impl<'a> ExtCtxt<'a> {
         self.item(span, name, Vec::new(), ast::ItemKind::ExternCrate(None))
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn item_static(&self,
                    span: Span,
                    name: Ident,
@@ -856,11 +985,17 @@ impl<'a> ExtCtxt<'a> {
         self.item(span, name, Vec::new(), ast::ItemKind::Const(ty, expr))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn item_ty_poly(&self, span: Span, name: Ident, ty: P<ast::Ty>,
                     generics: Generics) -> P<ast::Item> {
         self.item(span, name, Vec::new(), ast::ItemKind::TyAlias(ty, generics))
+=======
+    pub fn attribute(&self, mi: ast::MetaItem) -> ast::Attribute {
+        attr::mk_attr_outer(mi)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn item_ty(&self, span: Span, name: Ident, ty: P<ast::Ty>) -> P<ast::Item> {
         self.item_ty_poly(span, name, ty, Generics::default())
     }
@@ -937,5 +1072,9 @@ impl<'a> ExtCtxt<'a> {
             prefix: self.path(sp, path),
             kind: ast::UseTreeKind::Glob,
         }))
+=======
+    pub fn meta_word(&self, sp: Span, w: ast::Name) -> ast::MetaItem {
+        attr::mk_word_item(Ident::new(w, sp))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }

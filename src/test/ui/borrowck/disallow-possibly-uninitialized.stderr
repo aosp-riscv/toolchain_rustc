@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `t`
   --> $DIR/disallow-possibly-uninitialized.rs:6:5
    |
@@ -21,6 +22,31 @@ error[E0381]: assign to part of possibly uninitialized variable: `t`
    |
 LL |     t.0 = 1;
    |     ^^^^^^^ use of possibly uninitialized `t`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `t`
+  --> $DIR/disallow-possibly-uninitialized.rs:6:5
+   |
+LL |     t.0 = 1;
+   |     ^^^^^^^ use of possibly-uninitialized `t`
+
+error[E0381]: assign to part of possibly-uninitialized variable: `t`
+  --> $DIR/disallow-possibly-uninitialized.rs:11:5
+   |
+LL |     t.1 = 1;
+   |     ^^^^^^^ use of possibly-uninitialized `t`
+
+error[E0381]: assign to part of possibly-uninitialized variable: `t`
+  --> $DIR/disallow-possibly-uninitialized.rs:16:5
+   |
+LL |     t.0 = 1;
+   |     ^^^^^^^ use of possibly-uninitialized `t`
+
+error[E0381]: assign to part of possibly-uninitialized variable: `t`
+  --> $DIR/disallow-possibly-uninitialized.rs:20:5
+   |
+LL |     t.0 = 1;
+   |     ^^^^^^^ use of possibly-uninitialized `t`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 4 previous errors
 

@@ -11,8 +11,13 @@ use crate::transform::{MirPass, MirSource};
 
 pub struct InstCombine;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for InstCombine {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, _: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for InstCombine {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, _: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // We only run when optimizing MIR (at any level).
         if tcx.sess.opts.debugging_opts.mir_opt_level == 0 {
             return
@@ -43,12 +48,30 @@ impl<'tcx> MutVisitor<'tcx> for InstCombineVisitor<'tcx> {
             let new_place = match *rvalue {
                 Rvalue::Ref(_, _, Place {
                     ref mut base,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     projection: Some(ref mut projection),
                 }) => Place {
                     // Replace with dummy
                     base: mem::replace(base, PlaceBase::Local(Local::new(0))),
                     projection: projection.base.take(),
                 },
+=======
+                    projection: ref mut projection @ box [.., _],
+                }) => {
+                    if let box [proj_l @ .., proj_r] = projection {
+                        let place = Place {
+                            // Replace with dummy
+                            base: mem::replace(base, PlaceBase::Local(Local::new(0))),
+                            projection: proj_l.to_vec().into_boxed_slice(),
+                        };
+                        *projection = vec![proj_r.clone()].into_boxed_slice();
+
+                        place
+                    } else {
+                        unreachable!();
+                    }
+                }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 _ => bug!("Detected `&*` but didn't find `&*`!"),
             };
             *rvalue = Rvalue::Use(Operand::Copy(new_place))
@@ -83,6 +106,7 @@ impl OptimizationFinder<'b, 'tcx> {
 impl Visitor<'tcx> for OptimizationFinder<'b, 'tcx> {
     fn visit_rvalue(&mut self, rvalue: &Rvalue<'tcx>, location: Location) {
         if let Rvalue::Ref(_, _, Place {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ref base,
             projection: Some(ref projection),
         }) = *rvalue {
@@ -90,6 +114,13 @@ impl Visitor<'tcx> for OptimizationFinder<'b, 'tcx> {
                 if Place::ty_from(&base, &projection.base, self.body, self.tcx).ty.is_region_ptr() {
                     self.optimizations.and_stars.insert(location);
                 }
+=======
+            base,
+            projection: box [proj_base @ .., ProjectionElem::Deref],
+        }) = rvalue {
+            if Place::ty_from(base, proj_base, self.body, self.tcx).ty.is_region_ptr() {
+                self.optimizations.and_stars.insert(location);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
 
@@ -97,8 +128,12 @@ impl Visitor<'tcx> for OptimizationFinder<'b, 'tcx> {
             let place_ty = place.ty(&self.body.local_decls, self.tcx).ty;
             if let ty::Array(_, len) = place_ty.sty {
                 let span = self.body.source_info(location).span;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let ty = self.tcx.types.usize;
                 let constant = Constant { span, ty, literal: len, user_ty: None };
+=======
+                let constant = Constant { span, literal: len, user_ty: None };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.optimizations.arrays_lengths.insert(location, constant);
             }
         }

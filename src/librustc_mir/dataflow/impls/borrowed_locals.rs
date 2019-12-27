@@ -86,8 +86,23 @@ impl<'a, 'tcx> BitDenotation<'tcx> for HaveBeenBorrowedLocals<'a, 'tcx> {
 impl<'a, 'tcx> BottomValue for HaveBeenBorrowedLocals<'a, 'tcx> {
     // bottom = unborrowed
     const BOTTOM_VALUE: bool = false;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 }
 
+struct BorrowedLocalsVisitor<'gk> {
+    trans: &'gk mut GenKillSet<Local>,
+}
+
+fn find_local(place: &Place<'_>) -> Option<Local> {
+    match place.base {
+        PlaceBase::Local(local) if !place.is_indirect() => Some(local),
+        _ => None,
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+}
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 struct BorrowedLocalsVisitor<'gk> {
     trans: &'gk mut GenKillSet<Local>,
 }
@@ -108,6 +123,8 @@ fn find_local(place: &Place<'_>) -> Option<Local> {
     })
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 impl<'tcx> Visitor<'tcx> for BorrowedLocalsVisitor<'_> {
     fn visit_rvalue(&mut self,
                     rvalue: &Rvalue<'tcx>,

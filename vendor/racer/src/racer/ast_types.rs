@@ -271,6 +271,10 @@ pub enum Pat {
     Slice,
     Mac,
     Rest,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    Or,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 impl Pat {
@@ -304,7 +308,7 @@ impl Pat {
                 let path = Path::from_ast(path, scope);
                 let fields = fields
                     .iter()
-                    .map(|fld| FieldPat::from_ast(&fld.node, scope))
+                    .map(|fld| FieldPat::from_ast(&fld, scope))
                     .collect();
                 Pat::Struct(path, fields)
             }
@@ -333,6 +337,10 @@ impl Pat {
             PatKind::Paren(pat) => Pat::from_ast(&pat.node, scope),
             PatKind::Mac(_) => Pat::Mac,
             PatKind::Rest => Pat::Rest,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            PatKind::Or(_) => Pat::Or,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 }

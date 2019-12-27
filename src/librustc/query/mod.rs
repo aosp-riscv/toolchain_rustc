@@ -17,7 +17,6 @@ use crate::traits::query::{
 use std::borrow::Cow;
 use syntax_pos::symbol::InternedString;
 
-
 // Each of these queries corresponds to a function pointer field in the
 // `Providers` struct for requesting a value of that type, and a method
 // on `tcx: TyCtxt` (and `tcx.at(span)`) for doing that request in a way
@@ -110,7 +109,15 @@ rustc_queries! {
             no_hash
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         query mir_validated(_: DefId) -> &'tcx Steal<mir::Body<'tcx>> {
+=======
+        query mir_validated(_: DefId) ->
+            (
+                &'tcx Steal<mir::Body<'tcx>>,
+                &'tcx Steal<IndexVec<mir::Promoted, mir::Body<'tcx>>>
+            ) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             no_hash
         }
 
@@ -122,6 +129,21 @@ rustc_queries! {
                 let mir: Option<crate::mir::Body<'tcx>> = tcx.queries.on_disk_cache
                                                             .try_load_query_result(tcx, id);
                 mir.map(|x| &*tcx.arena.alloc(x))
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            }
+        }
+
+        query promoted_mir(key: DefId) -> &'tcx IndexVec<mir::Promoted, mir::Body<'tcx>> {
+            cache_on_disk_if { key.is_local() }
+            load_cached(tcx, id) {
+                let promoted: Option<
+                    rustc_data_structures::indexed_vec::IndexVec<
+                        crate::mir::Promoted,
+                        crate::mir::Body<'tcx>
+                    >> = tcx.queries.on_disk_cache.try_load_query_result(tcx, id);
+                promoted.map(|p| &*tcx.arena.alloc(p))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
 
@@ -231,6 +253,13 @@ rustc_queries! {
             desc { |tcx| "checking if item is const fn: `{}`", tcx.def_path_str(key) }
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        query asyncness(key: DefId) -> hir::IsAsync {
+            desc { |tcx| "checking if the function is async: `{}`", tcx.def_path_str(key) }
+        }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         /// Returns `true` if calls to the function may be promoted.
         ///
         /// This is either because the function is e.g., a tuple-struct or tuple-variant
@@ -449,6 +478,7 @@ rustc_queries! {
             no_force
             desc { "extract field of const" }
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
         /// Produces an absolute path representation of the given type. See also the documentation
         /// on `std::any::type_name`.
@@ -458,6 +488,8 @@ rustc_queries! {
             desc { "get absolute path of type" }
         }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     TypeChecking {
@@ -790,7 +822,11 @@ rustc_queries! {
     }
 
     BorrowChecking {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // Lifetime resolution. See `middle::resolve_lifetimes`.
+=======
+        /// Lifetime resolution. See `middle::resolve_lifetimes`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         query resolve_lifetimes(_: CrateNum) -> &'tcx ResolveLifetimes {
             desc { "resolving lifetimes" }
         }
@@ -832,13 +868,39 @@ rustc_queries! {
             -> &'tcx [(Symbol, Option<Symbol>)] {
             desc { "calculating the lib features defined in a crate" }
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        /// Returns the lang items defined in another crate by loading it from metadata.
+        // FIXME: It is illegal to pass a `CrateNum` other than `LOCAL_CRATE` here, just get rid
+        // of that argument?
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         query get_lang_items(_: CrateNum) -> &'tcx LanguageItems {
             eval_always
             desc { "calculating the lang items map" }
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+        /// Returns all diagnostic items defined in all crates.
+        query all_diagnostic_items(_: CrateNum) -> &'tcx FxHashMap<Symbol, DefId> {
+            eval_always
+            desc { "calculating the diagnostic items map" }
+        }
+
+        /// Returns the lang items defined in another crate by loading it from metadata.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         query defined_lang_items(_: CrateNum) -> &'tcx [(DefId, usize)] {
             desc { "calculating the lang items defined in a crate" }
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+        /// Returns the diagnostic items defined in a crate.
+        query diagnostic_items(_: CrateNum) -> &'tcx FxHashMap<Symbol, DefId> {
+            desc { "calculating the diagnostic items map in a crate" }
+        }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         query missing_lang_items(_: CrateNum) -> &'tcx [LangItem] {
             desc { "calculating the missing lang items in a crate" }
         }

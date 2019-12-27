@@ -15,7 +15,11 @@ impl StdoutEmitter {
 
 impl Emitter for StdoutEmitter {
     fn emit_formatted_file(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         &self,
+=======
+        &mut self,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         output: &mut dyn Write,
         FormattedFile {
             filename,

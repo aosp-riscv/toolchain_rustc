@@ -245,7 +245,11 @@ impl<'a, 'tcx> FnCtxt<'a, 'tcx> {
         Ok(result.callee)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn lookup_probe(
+=======
+    pub fn lookup_probe(
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         &self,
         span: Span,
         method_name: ast::Ident,

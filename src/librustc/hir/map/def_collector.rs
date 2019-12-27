@@ -31,7 +31,11 @@ impl<'a> DefCollector<'a> {
         self.definitions.create_def_with_parent(parent_def, node_id, data, self.expansion, span)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn with_parent<F: FnOnce(&mut Self)>(&mut self, parent_def: DefIndex, f: F) {
+=======
+    fn with_parent<F: FnOnce(&mut Self)>(&mut self, parent_def: DefIndex, f: F) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let orig_parent_def = std::mem::replace(&mut self.parent_def, parent_def);
         f(self);
         self.parent_def = orig_parent_def;
@@ -74,7 +78,28 @@ impl<'a> DefCollector<'a> {
         })
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn visit_macro_invoc(&mut self, id: NodeId) {
+        self.definitions.set_invocation_parent(id.placeholder_to_expn_id(), self.parent_def);
+=======
+    fn collect_field(&mut self, field: &'a StructField, index: Option<usize>) {
+        if field.is_placeholder {
+            self.visit_macro_invoc(field.id);
+        } else {
+            let name = field.ident.map(|ident| ident.name)
+                .or_else(|| index.map(sym::integer))
+                .unwrap_or_else(|| {
+                    let node_id = NodeId::placeholder_from_expn_id(self.expansion);
+                    sym::integer(self.definitions.placeholder_field_indices[&node_id])
+                })
+                .as_interned_str();
+            let def = self.create_def(field.id, DefPathData::ValueNs(name), field.span);
+            self.with_parent(def, |this| visit::walk_struct_field(this, field));
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+    }
+
+    pub fn visit_macro_invoc(&mut self, id: NodeId) {
         self.definitions.set_invocation_parent(id.placeholder_to_expn_id(), self.parent_def);
     }
 }
@@ -154,31 +179,57 @@ impl<'a> visit::Visitor<'a> for DefCollector<'a> {
         });
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn visit_variant(&mut self, v: &'a Variant, g: &'a Generics, item_id: NodeId) {
         let def = self.create_def(v.node.id,
                                   DefPathData::TypeNs(v.node.ident.as_interned_str()),
+=======
+    fn visit_variant(&mut self, v: &'a Variant) {
+        if v.is_placeholder {
+            return self.visit_macro_invoc(v.id);
+        }
+        let def = self.create_def(v.id,
+                                  DefPathData::TypeNs(v.ident.as_interned_str()),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                   v.span);
         self.with_parent(def, |this| {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if let Some(ctor_hir_id) = v.node.data.ctor_id() {
+=======
+            if let Some(ctor_hir_id) = v.data.ctor_id() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 this.create_def(ctor_hir_id, DefPathData::Ctor, v.span);
             }
-            visit::walk_variant(this, v, g, item_id)
+            visit::walk_variant(this, v)
         });
     }
 
-    fn visit_variant_data(&mut self, data: &'a VariantData, _: Ident,
-                          _: &'a Generics, _: NodeId, _: Span) {
+    fn visit_variant_data(&mut self, data: &'a VariantData) {
+        // The assumption here is that non-`cfg` macro expansion cannot change field indices.
+        // It currently holds because only inert attributes are accepted on fields,
+        // and every such attribute expands into a single field after it's resolved.
         for (index, field) in data.fields().iter().enumerate() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let name = field.ident.map(|ident| ident.name)
                 .unwrap_or_else(|| sym::integer(index));
             let def = self.create_def(field.id,
                                       DefPathData::ValueNs(name.as_interned_str()),
                                       field.span);
             self.with_parent(def, |this| this.visit_struct_field(field));
+=======
+            self.collect_field(field, Some(index));
+            if field.is_placeholder && field.ident.is_none() {
+                self.definitions.placeholder_field_indices.insert(field.id, index);
+            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
     fn visit_generic_param(&mut self, param: &'a GenericParam) {
+        if param.is_placeholder {
+            self.visit_macro_invoc(param.id);
+            return;
+        }
         let name = param.ident.as_interned_str();
         let def_path_data = match param.kind {
             GenericParamKind::Lifetime { .. } => DefPathData::LifetimeNs(name),
@@ -294,5 +345,43 @@ impl<'a> visit::Visitor<'a> for DefCollector<'a> {
                 }
             }
         }
+    }
+
+    fn visit_arm(&mut self, arm: &'a Arm) {
+        if arm.is_placeholder {
+            self.visit_macro_invoc(arm.id)
+        } else {
+            visit::walk_arm(self, arm)
+        }
+    }
+
+    fn visit_field(&mut self, f: &'a Field) {
+        if f.is_placeholder {
+            self.visit_macro_invoc(f.id)
+        } else {
+            visit::walk_field(self, f)
+        }
+    }
+
+    fn visit_field_pattern(&mut self, fp: &'a FieldPat) {
+        if fp.is_placeholder {
+            self.visit_macro_invoc(fp.id)
+        } else {
+            visit::walk_field_pattern(self, fp)
+        }
+    }
+
+    fn visit_param(&mut self, p: &'a Param) {
+        if p.is_placeholder {
+            self.visit_macro_invoc(p.id)
+        } else {
+            visit::walk_param(self, p)
+        }
+    }
+
+    // This method is called only when we are visiting an individual field
+    // after expanding an attribute on it.
+    fn visit_struct_field(&mut self, field: &'a StructField) {
+        self.collect_field(field, None);
     }
 }

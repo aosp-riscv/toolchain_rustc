@@ -48,7 +48,17 @@ impl rustc_driver::Callbacks for MiriCompilerCalls {
                     fn visit_item(&mut self, i: &'hir hir::Item) {
                         if let hir::ItemKind::Fn(.., body_id) = i.node {
                             if i.attrs.iter().any(|attr| attr.check_name(syntax::symbol::sym::test)) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 let config = MiriConfig { validate: true, args: vec![], seed: None };
+=======
+                                let config = MiriConfig {
+                                    validate: true,
+                                    communicate: false,
+                                    excluded_env_vars: vec![],
+                                    args: vec![],
+                                    seed: None,
+                                };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                 let did = self.0.hir().body_owner_def_id(body_id);
                                 println!("running test: {}", self.0.def_path_debug_str(did));
                                 miri::eval_main(self.0, did, config);
@@ -61,7 +71,17 @@ impl rustc_driver::Callbacks for MiriCompilerCalls {
                 }
                 tcx.hir().krate().visit_all_item_likes(&mut Visitor(tcx));
             } else if let Some((entry_def_id, _)) = tcx.entry_fn(LOCAL_CRATE) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let config = MiriConfig { validate: true, args: vec![], seed: None };
+=======
+                let config = MiriConfig {
+                    validate: true,
+                    communicate: false,
+                    excluded_env_vars: vec![],
+                    args: vec![],
+                    seed: None
+                };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 miri::eval_main(tcx, entry_def_id, config);
 
                 compiler.session().abort_if_errors();

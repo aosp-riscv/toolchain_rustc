@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::hir::def_id::{DefId, CRATE_DEF_INDEX, LOCAL_CRATE};
 use crate::util::nodemap::DefIdMap;
 use syntax::ast;
@@ -9,8 +10,26 @@ use crate::hir;
 use crate::ty;
 use std::fmt::Debug;
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use self::Namespace::*;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use crate::hir::def_id::{DefId, CRATE_DEF_INDEX, LOCAL_CRATE};
+use crate::hir;
+use crate::ty;
+use crate::util::nodemap::DefIdMap;
+
+use syntax::ast;
+use syntax::ext::base::MacroKind;
+use syntax::ast::NodeId;
+use syntax_pos::Span;
+use rustc_macros::HashStable;
+
+use std::fmt::Debug;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// Encodes if a `DefKind::Ctor` is the constructor of an enum variant or a struct.
 #[derive(Clone, Copy, PartialEq, Eq, RustcEncodable, RustcDecodable, Hash, Debug, HashStable)]
 pub enum CtorOf {
@@ -115,6 +134,7 @@ impl DefKind {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// An English article for the def.
     pub fn article(&self) -> &'static str {
         match *self {
@@ -134,18 +154,52 @@ pub enum Res<Id = hir::HirId> {
     Def(DefKind, DefId),
 
     // Type namespace
+=======
+    /// Gets an English article for the definition.
+    pub fn article(&self) -> &'static str {
+        match *self {
+            DefKind::AssocTy
+            | DefKind::AssocConst
+            | DefKind::AssocOpaqueTy
+            | DefKind::Enum
+            | DefKind::OpaqueTy => "an",
+            DefKind::Macro(macro_kind) => macro_kind.article(),
+            _ => "a",
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, RustcEncodable, RustcDecodable, Hash, Debug, HashStable)]
+pub enum Res<Id = hir::HirId> {
+    Def(DefKind, DefId),
+
+    // Type namespace
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     PrimTy(hir::PrimTy),
     SelfTy(Option<DefId> /* trait */, Option<DefId> /* impl */),
     ToolMod, // e.g., `rustfmt` in `#[rustfmt::skip]`
 
     // Value namespace
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     SelfCtor(DefId /* impl */),  // `DefId` refers to the impl
     Local(Id),
 
     // Macro namespace
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     NonMacroAttr(NonMacroAttrKind), // e.g., `#[inline]` or `#[rustfmt::skip]`
 
     // All namespaces
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Err,
 }
 
@@ -330,7 +384,11 @@ impl NonMacroAttrKind {
 }
 
 impl<Id> Res<Id> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Return the `DefId` of this `Def` if it has an id, else panic.
+=======
+    /// Return the `DefId` of this `Def` if it has an ID, else panic.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn def_id(&self) -> DefId
     where
         Id: Debug,
@@ -340,7 +398,11 @@ impl<Id> Res<Id> {
         })
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Return `Some(..)` with the `DefId` of this `Res` if it has a id, else `None`.
+=======
+    /// Return `Some(..)` with the `DefId` of this `Res` if it has a ID, else `None`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn opt_def_id(&self) -> Option<DefId> {
         match *self {
             Res::Def(_, id) => Some(id),
@@ -379,7 +441,11 @@ impl<Id> Res<Id> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// An English article for the res.
+=======
+    /// Gets an English article for the `Res`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn article(&self) -> &'static str {
         match *self {
             Res::Def(kind, _) => kind.article(),

@@ -5,17 +5,13 @@ use rustc_data_structures::{fx::FxHashMap, sync::Lock};
 use std::cell::{RefCell, Cell};
 use std::fmt::Debug;
 use std::hash::Hash;
-use std::panic;
-use std::env;
 use std::time::{Duration, Instant};
 
 use std::sync::mpsc::{Sender};
 use syntax_pos::{SpanData};
 use syntax::symbol::{Symbol, sym};
 use rustc_macros::HashStable;
-use crate::ty::TyCtxt;
 use crate::dep_graph::{DepNode};
-use lazy_static;
 use crate::session::Session;
 
 #[cfg(test)]
@@ -31,6 +27,7 @@ pub struct ErrorReported;
 
 thread_local!(static TIME_DEPTH: Cell<usize> = Cell::new(0));
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 lazy_static! {
     static ref DEFAULT_HOOK: Box<dyn Fn(&panic::PanicInfo<'_>) + Sync + Send + 'static> = {
         let hook = panic::take_hook();
@@ -64,6 +61,8 @@ pub fn install_panic_hook() {
     lazy_static::initialize(&DEFAULT_HOOK);
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// Parameters to the `Dump` variant of type `ProfileQueriesMsg`.
 #[derive(Clone,Debug)]
 pub struct ProfQDumpParams {

@@ -219,7 +219,11 @@ impl Diagnostic {
         }
         let buf = BufWriter::default();
         let output = buf.clone();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         je.json_rendered.new_emitter(Box::new(buf), Some(je.sm.clone()), false)
+=======
+        je.json_rendered.new_emitter(Box::new(buf), Some(je.sm.clone()), false, None)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             .ui_testing(je.ui_testing).emit_diagnostic(db);
         let output = Arc::try_unwrap(output.0).unwrap().into_inner().unwrap();
         let output = String::from_utf8(output).unwrap();

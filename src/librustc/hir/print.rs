@@ -33,7 +33,7 @@ pub enum Nested {
     TraitItem(hir::TraitItemId),
     ImplItem(hir::ImplItemId),
     Body(hir::BodyId),
-    BodyArgPat(hir::BodyId, usize)
+    BodyParamPat(hir::BodyId, usize)
 }
 
 pub trait PpAnn {
@@ -62,7 +62,7 @@ impl PpAnn for hir::Crate {
             Nested::TraitItem(id) => state.print_trait_item(self.trait_item(id)),
             Nested::ImplItem(id) => state.print_impl_item(self.impl_item(id)),
             Nested::Body(id) => state.print_expr(&self.body(id).value),
-            Nested::BodyArgPat(id, i) => state.print_pat(&self.body(id).arguments[i].pat)
+            Nested::BodyParamPat(id, i) => state.print_pat(&self.body(id).params[i].pat)
         }
     }
 }
@@ -318,7 +318,11 @@ impl<'a> State<'a> {
             }
             hir::TyKind::BareFn(ref f) => {
                 self.print_ty_fn(f.abi, f.unsafety, &f.decl, None, &f.generic_params,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                  &f.arg_names[..]);
+=======
+                                 &f.param_names[..]);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             hir::TyKind::Def(..) => {},
             hir::TyKind::Path(ref qpath) => {
@@ -737,7 +741,11 @@ impl<'a> State<'a> {
         for v in variants {
             self.space_if_not_bol();
             self.maybe_print_comment(v.span.lo());
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             self.print_outer_attributes(&v.node.attrs);
+=======
+            self.print_outer_attributes(&v.attrs);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             self.ibox(INDENT_UNIT);
             self.print_variant(v);
             self.s.word(",");
@@ -829,8 +837,13 @@ impl<'a> State<'a> {
     pub fn print_variant(&mut self, v: &hir::Variant) {
         self.head("");
         let generics = hir::Generics::empty();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.print_struct(&v.node.data, &generics, v.node.ident.name, v.span, false);
         if let Some(ref d) = v.node.disr_expr {
+=======
+        self.print_struct(&v.data, &generics, v.ident.name, v.span, false);
+        if let Some(ref d) = v.disr_expr {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             self.s.space();
             self.word_space("=");
             self.print_anon_const(d);
@@ -1290,14 +1303,22 @@ impl<'a> State<'a> {
             hir::ExprKind::Closure(capture_clause, ref decl, body, _fn_decl_span, _gen) => {
                 self.print_capture_clause(capture_clause);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.print_closure_args(&decl, body);
+=======
+                self.print_closure_params(&decl, body);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.s.space();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 // this is a bare expression
+=======
+                // This is a bare expression.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.ann.nested(self, Nested::Body(body));
                 self.end(); // need to close a box
 
-                // a box will be closed by print_expr, but we didn't want an overall
+                // A box will be closed by `print_expr`, but we didn't want an overall
                 // wrapper so we closed the corresponding opening. so create an
                 // empty box to satisfy the close.
                 self.ibox(0);
@@ -1307,9 +1328,15 @@ impl<'a> State<'a> {
                     self.print_ident(label.ident);
                     self.word_space(":");
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 // containing cbox, will be closed by print-block at }
                 self.cbox(INDENT_UNIT);
                 // head-box, will be closed by print-block after {
+=======
+                // containing cbox, will be closed by print-block at `}`
+                self.cbox(INDENT_UNIT);
+                // head-box, will be closed by print-block after `{`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 self.ibox(0);
                 self.print_block(&blk);
             }
@@ -1457,7 +1484,11 @@ impl<'a> State<'a> {
     }
 
     pub fn print_name(&mut self, name: ast::Name) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.print_ident(ast::Ident::with_empty_ctxt(name))
+=======
+        self.print_ident(ast::Ident::with_dummy_span(name))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     pub fn print_for_decl(&mut self, loc: &hir::Local, coll: &hir::Expr) {
@@ -1670,14 +1701,27 @@ impl<'a> State<'a> {
                                    &fields[..],
                                    |s, f| {
                                        s.cbox(INDENT_UNIT);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                        if !f.node.is_shorthand {
                                            s.print_ident(f.node.ident);
+=======
+                                       if !f.is_shorthand {
+                                           s.print_ident(f.ident);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                            s.word_nbsp(":");
                                        }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                        s.print_pat(&f.node.pat);
+=======
+                                       s.print_pat(&f.pat);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                        s.end()
                                    },
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                    |f| f.node.pat.span);
+=======
+                                   |f| f.pat.span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 if etc {
                     if !fields.is_empty() {
                         self.word_space(",");
@@ -1686,6 +1730,12 @@ impl<'a> State<'a> {
                 }
                 self.s.space();
                 self.s.word("}");
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            }
+            PatKind::Or(ref pats) => {
+                self.strsep("|", true, Inconsistent, &pats[..], |s, p| s.print_pat(&p));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             PatKind::Tuple(ref elts, ddpos) => {
                 self.popen();
@@ -1756,7 +1806,7 @@ impl<'a> State<'a> {
                         self.word_space(",");
                     }
                     if let PatKind::Wild = p.node {
-                        // Print nothing
+                        // Print nothing.
                     } else {
                         self.print_pat(&p);
                     }
@@ -1772,7 +1822,11 @@ impl<'a> State<'a> {
         self.ann.post(self, AnnNode::Pat(pat))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn print_arg(&mut self, arg: &hir::Arg) {
+=======
+    pub fn print_param(&mut self, arg: &hir::Param) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.print_outer_attributes(&arg.attrs);
         self.print_pat(&arg.pat);
     }
@@ -1861,7 +1915,11 @@ impl<'a> State<'a> {
                 s.s.word(":");
                 s.s.space();
             } else if let Some(body_id) = body_id {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 s.ann.nested(s, Nested::BodyArgPat(body_id, i));
+=======
+                s.ann.nested(s, Nested::BodyParamPat(body_id, i));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 s.s.word(":");
                 s.s.space();
             }
@@ -1878,17 +1936,25 @@ impl<'a> State<'a> {
         self.print_where_clause(&generics.where_clause)
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn print_closure_args(&mut self, decl: &hir::FnDecl, body_id: hir::BodyId) {
+=======
+    fn print_closure_params(&mut self, decl: &hir::FnDecl, body_id: hir::BodyId) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.s.word("|");
         let mut i = 0;
         self.commasep(Inconsistent, &decl.inputs, |s, ty| {
             s.ibox(INDENT_UNIT);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             s.ann.nested(s, Nested::BodyArgPat(body_id, i));
+=======
+            s.ann.nested(s, Nested::BodyParamPat(body_id, i));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             i += 1;
 
             if let hir::TyKind::Infer = ty.node {
-                // Print nothing
+                // Print nothing.
             } else {
                 s.s.word(":");
                 s.s.space();
@@ -2218,7 +2284,6 @@ impl<'a> State<'a> {
     }
 }
 
-// Dup'ed from parse::classify, but adapted for the HIR.
 /// Does this expression require a semicolon to be treated
 /// as a statement? The negation of this: 'can this expression
 /// be used as a statement without a semicolon' -- is used
@@ -2226,6 +2291,8 @@ impl<'a> State<'a> {
 ///     if true {...} else {...}
 ///      |x| 5
 /// isn't parsed as (if true {...} else {...} | x) | 5
+//
+// Duplicated from `parse::classify`, but adapted for the HIR.
 fn expr_requires_semi_to_be_stmt(e: &hir::Expr) -> bool {
     match e.node {
         hir::ExprKind::Match(..) |
@@ -2235,7 +2302,7 @@ fn expr_requires_semi_to_be_stmt(e: &hir::Expr) -> bool {
     }
 }
 
-/// this statement requires a semicolon after it.
+/// This statement requires a semicolon after it.
 /// note that in one case (stmt_semi), we've already
 /// seen the semicolon, and thus don't need another.
 fn stmt_ends_with_semi(stmt: &hir::StmtKind) -> bool {
@@ -2274,7 +2341,7 @@ fn bin_op_to_assoc_op(op: hir::BinOpKind) -> AssocOp {
     }
 }
 
-/// Expressions that syntactically contain an "exterior" struct literal i.e., not surrounded by any
+/// Expressions that syntactically contain an "exterior" struct literal, i.e., not surrounded by any
 /// parens or other delimiters, e.g., `X { y: 1 }`, `X { y: 1 }.method()`, `foo == X { y: 1 }` and
 /// `X { y: 1 } == foo` all do, but `(X { y: 1 }) == foo` does not.
 fn contains_exterior_struct_lit(value: &hir::Expr) -> bool {
@@ -2284,7 +2351,7 @@ fn contains_exterior_struct_lit(value: &hir::Expr) -> bool {
         hir::ExprKind::Assign(ref lhs, ref rhs) |
         hir::ExprKind::AssignOp(_, ref lhs, ref rhs) |
         hir::ExprKind::Binary(_, ref lhs, ref rhs) => {
-            // X { y: 1 } + X { y: 2 }
+            // `X { y: 1 } + X { y: 2 }`
             contains_exterior_struct_lit(&lhs) || contains_exterior_struct_lit(&rhs)
         }
         hir::ExprKind::Unary(_, ref x) |
@@ -2292,12 +2359,12 @@ fn contains_exterior_struct_lit(value: &hir::Expr) -> bool {
         hir::ExprKind::Type(ref x, _) |
         hir::ExprKind::Field(ref x, _) |
         hir::ExprKind::Index(ref x, _) => {
-            // &X { y: 1 }, X { y: 1 }.y
+            // `&X { y: 1 }, X { y: 1 }.y`
             contains_exterior_struct_lit(&x)
         }
 
         hir::ExprKind::MethodCall(.., ref exprs) => {
-            // X { y: 1 }.bar(...)
+            // `X { y: 1 }.bar(...)`
             contains_exterior_struct_lit(&exprs[0])
         }
 

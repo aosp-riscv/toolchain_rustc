@@ -37,6 +37,7 @@ LL | #[rustc_unknown]
    = note: for more information, see https://github.com/rust-lang/rust/issues/29642
    = help: add `#![feature(rustc_attrs)]` to the crate attributes to enable
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `rustc_unknown` in this scope
   --> $DIR/feature-gate-rustc-attrs.rs:20:3
    |
@@ -44,6 +45,15 @@ LL | #[rustc_unknown]
    |   ^^^^^^^^^^^^^
 
 error[E0658]: used by the test suite
+=======
+error: cannot find attribute `rustc_unknown` in this scope
+  --> $DIR/feature-gate-rustc-attrs.rs:20:3
+   |
+LL | #[rustc_unknown]
+   |   ^^^^^^^^^^^^^
+
+error[E0658]: the `#[rustc_dummy]` attribute is just used for rustc unit tests and will never be stable
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-rustc-attrs.rs:18:1
    |
 LL | #[rustc_dummy]

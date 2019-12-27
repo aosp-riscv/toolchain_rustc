@@ -536,7 +536,11 @@ extern {
     #[cfg_attr(target_os = "macos", link_name = "glob$INODE64")]
     #[cfg_attr(target_os = "netbsd", link_name = "__glob30")]
     #[cfg_attr(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         all(target_os = "freebsd", not(freebsd12)),
+=======
+        all(target_os = "freebsd", freebsd11),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         link_name = "glob@FBSD_1.0"
     )]
     pub fn glob(pattern: *const ::c_char,
@@ -546,7 +550,11 @@ extern {
                 pglob: *mut ::glob_t) -> ::c_int;
     #[cfg_attr(target_os = "netbsd", link_name = "__globfree30")]
     #[cfg_attr(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         all(target_os = "freebsd", not(freebsd12)),
+=======
+        all(target_os = "freebsd", freebsd11),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         link_name = "globfree@FBSD_1.0"
     )]
     pub fn globfree(pglob: *mut ::glob_t);

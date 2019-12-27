@@ -3,7 +3,11 @@
 // Exercise the unused_mut attribute in some positive and negative cases
 
 #![deny(unused_mut)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await, async_closure, param_attrs)]
+=======
+#![feature(async_closure)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 async fn baz_async(
     mut a: i32,

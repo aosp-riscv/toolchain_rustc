@@ -92,11 +92,11 @@ fn init_late_loggers() {
         }
     }
 
-    // If `MIRI_BACKTRACE` is set and `RUST_CTFE_BACKTRACE` is not, set `RUST_CTFE_BACKTRACE`.
-    // Do this late, so we really only apply this to miri's errors.
+    // If `MIRI_BACKTRACE` is set and `RUSTC_CTFE_BACKTRACE` is not, set `RUSTC_CTFE_BACKTRACE`.
+    // Do this late, so we ideally only apply this to Miri's errors.
     if let Ok(var) = env::var("MIRI_BACKTRACE") {
-        if env::var("RUST_CTFE_BACKTRACE") == Err(env::VarError::NotPresent) {
-            env::set_var("RUST_CTFE_BACKTRACE", &var);
+        if env::var("RUSTC_CTFE_BACKTRACE") == Err(env::VarError::NotPresent) {
+            env::set_var("RUSTC_CTFE_BACKTRACE", &var);
         }
     }
 }
@@ -130,10 +130,15 @@ fn main() {
 
     // Parse our arguments and split them across `rustc` and `miri`.
     let mut validate = true;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    let mut communicate = false;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let mut seed: Option<u64> = None;
     let mut rustc_args = vec![];
     let mut miri_args = vec![];
     let mut after_dashdash = false;
+    let mut excluded_env_vars = vec![];
     for arg in std::env::args() {
         if rustc_args.is_empty() {
             // Very first arg: for `rustc`.
@@ -146,6 +151,9 @@ fn main() {
             match arg.as_str() {
                 "-Zmiri-disable-validation" => {
                     validate = false;
+                },
+                "-Zmiri-disable-isolation" => {
+                    communicate = true;
                 },
                 "--" => {
                     after_dashdash = true;
@@ -171,6 +179,12 @@ fn main() {
                     seed = Some(u64::from_be_bytes(bytes));
 
                 },
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+                arg if arg.starts_with("-Zmiri-env-exclude=") => {
+                    excluded_env_vars.push(arg.trim_start_matches("-Zmiri-env-exclude=").to_owned());
+                },
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 _ => {
                     rustc_args.push(arg);
                 }
@@ -196,8 +210,20 @@ fn main() {
 
     debug!("rustc arguments: {:?}", rustc_args);
     debug!("miri arguments: {:?}", miri_args);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let miri_config = miri::MiriConfig { validate, args: miri_args, seed };
     let result = rustc_driver::report_ices_to_stderr_if_any(move || {
+=======
+    let miri_config = miri::MiriConfig {
+        validate,
+        communicate,
+        excluded_env_vars,
+        seed,
+        args: miri_args,
+    };
+    rustc_driver::install_ice_hook();
+    let result = rustc_driver::catch_fatal_errors(move || {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         rustc_driver::run_compiler(&rustc_args, &mut MiriCompilerCalls { miri_config }, None, None)
     }).and_then(|result| result);
     std::process::exit(result.is_err() as i32);

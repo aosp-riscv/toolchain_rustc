@@ -128,7 +128,11 @@ mod tests {
     }
 
     #[simd_test(enable = "sse")]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub unsafe fn test_mm_cvtsi64_ss() {
+=======
+    unsafe fn test_mm_cvtsi64_ss() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let inputs = &[
             (4555i64, 4555.0f32),
             (322223333, 322223330.0),

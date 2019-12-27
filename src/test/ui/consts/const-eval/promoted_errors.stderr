@@ -16,13 +16,18 @@ error: attempt to divide by zero
 LL |     println!("{}", 1/(1-1));
    |                    ^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: this expression will panic at runtime
+=======
+error: reaching this expression at runtime will panic or abort
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/promoted_errors.rs:9:20
    |
 LL |     println!("{}", 1/(1-1));
    |                    ^^^^^^^ attempt to divide by zero
 
 error: attempt to divide by zero
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/promoted_errors.rs:13:14
    |
 LL |     let _x = 1/(1-1);
@@ -71,4 +76,42 @@ LL |     println!("{}", 1/(1-1));
    |                    ^^^^^^^ attempt to divide by zero
 
 error: aborting due to 11 previous errors
+=======
+  --> $DIR/promoted_errors.rs:12:14
+   |
+LL |     let _x = 1/(1-1);
+   |              ^^^^^^^
+
+error: this expression will panic at runtime
+  --> $DIR/promoted_errors.rs:12:14
+   |
+LL |     let _x = 1/(1-1);
+   |              ^^^^^^^ attempt to divide by zero
+
+error: attempt to divide by zero
+  --> $DIR/promoted_errors.rs:15:20
+   |
+LL |     println!("{}", 1/(false as u32));
+   |                    ^^^^^^^^^^^^^^^^
+
+error: reaching this expression at runtime will panic or abort
+  --> $DIR/promoted_errors.rs:15:20
+   |
+LL |     println!("{}", 1/(false as u32));
+   |                    ^^^^^^^^^^^^^^^^ attempt to divide by zero
+
+error: attempt to divide by zero
+  --> $DIR/promoted_errors.rs:18:14
+   |
+LL |     let _x = 1/(false as u32);
+   |              ^^^^^^^^^^^^^^^^
+
+error: this expression will panic at runtime
+  --> $DIR/promoted_errors.rs:18:14
+   |
+LL |     let _x = 1/(false as u32);
+   |              ^^^^^^^^^^^^^^^^ attempt to divide by zero
+
+error: aborting due to 9 previous errors
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 

@@ -58,6 +58,7 @@ pub fn getrandom_inner(dest: &mut [u8]) -> Result<(), Error> {
 }
 
 fn getrandom_init() -> Result<RngSource, Error> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // First up we need to detect if we're running in node.js or a
     // browser. To do this we get ahold of the `this` object (in a bit
     // of a roundabout fashion).
@@ -106,6 +107,40 @@ extern "C" {
     fn self_(me: &This) -> JsValue;
     #[wasm_bindgen(method, getter, structural)]
     fn crypto(me: &This) -> JsValue;
+=======
+    if let Ok(self_) = Global::get_self() {
+        // If `self` is defined then we're in a browser somehow (main window
+        // or web worker). Here we want to try to use
+        // `crypto.getRandomValues`, but if `crypto` isn't defined we assume
+        // we're in an older web browser and the OS RNG isn't available.
+
+        let crypto = self_.crypto();
+        if crypto.is_undefined() {
+            return Err(BINDGEN_CRYPTO_UNDEF);
+        }
+
+        // Test if `crypto.getRandomValues` is undefined as well
+        let crypto: BrowserCrypto = crypto.into();
+        if crypto.get_random_values_fn().is_undefined() {
+            return Err(BINDGEN_GRV_UNDEF);
+        }
+
+        return Ok(RngSource::Browser(crypto));
+    }
+
+    return Ok(RngSource::Node(node_require("crypto")));
+}
+
+#[wasm_bindgen]
+extern "C" {
+    type Global;
+    #[wasm_bindgen(getter, catch, static_method_of = Global, js_class = self, js_name = self)]
+    fn get_self() -> Result<Self_, JsValue>;
+
+    type Self_;
+    #[wasm_bindgen(method, getter, structural)]
+    fn crypto(me: &Self_) -> JsValue;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     #[derive(Clone, Debug)]
     type BrowserCrypto;

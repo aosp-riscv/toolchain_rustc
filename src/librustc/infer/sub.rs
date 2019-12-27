@@ -130,7 +130,7 @@ impl TypeRelation<'tcx> for Sub<'combine, 'infcx, 'tcx> {
         // FIXME -- we have more fine-grained information available
         // from the "cause" field, we could perhaps give more tailored
         // error messages.
-        let origin = SubregionOrigin::Subtype(self.fields.trace.clone());
+        let origin = SubregionOrigin::Subtype(box self.fields.trace.clone());
         self.fields.infcx.borrow_region_constraints()
                          .make_subregion(origin, a, b);
 
@@ -142,6 +142,7 @@ impl TypeRelation<'tcx> for Sub<'combine, 'infcx, 'tcx> {
         a: &'tcx ty::Const<'tcx>,
         b: &'tcx ty::Const<'tcx>,
     ) -> RelateResult<'tcx, &'tcx ty::Const<'tcx>> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         debug!("{}.consts({:?}, {:?})", self.tag(), a, b);
         if a == b { return Ok(a); }
 
@@ -177,6 +178,9 @@ impl TypeRelation<'tcx> for Sub<'combine, 'infcx, 'tcx> {
 
         self.fields.infcx.super_combine_consts(self, a, b)?;
         Ok(a)
+=======
+        self.fields.infcx.super_combine_consts(self, a, b)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn binders<T>(&mut self, a: &ty::Binder<T>, b: &ty::Binder<T>)

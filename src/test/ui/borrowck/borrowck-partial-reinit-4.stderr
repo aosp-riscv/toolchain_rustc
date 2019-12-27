@@ -1,8 +1,16 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign of possibly uninitialized variable: `x.0`
+=======
+error[E0381]: assign of possibly-uninitialized variable: `x.0`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/borrowck-partial-reinit-4.rs:17:5
    |
 LL |     (x.0).0 = Some(Test);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |     ^^^^^^^ use of possibly uninitialized `x.0`
+=======
+   |     ^^^^^^^ use of possibly-uninitialized `x.0`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

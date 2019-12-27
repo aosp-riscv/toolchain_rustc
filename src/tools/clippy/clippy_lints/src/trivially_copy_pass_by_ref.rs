@@ -1,6 +1,10 @@
 use std::cmp;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, is_copy, is_self_ty, snippet, span_lint_and_sugg};
+=======
+use crate::utils::{is_copy, is_self_ty, snippet, span_lint_and_sugg};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use if_chain::if_chain;
 use matches::matches;
 use rustc::hir;
@@ -127,7 +131,11 @@ impl_lint_pass!(TriviallyCopyPassByRef => [TRIVIALLY_COPY_PASS_BY_REF]);
 
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for TriviallyCopyPassByRef {
     fn check_trait_item(&mut self, cx: &LateContext<'a, 'tcx>, item: &'tcx hir::TraitItem) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(item.span) {
+=======
+        if item.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 
@@ -145,7 +153,11 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for TriviallyCopyPassByRef {
         span: Span,
         hir_id: HirId,
     ) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(span) {
+=======
+        if span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 

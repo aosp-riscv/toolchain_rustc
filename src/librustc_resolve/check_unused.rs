@@ -26,6 +26,8 @@
 use crate::Resolver;
 use crate::resolve_imports::ImportDirectiveSubclass;
 
+use errors::pluralise;
+
 use rustc::util::nodemap::NodeMap;
 use rustc::{lint, ty};
 use rustc_data_structures::fx::FxHashSet;
@@ -295,7 +297,11 @@ impl Resolver<'_> {
                 }).collect::<Vec<String>>();
             span_snippets.sort();
             let msg = format!("unused import{}{}",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             if len > 1 { "s" } else { "" },
+=======
+                            pluralise!(len),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             if !span_snippets.is_empty() {
                                 format!(": {}", span_snippets.join(", "))
                             } else {

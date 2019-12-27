@@ -31,6 +31,10 @@ struct {
 	{ "rev-list",     lg2_rev_list,     1 },
 	{ "rev-parse",    lg2_rev_parse,    1 },
 	{ "show-index",   lg2_show_index,   0 },
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+	{ "stash",        lg2_stash,        1 },
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 	{ "status",       lg2_status,       1 },
 	{ "tag",          lg2_tag,          1 },
 };

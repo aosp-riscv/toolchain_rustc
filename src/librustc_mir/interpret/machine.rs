@@ -7,7 +7,11 @@ use std::hash::Hash;
 
 use rustc::hir::def_id::DefId;
 use rustc::mir;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::ty::{self, TyCtxt};
+=======
+use rustc::ty::{self, Ty, TyCtxt};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use super::{
     Allocation, AllocId, InterpResult, Scalar, AllocationExtra,
@@ -176,7 +180,11 @@ pub trait Machine<'mir, 'tcx>: Sized {
         bin_op: mir::BinOp,
         left: ImmTy<'tcx, Self::PointerTag>,
         right: ImmTy<'tcx, Self::PointerTag>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ) -> InterpResult<'tcx, (Scalar<Self::PointerTag>, bool)>;
+=======
+    ) -> InterpResult<'tcx, (Scalar<Self::PointerTag>, bool, Ty<'tcx>)>;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     /// Heap allocations via the `box` keyword.
     fn box_alloc(

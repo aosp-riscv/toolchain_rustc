@@ -33,6 +33,21 @@ typedef struct {
 	char *old_prefix, *new_prefix;
 } git_patch_parsed;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+static int git_parse_err(const char *fmt, ...) GIT_FORMAT_PRINTF(1, 2);
+static int git_parse_err(const char *fmt, ...)
+{
+	va_list ap;
+
+	va_start(ap, fmt);
+	git_error_vset(GIT_ERROR_PATCH, fmt, ap);
+	va_end(ap);
+
+	return -1;
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 static size_t header_path_len(git_patch_parse_ctx *ctx)
 {
 	bool inquote = 0;

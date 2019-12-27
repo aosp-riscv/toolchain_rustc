@@ -1,22 +1,61 @@
 use crate::os::unix::prelude::*;
 
-use crate::ffi::{OsString, OsStr, CString, CStr};
+use crate::ffi::{OsString, OsStr, CString};
 use crate::fmt;
 use crate::io;
 use crate::ptr;
 use crate::sys::fd::FileDesc;
-use crate::sys::fs::{File, OpenOptions};
+use crate::sys::fs::File;
 use crate::sys::pipe::{self, AnonPipe};
-use crate::sys_common::process::{CommandEnv, DefaultEnvKey};
+use crate::sys_common::process::CommandEnv;
 use crate::collections::BTreeMap;
+
+#[cfg(not(target_os = "fuchsia"))]
+use {
+    crate::ffi::CStr,
+    crate::sys::fs::OpenOptions,
+};
 
 use libc::{c_int, gid_t, uid_t, c_char, EXIT_SUCCESS, EXIT_FAILURE};
 
 cfg_if::cfg_if! {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if #[cfg(target_os = "redox")] {
         const DEV_NULL: &'static str = "null:\0";
     } else {
         const DEV_NULL: &'static str = "/dev/null\0";
+=======
+    if #[cfg(target_os = "fuchsia")] {
+        // fuchsia doesn't have /dev/null
+    } else if #[cfg(target_os = "redox")] {
+        const DEV_NULL: &'static str = "null:\0";
+    } else {
+        const DEV_NULL: &'static str = "/dev/null\0";
+    }
+}
+
+// Android with api less than 21 define sig* functions inline, so it is not
+// available for dynamic link. Implementing sigemptyset and sigaddset allow us
+// to support older Android version (independent of libc version).
+// The following implementations are based on https://git.io/vSkNf
+cfg_if::cfg_if! {
+    if #[cfg(target_os = "android")] {
+        pub unsafe fn sigemptyset(set: *mut libc::sigset_t) -> libc::c_int {
+            set.write_bytes(0u8, 1);
+            return 0;
+        }
+        #[allow(dead_code)]
+        pub unsafe fn sigaddset(set: *mut libc::sigset_t, signum: libc::c_int) -> libc::c_int {
+            use crate::{slice, mem};
+
+            let raw = slice::from_raw_parts_mut(set as *mut u8, mem::size_of::<libc::sigset_t>());
+            let bit = (signum - 1) as usize;
+            raw[bit / 8] |= 1 << (bit % 8);
+            return 0;
+        }
+    } else {
+        pub use libc::{sigemptyset, sigaddset};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
@@ -45,7 +84,7 @@ pub struct Command {
     program: CString,
     args: Vec<CString>,
     argv: Argv,
-    env: CommandEnv<DefaultEnvKey>,
+    env: CommandEnv,
 
     cwd: Option<CString>,
     uid: Option<uid_t>,
@@ -83,6 +122,11 @@ pub enum ChildStdio {
     Inherit,
     Explicit(c_int),
     Owned(FileDesc),
+
+    // On Fuchsia, null stdio is the default, so we simply don't specify
+    // any actions at the time of spawning.
+    #[cfg(target_os = "fuchsia")]
+    Null,
 }
 
 pub enum Stdio {
@@ -177,7 +221,7 @@ impl Command {
         self.stderr = Some(stderr);
     }
 
-    pub fn env_mut(&mut self) -> &mut CommandEnv<DefaultEnvKey> {
+    pub fn env_mut(&mut self) -> &mut CommandEnv {
         &mut self.env
     }
 
@@ -247,7 +291,7 @@ impl CStringArray {
     }
 }
 
-fn construct_envp(env: BTreeMap<DefaultEnvKey, OsString>, saw_nul: &mut bool) -> CStringArray {
+fn construct_envp(env: BTreeMap<OsString, OsString>, saw_nul: &mut bool) -> CStringArray {
     let mut result = CStringArray::with_capacity(env.len());
     for (k, v) in env {
         let mut k: OsString = k.into();
@@ -301,6 +345,7 @@ impl Stdio {
                 Ok((ChildStdio::Owned(theirs.into_fd()), Some(ours)))
             }
 
+            #[cfg(not(target_os = "fuchsia"))]
             Stdio::Null => {
                 let mut opts = OpenOptions::new();
                 opts.read(readable);
@@ -310,6 +355,11 @@ impl Stdio {
                 };
                 let fd = File::open_c(&path, &opts)?;
                 Ok((ChildStdio::Owned(fd.into_fd()), None))
+            }
+
+            #[cfg(target_os = "fuchsia")]
+            Stdio::Null => {
+                Ok((ChildStdio::Null, None))
             }
         }
     }
@@ -333,6 +383,9 @@ impl ChildStdio {
             ChildStdio::Inherit => None,
             ChildStdio::Explicit(fd) => Some(fd),
             ChildStdio::Owned(ref fd) => Some(fd.raw()),
+
+            #[cfg(target_os = "fuchsia")]
+            ChildStdio::Null => None,
         }
     }
 }
@@ -429,6 +482,7 @@ mod tests {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // Android with api less than 21 define sig* functions inline, so it is not
     // available for dynamic link. Implementing sigemptyset and sigaddset allow us
     // to support older Android version (independent of libc version).
@@ -459,6 +513,8 @@ mod tests {
         return 0;
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     // See #14232 for more information, but it appears that signal delivery to a
     // newly spawned process may just be raced in the macOS, so to prevent this
     // test from being flaky we ignore it on macOS.

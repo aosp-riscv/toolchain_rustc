@@ -30,8 +30,13 @@ pub use self::AddCallGuards::*;
  *
  */
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for AddCallGuards {
     fn run_pass<'tcx>(&self, _tcx: TyCtxt<'tcx>, _src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for AddCallGuards {
+    fn run_pass(&self, _tcx: TyCtxt<'tcx>, _src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.add_call_guards(body);
     }
 }

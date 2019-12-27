@@ -36,6 +36,7 @@ impl<'a> Parser<'a> {
         krate
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Parse a `mod <foo> { ... }` or `mod <foo>;` item
     pub(super) fn parse_item_mod(&mut self, outer_attrs: &[Attribute]) -> PResult<'a, ItemInfo> {
         let (in_cfg, outer_attrs) = {
@@ -61,6 +62,33 @@ impl<'a> Parser<'a> {
                 if warn {
                     let attr = attr::mk_attr_outer(
                         attr::mk_word_item(Ident::with_empty_ctxt(sym::warn_directory_ownership)));
+=======
+    /// Parses a `mod <foo> { ... }` or `mod <foo>;` item.
+    pub(super) fn parse_item_mod(&mut self, outer_attrs: &[Attribute]) -> PResult<'a, ItemInfo> {
+        let (in_cfg, outer_attrs) = {
+            let mut strip_unconfigured = crate::config::StripUnconfigured {
+                sess: self.sess,
+                features: None, // Don't perform gated feature checking.
+            };
+            let mut outer_attrs = outer_attrs.to_owned();
+            strip_unconfigured.process_cfg_attrs(&mut outer_attrs);
+            (!self.cfg_mods || strip_unconfigured.in_cfg(&outer_attrs), outer_attrs)
+        };
+
+        let id_span = self.token.span;
+        let id = self.parse_ident()?;
+        if self.eat(&token::Semi) {
+            if in_cfg && self.recurse_into_file_modules {
+                // This mod is in an external file. Let's go get it!
+                let ModulePathSuccess { path, directory_ownership, warn } =
+                    self.submod_path(id, &outer_attrs, id_span)?;
+                let (module, mut attrs) =
+                    self.eval_src_mod(path, directory_ownership, id.to_string(), id_span)?;
+                // Record that we fetched the mod from an external file.
+                if warn {
+                    let attr = attr::mk_attr_outer(
+                        attr::mk_word_item(Ident::with_dummy_span(sym::warn_directory_ownership)));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     attr::mark_known(&attr);
                     attrs.push(attr);
                 }

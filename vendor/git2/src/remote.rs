@@ -586,7 +586,11 @@ mod tests {
     use crate::{AutotagOption, PushOptions};
     use crate::{Direction, FetchOptions, Remote, RemoteCallbacks, Repository};
     use std::cell::Cell;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     use tempdir::TempDir;
+=======
+    use tempfile::TempDir;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     #[test]
     fn smoke() {
@@ -609,7 +613,7 @@ mod tests {
 
     #[test]
     fn create_remote() {
-        let td = TempDir::new("test").unwrap();
+        let td = TempDir::new().unwrap();
         let remote = td.path().join("remote");
         Repository::init_bare(&remote).unwrap();
 
@@ -690,7 +694,7 @@ mod tests {
 
     #[test]
     fn create_remote_anonymous() {
-        let td = TempDir::new("test").unwrap();
+        let td = TempDir::new().unwrap();
         let repo = Repository::init(td.path()).unwrap();
 
         let origin = repo.remote_anonymous("/path/to/nowhere").unwrap();
@@ -707,7 +711,11 @@ mod tests {
     #[test]
     fn transfer_cb() {
         let (td, _repo) = crate::test::repo_init();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let td2 = TempDir::new("git").unwrap();
+=======
+        let td2 = TempDir::new().unwrap();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let url = crate::test::path2url(&td.path());
 
         let repo = Repository::init(td2.path()).unwrap();
@@ -743,7 +751,11 @@ mod tests {
     #[test]
     fn connect_list() {
         let (td, _repo) = crate::test::repo_init();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let td2 = TempDir::new("git").unwrap();
+=======
+        let td2 = TempDir::new().unwrap();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let url = crate::test::path2url(&td.path());
 
         let repo = Repository::init(td2.path()).unwrap();
@@ -774,8 +786,13 @@ mod tests {
     #[test]
     fn push() {
         let (_td, repo) = crate::test::repo_init();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let td2 = TempDir::new("git1").unwrap();
         let td3 = TempDir::new("git2").unwrap();
+=======
+        let td2 = TempDir::new().unwrap();
+        let td3 = TempDir::new().unwrap();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let url = crate::test::path2url(&td2.path());
 
         Repository::init_bare(td2.path()).unwrap();

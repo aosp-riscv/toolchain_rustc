@@ -32,8 +32,16 @@ error[E0277]: the trait bound `[closure@$DIR/issue-62009-1.rs:14:5: 14:15]: std:
    |
 LL |     (|_| 2333).await;
    |     ^^^^^^^^^^^^^^^^ the trait `std::future::Future` is not implemented for `[closure@$DIR/issue-62009-1.rs:14:5: 14:15]`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |
    = note: required by `std::future::poll_with_tls_context`
+=======
+   | 
+  ::: $SRC_DIR/libstd/future.rs:LL:COL
+   |
+LL |     F: Future
+   |        ------ required by this bound in `std::future::poll_with_tls_context`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 4 previous errors
 

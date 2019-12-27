@@ -6,6 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[macro_use]
 extern crate structopt;
 
@@ -34,6 +35,33 @@ fn use_env() {
     Opt::clap().write_long_help(&mut output).unwrap();
     let output = String::from_utf8(output).unwrap();
     assert!(output.starts_with("structopt 0.2."));
+=======
+use structopt::StructOpt;
+
+#[test]
+fn no_author_version_about() {
+    #[derive(StructOpt, PartialEq, Debug)]
+    #[structopt(name = "foo", no_version)]
+    struct Opt {}
+
+    let mut output = Vec::new();
+    Opt::clap().write_long_help(&mut output).unwrap();
+    let output = String::from_utf8(output).unwrap();
+
+    assert!(output.starts_with("foo \n\nUSAGE:"));
+}
+
+#[test]
+fn use_env() {
+    #[derive(StructOpt, PartialEq, Debug)]
+    #[structopt(author, about)]
+    struct Opt {}
+
+    let mut output = Vec::new();
+    Opt::clap().write_long_help(&mut output).unwrap();
+    let output = String::from_utf8(output).unwrap();
+    assert!(output.starts_with("structopt 0."));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     assert!(output.contains("Guillaume Pinot <texitoi@texitoi.eu>, others"));
     assert!(output.contains("Parse command line argument by defining a struct."));
 }

@@ -24,7 +24,11 @@ impl rustc_driver::Callbacks for TestCalls<'_> {
 fn main() {
     let mut count = 1;
     let args = vec!["compiler-calls".to_string(), "foo.rs".to_string()];
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     rustc_driver::report_ices_to_stderr_if_any(|| {
+=======
+    rustc_driver::catch_fatal_errors(|| {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         rustc_driver::run_compiler(&args, &mut TestCalls { count: &mut count }, None, None).ok();
     }).ok();
     assert_eq!(count, 2);

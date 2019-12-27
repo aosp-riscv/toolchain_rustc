@@ -1,14 +1,22 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign of possibly uninitialized variable: `d`
+=======
+error[E0381]: assign of possibly-uninitialized variable: `d`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/issue-21232-partial-init-and-erroneous-use.rs:28:5
    |
 LL |     d.x = 10;
-   |     ^^^^^^^^ use of possibly uninitialized `d`
+   |     ^^^^^^^^ use of possibly-uninitialized `d`
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign of possibly uninitialized variable: `d`
+=======
+error[E0381]: assign of possibly-uninitialized variable: `d`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/issue-21232-partial-init-and-erroneous-use.rs:34:5
    |
 LL |     d.x = 10;
-   |     ^^^^^^^^ use of possibly uninitialized `d`
+   |     ^^^^^^^^ use of possibly-uninitialized `d`
 
 error[E0382]: assign of moved value: `d`
   --> $DIR/issue-21232-partial-init-and-erroneous-use.rs:41:5
@@ -20,17 +28,25 @@ LL |     drop(d);
 LL |     d.x = 10;
    |     ^^^^^^^^ value assigned here after move
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `d`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `d`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/issue-21232-partial-init-and-erroneous-use.rs:47:5
    |
 LL |     d.s.y = 20;
-   |     ^^^^^^^^^^ use of possibly uninitialized `d.s`
+   |     ^^^^^^^^^^ use of possibly-uninitialized `d.s`
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `d`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `d`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/issue-21232-partial-init-and-erroneous-use.rs:53:5
    |
 LL |     d.s.y = 20;
-   |     ^^^^^^^^^^ use of possibly uninitialized `d.s`
+   |     ^^^^^^^^^^ use of possibly-uninitialized `d.s`
 
 error[E0382]: assign to part of moved value: `d`
   --> $DIR/issue-21232-partial-init-and-erroneous-use.rs:60:5

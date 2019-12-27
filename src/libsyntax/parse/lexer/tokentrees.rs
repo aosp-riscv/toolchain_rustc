@@ -21,6 +21,7 @@ impl<'a> StringReader<'a> {
         (res, tt_reader.unmatched_braces)
     }
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 struct TokenTreesReader<'a> {
     string_reader: StringReader<'a>,
@@ -40,28 +41,56 @@ impl<'a> TokenTreesReader<'a> {
     // Parse a stream of tokens into a list of `TokenTree`s, up to an `Eof`.
     fn parse_all_token_trees(&mut self) -> PResult<'a, TokenStream> {
         let mut tts = Vec::new();
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+struct TokenTreesReader<'a> {
+    string_reader: StringReader<'a>,
+    token: Token,
+    joint_to_prev: IsJoint,
+    /// Stack of open delimiters and their spans. Used for error message.
+    open_braces: Vec<(token::DelimToken, Span)>,
+    unmatched_braces: Vec<UnmatchedBrace>,
+    /// The type and spans for all braces
+    ///
+    /// Used only for error recovery when arriving to EOF with mismatched braces.
+    matching_delim_spans: Vec<(token::DelimToken, Span, Span)>,
+    last_unclosed_found_span: Option<Span>,
+}
+
+impl<'a> TokenTreesReader<'a> {
+    // Parse a stream of tokens into a list of `TokenTree`s, up to an `Eof`.
+    fn parse_all_token_trees(&mut self) -> PResult<'a, TokenStream> {
+        let mut buf = TokenStreamBuilder::default();
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.real_token();
         while self.token != token::Eof {
-            tts.push(self.parse_token_tree()?);
+            buf.push(self.parse_token_tree()?);
         }
 
-        Ok(TokenStream::new(tts))
+        Ok(buf.into_token_stream())
     }
 
     // Parse a stream of tokens into a list of `TokenTree`s, up to a `CloseDelim`.
     fn parse_token_trees_until_close_delim(&mut self) -> TokenStream {
-        let mut tts = vec![];
+        let mut buf = TokenStreamBuilder::default();
         loop {
             if let token::CloseDelim(..) = self.token.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 return TokenStream::new(tts);
+=======
+                return buf.into_token_stream();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
 
             match self.parse_token_tree() {
-                Ok(tree) => tts.push(tree),
+                Ok(tree) => buf.push(tree),
                 Err(mut e) => {
                     e.emit();
-                    return TokenStream::new(tts);
+                    return buf.into_token_stream();
                 }
             }
         }
@@ -223,8 +252,38 @@ impl<'a> TokenTreesReader<'a> {
                 _ => {
                     self.token = token;
                     return;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 },
             }
         }
+=======
+                }
+            }
+        }
+    }
+}
+
+#[derive(Default)]
+struct TokenStreamBuilder {
+    buf: Vec<TreeAndJoint>,
+}
+
+impl TokenStreamBuilder {
+    fn push(&mut self, (tree, joint): TreeAndJoint) {
+        if let Some((TokenTree::Token(prev_token), Joint)) = self.buf.last() {
+            if let TokenTree::Token(token) = &tree {
+                if let Some(glued) = prev_token.glue(token) {
+                    self.buf.pop();
+                    self.buf.push((TokenTree::Token(glued), joint));
+                    return;
+                }
+            }
+        }
+        self.buf.push((tree, joint))
+    }
+
+    fn into_token_stream(self) -> TokenStream {
+        TokenStream::new(self.buf)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }

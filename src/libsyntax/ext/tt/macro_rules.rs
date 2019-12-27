@@ -1,3 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use crate::ast;
+use crate::attr::{self, TransparencyError};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::edition::Edition;
 use crate::ext::base::{DummyResult, ExtCtxt, MacResult, TTMacroExpander};
 use crate::ext::base::{SyntaxExtension, SyntaxExtensionKind};
@@ -19,6 +24,10 @@ use crate::{ast, attr, attr::TransparencyError};
 
 use errors::{DiagnosticBuilder, FatalError};
 use log::debug;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use syntax_pos::hygiene::Transparency;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax_pos::Span;
 
 use rustc_data_structures::fx::FxHashMap;
@@ -128,6 +137,10 @@ impl<'a> ParserAnyMacro<'a> {
 struct MacroRulesMacroExpander {
     name: ast::Ident,
     span: Span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    transparency: Transparency,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     lhses: Vec<quoted::TokenTree>,
     rhses: Vec<quoted::TokenTree>,
     valid: bool,
@@ -143,7 +156,13 @@ impl TTMacroExpander for MacroRulesMacroExpander {
         if !self.valid {
             return DummyResult::any(sp);
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         generic_extension(cx, sp, self.span, self.name, input, &self.lhses, &self.rhses)
+=======
+        generic_extension(
+            cx, sp, self.span, self.name, self.transparency, input, &self.lhses, &self.rhses
+        )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 
@@ -158,6 +177,10 @@ fn generic_extension<'cx>(
     sp: Span,
     def_span: Span,
     name: ast::Ident,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    transparency: Transparency,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     arg: TokenStream,
     lhses: &[quoted::TokenTree],
     rhses: &[quoted::TokenTree],
@@ -187,7 +210,11 @@ fn generic_extension<'cx>(
 
                 let rhs_spans = rhs.iter().map(|t| t.span()).collect::<Vec<_>>();
                 // rhs has holes ( `$id` and `$(...)` that need filled)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let mut tts = transcribe(cx, &named_matches, rhs);
+=======
+                let mut tts = transcribe(cx, &named_matches, rhs, transparency);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                 // Replace all the tokens for the corresponding positions in the macro, to maintain
                 // proper positions in error reporting, while maintaining the macro_backtrace.
@@ -285,6 +312,10 @@ pub fn compile(
     def: &ast::Item,
     edition: Edition,
 ) -> SyntaxExtension {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    let diag = &sess.span_diagnostic;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let lhs_nm = ast::Ident::new(sym::lhs, def.span);
     let rhs_nm = ast::Ident::new(sym::rhs, def.span);
     let tt_spec = ast::Ident::new(sym::tt, def.span);
@@ -409,12 +440,35 @@ pub fn compile(
     // don't abort iteration early, so that errors for multiple lhses can be reported
     for lhs in &lhses {
         valid &= check_lhs_no_empty_seq(sess, slice::from_ref(lhs));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
     }
 
     // We use CRATE_NODE_ID instead of `def.id` otherwise we may emit buffered lints for a node id
     // that is not lint-checked and trigger the "failed to process buffered lint here" bug.
     valid &= macro_check::check_meta_variables(sess, ast::CRATE_NODE_ID, def.span, &lhses, &rhses);
 
+    let (transparency, transparency_error) = attr::find_transparency(&def.attrs, body.legacy);
+    match transparency_error {
+        Some(TransparencyError::UnknownTransparency(value, span)) =>
+            diag.span_err(span, &format!("unknown macro transparency: `{}`", value)),
+        Some(TransparencyError::MultipleTransparencyAttrs(old_span, new_span)) =>
+            diag.span_err(vec![old_span, new_span], "multiple macro transparency attributes"),
+        None => {}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+    }
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+    // We use CRATE_NODE_ID instead of `def.id` otherwise we may emit buffered lints for a node id
+    // that is not lint-checked and trigger the "failed to process buffered lint here" bug.
+    valid &= macro_check::check_meta_variables(sess, ast::CRATE_NODE_ID, def.span, &lhses, &rhses);
+=======
+    let expander: Box<_> = Box::new(MacroRulesMacroExpander {
+        name: def.ident, span: def.span, transparency, lhses, rhses, valid
+    });
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let expander: Box<_> =
         Box::new(MacroRulesMacroExpander { name: def.ident, span: def.span, lhses, rhses, valid });
 
@@ -484,6 +538,17 @@ pub fn compile(
         is_builtin,
         is_derive_copy: is_builtin && def.ident.name == sym::Copy,
     }
+=======
+    SyntaxExtension::new(
+        sess,
+        SyntaxExtensionKind::LegacyBang(expander),
+        def.span,
+        Vec::new(),
+        edition,
+        def.ident.name,
+        &def.attrs,
+    )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 fn check_lhs_nt_follows(
@@ -917,9 +982,9 @@ fn check_matcher_core(
         // Now `last` holds the complete set of NT tokens that could
         // end the sequence before SUFFIX. Check that every one works with `suffix`.
         'each_last: for token in &last.tokens {
-            if let TokenTree::MetaVarDecl(_, ref name, ref frag_spec) = *token {
+            if let TokenTree::MetaVarDecl(_, name, frag_spec) = *token {
                 for next_token in &suffix_first.tokens {
-                    match is_in_follow(next_token, &frag_spec.as_str()) {
+                    match is_in_follow(next_token, frag_spec.name) {
                         IsInFollow::Invalid(msg, help) => {
                             sess.span_diagnostic
                                 .struct_span_err(next_token.span(), &msg)
@@ -988,7 +1053,7 @@ fn check_matcher_core(
 
 fn token_can_be_followed_by_any(tok: &quoted::TokenTree) -> bool {
     if let quoted::TokenTree::MetaVarDecl(_, _, frag_spec) = *tok {
-        frag_can_be_followed_by_any(&frag_spec.as_str())
+        frag_can_be_followed_by_any(frag_spec.name)
     } else {
         // (Non NT's can always be followed by anthing in matchers.)
         true
@@ -1003,15 +1068,15 @@ fn token_can_be_followed_by_any(tok: &quoted::TokenTree) -> bool {
 /// specifier which consumes at most one token tree can be followed by
 /// a fragment specifier (indeed, these fragments can be followed by
 /// ANYTHING without fear of future compatibility hazards).
-fn frag_can_be_followed_by_any(frag: &str) -> bool {
+fn frag_can_be_followed_by_any(frag: Symbol) -> bool {
     match frag {
-        "item"     | // always terminated by `}` or `;`
-        "block"    | // exactly one token tree
-        "ident"    | // exactly one token tree
-        "literal"  | // exactly one token tree
-        "meta"     | // exactly one token tree
-        "lifetime" | // exactly one token tree
-        "tt" =>   // exactly one token tree
+        sym::item     | // always terminated by `}` or `;`
+        sym::block    | // exactly one token tree
+        sym::ident    | // exactly one token tree
+        sym::literal  | // exactly one token tree
+        sym::meta     | // exactly one token tree
+        sym::lifetime | // exactly one token tree
+        sym::tt =>   // exactly one token tree
             true,
 
         _ =>
@@ -1033,7 +1098,7 @@ enum IsInFollow {
 /// break macros that were relying on that binary operator as a
 /// separator.
 // when changing this do not forget to update doc/book/macros.md!
-fn is_in_follow(tok: &quoted::TokenTree, frag: &str) -> IsInFollow {
+fn is_in_follow(tok: &quoted::TokenTree, frag: Symbol) -> IsInFollow {
     use quoted::TokenTree;
 
     if let TokenTree::Token(Token { kind: token::CloseDelim(_), .. }) = *tok {
@@ -1042,17 +1107,25 @@ fn is_in_follow(tok: &quoted::TokenTree, frag: &str) -> IsInFollow {
         IsInFollow::Yes
     } else {
         match frag {
-            "item" => {
+            sym::item => {
                 // since items *must* be followed by either a `;` or a `}`, we can
                 // accept anything after them
                 IsInFollow::Yes
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "block" => {
+=======
+            sym::block => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 // anything can follow block, the braces provide an easy boundary to
                 // maintain
                 IsInFollow::Yes
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "stmt" | "expr" => {
+=======
+            sym::stmt | sym::expr => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 const TOKENS: &[&str] = &["`=>`", "`,`", "`;`"];
                 match tok {
                     TokenTree::Token(token) => match token.kind {
@@ -1062,7 +1135,11 @@ fn is_in_follow(tok: &quoted::TokenTree, frag: &str) -> IsInFollow {
                     _ => IsInFollow::No(TOKENS),
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "pat" => {
+=======
+            sym::pat => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 const TOKENS: &[&str] = &["`=>`", "`,`", "`=`", "`|`", "`if`", "`in`"];
                 match tok {
                     TokenTree::Token(token) => match token.kind {
@@ -1073,7 +1150,11 @@ fn is_in_follow(tok: &quoted::TokenTree, frag: &str) -> IsInFollow {
                     _ => IsInFollow::No(TOKENS),
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "path" | "ty" => {
+=======
+            sym::path | sym::ty => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 const TOKENS: &[&str] = &[
                     "`{`", "`[`", "`=>`", "`,`", "`>`", "`=`", "`:`", "`;`", "`|`", "`as`",
                     "`where`",
@@ -1101,20 +1182,36 @@ fn is_in_follow(tok: &quoted::TokenTree, frag: &str) -> IsInFollow {
                     _ => IsInFollow::No(TOKENS),
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "ident" | "lifetime" => {
+=======
+            sym::ident | sym::lifetime => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 // being a single token, idents and lifetimes are harmless
                 IsInFollow::Yes
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "literal" => {
+=======
+            sym::literal => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 // literals may be of a single token, or two tokens (negative numbers)
                 IsInFollow::Yes
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "meta" | "tt" => {
+=======
+            sym::meta | sym::tt => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 // being either a single token or a delimited sequence, tt is
                 // harmless
                 IsInFollow::Yes
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "vis" => {
+=======
+            sym::vis => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 // Explicitly disallow `priv`, on the off chance it comes back.
                 const TOKENS: &[&str] = &["`,`", "an ident", "a type"];
                 match tok {
@@ -1139,7 +1236,11 @@ fn is_in_follow(tok: &quoted::TokenTree, frag: &str) -> IsInFollow {
                     _ => IsInFollow::No(TOKENS),
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             "" => IsInFollow::Yes, // kw::Invalid
+=======
+            kw::Invalid => IsInFollow::Yes,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             _ => IsInFollow::Invalid(
                 format!("invalid fragment specifier `{}`", frag),
                 VALID_FRAGMENT_NAMES_MSG,

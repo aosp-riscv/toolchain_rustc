@@ -105,7 +105,11 @@ impl<'ast, 'sess, 'c> ModResolver<'ast, 'sess> {
         visitor.visit_item(&item);
         for module_item in visitor.mods() {
             if let ast::ItemKind::Mod(ref sub_mod) = module_item.item.node {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.visit_sub_mod(&item, Cow::Owned(sub_mod.clone()))?;
+=======
+                self.visit_sub_mod(&module_item.item, Cow::Owned(sub_mod.clone()))?;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
         Ok(())
@@ -442,6 +446,7 @@ fn parse_inner_attributes<'a>(parser: &mut parser::Parser<'a>) -> PResult<'a, Ve
             }
             TokenKind::DocComment(s) => {
                 // we need to get the position of this token before we bump.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let attr = attr::mk_sugared_doc_attr(attr::mk_attr_id(), s, parser.token.span);
                 if attr.style == ast::AttrStyle::Inner {
                     attrs.push(attr);
@@ -478,6 +483,51 @@ fn parse_mod_items<'a>(parser: &mut parser::Parser<'a>, inner_lo: Span) -> PResu
 fn is_cfg_if(item: &ast::Item) -> bool {
     match item.node {
         ast::ItemKind::Mac(..) if item.ident.name == Symbol::intern("cfg_if") => true,
+=======
+                let attr = attr::mk_sugared_doc_attr(s, parser.token.span);
+                if attr.style == ast::AttrStyle::Inner {
+                    attrs.push(attr);
+                    parser.bump();
+                } else {
+                    break;
+                }
+            }
+            _ => break,
+        }
+    }
+    Ok(attrs)
+}
+
+fn parse_mod_items<'a>(parser: &mut parser::Parser<'a>, inner_lo: Span) -> PResult<'a, ast::Mod> {
+    let mut items = vec![];
+    while let Some(item) = parser.parse_item()? {
+        items.push(item);
+    }
+
+    let hi = if parser.token.span.is_dummy() {
+        inner_lo
+    } else {
+        parser.prev_span
+    };
+
+    Ok(ast::Mod {
+        inner: inner_lo.to(hi),
+        items,
+        inline: false,
+    })
+}
+
+fn is_cfg_if(item: &ast::Item) -> bool {
+    match item.node {
+        ast::ItemKind::Mac(ref mac) => {
+            if let Some(first_segment) = mac.path.segments.first() {
+                if first_segment.ident.name == Symbol::intern("cfg_if") {
+                    return true;
+                }
+            }
+            false
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         _ => false,
     }
 }

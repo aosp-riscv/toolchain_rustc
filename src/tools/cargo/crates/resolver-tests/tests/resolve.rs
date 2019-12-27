@@ -1,5 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::env;
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use cargo::core::dependency::Kind;
 use cargo::core::{enable_nightly_features, Dependency};
 use cargo::util::{is_ci, Config};

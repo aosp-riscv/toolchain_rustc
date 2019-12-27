@@ -127,8 +127,13 @@ impl<'a, 'tcx> InferCtxt<'a, 'tcx> {
     ) -> InferOk<'tcx, (T, OpaqueTypeMap<'tcx>)> {
         debug!(
             "instantiate_opaque_types(value={:?}, parent_def_id={:?}, body_id={:?}, \
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
              param_env={:?})",
             value, parent_def_id, body_id, param_env,
+=======
+             param_env={:?}, value_span={:?})",
+            value, parent_def_id, body_id, param_env, value_span,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         );
         let mut instantiator = Instantiator {
             infcx: self,
@@ -1108,9 +1113,14 @@ impl<'a, 'tcx> Instantiator<'a, 'tcx> {
         // Use the same type variable if the exact same opaque type appears more
         // than once in the return type (e.g., if it's passed to a type alias).
         if let Some(opaque_defn) = self.opaque_types.get(&def_id) {
+            debug!("instantiate_opaque_types: returning concrete ty {:?}", opaque_defn.concrete_ty);
             return opaque_defn.concrete_ty;
         }
         let span = tcx.def_span(def_id);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        debug!("fold_opaque_ty {:?} {:?}", self.value_span, span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let ty_var = infcx
             .next_ty_var(TypeVariableOrigin { kind: TypeVariableOriginKind::TypeInference, span });
 

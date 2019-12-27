@@ -58,6 +58,7 @@ impl From<io::Error> for FormatDiffError {
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "rustfmt-format-diff",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     author = "",
     about = "",
     raw(setting = "AppSettings::DisableVersion"),
@@ -79,6 +80,27 @@ pub struct Opts {
         long = "filter",
         value_name = "PATTERN",
         raw(default_value = "DEFAULT_PATTERN")
+=======
+    setting = AppSettings::DisableVersion,
+    setting = AppSettings::NextLineHelp
+)]
+pub struct Opts {
+    /// Skip the smallest prefix containing NUMBER slashes
+    #[structopt(
+        short = "p",
+        long = "skip-prefix",
+        value_name = "NUMBER",
+        default_value = "0"
+    )]
+    skip_prefix: u32,
+
+    /// Custom pattern selecting file paths to reformat
+    #[structopt(
+        short = "f",
+        long = "filter",
+        value_name = "PATTERN",
+        default_value = DEFAULT_PATTERN
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     )]
     filter: String,
 }

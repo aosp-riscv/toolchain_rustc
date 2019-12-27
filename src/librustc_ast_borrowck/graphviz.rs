@@ -4,6 +4,7 @@
 
 pub use Variant::*;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub use rustc::cfg::graphviz::{Node, Edge};
 use rustc::cfg::graphviz as cfg_dot;
 
@@ -11,6 +12,14 @@ use crate::borrowck::{self, BorrowckCtxt, LoanPath};
 use crate::dataflow::{DataFlowOperator, DataFlowContext, EntryOrExit};
 use log::debug;
 use rustc::cfg::CFGIndex;
+=======
+pub(crate) use crate::cfg::graphviz::{Node, Edge};
+use crate::cfg::graphviz as cfg_dot;
+use crate::cfg::CFGIndex;
+use crate::borrowck::{self, BorrowckCtxt, LoanPath};
+use crate::dataflow::{DataFlowOperator, DataFlowContext, EntryOrExit};
+use log::debug;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::rc::Rc;
 
 #[derive(Debug, Copy, Clone)]

@@ -199,6 +199,7 @@ pub trait Hash {
 }
 
 // Separate module to reexport the macro `Hash` from prelude without the trait `Hash`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg(not(bootstrap))]
 pub(crate) mod macros {
     /// Derive macro generating an impl of the trait `Hash`.
@@ -209,6 +210,16 @@ pub(crate) mod macros {
     pub macro Hash($item:item) { /* compiler built-in */ }
 }
 #[cfg(not(bootstrap))]
+=======
+pub(crate) mod macros {
+    /// Derive macro generating an impl of the trait `Hash`.
+    #[rustc_builtin_macro]
+    #[cfg_attr(bootstrap, rustc_macro_transparency = "semitransparent")]
+    #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
+    #[allow_internal_unstable(core_intrinsics)]
+    pub macro Hash($item:item) { /* compiler built-in */ }
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[stable(feature = "builtin_macro_prelude", since = "1.38.0")]
 #[doc(inline)]
 pub use macros::Hash;
@@ -552,8 +563,6 @@ impl<H> PartialEq for BuildHasherDefault<H> {
 
 #[stable(since = "1.29.0", feature = "build_hasher_eq")]
 impl<H> Eq for BuildHasherDefault<H> {}
-
-//////////////////////////////////////////////////////////////////////////////
 
 mod impls {
     use crate::mem;

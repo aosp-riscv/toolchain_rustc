@@ -6,7 +6,11 @@ edition = "2018"
 
 [dependencies]
 diff = "0.1.10"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 env_logger = { version = "0.5", default-features = false }
+=======
+env_logger = { version = "0.6", default-features = false }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 getopts = "0.2"
 log = "0.4"
 regex = "1.0"

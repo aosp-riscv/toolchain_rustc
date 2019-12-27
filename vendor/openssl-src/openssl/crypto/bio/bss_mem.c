@@ -259,9 +259,13 @@ static long mem_ctrl(BIO *b, int cmd, long num, void *ptr)
         bm = bbm->buf;
         if (bm->data != NULL) {
             if (!(b->flags & BIO_FLAGS_MEM_RDONLY)) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if (b->flags & BIO_FLAGS_NONCLEAR_RST) {
                     bm->length = bm->max;
                 } else {
+=======
+                if (!(b->flags & BIO_FLAGS_NONCLEAR_RST)) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     memset(bm->data, 0, bm->max);
                     bm->length = 0;
                 }

@@ -1,5 +1,6 @@
 // force-host
 // no-prefer-dynamic
+// compile-flags: --crate-type proc-macro
 
 #![crate_type="proc-macro"]
 #![crate_name="some_macros"]
@@ -25,3 +26,12 @@ pub fn some_proc_attr(_attr: TokenStream, item: TokenStream) -> TokenStream {
 pub fn some_derive(_item: TokenStream) -> TokenStream {
     TokenStream::new()
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+/// Doc comment from the original crate
+#[proc_macro]
+pub fn reexported_macro(_input: TokenStream) -> TokenStream {
+    TokenStream::new()
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

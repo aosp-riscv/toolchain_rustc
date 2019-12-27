@@ -26,6 +26,21 @@
 extern int git_config_backend_from_file(git_config_backend **out, const char *path);
 
 /**
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+ * Create a readonly configuration file backend from another backend
+ *
+ * This copies the complete contents of the source backend to the
+ * new backend. The new backend will be completely read-only and
+ * cannot be modified.
+ *
+ * @param out the new snapshotted backend
+ * @param source the backend to copy
+ */
+extern int git_config_backend_snapshot(git_config_backend **out, git_config_backend *source);
+
+/**
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
  * Create an in-memory configuration file backend
  *
  * @param out the new backend

@@ -10,7 +10,11 @@ note: subsumed by `pub use`
 LL | #![feature(macro_reexport)]
    |            ^^^^^^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: cannot find attribute macro `macro_reexport` in this scope
+=======
+error: cannot find attribute `macro_reexport` in this scope
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/macro-reexport-removed.rs:5:3
    |
 LL | #[macro_reexport(macro_one)]

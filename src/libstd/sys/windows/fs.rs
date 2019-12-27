@@ -357,7 +357,11 @@ impl File {
                                                 size as c::DWORD))?;
             attr.file_size = info.AllocationSize as u64;
             attr.number_of_links = Some(info.NumberOfLinks);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             if attr.is_reparse_point() {
+=======
+            if attr.file_type().is_reparse_point() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let mut b = [0; c::MAXIMUM_REPARSE_DATA_BUFFER_SIZE];
                 if let Ok((_, buf)) = self.reparse_point(&mut b) {
                     attr.reparse_tag = buf.ReparseTag;

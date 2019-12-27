@@ -16,6 +16,7 @@ impl FnOnce<()> for Foo {
     extern "rust-call" fn call_once(mut self, _: ()) -> u32 { self.call_mut(()) }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /////////////////////////////////////////////////////////////////////////
 
 impl FnMut<(u32,)> for Foo {
@@ -28,6 +29,16 @@ impl FnOnce<(u32,)> for Foo {
 }
 
 /////////////////////////////////////////////////////////////////////////
+=======
+impl FnMut<(u32,)> for Foo {
+    extern "rust-call" fn call_mut(&mut self, (x,): (u32,)) -> u32 { self.foo + x }
+}
+
+impl FnOnce<(u32,)> for Foo {
+    type Output = u32;
+    extern "rust-call" fn call_once(mut self, args: (u32,)) -> u32 { self.call_mut(args) }
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 impl FnMut<(u32,u32)> for Foo {
     extern "rust-call" fn call_mut(&mut self, (x, y): (u32, u32)) -> u32 { self.foo + x + y }

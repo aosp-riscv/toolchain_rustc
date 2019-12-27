@@ -28,6 +28,7 @@ fn foo_let(bar: usize) -> usize {
         return 3;
     }
     //~^^^ ERROR if may be missing an else clause
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     //~| ERROR mismatched types [E0308]
 }
 
@@ -46,6 +47,23 @@ fn foo3_let(bar: usize) -> usize {
     }
     //~^^^ ERROR if may be missing an else clause
     //~| ERROR mismatched types [E0308]
+=======
+}
+
+fn foo2_let(bar: usize) -> usize {
+    let x: usize = if let 0 = 1 {
+        return 3;
+    };
+    //~^^^ ERROR if may be missing an else clause
+    x
+}
+
+fn foo3_let(bar: usize) -> usize {
+    if let 0 = 1 {
+        3
+    }
+    //~^^^ ERROR if may be missing an else clause
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 // FIXME(60254): deduplicate first error in favor of second.

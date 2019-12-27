@@ -287,6 +287,7 @@ pub fn temp_dir() -> PathBuf {
 }
 
 pub fn home_dir() -> Option<PathBuf> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     return crate::env::var_os("HOME").or_else(|| unsafe {
         fallback()
     }).map(PathBuf::from);
@@ -309,6 +310,9 @@ pub fn home_dir() -> Option<PathBuf> {
             _ => None,
         }
     }
+=======
+    None
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 pub fn exit(code: i32) -> ! {

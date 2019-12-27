@@ -67,6 +67,7 @@ int git_config_entries_new(git_config_entries **out)
 	return error;
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 int git_config_entries_dup(git_config_entries **out, git_config_entries *entries)
 {
 	git_config_entries *result = NULL;
@@ -92,6 +93,50 @@ int git_config_entries_dup(git_config_entries **out, git_config_entries *entries
 		if ((error = git_config_entries_append(result, dup)) < 0)
 			goto out;
 	}
+=======
+int git_config_entries_dup_entry(git_config_entries *entries, const git_config_entry *entry)
+{
+	git_config_entry *duplicated;
+	int error;
+
+	duplicated = git__calloc(1, sizeof(git_config_entry));
+	GIT_ERROR_CHECK_ALLOC(duplicated);
+
+	duplicated->name = git__strdup(entry->name);
+	GIT_ERROR_CHECK_ALLOC(duplicated->name);
+
+	if (entry->value) {
+		duplicated->value = git__strdup(entry->value);
+		GIT_ERROR_CHECK_ALLOC(duplicated->value);
+	}
+	duplicated->level = entry->level;
+	duplicated->include_depth = entry->include_depth;
+
+	if ((error = git_config_entries_append(entries, duplicated)) < 0)
+		goto out;
+
+out:
+	if (error && duplicated) {
+		git__free((char *) duplicated->name);
+		git__free((char *) duplicated->value);
+		git__free(duplicated);
+	}
+	return error;
+}
+
+int git_config_entries_dup(git_config_entries **out, git_config_entries *entries)
+{
+	git_config_entries *result = NULL;
+	config_entry_list *head;
+	int error;
+
+	if ((error = git_config_entries_new(&result)) < 0)
+		goto out;
+
+	for (head = entries->list; head; head = head->next)
+		if ((git_config_entries_dup_entry(result, head->entry)) < 0)
+			goto out;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 	*out = result;
 	result = NULL;

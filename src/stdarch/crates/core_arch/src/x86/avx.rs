@@ -1913,6 +1913,7 @@ pub unsafe fn _mm256_moveldup_ps(a: __m256) -> __m256 {
 }
 
 /// Duplicate even-indexed double-precision (64-bit) floating-point elements
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// from "a", and returns the results.
 ///
 /// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_movedup_pd)
@@ -2743,6 +2744,838 @@ pub unsafe fn _mm256_set1_epi32(a: i32) -> __m256i {
 #[target_feature(enable = "avx")]
 //#[cfg_attr(test, assert_instr(vmovddup))]
 #[cfg_attr(test, assert_instr(vinsertf128))]
+=======
+/// from `a`, and returns the results.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_movedup_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vmovddup))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_movedup_pd(a: __m256d) -> __m256d {
+    simd_shuffle4(a, a, [0, 0, 2, 2])
+}
+
+/// Loads 256-bits of integer data from unaligned memory into result.
+/// This intrinsic may perform better than `_mm256_loadu_si256` when the
+/// data crosses a cache line boundary.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_lddqu_si256)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vlddqu))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_lddqu_si256(mem_addr: *const __m256i) -> __m256i {
+    transmute(vlddqu(mem_addr as *const i8))
+}
+
+/// Moves integer data from a 256-bit integer vector to a 32-byte
+/// aligned memory location. To minimize caching, the data is flagged as
+/// non-temporal (unlikely to be used again soon)
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_stream_si256)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vmovntps))] // FIXME vmovntdq
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_stream_si256(mem_addr: *mut __m256i, a: __m256i) {
+    intrinsics::nontemporal_store(mem_addr, a);
+}
+
+/// Moves double-precision values from a 256-bit vector of `[4 x double]`
+/// to a 32-byte aligned memory location. To minimize caching, the data is
+/// flagged as non-temporal (unlikely to be used again soon).
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_stream_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vmovntps))] // FIXME vmovntpd
+#[stable(feature = "simd_x86", since = "1.27.0")]
+#[allow(clippy::cast_ptr_alignment)]
+pub unsafe fn _mm256_stream_pd(mem_addr: *mut f64, a: __m256d) {
+    intrinsics::nontemporal_store(mem_addr as *mut __m256d, a);
+}
+
+/// Moves single-precision floating point values from a 256-bit vector
+/// of `[8 x float]` to a 32-byte aligned memory location. To minimize
+/// caching, the data is flagged as non-temporal (unlikely to be used again
+/// soon).
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_stream_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vmovntps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+#[allow(clippy::cast_ptr_alignment)]
+pub unsafe fn _mm256_stream_ps(mem_addr: *mut f32, a: __m256) {
+    intrinsics::nontemporal_store(mem_addr as *mut __m256, a);
+}
+
+/// Computes the approximate reciprocal of packed single-precision (32-bit)
+/// floating-point elements in `a`, and returns the results. The maximum
+/// relative error for this approximation is less than 1.5*2^-12.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_rcp_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vrcpps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_rcp_ps(a: __m256) -> __m256 {
+    vrcpps(a)
+}
+
+/// Computes the approximate reciprocal square root of packed single-precision
+/// (32-bit) floating-point elements in `a`, and returns the results.
+/// The maximum relative error for this approximation is less than 1.5*2^-12.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_rsqrt_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vrsqrtps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_rsqrt_ps(a: __m256) -> __m256 {
+    vrsqrtps(a)
+}
+
+/// Unpacks and interleave double-precision (64-bit) floating-point elements
+/// from the high half of each 128-bit lane in `a` and `b`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_unpackhi_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vunpckhpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_unpackhi_pd(a: __m256d, b: __m256d) -> __m256d {
+    simd_shuffle4(a, b, [1, 5, 3, 7])
+}
+
+/// Unpacks and interleave single-precision (32-bit) floating-point elements
+/// from the high half of each 128-bit lane in `a` and `b`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_unpackhi_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vunpckhps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_unpackhi_ps(a: __m256, b: __m256) -> __m256 {
+    simd_shuffle8(a, b, [2, 10, 3, 11, 6, 14, 7, 15])
+}
+
+/// Unpacks and interleave double-precision (64-bit) floating-point elements
+/// from the low half of each 128-bit lane in `a` and `b`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_unpacklo_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vunpcklpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_unpacklo_pd(a: __m256d, b: __m256d) -> __m256d {
+    simd_shuffle4(a, b, [0, 4, 2, 6])
+}
+
+/// Unpacks and interleave single-precision (32-bit) floating-point elements
+/// from the low half of each 128-bit lane in `a` and `b`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_unpacklo_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vunpcklps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_unpacklo_ps(a: __m256, b: __m256) -> __m256 {
+    simd_shuffle8(a, b, [0, 8, 1, 9, 4, 12, 5, 13])
+}
+
+/// Computes the bitwise AND of 256 bits (representing integer data) in `a` and
+/// `b`, and set `ZF` to 1 if the result is zero, otherwise set `ZF` to 0.
+/// Computes the bitwise NOT of `a` and then AND with `b`, and set `CF` to 1 if
+/// the result is zero, otherwise set `CF` to 0. Return the `ZF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testz_si256)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vptest))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testz_si256(a: __m256i, b: __m256i) -> i32 {
+    ptestz256(a.as_i64x4(), b.as_i64x4())
+}
+
+/// Computes the bitwise AND of 256 bits (representing integer data) in `a` and
+/// `b`, and set `ZF` to 1 if the result is zero, otherwise set `ZF` to 0.
+/// Computes the bitwise NOT of `a` and then AND with `b`, and set `CF` to 1 if
+/// the result is zero, otherwise set `CF` to 0. Return the `CF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testc_si256)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vptest))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testc_si256(a: __m256i, b: __m256i) -> i32 {
+    ptestc256(a.as_i64x4(), b.as_i64x4())
+}
+
+/// Computes the bitwise AND of 256 bits (representing integer data) in `a` and
+/// `b`, and set `ZF` to 1 if the result is zero, otherwise set `ZF` to 0.
+/// Computes the bitwise NOT of `a` and then AND with `b`, and set `CF` to 1 if
+/// the result is zero, otherwise set `CF` to 0. Return 1 if both the `ZF` and
+/// `CF` values are zero, otherwise return 0.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testnzc_si256)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vptest))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testnzc_si256(a: __m256i, b: __m256i) -> i32 {
+    ptestnzc256(a.as_i64x4(), b.as_i64x4())
+}
+
+/// Computes the bitwise AND of 256 bits (representing double-precision (64-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 256-bit
+/// value, and set `ZF` to 1 if the sign bit of each 64-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 64-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return the `ZF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testz_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testz_pd(a: __m256d, b: __m256d) -> i32 {
+    vtestzpd256(a, b)
+}
+
+/// Computes the bitwise AND of 256 bits (representing double-precision (64-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 256-bit
+/// value, and set `ZF` to 1 if the sign bit of each 64-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 64-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return the `CF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testc_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testc_pd(a: __m256d, b: __m256d) -> i32 {
+    vtestcpd256(a, b)
+}
+
+/// Computes the bitwise AND of 256 bits (representing double-precision (64-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 256-bit
+/// value, and set `ZF` to 1 if the sign bit of each 64-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 64-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return 1 if both the `ZF` and `CF` values
+/// are zero, otherwise return 0.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testnzc_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testnzc_pd(a: __m256d, b: __m256d) -> i32 {
+    vtestnzcpd256(a, b)
+}
+
+/// Computes the bitwise AND of 128 bits (representing double-precision (64-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 128-bit
+/// value, and set `ZF` to 1 if the sign bit of each 64-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 64-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return the `ZF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_testz_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm_testz_pd(a: __m128d, b: __m128d) -> i32 {
+    vtestzpd(a, b)
+}
+
+/// Computes the bitwise AND of 128 bits (representing double-precision (64-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 128-bit
+/// value, and set `ZF` to 1 if the sign bit of each 64-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 64-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return the `CF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_testc_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm_testc_pd(a: __m128d, b: __m128d) -> i32 {
+    vtestcpd(a, b)
+}
+
+/// Computes the bitwise AND of 128 bits (representing double-precision (64-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 128-bit
+/// value, and set `ZF` to 1 if the sign bit of each 64-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 64-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return 1 if both the `ZF` and `CF` values
+/// are zero, otherwise return 0.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_testnzc_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm_testnzc_pd(a: __m128d, b: __m128d) -> i32 {
+    vtestnzcpd(a, b)
+}
+
+/// Computes the bitwise AND of 256 bits (representing single-precision (32-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 256-bit
+/// value, and set `ZF` to 1 if the sign bit of each 32-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 32-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return the `ZF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testz_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testz_ps(a: __m256, b: __m256) -> i32 {
+    vtestzps256(a, b)
+}
+
+/// Computes the bitwise AND of 256 bits (representing single-precision (32-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 256-bit
+/// value, and set `ZF` to 1 if the sign bit of each 32-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 32-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return the `CF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testc_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testc_ps(a: __m256, b: __m256) -> i32 {
+    vtestcps256(a, b)
+}
+
+/// Computes the bitwise AND of 256 bits (representing single-precision (32-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 256-bit
+/// value, and set `ZF` to 1 if the sign bit of each 32-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 32-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return 1 if both the `ZF` and `CF` values
+/// are zero, otherwise return 0.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_testnzc_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_testnzc_ps(a: __m256, b: __m256) -> i32 {
+    vtestnzcps256(a, b)
+}
+
+/// Computes the bitwise AND of 128 bits (representing single-precision (32-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 128-bit
+/// value, and set `ZF` to 1 if the sign bit of each 32-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 32-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return the `ZF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_testz_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm_testz_ps(a: __m128, b: __m128) -> i32 {
+    vtestzps(a, b)
+}
+
+/// Computes the bitwise AND of 128 bits (representing single-precision (32-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 128-bit
+/// value, and set `ZF` to 1 if the sign bit of each 32-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 32-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return the `CF` value.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_testc_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm_testc_ps(a: __m128, b: __m128) -> i32 {
+    vtestcps(a, b)
+}
+
+/// Computes the bitwise AND of 128 bits (representing single-precision (32-bit)
+/// floating-point elements) in `a` and `b`, producing an intermediate 128-bit
+/// value, and set `ZF` to 1 if the sign bit of each 32-bit element in the
+/// intermediate value is zero, otherwise set `ZF` to 0. Compute the bitwise
+/// NOT of `a` and then AND with `b`, producing an intermediate value, and set
+/// `CF` to 1 if the sign bit of each 32-bit element in the intermediate value
+/// is zero, otherwise set `CF` to 0. Return 1 if both the `ZF` and `CF` values
+/// are zero, otherwise return 0.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm_testnzc_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vtestps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm_testnzc_ps(a: __m128, b: __m128) -> i32 {
+    vtestnzcps(a, b)
+}
+
+/// Sets each bit of the returned mask based on the most significant bit of the
+/// corresponding packed double-precision (64-bit) floating-point element in
+/// `a`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_movemask_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vmovmskpd))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_movemask_pd(a: __m256d) -> i32 {
+    movmskpd256(a)
+}
+
+/// Sets each bit of the returned mask based on the most significant bit of the
+/// corresponding packed single-precision (32-bit) floating-point element in
+/// `a`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_movemask_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vmovmskps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_movemask_ps(a: __m256) -> i32 {
+    movmskps256(a)
+}
+
+/// Returns vector of type __m256d with all elements set to zero.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setzero_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vxorps))] // FIXME vxorpd expected
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setzero_pd() -> __m256d {
+    _mm256_set1_pd(0.0)
+}
+
+/// Returns vector of type __m256 with all elements set to zero.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setzero_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vxorps))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setzero_ps() -> __m256 {
+    _mm256_set1_ps(0.0)
+}
+
+/// Returns vector of type __m256i with all elements set to zero.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setzero_si256)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vxor))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setzero_si256() -> __m256i {
+    _mm256_set1_epi8(0)
+}
+
+/// Sets packed double-precision (64-bit) floating-point elements in returned
+/// vector with the supplied values.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[cfg_attr(test, assert_instr(vinsertf128))]
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set_pd(a: f64, b: f64, c: f64, d: f64) -> __m256d {
+    _mm256_setr_pd(d, c, b, a)
+}
+
+/// Sets packed single-precision (32-bit) floating-point elements in returned
+/// vector with the supplied values.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set_ps(
+    a: f32,
+    b: f32,
+    c: f32,
+    d: f32,
+    e: f32,
+    f: f32,
+    g: f32,
+    h: f32,
+) -> __m256 {
+    _mm256_setr_ps(h, g, f, e, d, c, b, a)
+}
+
+/// Sets packed 8-bit integers in returned vector with the supplied values in
+/// reverse order.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set_epi8)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set_epi8(
+    e00: i8,
+    e01: i8,
+    e02: i8,
+    e03: i8,
+    e04: i8,
+    e05: i8,
+    e06: i8,
+    e07: i8,
+    e08: i8,
+    e09: i8,
+    e10: i8,
+    e11: i8,
+    e12: i8,
+    e13: i8,
+    e14: i8,
+    e15: i8,
+    e16: i8,
+    e17: i8,
+    e18: i8,
+    e19: i8,
+    e20: i8,
+    e21: i8,
+    e22: i8,
+    e23: i8,
+    e24: i8,
+    e25: i8,
+    e26: i8,
+    e27: i8,
+    e28: i8,
+    e29: i8,
+    e30: i8,
+    e31: i8,
+) -> __m256i {
+    #[rustfmt::skip]
+    _mm256_setr_epi8(
+        e31, e30, e29, e28, e27, e26, e25, e24,
+        e23, e22, e21, e20, e19, e18, e17, e16,
+        e15, e14, e13, e12, e11, e10, e09, e08,
+        e07, e06, e05, e04, e03, e02, e01, e00,
+    )
+}
+
+/// Sets packed 16-bit integers in returned vector with the supplied values.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set_epi16)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set_epi16(
+    e00: i16,
+    e01: i16,
+    e02: i16,
+    e03: i16,
+    e04: i16,
+    e05: i16,
+    e06: i16,
+    e07: i16,
+    e08: i16,
+    e09: i16,
+    e10: i16,
+    e11: i16,
+    e12: i16,
+    e13: i16,
+    e14: i16,
+    e15: i16,
+) -> __m256i {
+    #[rustfmt::skip]
+    _mm256_setr_epi16(
+        e15, e14, e13, e12,
+        e11, e10, e09, e08,
+        e07, e06, e05, e04,
+        e03, e02, e01, e00,
+    )
+}
+
+/// Sets packed 32-bit integers in returned vector with the supplied values.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set_epi32)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set_epi32(
+    e0: i32,
+    e1: i32,
+    e2: i32,
+    e3: i32,
+    e4: i32,
+    e5: i32,
+    e6: i32,
+    e7: i32,
+) -> __m256i {
+    _mm256_setr_epi32(e7, e6, e5, e4, e3, e2, e1, e0)
+}
+
+/// Sets packed 64-bit integers in returned vector with the supplied values.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set_epi64x)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set_epi64x(a: i64, b: i64, c: i64, d: i64) -> __m256i {
+    _mm256_setr_epi64x(d, c, b, a)
+}
+
+/// Sets packed double-precision (64-bit) floating-point elements in returned
+/// vector with the supplied values in reverse order.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setr_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setr_pd(a: f64, b: f64, c: f64, d: f64) -> __m256d {
+    __m256d(a, b, c, d)
+}
+
+/// Sets packed single-precision (32-bit) floating-point elements in returned
+/// vector with the supplied values in reverse order.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setr_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setr_ps(
+    a: f32,
+    b: f32,
+    c: f32,
+    d: f32,
+    e: f32,
+    f: f32,
+    g: f32,
+    h: f32,
+) -> __m256 {
+    __m256(a, b, c, d, e, f, g, h)
+}
+
+/// Sets packed 8-bit integers in returned vector with the supplied values in
+/// reverse order.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setr_epi8)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setr_epi8(
+    e00: i8,
+    e01: i8,
+    e02: i8,
+    e03: i8,
+    e04: i8,
+    e05: i8,
+    e06: i8,
+    e07: i8,
+    e08: i8,
+    e09: i8,
+    e10: i8,
+    e11: i8,
+    e12: i8,
+    e13: i8,
+    e14: i8,
+    e15: i8,
+    e16: i8,
+    e17: i8,
+    e18: i8,
+    e19: i8,
+    e20: i8,
+    e21: i8,
+    e22: i8,
+    e23: i8,
+    e24: i8,
+    e25: i8,
+    e26: i8,
+    e27: i8,
+    e28: i8,
+    e29: i8,
+    e30: i8,
+    e31: i8,
+) -> __m256i {
+    #[rustfmt::skip]
+    transmute(i8x32::new(
+        e00, e01, e02, e03, e04, e05, e06, e07,
+        e08, e09, e10, e11, e12, e13, e14, e15,
+        e16, e17, e18, e19, e20, e21, e22, e23,
+        e24, e25, e26, e27, e28, e29, e30, e31,
+    ))
+}
+
+/// Sets packed 16-bit integers in returned vector with the supplied values in
+/// reverse order.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setr_epi16)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setr_epi16(
+    e00: i16,
+    e01: i16,
+    e02: i16,
+    e03: i16,
+    e04: i16,
+    e05: i16,
+    e06: i16,
+    e07: i16,
+    e08: i16,
+    e09: i16,
+    e10: i16,
+    e11: i16,
+    e12: i16,
+    e13: i16,
+    e14: i16,
+    e15: i16,
+) -> __m256i {
+    #[rustfmt::skip]
+    transmute(i16x16::new(
+        e00, e01, e02, e03,
+        e04, e05, e06, e07,
+        e08, e09, e10, e11,
+        e12, e13, e14, e15,
+    ))
+}
+
+/// Sets packed 32-bit integers in returned vector with the supplied values in
+/// reverse order.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setr_epi32)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setr_epi32(
+    e0: i32,
+    e1: i32,
+    e2: i32,
+    e3: i32,
+    e4: i32,
+    e5: i32,
+    e6: i32,
+    e7: i32,
+) -> __m256i {
+    transmute(i32x8::new(e0, e1, e2, e3, e4, e5, e6, e7))
+}
+
+/// Sets packed 64-bit integers in returned vector with the supplied values in
+/// reverse order.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_setr_epi64x)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_setr_epi64x(a: i64, b: i64, c: i64, d: i64) -> __m256i {
+    transmute(i64x4::new(a, b, c, d))
+}
+
+/// Broadcasts double-precision (64-bit) floating-point value `a` to all
+/// elements of returned vector.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set1_pd)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set1_pd(a: f64) -> __m256d {
+    _mm256_setr_pd(a, a, a, a)
+}
+
+/// Broadcasts single-precision (32-bit) floating-point value `a` to all
+/// elements of returned vector.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set1_ps)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set1_ps(a: f32) -> __m256 {
+    _mm256_setr_ps(a, a, a, a, a, a, a, a)
+}
+
+/// Broadcasts 8-bit integer `a` to all elements of returned vector.
+/// This intrinsic may generate the `vpbroadcastb`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set1_epi8)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(test, assert_instr(vpshufb))]
+#[cfg_attr(test, assert_instr(vinsertf128))]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set1_epi8(a: i8) -> __m256i {
+    #[rustfmt::skip]
+    _mm256_setr_epi8(
+        a, a, a, a, a, a, a, a,
+        a, a, a, a, a, a, a, a,
+        a, a, a, a, a, a, a, a,
+        a, a, a, a, a, a, a, a,
+    )
+}
+
+/// Broadcasts 16-bit integer `a` to all all elements of returned vector.
+/// This intrinsic may generate the `vpbroadcastw`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set1_epi16)
+#[inline]
+#[target_feature(enable = "avx")]
+//#[cfg_attr(test, assert_instr(vpshufb))]
+#[cfg_attr(test, assert_instr(vinsertf128))]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set1_epi16(a: i16) -> __m256i {
+    _mm256_setr_epi16(a, a, a, a, a, a, a, a, a, a, a, a, a, a, a, a)
+}
+
+/// Broadcasts 32-bit integer `a` to all elements of returned vector.
+/// This intrinsic may generate the `vpbroadcastd`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set1_epi32)
+#[inline]
+#[target_feature(enable = "avx")]
+// This intrinsic has no corresponding instruction.
+#[stable(feature = "simd_x86", since = "1.27.0")]
+pub unsafe fn _mm256_set1_epi32(a: i32) -> __m256i {
+    _mm256_setr_epi32(a, a, a, a, a, a, a, a)
+}
+
+/// Broadcasts 64-bit integer `a` to all elements of returned vector.
+/// This intrinsic may generate the `vpbroadcastq`.
+///
+/// [Intel's documentation](https://software.intel.com/sites/landingpage/IntrinsicsGuide/#text=_mm256_set1_epi64x)
+#[inline]
+#[target_feature(enable = "avx")]
+#[cfg_attr(all(test, target_arch = "x86_64"), assert_instr(vinsertf128))]
+#[cfg_attr(all(test, target_arch = "x86"), assert_instr(vbroadcastsd))]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // This intrinsic has no corresponding instruction.
 #[stable(feature = "simd_x86", since = "1.27.0")]
 pub unsafe fn _mm256_set1_epi64x(a: i64) -> __m256i {

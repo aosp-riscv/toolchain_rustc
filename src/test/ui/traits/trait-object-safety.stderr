@@ -1,19 +1,32 @@
 error[E0038]: the trait `Tr` cannot be made into an object
   --> $DIR/trait-object-safety.rs:15:22
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+LL |     fn foo();
+   |        --- associated function `foo` has no `self` parameter
+...
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 LL |     let _: &dyn Tr = &St;
    |                      ^^^ the trait `Tr` cannot be made into an object
    |
-   = note: method `foo` has no receiver
    = note: required because of the requirements on the impl of `std::ops::CoerceUnsized<&dyn Tr>` for `&St`
 
 error[E0038]: the trait `Tr` cannot be made into an object
   --> $DIR/trait-object-safety.rs:15:12
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL |     let _: &dyn Tr = &St;
    |            ^^^^^^^ the trait `Tr` cannot be made into an object
    |
    = note: method `foo` has no receiver
+=======
+LL |     fn foo();
+   |        --- associated function `foo` has no `self` parameter
+...
+LL |     let _: &dyn Tr = &St;
+   |            ^^^^^^^ the trait `Tr` cannot be made into an object
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 2 previous errors
 

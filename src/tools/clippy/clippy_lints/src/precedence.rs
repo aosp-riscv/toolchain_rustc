@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, snippet_with_applicability, span_lint_and_sugg};
+=======
+use crate::utils::{snippet_with_applicability, span_lint_and_sugg};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::lint::{EarlyContext, EarlyLintPass, LintArray, LintPass};
 use rustc::{declare_lint_pass, declare_tool_lint};
 use rustc_errors::Applicability;
@@ -32,7 +36,11 @@ declare_lint_pass!(Precedence => [PRECEDENCE]);
 
 impl EarlyLintPass for Precedence {
     fn check_expr(&mut self, cx: &EarlyContext<'_>, expr: &Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(expr.span) {
+=======
+        if expr.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 

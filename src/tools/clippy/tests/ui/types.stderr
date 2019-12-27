@@ -1,5 +1,9 @@
 error: casting i32 to i64 may become silently lossy if you later change the type
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/types.rs:13:22
+=======
+  --> $DIR/types.rs:14:22
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     let c_i64: i64 = c as i64;
    |                      ^^^^^^^^ help: try: `i64::from(c)`

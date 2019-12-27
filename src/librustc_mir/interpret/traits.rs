@@ -1,5 +1,10 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::ty::{self, Ty, Instance};
 use rustc::ty::layout::{Size, Align, LayoutOf};
+=======
+use rustc::ty::{self, Ty, Instance, TypeFoldable};
+use rustc::ty::layout::{Size, Align, LayoutOf, HasDataLayout};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::mir::interpret::{Scalar, Pointer, InterpResult, PointerArithmetic,};
 
 use super::{InterpCx, Machine, MemoryKind, FnVal};
@@ -19,6 +24,11 @@ impl<'mir, 'tcx, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
         trace!("get_vtable(trait_ref={:?})", poly_trait_ref);
 
         let (ty, poly_trait_ref) = self.tcx.erase_regions(&(ty, poly_trait_ref));
+
+        // All vtables must be monomorphic, bail out otherwise.
+        if ty.needs_subst() || poly_trait_ref.needs_subst() {
+            throw_inval!(TooGeneric);
+        }
 
         if let Some(&vtable) = self.vtables.get(&(ty, poly_trait_ref)) {
             // This means we guarantee that there are no duplicate vtables, we will
@@ -77,7 +87,10 @@ impl<'mir, 'tcx, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
         for (i, method) in methods.iter().enumerate() {
             if let Some((def_id, substs)) = *method {
                 // resolve for vtable: insert shims where needed
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let substs = self.subst_and_normalize_erasing_regions(substs)?;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let instance = ty::Instance::resolve_for_vtable(
                     *self.tcx,
                     self.param_env,
@@ -140,11 +153,22 @@ impl<'mir, 'tcx, M: Machine<'mir, 'tcx>> InterpCx<'mir, 'tcx, M> {
         let size = alloc.read_ptr_sized(
             self,
             vtable.offset(pointer_size, self)?
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         )?.to_bits(pointer_size)? as u64;
+=======
+        )?.not_undef()?;
+        let size = self.force_bits(size, pointer_size)? as u64;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let align = alloc.read_ptr_sized(
             self,
             vtable.offset(pointer_size * 2, self)?,
-        )?.to_bits(pointer_size)? as u64;
+        )?.not_undef()?;
+        let align = self.force_bits(align, pointer_size)? as u64;
+
+        if size >= self.tcx.data_layout().obj_size_bound() {
+            throw_ub_format!("invalid vtable: \
+                size is bigger than largest supported object");
+        }
         Ok((Size::from_bytes(size), Align::from_bytes(align).unwrap()))
     }
 }

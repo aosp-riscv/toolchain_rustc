@@ -403,7 +403,11 @@ mod tests {
     use std::fs::File;
     use std::io::prelude::*;
     use std::path::Path;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     use tempdir::TempDir;
+=======
+    use tempfile::TempDir;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     pub struct TestTreeIter<'a> {
         entries: Vec<TreeEntry<'a>>,

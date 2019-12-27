@@ -57,6 +57,7 @@ fn main() {
 //     StorageLive(_6);
 //     StorageLive(_7);
 //     _7 = move _2;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //     _6 = const take::<Foo>(move _7) -> [return: bb9, unwind: bb8];
 // }
 // bb3 (cleanup): {
@@ -105,6 +106,56 @@ fn main() {
 //     StorageDead(_9);
 //     StorageDead(_8);
 //     goto -> bb7;
+=======
+//     _6 = const take::<Foo>(move _7) -> [return: bb7, unwind: bb9];
+// }
+// bb3 (cleanup): {
+//     StorageDead(_2);
+//     drop(_1) -> bb1;
+// }
+// bb4: {
+//     ...
+//     StorageDead(_3);
+//     drop(_2) -> [return: bb5, unwind: bb3];
+// }
+// bb5: {
+//     StorageDead(_2);
+//     drop(_1) -> [return: bb6, unwind: bb1];
+// }
+// bb6: {
+//     generator_drop;
+// }
+// bb7: {
+//     StorageDead(_7);
+//     StorageDead(_6);
+//     StorageLive(_8);
+//     StorageLive(_9);
+//     _9 = move _3;
+//     _8 = const take::<Bar>(move _9) -> [return: bb10, unwind: bb11];
+// }
+// bb8 (cleanup): {
+//     StorageDead(_3);
+//     StorageDead(_2);
+//     drop(_1) -> bb1;
+// }
+// bb9 (cleanup): {
+//     StorageDead(_7);
+//     StorageDead(_6);
+//     goto -> bb8;
+// }
+// bb10: {
+//     StorageDead(_9);
+//     StorageDead(_8);
+//     ...
+//     StorageDead(_3);
+//     StorageDead(_2);
+//     drop(_1) -> [return: bb12, unwind: bb1];
+// }
+// bb11 (cleanup): {
+//     StorageDead(_9);
+//     StorageDead(_8);
+//     goto -> bb8;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // }
 // bb12: {
 //     return;

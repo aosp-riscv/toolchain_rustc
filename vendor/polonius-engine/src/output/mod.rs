@@ -14,6 +14,10 @@ use std::collections::{BTreeMap, BTreeSet};
 
 mod datafrog_opt;
 mod hybrid;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+mod initialization;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 mod liveness;
 mod location_insensitive;
 mod naive;
@@ -61,7 +65,19 @@ impl ::std::str::FromStr for Algorithm {
 }
 
 #[derive(Clone, Debug)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub struct Output<Region: Atom, Loan: Atom, Point: Atom, Variable: Atom> {
+=======
+pub struct Output<Region, Loan, Point, Variable, MovePath>
+where
+    Region: Atom,
+    Region: Atom,
+    Loan: Atom,
+    Point: Atom,
+    Variable: Atom,
+    MovePath: Atom,
+{
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub errors: FxHashMap<Point, Vec<Loan>>,
 
     pub dump_enabled: bool,
@@ -76,6 +92,11 @@ pub struct Output<Region: Atom, Loan: Atom, Point: Atom, Variable: Atom> {
     pub subset_anywhere: FxHashMap<Region, BTreeSet<Region>>,
     pub var_live_at: FxHashMap<Point, Vec<Variable>>,
     pub var_drop_live_at: FxHashMap<Point, Vec<Variable>>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    pub path_maybe_initialized_at: FxHashMap<Point, Vec<MovePath>>,
+    pub var_maybe_initialized_on_exit: FxHashMap<Point, Vec<Variable>>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 /// Compares errors reported by Naive implementation with the errors
@@ -114,15 +135,27 @@ fn compare_errors<Loan: Atom, Point: Atom>(
     differ
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl<Region, Loan, Point, Variable> Output<Region, Loan, Point, Variable>
+=======
+impl<Region, Loan, Point, Variable, MovePath> Output<Region, Loan, Point, Variable, MovePath>
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 where
     Region: Atom,
     Loan: Atom,
     Point: Atom,
     Variable: Atom,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    MovePath: Atom,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 {
     pub fn compute(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         all_facts: &AllFacts<Region, Loan, Point, Variable>,
+=======
+        all_facts: &AllFacts<Region, Loan, Point, Variable, MovePath>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         algorithm: Algorithm,
         dump_enabled: bool,
     ) -> Self {
@@ -162,6 +195,11 @@ where
             subset_anywhere: FxHashMap::default(),
             var_live_at: FxHashMap::default(),
             var_drop_live_at: FxHashMap::default(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            path_maybe_initialized_at: FxHashMap::default(),
+            var_maybe_initialized_on_exit: FxHashMap::default(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             dump_enabled,
         }
     }

@@ -3,7 +3,11 @@
 // Test that a feature gate is needed to use `impl Trait` as the
 // return type of an async.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await, member_constraints)]
+=======
+#![feature(member_constraints)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 trait Trait<'a> { }
 impl<T> Trait<'_> for T { }

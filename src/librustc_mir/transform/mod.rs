@@ -137,32 +137,54 @@ pub fn default_name<T: ?Sized>() -> Cow<'static, str> {
 /// A streamlined trait that you can implement to create a pass; the
 /// pass will be named after the type, and it will consist of a main
 /// loop that goes over each available MIR and applies `run_pass`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub trait MirPass {
+=======
+pub trait MirPass<'tcx> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn name(&self) -> Cow<'_, str> {
         default_name::<Self>()
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, source: MirSource<'tcx>, body: &mut Body<'tcx>);
+=======
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, source: MirSource<'tcx>, body: &mut Body<'tcx>);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 pub fn run_passes(
     tcx: TyCtxt<'tcx>,
     body: &mut Body<'tcx>,
     instance: InstanceDef<'tcx>,
+    promoted: Option<Promoted>,
     mir_phase: MirPhase,
-    passes: &[&dyn MirPass],
+    passes: &[&dyn MirPass<'tcx>],
 ) {
     let phase_index = mir_phase.phase_index();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let run_passes = |body: &mut Body<'tcx>, promoted| {
         if body.phase >= mir_phase {
             return;
         }
+=======
+    if body.phase >= mir_phase {
+        return;
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
-        let source = MirSource {
-            instance,
-            promoted,
+    let source = MirSource {
+        instance,
+        promoted,
+    };
+    let mut index = 0;
+    let mut run_pass = |pass: &dyn MirPass<'tcx>| {
+        let run_hooks = |body: &_, index, is_after| {
+            dump_mir::on_mir_pass(tcx, &format_args!("{:03}-{:03}", phase_index, index),
+                                    &pass.name(), source, body, is_after);
         };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut index = 0;
         let mut run_pass = |pass: &dyn MirPass| {
             let run_hooks = |body: &_, index, is_after| {
@@ -172,7 +194,13 @@ pub fn run_passes(
             run_hooks(body, index, false);
             pass.run_pass(tcx, source, body);
             run_hooks(body, index, true);
+=======
+        run_hooks(body, index, false);
+        pass.run_pass(tcx, source, body);
+        run_hooks(body, index, true);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             index += 1;
         };
 
@@ -181,8 +209,12 @@ pub fn run_passes(
         }
 
         body.phase = mir_phase;
+=======
+        index += 1;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     run_passes(body, None);
 
     for (index, promoted_body) in body.promoted.iter_enumerated_mut() {
@@ -190,7 +222,13 @@ pub fn run_passes(
 
         //Let's make sure we don't miss any nested instances
         assert!(promoted_body.promoted.is_empty())
+=======
+    for pass in passes {
+        run_pass(*pass);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
+
+    body.phase = mir_phase;
 }
 
 fn mir_const(tcx: TyCtxt<'_>, def_id: DefId) -> &Steal<Body<'_>> {
@@ -198,7 +236,11 @@ fn mir_const(tcx: TyCtxt<'_>, def_id: DefId) -> &Steal<Body<'_>> {
     let _ = tcx.unsafety_check_result(def_id);
 
     let mut body = tcx.mir_built(def_id).steal();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     run_passes(tcx, &mut body, InstanceDef::Item(def_id), MirPhase::Const, &[
+=======
+    run_passes(tcx, &mut body, InstanceDef::Item(def_id), None, MirPhase::Const, &[
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // What we need to do constant evaluation.
         &simplify::SimplifyCfg::new("initial"),
         &rustc_peek::SanityCheck,
@@ -207,7 +249,14 @@ fn mir_const(tcx: TyCtxt<'_>, def_id: DefId) -> &Steal<Body<'_>> {
     tcx.alloc_steal_mir(body)
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn mir_validated(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx Steal<Body<'tcx>> {
+=======
+fn mir_validated(
+    tcx: TyCtxt<'tcx>,
+    def_id: DefId,
+) -> (&'tcx Steal<Body<'tcx>>, &'tcx Steal<IndexVec<Promoted, Body<'tcx>>>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let hir_id = tcx.hir().as_local_hir_id(def_id).unwrap();
     if let hir::BodyOwnerKind::Const = tcx.hir().body_owner_kind(hir_id) {
         // Ensure that we compute the `mir_const_qualif` for constants at
@@ -216,14 +265,25 @@ fn mir_validated(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx Steal<Body<'tcx>> {
     }
 
     let mut body = tcx.mir_const(def_id).steal();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     run_passes(tcx, &mut body, InstanceDef::Item(def_id), MirPhase::Validated, &[
+=======
+    let qualify_and_promote_pass = qualify_consts::QualifyAndPromoteConstants::default();
+    run_passes(tcx, &mut body, InstanceDef::Item(def_id), None, MirPhase::Validated, &[
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // What we need to run borrowck etc.
-        &qualify_consts::QualifyAndPromoteConstants,
+        &qualify_and_promote_pass,
         &simplify::SimplifyCfg::new("qualify-consts"),
     ]);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     tcx.alloc_steal_mir(body)
+=======
+    let promoted = qualify_and_promote_pass.promoted.into_inner();
+    (tcx.alloc_steal_mir(body), tcx.alloc_steal_promoted(promoted))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn optimized_mir(tcx: TyCtxt<'_>, def_id: DefId) -> &Body<'_> {
     if tcx.is_constructor(def_id) {
         // There's no reason to run all of the MIR passes on constructors when
@@ -243,6 +303,15 @@ fn optimized_mir(tcx: TyCtxt<'_>, def_id: DefId) -> &Body<'_> {
 
     let mut body = tcx.mir_validated(def_id).steal();
     run_passes(tcx, &mut body, InstanceDef::Item(def_id), MirPhase::Optimized, &[
+=======
+fn run_optimization_passes<'tcx>(
+    tcx: TyCtxt<'tcx>,
+    body: &mut Body<'tcx>,
+    def_id: DefId,
+    promoted: Option<Promoted>,
+) {
+    run_passes(tcx, body, InstanceDef::Item(def_id), promoted, MirPhase::Optimized, &[
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // Remove all things only needed by analysis
         &no_landing_pads::NoLandingPads,
         &simplify_branches::SimplifyBranches::new("initial"),
@@ -293,10 +362,52 @@ fn optimized_mir(tcx: TyCtxt<'_>, def_id: DefId) -> &Body<'_> {
         &add_call_guards::CriticalCallEdges,
         &dump_mir::Marker("PreCodegen"),
     ]);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     tcx.arena.alloc(body)
 }
 
 fn promoted_mir<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx IndexVec<Promoted, Body<'tcx>> {
     let body = tcx.optimized_mir(def_id);
     &body.promoted
+=======
+}
+
+fn optimized_mir(tcx: TyCtxt<'_>, def_id: DefId) -> &Body<'_> {
+    if tcx.is_constructor(def_id) {
+        // There's no reason to run all of the MIR passes on constructors when
+        // we can just output the MIR we want directly. This also saves const
+        // qualification and borrow checking the trouble of special casing
+        // constructors.
+        return shim::build_adt_ctor(tcx, def_id);
+    }
+
+    // (Mir-)Borrowck uses `mir_validated`, so we have to force it to
+    // execute before we can steal.
+    tcx.ensure().mir_borrowck(def_id);
+
+    if tcx.use_ast_borrowck() {
+        tcx.ensure().borrowck(def_id);
+    }
+
+    let (body, _) = tcx.mir_validated(def_id);
+    let mut body = body.steal();
+    run_optimization_passes(tcx, &mut body, def_id, None);
+    tcx.arena.alloc(body)
+}
+
+fn promoted_mir<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId) -> &'tcx IndexVec<Promoted, Body<'tcx>> {
+    if tcx.is_constructor(def_id) {
+        return tcx.intern_promoted(IndexVec::new());
+    }
+
+    tcx.ensure().mir_borrowck(def_id);
+    let (_, promoted) = tcx.mir_validated(def_id);
+    let mut promoted = promoted.steal();
+
+    for (p, mut body) in promoted.iter_enumerated_mut() {
+        run_optimization_passes(tcx, &mut body, def_id, Some(p));
+    }
+
+    tcx.intern_promoted(promoted)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

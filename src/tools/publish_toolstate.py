@@ -7,6 +7,11 @@
 ## It is set as callback for `src/ci/docker/x86_64-gnu-tools/repo.sh` by the CI scripts
 ## when a new commit lands on `master` (i.e., after it passed all checks on `auto`).
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+from __future__ import print_function
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 import sys
 import re
 import os
@@ -20,7 +25,10 @@ except ImportError:
     import urllib.request as urllib2
 
 # List of people to ping when the status of a tool or a book changed.
+# These should be collaborators of the rust-lang/rust repository (with at least
+# read privileges on it). CI will fail otherwise.
 MAINTAINERS = {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     'miri': '@oli-obk @RalfJung @eddyb',
     'clippy-driver': '@Manishearth @llogiq @mcarton @oli-obk @phansch',
     'rls': '@Xanewok',
@@ -35,6 +43,25 @@ MAINTAINERS = {
     ),
     'edition-guide': '@ehuss @Centril @steveklabnik',
     'rustc-guide': '@mark-i-m @spastorino'
+=======
+    'miri': {'oli-obk', 'RalfJung', 'eddyb'},
+    'clippy-driver': {
+        'Manishearth', 'llogiq', 'mcarton', 'oli-obk', 'phansch', 'flip1995',
+        'yaahc',
+    },
+    'rls': {'Xanewok'},
+    'rustfmt': {'topecongiro'},
+    'book': {'carols10cents', 'steveklabnik'},
+    'nomicon': {'frewsxcv', 'Gankra'},
+    'reference': {'steveklabnik', 'Havvy', 'matthewjasper', 'ehuss'},
+    'rust-by-example': {'steveklabnik', 'marioidival'},
+    'embedded-book': {
+        'adamgreig', 'andre-richter', 'jamesmunns', 'korken89',
+        'ryankurte', 'thejpster', 'therealprof',
+    },
+    'edition-guide': {'ehuss', 'Centril', 'steveklabnik'},
+    'rustc-guide': {'mark-i-m', 'spastorino', 'amanjeev'},
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 REPOS = {
@@ -51,6 +78,50 @@ REPOS = {
     'rustc-guide': 'https://github.com/rust-lang/rustc-guide',
 }
 
+
+def validate_maintainers(repo, github_token):
+    '''Ensure all maintainers are assignable on a GitHub repo'''
+    next_link_re = re.compile(r'<([^>]+)>; rel="next"')
+
+    # Load the list of assignable people in the GitHub repo
+    assignable = []
+    url = 'https://api.github.com/repos/%s/collaborators?per_page=100' % repo
+    while url is not None:
+        response = urllib2.urlopen(urllib2.Request(url, headers={
+            'Authorization': 'token ' + github_token,
+            # Properly load nested teams.
+            'Accept': 'application/vnd.github.hellcat-preview+json',
+        }))
+        assignable.extend(user['login'] for user in json.load(response))
+        # Load the next page if available
+        url = None
+        link_header = response.headers.get('Link')
+        if link_header:
+            matches = next_link_re.match(link_header)
+            if matches is not None:
+                url = matches.group(1)
+
+    errors = False
+    for tool, maintainers in MAINTAINERS.items():
+        for maintainer in maintainers:
+            if maintainer not in assignable:
+                errors = True
+                print(
+                    "error: %s maintainer @%s is not assignable in the %s repo"
+                    % (tool, maintainer, repo),
+                )
+
+    if errors:
+        print()
+        print("  To be assignable, a person needs to be explicitly listed as a")
+        print("  collaborator in the repository settings. The simple way to")
+        print("  fix this is to ask someone with 'admin' privileges on the repo")
+        print("  to add the person or whole team as a collaborator with 'read'")
+        print("  privileges. Those privileges don't grant any extra permissions")
+        print("  so it's safe to apply them.")
+        print()
+        print("The build will fail due to this.")
+        exit(1)
 
 def read_current_status(current_commit, path):
     '''Reads build status of `current_commit` from content of `history/*.tsv`
@@ -73,12 +144,17 @@ def maybe_delink(message):
 def issue(
     tool,
     status,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     maintainers,
+=======
+    assignees,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     relevant_pr_number,
     relevant_pr_user,
     pr_reviewer,
 ):
     # Open an issue about the toolstate failure.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     assignees = [x.strip() for x in maintainers.split('@') if x != '']
     if status == 'test-fail':
         status_description = 'has failing tests'
@@ -101,6 +177,29 @@ def issue(
         )),
         'title': '`{}` no longer builds after {}'.format(tool, relevant_pr_number),
         'assignees': assignees,
+=======
+    if status == 'test-fail':
+        status_description = 'has failing tests'
+    else:
+        status_description = 'no longer builds'
+    request = json.dumps({
+        'body': maybe_delink(textwrap.dedent('''\
+        Hello, this is your friendly neighborhood mergebot.
+        After merging PR {}, I observed that the tool {} {}.
+        A follow-up PR to the repository {} is needed to fix the fallout.
+
+        cc @{}, do you think you would have time to do the follow-up work?
+        If so, that would be great!
+
+        cc @{}, the PR reviewer, and @rust-lang/compiler -- nominating for prioritization.
+
+        ''').format(
+            relevant_pr_number, tool, status_description,
+            REPOS.get(tool), relevant_pr_user, pr_reviewer
+        )),
+        'title': '`{}` no longer builds after {}'.format(tool, relevant_pr_number),
+        'assignees': list(assignees),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         'labels': ['T-compiler', 'I-nominated'],
     })
     print("Creating issue:\n{}".format(request))
@@ -150,22 +249,44 @@ def update_latest(
                 old = status[os]
                 new = s.get(tool, old)
                 status[os] = new
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 if new > old: # comparing the strings, but they are ordered appropriately!
+=======
+                maintainers = ' '.join('@'+name for name in MAINTAINERS[tool])
+                # comparing the strings, but they are ordered appropriately:
+                # "test-pass" > "test-fail" > "build-fail"
+                if new > old:
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     # things got fixed or at least the status quo improved
                     changed = True
                     message += '🎉 {} on {}: {} → {} (cc {}, @rust-lang/infra).\n' \
-                        .format(tool, os, old, new, MAINTAINERS.get(tool))
+                        .format(tool, os, old, new, maintainers)
                 elif new < old:
                     # tests or builds are failing and were not failing before
                     changed = True
                     title = '💔 {} on {}: {} → {}' \
                         .format(tool, os, old, new)
                     message += '{} (cc {}, @rust-lang/infra).\n' \
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         .format(title, MAINTAINERS.get(tool))
                     # Most tools only create issues for build failures.
                     # Other failures can be spurious.
                     if new == 'build-fail' or (tool == 'miri' and new == 'test-fail'):
                         create_issue_for_status = new
+=======
+                        .format(title, maintainers)
+                    # See if we need to create an issue.
+                    if tool == 'miri':
+                        # Create issue if tests used to pass before. Don't open a *second*
+                        # issue when we regress from "test-fail" to "build-fail".
+                        if old == 'test-pass':
+                            create_issue_for_status = new
+                    else:
+                        # Create issue if things no longer build.
+                        # (No issue for mere test failures to avoid spurious issues.)
+                        if new == 'build-fail':
+                            create_issue_for_status = new
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
             if create_issue_for_status is not None:
                 try:
@@ -200,6 +321,16 @@ def update_latest(
 
 
 if __name__ == '__main__':
+    repo = os.environ.get('TOOLSTATE_VALIDATE_MAINTAINERS_REPO')
+    if repo:
+        github_token = os.environ.get('TOOLSTATE_REPO_ACCESS_TOKEN')
+        if github_token:
+            validate_maintainers(repo, github_token)
+        else:
+            print('skipping toolstate maintainers validation since no GitHub token is present')
+        # When validating maintainers don't run the full script.
+        exit(0)
+
     cur_commit = sys.argv[1]
     cur_datetime = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
     cur_commit_msg = sys.argv[2]

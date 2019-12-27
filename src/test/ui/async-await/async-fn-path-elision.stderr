@@ -1,5 +1,9 @@
 error[E0726]: implicit elided lifetime not allowed here
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/async-fn-path-elision.rs:8:20
+=======
+  --> $DIR/async-fn-path-elision.rs:5:20
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | async fn error(lt: HasLifetime) {
    |                    ^^^^^^^^^^^- help: indicate the anonymous lifetime: `<'_>`

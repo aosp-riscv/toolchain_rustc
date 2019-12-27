@@ -121,12 +121,17 @@ BraceStructTypeFoldableImpl! {
 impl<'tcx> Place<'tcx> {
     pub fn ty_from<D>(
         base: &PlaceBase<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         projection: &Option<Box<Projection<'tcx>>>,
+=======
+        projection: &[PlaceElem<'tcx>],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         local_decls: &D,
         tcx: TyCtxt<'tcx>
     ) -> PlaceTy<'tcx>
         where D: HasLocalDecls<'tcx>
     {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Place::iterate_over(base, projection, |place_base, place_projections| {
             let mut place_ty = place_base.ty(local_decls);
 
@@ -136,6 +141,12 @@ impl<'tcx> Place<'tcx> {
 
             place_ty
         })
+=======
+        projection.iter().fold(
+            base.ty(local_decls),
+            |place_ty, elem| place_ty.projection_ty(tcx, elem)
+        )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     pub fn ty<D>(&self, local_decls: &D, tcx: TyCtxt<'tcx>) -> PlaceTy<'tcx>
@@ -252,7 +263,7 @@ impl<'tcx> Operand<'tcx> {
         match self {
             &Operand::Copy(ref l) |
             &Operand::Move(ref l) => l.ty(local_decls, tcx).ty,
-            &Operand::Constant(ref c) => c.ty,
+            &Operand::Constant(ref c) => c.literal.ty,
         }
     }
 }

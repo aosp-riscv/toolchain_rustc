@@ -78,20 +78,32 @@ fn fu_move_after_fu_move() {
 
 fn copy_after_field_assign_after_uninit() {
     let mut x: A;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     x.a = 1; //~ ERROR assign to part of possibly uninitialized variable: `x`
+=======
+    x.a = 1; //~ ERROR assign to part of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     drop(x.a);
 }
 
 fn borrow_after_field_assign_after_uninit() {
     let mut x: A;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     x.a = 1; //~ ERROR assign to part of possibly uninitialized variable: `x`
+=======
+    x.a = 1; //~ ERROR assign to part of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let p = &x.a;
     drop(*p);
 }
 
 fn move_after_field_assign_after_uninit() {
     let mut x: A;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     x.b = box 1; //~ ERROR assign to part of possibly uninitialized variable: `x`
+=======
+    x.b = box 1; //~ ERROR assign to part of possibly-uninitialized variable: `x`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     drop(x.b);
 }
 

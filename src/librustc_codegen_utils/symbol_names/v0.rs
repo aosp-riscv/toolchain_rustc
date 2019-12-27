@@ -198,6 +198,7 @@ impl SymbolMangler<'tcx> {
 
         let lifetimes = regions.into_iter().map(|br| {
             match br {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 ty::BrAnon(i) => i + 1,
                 _ => bug!("symbol_names: non-anonymized region `{:?}` in `{:?}`", br, value),
             }
@@ -297,6 +298,115 @@ impl Printer<'tcx> for SymbolMangler<'tcx> {
             // Late-bound lifetimes use indices starting at 1,
             // see `BinderLevel` for more details.
             ty::ReLateBound(debruijn, ty::BrAnon(i)) => {
+=======
+                ty::BrAnon(i) => {
+                    // FIXME(eddyb) for some reason, `anonymize_late_bound_regions` starts at `1`.
+                    assert_ne!(i, 0);
+                    i - 1
+                },
+                _ => bug!("symbol_names: non-anonymized region `{:?}` in `{:?}`", br, value),
+            }
+        }).max().map_or(0, |max| max + 1);
+
+        self.push_opt_integer_62("G", lifetimes as u64);
+        lifetime_depths.end += lifetimes;
+
+        self.binders.push(BinderLevel { lifetime_depths });
+        self = print_value(self, value.skip_binder())?;
+        self.binders.pop();
+
+        Ok(self)
+    }
+}
+
+impl Printer<'tcx> for SymbolMangler<'tcx> {
+    type Error = !;
+
+    type Path = Self;
+    type Region = Self;
+    type Type = Self;
+    type DynExistential = Self;
+    type Const = Self;
+
+    fn tcx(&self) -> TyCtxt<'tcx> {
+        self.tcx
+    }
+
+    fn print_def_path(
+        mut self,
+        def_id: DefId,
+        substs: &'tcx [Kind<'tcx>],
+    ) -> Result<Self::Path, Self::Error> {
+        if let Some(&i) = self.compress.as_ref().and_then(|c| c.paths.get(&(def_id, substs))) {
+            return self.print_backref(i);
+        }
+        let start = self.out.len();
+
+        self = self.default_print_def_path(def_id, substs)?;
+
+        // Only cache paths that do not refer to an enclosing
+        // binder (which would change depending on context).
+        if !substs.iter().any(|k| k.has_escaping_bound_vars()) {
+            if let Some(c) = &mut self.compress {
+                c.paths.insert((def_id, substs), start);
+            }
+        }
+        Ok(self)
+    }
+
+    fn print_impl_path(
+        self,
+        impl_def_id: DefId,
+        substs: &'tcx [Kind<'tcx>],
+        mut self_ty: Ty<'tcx>,
+        mut impl_trait_ref: Option<ty::TraitRef<'tcx>>,
+    ) -> Result<Self::Path, Self::Error> {
+        let key = self.tcx.def_key(impl_def_id);
+        let parent_def_id = DefId { index: key.parent.unwrap(), ..impl_def_id };
+
+        let mut param_env = self.tcx.param_env(impl_def_id)
+            .with_reveal_all();
+        if !substs.is_empty() {
+            param_env = param_env.subst(self.tcx, substs);
+        }
+
+        match &mut impl_trait_ref {
+            Some(impl_trait_ref) => {
+                assert_eq!(impl_trait_ref.self_ty(), self_ty);
+                *impl_trait_ref =
+                    self.tcx.normalize_erasing_regions(param_env, *impl_trait_ref);
+                self_ty = impl_trait_ref.self_ty();
+            }
+            None => {
+                self_ty = self.tcx.normalize_erasing_regions(param_env, self_ty);
+            }
+        }
+
+        self.path_append_impl(
+            |cx| cx.print_def_path(parent_def_id, &[]),
+            &key.disambiguated_data,
+            self_ty,
+            impl_trait_ref,
+        )
+    }
+
+    fn print_region(
+        mut self,
+        region: ty::Region<'_>,
+    ) -> Result<Self::Region, Self::Error> {
+        let i = match *region {
+            // Erased lifetimes use the index 0, for a
+            // shorter mangling of `L_`.
+            ty::ReErased => 0,
+
+            // Late-bound lifetimes use indices starting at 1,
+            // see `BinderLevel` for more details.
+            ty::ReLateBound(debruijn, ty::BrAnon(i)) => {
+                // FIXME(eddyb) for some reason, `anonymize_late_bound_regions` starts at `1`.
+                assert_ne!(i, 0);
+                let i = i - 1;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let binder = &self.binders[self.binders.len() - 1 - debruijn.index()];
                 let depth = binder.lifetime_depths.start + i;
 

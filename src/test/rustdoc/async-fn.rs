@@ -1,7 +1,10 @@
 // edition:2018
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // @has async_fn/fn.foo.html '//pre[@class="rust fn"]' 'pub async fn foo() -> Option<Foo>'
 pub async fn foo() -> Option<Foo> {
     None

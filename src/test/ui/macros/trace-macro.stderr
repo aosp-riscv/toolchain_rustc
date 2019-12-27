@@ -5,5 +5,9 @@ LL |     println!("Hello, World!");
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^
    |
    = note: expanding `println! { "Hello, World!" }`
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    = note: to `{ $crate :: io :: _print (format_args_nl ! ("Hello, World!")) ; }`
+=======
+   = note: to `{ $crate :: io :: _print ($crate :: format_args_nl ! ("Hello, World!")) ; }`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 

@@ -1,16 +1,37 @@
 use rustc::ty::subst::SubstsRef;
 use rustc::ty::{self, ClosureSubsts, GeneratorSubsts, Ty, TypeFoldable};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc::mir::{Location, Body};
+=======
+use rustc::mir::{Location, Body, Promoted};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc::mir::visit::{MutVisitor, TyContext};
 use rustc::infer::{InferCtxt, NLLRegionVariableOrigin};
+use rustc_data_structures::indexed_vec::IndexVec;
 
 /// Replaces all free regions appearing in the MIR with fresh
 /// inference variables, returning the number of variables created.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub fn renumber_mir<'tcx>(infcx: &InferCtxt<'_, 'tcx>, body: &mut Body<'tcx>) {
+=======
+pub fn renumber_mir<'tcx>(
+    infcx: &InferCtxt<'_, 'tcx>,
+    body: &mut Body<'tcx>,
+    promoted: &mut IndexVec<Promoted, Body<'tcx>>,
+) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     debug!("renumber_mir()");
     debug!("renumber_mir: body.arg_count={:?}", body.arg_count);
 
     let mut visitor = NLLVisitor { infcx };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+    for body in promoted.iter_mut() {
+        visitor.visit_body(body);
+    }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     visitor.visit_body(body);
 }
 
@@ -44,6 +65,7 @@ impl<'a, 'tcx> NLLVisitor<'a, 'tcx> {
 }
 
 impl<'a, 'tcx> MutVisitor<'tcx> for NLLVisitor<'a, 'tcx> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn visit_body(&mut self, body: &mut Body<'tcx>) {
         for promoted in body.promoted.iter_mut() {
             self.visit_body(promoted);
@@ -52,6 +74,8 @@ impl<'a, 'tcx> MutVisitor<'tcx> for NLLVisitor<'a, 'tcx> {
         self.super_body(body);
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn visit_ty(&mut self, ty: &mut Ty<'tcx>, ty_context: TyContext) {
         debug!("visit_ty(ty={:?}, ty_context={:?})", ty, ty_context);
 

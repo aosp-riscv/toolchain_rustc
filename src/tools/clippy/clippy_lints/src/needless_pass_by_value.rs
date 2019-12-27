@@ -1,6 +1,10 @@
 use crate::utils::ptr::get_spans;
 use crate::utils::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     get_trait_def_id, implements_trait, in_macro_or_desugar, is_copy, is_self, match_type, multispan_sugg, paths,
+=======
+    get_trait_def_id, implements_trait, is_copy, is_self, is_type_diagnostic_item, match_type, multispan_sugg, paths,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     snippet, snippet_opt, span_lint_and_then,
 };
 use if_chain::if_chain;
@@ -19,7 +23,7 @@ use rustc_target::spec::abi::Abi;
 use std::borrow::Cow;
 use syntax::ast::Attribute;
 use syntax::errors::DiagnosticBuilder;
-use syntax_pos::Span;
+use syntax_pos::{Span, Symbol};
 
 declare_clippy_lint! {
     /// **What it does:** Checks for functions taking arguments by value, but not
@@ -76,7 +80,11 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NeedlessPassByValue {
         span: Span,
         hir_id: HirId,
     ) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(span) {
+=======
+        if span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 
@@ -152,7 +160,7 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NeedlessPassByValue {
         let fn_sig = cx.tcx.fn_sig(fn_def_id);
         let fn_sig = cx.tcx.erase_late_bound_regions(&fn_sig);
 
-        for (idx, ((input, &ty), arg)) in decl.inputs.iter().zip(fn_sig.inputs()).zip(&body.arguments).enumerate() {
+        for (idx, ((input, &ty), arg)) in decl.inputs.iter().zip(fn_sig.inputs()).zip(&body.params).enumerate() {
             // All spans generated from a proc-macro invocation are the same...
             if span == input.span {
                 return;
@@ -221,7 +229,7 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NeedlessPassByValue {
 
                         let deref_span = spans_need_deref.get(&canonical_id);
                         if_chain! {
-                            if match_type(cx, ty, &paths::VEC);
+                            if is_type_diagnostic_item(cx, ty, Symbol::intern("vec_type"));
                             if let Some(clone_spans) =
                                 get_spans(cx, Some(body.id()), idx, &[("clone", ".to_owned()")]);
                             if let TyKind::Path(QPath::Resolved(_, ref path)) = input.node;

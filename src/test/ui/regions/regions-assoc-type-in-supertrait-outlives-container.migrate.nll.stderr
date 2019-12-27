@@ -1,5 +1,9 @@
 error: lifetime may not live long enough
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/regions-assoc-type-in-supertrait-outlives-container.rs:43:12
+=======
+  --> $DIR/regions-assoc-type-in-supertrait-outlives-container.rs:39:12
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL | fn with_assoc<'a,'b>() {
    |               -- -- lifetime `'b` defined here

@@ -27,7 +27,10 @@ extern "platform-intrinsic" {
     pub fn simd_sub<T>(x: T, y: T) -> T;
     pub fn simd_mul<T>(x: T, y: T) -> T;
     pub fn simd_div<T>(x: T, y: T) -> T;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     pub fn simd_rem<T>(x: T, y: T) -> T;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn simd_shl<T>(x: T, y: T) -> T;
     pub fn simd_shr<T>(x: T, y: T) -> T;
     pub fn simd_and<T>(x: T, y: T) -> T;

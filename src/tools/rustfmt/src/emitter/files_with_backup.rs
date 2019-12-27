@@ -6,7 +6,11 @@ pub(crate) struct FilesWithBackupEmitter;
 
 impl Emitter for FilesWithBackupEmitter {
     fn emit_formatted_file(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         &self,
+=======
+        &mut self,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         _output: &mut dyn Write,
         FormattedFile {
             filename,

@@ -39,8 +39,13 @@ use crate::util;
 
 pub struct AddMovesForPackedDrops;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for AddMovesForPackedDrops {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for AddMovesForPackedDrops {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, src: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         debug!("add_moves_for_packed_drops({:?} @ {:?})", src, body.span);
         add_moves_for_packed_drops(tcx, body, src.def_id());
     }

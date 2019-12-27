@@ -1980,7 +1980,10 @@ mod tests {
     test_vcombine!(test_vcombine_u64 => vcombine_u64([3_u64], [13_u64]));
     test_vcombine!(test_vcombine_p64 => vcombine_p64([3_u64], [13_u64]));
     test_vcombine!(test_vcombine_f64 => vcombine_f64([-3_f64], [13_f64]));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 #[cfg(test)]

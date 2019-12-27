@@ -103,9 +103,12 @@
 //! More documentation can be found in each respective module below, and you can
 //! also check out the `src/bootstrap/README.md` file for more information.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // NO-RUSTC-WRAPPER
 #![deny(warnings, rust_2018_idioms, unused_lifetimes)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![feature(core_intrinsics)]
 #![feature(drain_filter)]
 
@@ -297,9 +300,6 @@ pub enum Mode {
     /// Build the standard library, placing output in the "stageN-std" directory.
     Std,
 
-    /// Build libtest, placing output in the "stageN-test" directory.
-    Test,
-
     /// Build librustc, and compiler libraries, placing output in the "stageN-rustc" directory.
     Rustc,
 
@@ -315,7 +315,6 @@ pub enum Mode {
     /// Compile a tool which uses all libraries we compile (up to rustc).
     /// Doesn't use the stage0 compiler libraries like "other", and includes
     /// tools like rustdoc, cargo, rls, etc.
-    ToolTest,
     ToolStd,
     ToolRustc,
 }
@@ -502,9 +501,6 @@ impl Build {
         if self.config.profiler {
             features.push_str(" profiler");
         }
-        if self.config.wasm_syscall {
-            features.push_str(" wasm_syscall");
-        }
         features
     }
 
@@ -536,11 +532,14 @@ impl Build {
     fn stage_out(&self, compiler: Compiler, mode: Mode) -> PathBuf {
         let suffix = match mode {
             Mode::Std => "-std",
-            Mode::Test => "-test",
             Mode::Rustc => "-rustc",
             Mode::Codegen => "-codegen",
             Mode::ToolBootstrap => "-bootstrap-tools",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             Mode::ToolStd | Mode::ToolTest | Mode::ToolRustc => "-tools",
+=======
+            Mode::ToolStd | Mode::ToolRustc => "-tools",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         };
         self.out.join(&*compiler.host)
                 .join(format!("stage{}{}", compiler.stage, suffix))
@@ -1330,4 +1329,14 @@ impl Compiler {
         let final_stage = if build.config.full_bootstrap { 2 } else { 1 };
         self.stage >= final_stage
     }
+}
+
+fn envify(s: &str) -> String {
+    s.chars()
+        .map(|c| match c {
+            '-' => '_',
+            c => c,
+        })
+        .flat_map(|c| c.to_uppercase())
+        .collect()
 }

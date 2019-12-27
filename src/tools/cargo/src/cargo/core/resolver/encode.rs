@@ -193,9 +193,15 @@ impl EncodableResolve {
         let mut map = HashMap::new();
         for (id, _) in live_pkgs.values() {
             map.entry(id.name().as_str())
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 .or_insert(HashMap::new())
                 .entry(id.version().to_string())
                 .or_insert(HashMap::new())
+=======
+                .or_insert_with(HashMap::new)
+                .entry(id.version().to_string())
+                .or_insert_with(HashMap::new)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 .insert(id.source_id(), *id);
         }
 
@@ -317,7 +323,11 @@ impl EncodableResolve {
         // If `checksum` was listed in `[metadata]` but we were previously
         // listed as `V2` then assume some sort of bad git merge happened, so
         // discard all checksums and let's regenerate them later.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if to_remove.len() > 0 && version == ResolveVersion::V2 {
+=======
+        if !to_remove.is_empty() && version == ResolveVersion::V2 {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             checksums.drain();
         }
         for k in to_remove {
@@ -542,7 +552,11 @@ impl<'a> ser::Serialize for Resolve {
                     dependencies: None,
                     replace: None,
                     checksum: match self.version() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         ResolveVersion::V2 => self.checksums().get(&id).and_then(|x| x.clone()),
+=======
+                        ResolveVersion::V2 => self.checksums().get(id).and_then(|x| x.clone()),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         ResolveVersion::V1 => None,
                     },
                 })

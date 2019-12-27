@@ -181,10 +181,16 @@ fn return_macro_parse_failure_fallback(
         return trim_left_preserve_layout(context.snippet(span), indent, &context.config);
     }
 
+    context.skipped_range.borrow_mut().push((
+        context.source_map.lookup_line(span.lo()).unwrap().line,
+        context.source_map.lookup_line(span.hi()).unwrap().line,
+    ));
+
     // Return the snippet unmodified if the macro is not block-like
     Some(context.snippet(span).to_owned())
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 struct InsideMacroGuard<'a> {
     context: &'a RewriteContext<'a>,
     is_nested: bool,
@@ -203,6 +209,8 @@ impl<'a> Drop for InsideMacroGuard<'a> {
     }
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 pub(crate) fn rewrite_macro(
     mac: &ast::Mac,
     extra_ident: Option<ast::Ident>,
@@ -212,13 +220,30 @@ pub(crate) fn rewrite_macro(
 ) -> Option<String> {
     let should_skip = context
         .skip_context
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         .skip_macro(&context.snippet(mac.node.path.span).to_owned());
+=======
+        .skip_macro(&context.snippet(mac.path.span).to_owned());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     if should_skip {
         None
     } else {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let guard = InsideMacroGuard::inside_macro_context(context);
         let result = catch_unwind(AssertUnwindSafe(|| {
             rewrite_macro_inner(mac, extra_ident, context, shape, position, guard.is_nested)
+=======
+        let guard = context.enter_macro();
+        let result = catch_unwind(AssertUnwindSafe(|| {
+            rewrite_macro_inner(
+                mac,
+                extra_ident,
+                context,
+                shape,
+                position,
+                guard.is_nested(),
+            )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }));
         match result {
             Err(..) | Ok(None) => {
@@ -241,7 +266,11 @@ fn check_keyword<'a, 'b: 'a>(parser: &'a mut Parser<'b>) -> Option<MacroArg> {
         {
             parser.bump();
             let macro_arg =
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 MacroArg::Keyword(ast::Ident::with_empty_ctxt(keyword), parser.prev_span);
+=======
+                MacroArg::Keyword(ast::Ident::with_dummy_span(keyword), parser.prev_span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return Some(macro_arg);
         }
     }
@@ -258,14 +287,14 @@ fn rewrite_macro_inner(
 ) -> Option<String> {
     if context.config.use_try_shorthand() {
         if let Some(expr) = convert_try_mac(mac, context) {
-            context.inside_macro.replace(false);
+            context.leave_macro();
             return expr.rewrite(context, shape);
         }
     }
 
     let original_style = macro_style(mac, context);
 
-    let macro_name = rewrite_macro_name(context, &mac.node.path, extra_ident);
+    let macro_name = rewrite_macro_name(context, &mac.path, extra_ident);
 
     let style = if FORCED_BRACKET_MACROS.contains(&&macro_name[..]) && !is_nested_macro {
         DelimToken::Bracket
@@ -273,7 +302,7 @@ fn rewrite_macro_inner(
         original_style
     };
 
-    let ts: TokenStream = mac.node.stream();
+    let ts: TokenStream = mac.stream();
     let has_comment = contains_comment(context.snippet(mac.span));
     if ts.is_empty() && !has_comment {
         return match style {
@@ -303,9 +332,9 @@ fn rewrite_macro_inner(
 
     if DelimToken::Brace != style {
         loop {
-            if let Some(arg) = parse_macro_arg(&mut parser) {
+            if let Some(arg) = check_keyword(&mut parser) {
                 arg_vec.push(arg);
-            } else if let Some(arg) = check_keyword(&mut parser) {
+            } else if let Some(arg) = parse_macro_arg(&mut parser) {
                 arg_vec.push(arg);
             } else {
                 return return_macro_parse_failure_fallback(context, shape.indent, mac.span);
@@ -407,7 +436,7 @@ fn rewrite_macro_inner(
                     Some(SeparatorTactic::Never)
                 };
                 if FORCED_BRACKET_MACROS.contains(macro_name) && !is_nested_macro {
-                    context.inside_macro.replace(false);
+                    context.leave_macro();
                     if context.use_block_indent() {
                         force_trailing_comma = Some(SeparatorTactic::Vertical);
                     };
@@ -1196,8 +1225,13 @@ fn next_space(tok: &TokenKind) -> SpaceState {
 /// when the macro is not an instance of `try!` (or parsing the inner expression
 /// failed).
 pub(crate) fn convert_try_mac(mac: &ast::Mac, context: &RewriteContext<'_>) -> Option<ast::Expr> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if &mac.node.path.to_string() == "try" {
         let ts: TokenStream = mac.node.tts.clone();
+=======
+    if &mac.path.to_string() == "try" {
+        let ts: TokenStream = mac.tts.clone();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let mut parser = new_parser_from_tts(context.parse_session, ts.trees().collect());
 
         Some(ast::Expr {
@@ -1538,6 +1572,7 @@ fn rewrite_macro_with_items(
     Some(result)
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 const RUST_KW: [Symbol; 60] = [
     kw::PathRoot,
     kw::DollarCrate,
@@ -1598,5 +1633,66 @@ const RUST_KW: [Symbol; 60] = [
     kw::Catch,
     kw::Default,
     kw::Existential,
+=======
+const RUST_KW: [Symbol; 59] = [
+    kw::PathRoot,
+    kw::DollarCrate,
+    kw::Underscore,
+    kw::As,
+    kw::Box,
+    kw::Break,
+    kw::Const,
+    kw::Continue,
+    kw::Crate,
+    kw::Else,
+    kw::Enum,
+    kw::Extern,
+    kw::False,
+    kw::Fn,
+    kw::For,
+    kw::If,
+    kw::Impl,
+    kw::In,
+    kw::Let,
+    kw::Loop,
+    kw::Match,
+    kw::Mod,
+    kw::Move,
+    kw::Mut,
+    kw::Pub,
+    kw::Ref,
+    kw::Return,
+    kw::SelfLower,
+    kw::SelfUpper,
+    kw::Static,
+    kw::Struct,
+    kw::Super,
+    kw::Trait,
+    kw::True,
+    kw::Type,
+    kw::Unsafe,
+    kw::Use,
+    kw::Where,
+    kw::While,
+    kw::Abstract,
+    kw::Become,
+    kw::Do,
+    kw::Final,
+    kw::Macro,
+    kw::Override,
+    kw::Priv,
+    kw::Typeof,
+    kw::Unsized,
+    kw::Virtual,
+    kw::Yield,
+    kw::Dyn,
+    kw::Async,
+    kw::Try,
+    kw::UnderscoreLifetime,
+    kw::StaticLifetime,
+    kw::Auto,
+    kw::Catch,
+    kw::Default,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     kw::Union,
 ];

@@ -43,6 +43,7 @@ impl<'a, 'ast: 'a> Visitor<'ast> for CfgIfVisitor<'a> {
 
 impl<'a, 'ast: 'a> CfgIfVisitor<'a> {
     fn visit_mac_inner(&mut self, mac: &'ast ast::Mac) -> Result<(), &'static str> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if mac.node.path != Symbol::intern("cfg_if") {
             return Err("Expected cfg_if");
         }
@@ -52,6 +53,32 @@ impl<'a, 'ast: 'a> CfgIfVisitor<'a> {
             mac.node.tts.clone(),
             self.base_dir.clone(),
         );
+=======
+        // Support both:
+        // ```
+        // extern crate cfg_if;
+        // cfg_if::cfg_if! {..}
+        // ```
+        // And:
+        // ```
+        // #[macro_use]
+        // extern crate cfg_if;
+        // cfg_if! {..}
+        // ```
+        match mac.path.segments.first() {
+            Some(first_segment) => {
+                if first_segment.ident.name != Symbol::intern("cfg_if") {
+                    return Err("Expected cfg_if");
+                }
+            }
+            None => {
+                return Err("Expected cfg_if");
+            }
+        };
+
+        let mut parser =
+            stream_to_parser_with_base_dir(self.parse_sess, mac.tts.clone(), self.base_dir.clone());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         parser.cfg_mods = false;
         let mut process_if_cfg = true;
 

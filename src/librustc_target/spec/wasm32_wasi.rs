@@ -97,6 +97,13 @@ pub fn target() -> Result<Target, String> {
     options.crt_static_default = true;
     options.crt_static_respected = true;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    // Allow `+crt-static` to create a "cdylib" output which is just a wasm file
+    // without a main function.
+    options.crt_static_allows_dylibs = true;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     Ok(Target {
         llvm_target: "wasm32-wasi".to_string(),
         target_endian: "little".to_string(),

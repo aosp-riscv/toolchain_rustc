@@ -1,11 +1,15 @@
-use crate::support::paths::CargoPathExt;
-use crate::support::{basic_manifest, project};
+use cargo_test_support::paths::CargoPathExt;
+use cargo_test_support::{basic_manifest, project};
 use std::env;
 
 #[cargo_test]
 fn rustc_info_cache() {
     // FIXME: when pipelining rides to stable, enable this test on all channels.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     if !crate::support::is_nightly() {
+=======
+    if !cargo_test_support::is_nightly() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         return;
     }
 

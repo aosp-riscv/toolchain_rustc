@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0511]: invalid monomorphization of `atomic_load` intrinsic: expected basic integer type, found `bool`
   --> $DIR/non-interger-atomic.rs:13:5
    |
@@ -96,3 +97,5 @@ LL |     intrinsics::atomic_cxchg(p, v, v);
 
 error: aborting due to 16 previous errors
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

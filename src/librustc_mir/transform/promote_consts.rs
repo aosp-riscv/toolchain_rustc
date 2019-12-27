@@ -12,9 +12,11 @@
 //! initialization and can otherwise silence errors, if
 //! move analysis runs after promotion on broken MIR.
 
+use rustc::hir::def_id::DefId;
 use rustc::mir::*;
 use rustc::mir::visit::{PlaceContext, MutatingUseContext, MutVisitor, Visitor};
 use rustc::mir::traversal::ReversePostorder;
+use rustc::ty::subst::InternalSubsts;
 use rustc::ty::TyCtxt;
 use syntax_pos::Span;
 
@@ -185,7 +187,11 @@ impl<'a, 'tcx> Promoter<'a, 'tcx> {
                 span,
                 scope: OUTERMOST_SOURCE_SCOPE
             },
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             kind: StatementKind::Assign(Place::from(dest), box rvalue)
+=======
+            kind: StatementKind::Assign(box(Place::from(dest), rvalue))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         });
     }
 
@@ -220,10 +226,10 @@ impl<'a, 'tcx> Promoter<'a, 'tcx> {
         // First, take the Rvalue or Call out of the source MIR,
         // or duplicate it, depending on keep_original.
         if loc.statement_index < no_stmts {
-            let (rvalue, source_info) = {
+            let (mut rvalue, source_info) = {
                 let statement = &mut self.source[loc.block].statements[loc.statement_index];
                 let rhs = match statement.kind {
-                    StatementKind::Assign(_, ref mut rhs) => rhs,
+                    StatementKind::Assign(box(_, ref mut rhs)) => rhs,
                     _ => {
                         span_bug!(statement.source_info.span, "{:?} is not an assignment",
                                   statement);
@@ -233,12 +239,11 @@ impl<'a, 'tcx> Promoter<'a, 'tcx> {
                 (if self.keep_original {
                     rhs.clone()
                 } else {
-                    let unit = box Rvalue::Aggregate(box AggregateKind::Tuple, vec![]);
+                    let unit = Rvalue::Aggregate(box AggregateKind::Tuple, vec![]);
                     mem::replace(rhs, unit)
                 }, statement.source_info)
             };
 
-            let mut rvalue = *rvalue;
             self.visit_rvalue(&mut rvalue, loc);
             self.assign(new_temp, rvalue, source_info.span);
         } else {
@@ -293,19 +298,37 @@ impl<'a, 'tcx> Promoter<'a, 'tcx> {
         new_temp
     }
 
-    fn promote_candidate(mut self, candidate: Candidate) {
+    fn promote_candidate(
+        mut self,
+        def_id: DefId,
+        candidate: Candidate,
+        next_promoted_id: usize,
+    ) -> Option<Body<'tcx>> {
         let mut operand = {
             let promoted = &mut self.promoted;
-            let promoted_id = Promoted::new(self.source.promoted.len());
+            let promoted_id = Promoted::new(next_promoted_id);
+            let tcx = self.tcx;
             let mut promoted_place = |ty, span| {
                 promoted.span = span;
                 promoted.local_decls[RETURN_PLACE] = LocalDecl::new_return_place(ty, span);
                 Place {
                     base: PlaceBase::Static(box Static {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         kind: StaticKind::Promoted(promoted_id),
                         ty
                     }),
                     projection: None,
+=======
+                        kind:
+                            StaticKind::Promoted(
+                                promoted_id,
+                                InternalSubsts::identity_for_item(tcx, def_id),
+                            ),
+                        ty,
+                        def_id,
+                    }),
+                    projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
             };
             let (blocks, local_decls) = self.source.basic_blocks_and_local_decls_mut();
@@ -313,14 +336,26 @@ impl<'a, 'tcx> Promoter<'a, 'tcx> {
                 Candidate::Ref(loc) => {
                     let ref mut statement = blocks[loc.block].statements[loc.statement_index];
                     match statement.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         StatementKind::Assign(_, box Rvalue::Ref(_, _, ref mut place)) => {
+=======
+                        StatementKind::Assign(box(_, Rvalue::Ref(_, _, ref mut place))) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             // Use the underlying local for this (necessarily interior) borrow.
                             let ty = place.base.ty(local_decls).ty;
                             let span = statement.source_info.span;
 
                             Operand::Move(Place {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 base: mem::replace(&mut place.base, promoted_place(ty, span).base),
                                 projection: None,
+=======
+                                base: mem::replace(
+                                    &mut place.base,
+                                    promoted_place(ty, span).base,
+                                ),
+                                projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             })
                         }
                         _ => bug!()
@@ -329,10 +364,20 @@ impl<'a, 'tcx> Promoter<'a, 'tcx> {
                 Candidate::Repeat(loc) => {
                     let ref mut statement = blocks[loc.block].statements[loc.statement_index];
                     match statement.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         StatementKind::Assign(_, box Rvalue::Repeat(ref mut operand, _)) => {
                             let ty = operand.ty(local_decls, self.tcx);
                             let span = statement.source_info.span;
                             mem::replace(operand, Operand::Copy(promoted_place(ty, span)))
+=======
+                        StatementKind::Assign(box(_, Rvalue::Repeat(ref mut operand, _))) => {
+                            let ty = operand.ty(local_decls, self.tcx);
+                            let span = statement.source_info.span;
+                            mem::replace(
+                                operand,
+                                Operand::Copy(promoted_place(ty, span))
+                            )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         }
                         _ => bug!()
                     }
@@ -353,7 +398,7 @@ impl<'a, 'tcx> Promoter<'a, 'tcx> {
                         // a function requiring a constant argument and as that constant value
                         // providing a value whose computation contains another call to a function
                         // requiring a constant argument.
-                        TerminatorKind::Goto { .. } => return,
+                        TerminatorKind::Goto { .. } => return None,
                         _ => bug!()
                     }
                 }
@@ -368,7 +413,7 @@ impl<'a, 'tcx> Promoter<'a, 'tcx> {
 
         let span = self.promoted.span;
         self.assign(RETURN_PLACE, Rvalue::Use(operand), span);
-        self.source.promoted.push(self.promoted);
+        Some(self.promoted)
     }
 }
 
@@ -385,23 +430,41 @@ impl<'a, 'tcx> MutVisitor<'tcx> for Promoter<'a, 'tcx> {
 }
 
 pub fn promote_candidates<'tcx>(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     body: &mut Body<'tcx>,
     tcx: TyCtxt<'tcx>,
     mut temps: IndexVec<Local, TempState>,
     candidates: Vec<Candidate>,
 ) {
+=======
+    def_id: DefId,
+    body: &mut Body<'tcx>,
+    tcx: TyCtxt<'tcx>,
+    mut temps: IndexVec<Local, TempState>,
+    candidates: Vec<Candidate>,
+) -> IndexVec<Promoted, Body<'tcx>> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     // Visit candidates in reverse, in case they're nested.
     debug!("promote_candidates({:?})", candidates);
+
+    let mut promotions = IndexVec::new();
 
     for candidate in candidates.into_iter().rev() {
         match candidate {
             Candidate::Repeat(Location { block, statement_index }) |
             Candidate::Ref(Location { block, statement_index }) => {
                 match body[block].statements[statement_index].kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     StatementKind::Assign(Place {
                         base: PlaceBase::Local(local),
                         projection: None,
                     }, _) => {
+=======
+                    StatementKind::Assign(box(Place {
+                        base: PlaceBase::Local(local),
+                        projection: box [],
+                    }, _)) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         if temps[local] == TempState::PromotedOut {
                             // Already promoted.
                             continue;
@@ -426,7 +489,10 @@ pub fn promote_candidates<'tcx>(
                 // memory usage?
                 body.source_scopes.clone(),
                 body.source_scope_local_data.clone(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 IndexVec::new(),
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 None,
                 initial_locals,
                 IndexVec::new(),
@@ -440,7 +506,11 @@ pub fn promote_candidates<'tcx>(
             temps: &mut temps,
             keep_original: false
         };
-        promoter.promote_candidate(candidate);
+
+        //FIXME(oli-obk): having a `maybe_push()` method on `IndexVec` might be nice
+        if let Some(promoted) = promoter.promote_candidate(def_id, candidate, promotions.len()) {
+            promotions.push(promoted);
+        }
     }
 
     // Eliminate assignments to, and drops of promoted temps.
@@ -448,10 +518,17 @@ pub fn promote_candidates<'tcx>(
     for block in body.basic_blocks_mut() {
         block.statements.retain(|statement| {
             match statement.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 StatementKind::Assign(Place {
                     base: PlaceBase::Local(index),
                     projection: None,
                 }, _) |
+=======
+                StatementKind::Assign(box(Place {
+                    base: PlaceBase::Local(index),
+                    projection: box [],
+                }, _)) |
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 StatementKind::StorageLive(index) |
                 StatementKind::StorageDead(index) => {
                     !promoted(index)
@@ -463,7 +540,11 @@ pub fn promote_candidates<'tcx>(
         match terminator.kind {
             TerminatorKind::Drop { location: Place {
                 base: PlaceBase::Local(index),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 projection: None,
+=======
+                projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }, target, .. } => {
                 if promoted(index) {
                     terminator.kind = TerminatorKind::Goto {
@@ -474,4 +555,6 @@ pub fn promote_candidates<'tcx>(
             _ => {}
         }
     }
+
+    promotions
 }

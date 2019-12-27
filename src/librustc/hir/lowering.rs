@@ -67,7 +67,11 @@ use syntax::errors;
 use syntax::ext::base::SpecialDerives;
 use syntax::ext::hygiene::ExpnId;
 use syntax::print::pprust;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax::source_map::{respan, ExpnInfo, ExpnKind, DesugaringKind, Spanned};
+=======
+use syntax::source_map::{respan, ExpnData, ExpnKind, DesugaringKind, Spanned};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax::symbol::{kw, sym, Symbol};
 use syntax::tokenstream::{TokenStream, TokenTree};
 use syntax::parse::token::{self, Token};
@@ -79,7 +83,7 @@ const HIR_ID_COUNTER_LOCKED: u32 = 0xFFFFFFFF;
 pub struct LoweringContext<'a> {
     crate_root: Option<Symbol>,
 
-    /// Used to assign ids to HIR nodes that do not directly correspond to an AST node.
+    /// Used to assign IDs to HIR nodes that do not directly correspond to AST nodes.
     sess: &'a Session,
 
     cstore: &'a dyn CrateStore,
@@ -126,7 +130,7 @@ pub struct LoweringContext<'a> {
     /// lifetime definitions in the corresponding impl or function generics.
     lifetimes_to_define: Vec<(Span, ParamName)>,
 
-    /// Whether or not in-band lifetimes are being collected. This is used to
+    /// `true` if in-band lifetimes are being collected. This is used to
     /// indicate whether or not we're in a place where new lifetimes will result
     /// in in-band lifetime definitions, such a function or an impl header,
     /// including implicit lifetimes from `impl_header_lifetime_elision`.
@@ -136,7 +140,10 @@ pub struct LoweringContext<'a> {
     /// When `is_collectin_in_band_lifetimes` is true, each lifetime is checked
     /// against this list to see if it is already in-scope, or if a definition
     /// needs to be created for it.
-    in_scope_lifetimes: Vec<Ident>,
+    ///
+    /// We always store a `modern()` version of the param-name in this
+    /// vector.
+    in_scope_lifetimes: Vec<ParamName>,
 
     current_module: NodeId,
 
@@ -151,13 +158,25 @@ pub struct LoweringContext<'a> {
 }
 
 pub trait Resolver {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Obtain resolution for a `NodeId` with a single resolution.
+=======
+    /// Obtains resolution for a `NodeId` with a single resolution.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn get_partial_res(&mut self, id: NodeId) -> Option<PartialRes>;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Obtain per-namespace resolutions for `use` statement with the given `NoedId`.
+=======
+    /// Obtains per-namespace resolutions for `use` statement with the given `NodeId`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn get_import_res(&mut self, id: NodeId) -> PerNS<Option<Res<NodeId>>>;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Obtain resolution for a label with the given `NodeId`.
+=======
+    /// Obtains resolution for a label with the given `NodeId`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn get_label_res(&mut self, id: NodeId) -> Option<NodeId>;
 
     /// We must keep the set of definitions up to date as we add nodes that weren't in the AST.
@@ -319,7 +338,7 @@ enum ParenthesizedGenericArgs {
 /// `resolve_lifetime` module. Often we "fallthrough" to that code by generating
 /// an "elided" or "underscore" lifetime name. In the future, we probably want to move
 /// everything into HIR lowering.
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 enum AnonymousLifetimeMode {
     /// For **Modern** cases, create a new anonymous region parameter
     /// and reference that.
@@ -337,49 +356,6 @@ enum AnonymousLifetimeMode {
 
     /// Pass responsibility to `resolve_lifetime` code for all cases.
     PassThrough,
-
-    /// Used in the return types of `async fn` where there exists
-    /// exactly one argument-position elided lifetime.
-    ///
-    /// In `async fn`, we lower the arguments types using the `CreateParameter`
-    /// mode, meaning that non-`dyn` elided lifetimes are assigned a fresh name.
-    /// If any corresponding elided lifetimes appear in the output, we need to
-    /// replace them with references to the fresh name assigned to the corresponding
-    /// elided lifetime in the arguments.
-    ///
-    /// For **Modern cases**, replace the anonymous parameter with a
-    /// reference to a specific freshly-named lifetime that was
-    /// introduced in argument
-    ///
-    /// For **Dyn Bound** cases, pass responsibility to
-    /// `resole_lifetime` code.
-    Replace(LtReplacement),
-}
-
-/// The type of elided lifetime replacement to perform on `async fn` return types.
-#[derive(Copy, Clone)]
-enum LtReplacement {
-    /// Fresh name introduced by the single non-dyn elided lifetime
-    /// in the arguments of the async fn.
-    Some(ParamName),
-
-    /// There is no single non-dyn elided lifetime because no lifetimes
-    /// appeared in the arguments.
-    NoLifetimes,
-
-    /// There is no single non-dyn elided lifetime because multiple
-    /// lifetimes appeared in the arguments.
-    MultipleLifetimes,
-}
-
-/// Calculates the `LtReplacement` to use for elided lifetimes in the return
-/// type based on the fresh elided lifetimes introduced in argument position.
-fn get_elided_lt_replacement(arg_position_lifetimes: &[(Span, ParamName)]) -> LtReplacement {
-    match arg_position_lifetimes {
-        [] => LtReplacement::NoLifetimes,
-        [(_span, param)] => LtReplacement::Some(*param),
-        _ => LtReplacement::MultipleLifetimes,
-    }
 }
 
 struct ImplTraitTypeIdVisitor<'a> { ids: &'a mut SmallVec<[NodeId; 1]> }
@@ -465,6 +441,7 @@ impl<'a> LoweringContext<'a> {
 
         impl<'tcx, 'interner> Visitor<'tcx> for MiscCollector<'tcx, 'interner> {
             fn visit_pat(&mut self, p: &'tcx Pat) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 match p.node {
                     // Doesn't generate a HIR node
                     PatKind::Paren(..) | PatKind::Rest => {},
@@ -476,6 +453,44 @@ impl<'a> LoweringContext<'a> {
                 };
 
                 visit::walk_pat(self, p)
+=======
+                if let PatKind::Paren(..) | PatKind::Rest = p.node {
+                    // Doesn't generate a HIR node
+                } else if let Some(owner) = self.hir_id_owner {
+                    self.lctx.lower_node_id_with_owner(p.id, owner);
+                }
+
+                visit::walk_pat(self, p)
+            }
+
+            // HACK(or_patterns; Centril | dlrobertson): Avoid creating
+            // HIR  nodes for `PatKind::Or` for the top level of a `ast::Arm`.
+            // This is a temporary hack that should go away once we push down
+            // `arm.pats: HirVec<P<Pat>>` -> `arm.pat: P<Pat>` to HIR. // Centril
+            fn visit_arm(&mut self, arm: &'tcx Arm) {
+                match &arm.pat.node {
+                    PatKind::Or(pats) => pats.iter().for_each(|p| self.visit_pat(p)),
+                    _ => self.visit_pat(&arm.pat),
+                }
+                walk_list!(self, visit_expr, &arm.guard);
+                self.visit_expr(&arm.body);
+                walk_list!(self, visit_attribute, &arm.attrs);
+            }
+
+            // HACK(or_patterns; Centril | dlrobertson): Same as above. // Centril
+            fn visit_expr(&mut self, e: &'tcx Expr) {
+                if let ExprKind::Let(pat, scrutinee) = &e.node {
+                    walk_list!(self, visit_attribute, e.attrs.iter());
+                    match &pat.node {
+                        PatKind::Or(pats) => pats.iter().for_each(|p| self.visit_pat(p)),
+                        _ => self.visit_pat(&pat),
+                    }
+                    self.visit_expr(scrutinee);
+                    self.visit_expr_post(e);
+                    return;
+                }
+                visit::walk_expr(self, e)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
 
             fn visit_item(&mut self, item: &'tcx Item) {
@@ -550,12 +565,21 @@ impl<'a> LoweringContext<'a> {
                             &f.generic_params
                         );
                         // Mirrors visit::walk_fn_decl
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         for argument in &f.decl.inputs {
                             // We don't lower the ids of argument patterns
                             self.with_hir_id_owner(None, |this| {
                                 this.visit_pat(&argument.pat);
                             });
                             self.visit_ty(&argument.ty)
+=======
+                        for parameter in &f.decl.inputs {
+                            // We don't lower the ids of argument patterns
+                            self.with_hir_id_owner(None, |this| {
+                                this.visit_pat(&parameter.pat);
+                            });
+                            self.visit_ty(&parameter.ty)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         }
                         self.visit_fn_ret_ty(&f.decl.output)
                     }
@@ -714,7 +738,11 @@ impl<'a> LoweringContext<'a> {
     fn lower_res(&mut self, res: Res<NodeId>) -> Res {
         res.map_id(|id| {
             self.lower_node_id_generic(id, |_| {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 panic!("expected node_id to be lowered already for res {:#?}", res)
+=======
+                panic!("expected `NodeId` to be lowered already for res {:#?}", res);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             })
         })
     }
@@ -744,10 +772,18 @@ impl<'a> LoweringContext<'a> {
         span: Span,
         allow_internal_unstable: Option<Lrc<[Symbol]>>,
     ) -> Span {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         span.fresh_expansion(ExpnId::root(), ExpnInfo {
             def_site: span,
+=======
+        span.fresh_expansion(ExpnData {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             allow_internal_unstable,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             ..ExpnInfo::default(ExpnKind::Desugaring(reason), span, self.sess.edition())
+=======
+            ..ExpnData::default(ExpnKind::Desugaring(reason), span, self.sess.edition())
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         })
     }
 
@@ -756,10 +792,16 @@ impl<'a> LoweringContext<'a> {
         anonymous_lifetime_mode: AnonymousLifetimeMode,
         op: impl FnOnce(&mut Self) -> R,
     ) -> R {
+        debug!(
+            "with_anonymous_lifetime_mode(anonymous_lifetime_mode={:?})",
+            anonymous_lifetime_mode,
+        );
         let old_anonymous_lifetime_mode = self.anonymous_lifetime_mode;
         self.anonymous_lifetime_mode = anonymous_lifetime_mode;
         let result = op(self);
         self.anonymous_lifetime_mode = old_anonymous_lifetime_mode;
+        debug!("with_anonymous_lifetime_mode: restoring anonymous_lifetime_mode={:?}",
+               old_anonymous_lifetime_mode);
         result
     }
 
@@ -770,7 +812,7 @@ impl<'a> LoweringContext<'a> {
     ///
     /// Presuming that in-band lifetimes are enabled, then
     /// `self.anonymous_lifetime_mode` will be updated to match the
-    /// argument while `f` is running (and restored afterwards).
+    /// parameter while `f` is running (and restored afterwards).
     fn collect_in_band_defs<T, F>(
         &mut self,
         parent_id: DefId,
@@ -865,7 +907,7 @@ impl<'a> LoweringContext<'a> {
             return;
         }
 
-        if self.in_scope_lifetimes.contains(&ident.modern()) {
+        if self.in_scope_lifetimes.contains(&ParamName::Plain(ident.modern())) {
             return;
         }
 
@@ -883,7 +925,7 @@ impl<'a> LoweringContext<'a> {
     /// header, we convert it to an in-band lifetime.
     fn collect_fresh_in_band_lifetime(&mut self, span: Span) -> ParamName {
         assert!(self.is_collecting_in_band_lifetimes);
-        let index = self.lifetimes_to_define.len();
+        let index = self.lifetimes_to_define.len() + self.in_scope_lifetimes.len();
         let hir_name = ParamName::Fresh(index);
         self.lifetimes_to_define.push((span, hir_name));
         hir_name
@@ -899,7 +941,11 @@ impl<'a> LoweringContext<'a> {
     {
         let old_len = self.in_scope_lifetimes.len();
         let lt_def_names = params.iter().filter_map(|param| match param.kind {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             GenericParamKind::Lifetime { .. } => Some(param.ident.modern()),
+=======
+            GenericParamKind::Lifetime { .. } => Some(ParamName::Plain(param.ident.modern())),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             _ => None,
         });
         self.in_scope_lifetimes.extend(lt_def_names);
@@ -915,7 +961,7 @@ impl<'a> LoweringContext<'a> {
     ///
     /// Presuming that in-band lifetimes are enabled, then
     /// `self.anonymous_lifetime_mode` will be updated to match the
-    /// argument while `f` is running (and restored afterwards).
+    /// parameter while `f` is running (and restored afterwards).
     fn add_in_band_defs<F, T>(
         &mut self,
         generics: &Generics,
@@ -1074,6 +1120,7 @@ impl<'a> LoweringContext<'a> {
     /// ```
     ///
     /// returns a `hir::TypeBinding` representing `Item`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn lower_assoc_ty_constraint(&mut self,
                                  c: &AssocTyConstraint,
                                  itctx: ImplTraitContext<'_>)
@@ -1081,6 +1128,16 @@ impl<'a> LoweringContext<'a> {
         debug!("lower_assoc_ty_constraint(constraint={:?}, itctx={:?})", c, itctx);
 
         let kind = match c.kind {
+=======
+    fn lower_assoc_ty_constraint(
+        &mut self,
+        constraint: &AssocTyConstraint,
+        itctx: ImplTraitContext<'_>,
+    ) -> hir::TypeBinding {
+        debug!("lower_assoc_ty_constraint(constraint={:?}, itctx={:?})", constraint, itctx);
+
+        let kind = match constraint.kind {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             AssocTyConstraintKind::Equality { ref ty } => hir::TypeBindingKind::Equality {
                 ty: self.lower_ty(ty, itctx)
             },
@@ -1114,6 +1171,7 @@ impl<'a> LoweringContext<'a> {
                     ImplTraitContext::Disallowed(_) if self.is_in_dyn_type =>
                         (true, ImplTraitContext::OpaqueTy(None)),
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     // We are in the argument position, but not within a dyn type:
                     //
                     //     fn foo(x: impl Iterator<Item: Debug>)
@@ -1144,6 +1202,38 @@ impl<'a> LoweringContext<'a> {
                                 id: this.sess.next_node_id(),
                                 node: TyKind::ImplTrait(impl_trait_node_id, bounds.clone()),
                                 span: DUMMY_SP,
+=======
+                    // We are in the parameter position, but not within a dyn type:
+                    //
+                    //     fn foo(x: impl Iterator<Item: Debug>)
+                    //
+                    // so we leave it as is and this gets expanded in astconv to a bound like
+                    // `<T as Iterator>::Item: Debug` where `T` is the type parameter for the
+                    // `impl Iterator`.
+                    _ => (false, itctx),
+                };
+
+                if desugar_to_impl_trait {
+                    // Desugar `AssocTy: Bounds` into `AssocTy = impl Bounds`. We do this by
+                    // constructing the HIR for `impl bounds...` and then lowering that.
+
+                    let impl_trait_node_id = self.sess.next_node_id();
+                    let parent_def_index = self.current_hir_id_owner.last().unwrap().0;
+                    self.resolver.definitions().create_def_with_parent(
+                        parent_def_index,
+                        impl_trait_node_id,
+                        DefPathData::ImplTrait,
+                        ExpnId::root(),
+                        constraint.span,
+                    );
+
+                    self.with_dyn_type_scope(false, |this| {
+                        let ty = this.lower_ty(
+                            &Ty {
+                                id: this.sess.next_node_id(),
+                                node: TyKind::ImplTrait(impl_trait_node_id, bounds.clone()),
+                                span: constraint.span,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             },
                             itctx,
                         );
@@ -1165,10 +1255,17 @@ impl<'a> LoweringContext<'a> {
         };
 
         hir::TypeBinding {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             hir_id: self.lower_node_id(c.id),
             ident: c.ident,
             kind,
             span: c.span,
+=======
+            hir_id: self.lower_node_id(constraint.id),
+            ident: constraint.ident,
+            kind,
+            span: constraint.span,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
@@ -1238,7 +1335,7 @@ impl<'a> LoweringContext<'a> {
                                 unsafety: this.lower_unsafety(f.unsafety),
                                 abi: f.abi,
                                 decl: this.lower_fn_decl(&f.decl, None, false, None),
-                                arg_names: this.lower_fn_args_to_names(&f.decl),
+                                param_names: this.lower_fn_params_to_names(&f.decl),
                             }))
                         },
                     )
@@ -1264,7 +1361,11 @@ impl<'a> LoweringContext<'a> {
                     P(hir::Path {
                         res,
                         segments: hir_vec![hir::PathSegment::from_ident(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             Ident::with_empty_ctxt(kw::SelfUpper)
+=======
+                            Ident::with_dummy_span(kw::SelfUpper)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         )],
                         span: t.span,
                     }),
@@ -1325,7 +1426,7 @@ impl<'a> LoweringContext<'a> {
                             ImplTraitContext::Universal(in_band_ty_params),
                         );
                         // Set the name to `impl Bound1 + Bound2`.
-                        let ident = Ident::from_str(&pprust::ty_to_string(t)).with_span_pos(span);
+                        let ident = Ident::from_str_and_span(&pprust::ty_to_string(t), span);
                         in_band_ty_params.push(hir::GenericParam {
                             hir_id: self.lower_node_id(def_node_id),
                             name: ParamName::Plain(ident),
@@ -1373,7 +1474,11 @@ impl<'a> LoweringContext<'a> {
                     }
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             TyKind::Mac(_) => bug!("`TyMac` should have been expanded by now."),
+=======
+            TyKind::Mac(_) => bug!("`TyMac` should have been expanded by now"),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             TyKind::CVarArgs => {
                 // Create the implicit lifetime of the "spoofed" `VaListImpl`.
                 let span = self.sess.source_map().next_point(t.span.shrink_to_lo());
@@ -1396,6 +1501,13 @@ impl<'a> LoweringContext<'a> {
         opaque_ty_node_id: NodeId,
         lower_bounds: impl FnOnce(&mut LoweringContext<'_>) -> hir::GenericBounds,
     ) -> hir::TyKind {
+        debug!(
+            "lower_opaque_impl_trait(fn_def_id={:?}, opaque_ty_node_id={:?}, span={:?})",
+            fn_def_id,
+            opaque_ty_node_id,
+            span,
+        );
+
         // Make sure we know that some funky desugaring has been going on here.
         // This is a first: there is code in other places like for loop
         // desugaring that explicitly states that we don't want to track that.
@@ -1423,6 +1535,17 @@ impl<'a> LoweringContext<'a> {
             &hir_bounds,
         );
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        debug!(
+            "lower_opaque_impl_trait: lifetimes={:#?}", lifetimes,
+        );
+
+        debug!(
+            "lower_opaque_impl_trait: lifetime_defs={:#?}", lifetime_defs,
+        );
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.with_hir_id_owner(opaque_ty_node_id, |lctx| {
             let opaque_ty_item = hir::OpaqueTy {
                 generics: hir::Generics {
@@ -1438,7 +1561,11 @@ impl<'a> LoweringContext<'a> {
                 origin: hir::OpaqueTyOrigin::FnReturn,
             };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             trace!("exist ty from impl trait def-index: {:#?}", opaque_ty_def_index);
+=======
+            trace!("lower_opaque_impl_trait: {:#?}", opaque_ty_def_index);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let opaque_ty_id = lctx.generate_opaque_type(
                 opaque_ty_node_id,
                 opaque_ty_item,
@@ -1486,6 +1613,16 @@ impl<'a> LoweringContext<'a> {
         parent_index: DefIndex,
         bounds: &hir::GenericBounds,
     ) -> (HirVec<hir::GenericArg>, HirVec<hir::GenericParam>) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        debug!(
+            "lifetimes_from_impl_trait_bounds(opaque_ty_id={:?}, \
+             parent_index={:?}, \
+             bounds={:#?})",
+            opaque_ty_id, parent_index, bounds,
+        );
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // This visitor walks over `impl Trait` bounds and creates defs for all lifetimes that
         // appear in the bounds, excluding lifetimes that are created within the bounds.
         // E.g., `'a`, `'b`, but not `'c` in `impl for<'c> SomeTrait<'a, 'b, 'c>`.
@@ -1573,6 +1710,11 @@ impl<'a> LoweringContext<'a> {
                         }
                     }
                     hir::LifetimeName::Param(_) => lifetime.name,
+
+                    // Refers to some other lifetime that is "in
+                    // scope" within the type.
+                    hir::LifetimeName::ImplicitObjectLifetimeDefault => return,
+
                     hir::LifetimeName::Error | hir::LifetimeName::Static => return,
                 };
 
@@ -1598,7 +1740,11 @@ impl<'a> LoweringContext<'a> {
 
                     let (name, kind) = match name {
                         hir::LifetimeName::Underscore => (
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             hir::ParamName::Plain(Ident::with_empty_ctxt(kw::UnderscoreLifetime)),
+=======
+                            hir::ParamName::Plain(Ident::with_dummy_span(kw::UnderscoreLifetime)),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             hir::LifetimeParamKind::Elided,
                         ),
                         hir::LifetimeName::Param(param_name) => (
@@ -1875,10 +2021,13 @@ impl<'a> LoweringContext<'a> {
                         if let Ok(snippet) = self.sess.source_map().span_to_snippet(data.span) {
                             // Do not suggest going from `Trait()` to `Trait<>`
                             if data.inputs.len() > 0 {
+                                let split = snippet.find('(').unwrap();
+                                let trait_name = &snippet[0..split];
+                                let args = &snippet[split + 1 .. snippet.len() - 1];
                                 err.span_suggestion(
                                     data.span,
                                     "use angle brackets instead",
-                                    format!("<{}>", &snippet[1..snippet.len() - 1]),
+                                    format!("{}<{}>", trait_name, args),
                                     Applicability::MaybeIncorrect,
                                 );
                             }
@@ -1953,8 +2102,12 @@ impl<'a> LoweringContext<'a> {
                         err.emit();
                     }
                     AnonymousLifetimeMode::PassThrough |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     AnonymousLifetimeMode::ReportError |
                     AnonymousLifetimeMode::Replace(_) => {
+=======
+                    AnonymousLifetimeMode::ReportError => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         self.sess.buffer_lint_with_diagnostic(
                             ELIDED_LIFETIMES_IN_PATHS,
                             CRATE_NODE_ID,
@@ -2043,7 +2196,11 @@ impl<'a> LoweringContext<'a> {
                         bindings: hir_vec![
                             hir::TypeBinding {
                                 hir_id: this.next_id(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 ident: Ident::with_empty_ctxt(FN_OUTPUT_NAME),
+=======
+                                ident: Ident::with_dummy_span(FN_OUTPUT_NAME),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                 kind: hir::TypeBindingKind::Equality {
                                     ty: output
                                         .as_ref()
@@ -2101,12 +2258,20 @@ impl<'a> LoweringContext<'a> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn lower_fn_args_to_names(&mut self, decl: &FnDecl) -> hir::HirVec<Ident> {
+=======
+    fn lower_fn_params_to_names(&mut self, decl: &FnDecl) -> hir::HirVec<Ident> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         decl.inputs
             .iter()
-            .map(|arg| match arg.pat.node {
+            .map(|param| match param.pat.node {
                 PatKind::Ident(_, ident, _) => ident,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 _ => Ident::new(kw::Invalid, arg.pat.span),
+=======
+                _ => Ident::new(kw::Invalid, param.pat.span),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             })
             .collect()
     }
@@ -2141,31 +2306,24 @@ impl<'a> LoweringContext<'a> {
 
         // Remember how many lifetimes were already around so that we can
         // only look at the lifetime parameters introduced by the arguments.
-        let lifetime_count_before_args = self.lifetimes_to_define.len();
         let inputs = self.with_anonymous_lifetime_mode(lt_mode, |this| {
             decl.inputs
                 .iter()
-                .map(|arg| {
+                .map(|param| {
                     if let Some((_, ibty)) = &mut in_band_ty_params {
-                        this.lower_ty_direct(&arg.ty, ImplTraitContext::Universal(ibty))
+                        this.lower_ty_direct(&param.ty, ImplTraitContext::Universal(ibty))
                     } else {
-                        this.lower_ty_direct(&arg.ty, ImplTraitContext::disallowed())
+                        this.lower_ty_direct(&param.ty, ImplTraitContext::disallowed())
                     }
                 })
                 .collect::<HirVec<_>>()
         });
 
         let output = if let Some(ret_id) = make_ret_async {
-            // Calculate the `LtReplacement` to use for any return-position elided
-            // lifetimes based on the elided lifetime parameters introduced in the args.
-            let lt_replacement = get_elided_lt_replacement(
-                &self.lifetimes_to_define[lifetime_count_before_args..]
-            );
             self.lower_async_fn_ret_ty(
                 &decl.output,
                 in_band_ty_params.expect("`make_ret_async` but no `fn_def_id`").0,
                 ret_id,
-                lt_replacement,
             )
         } else {
             match decl.output {
@@ -2220,7 +2378,11 @@ impl<'a> LoweringContext<'a> {
     //
     //     type OpaqueTy<generics_from_parent_fn> = impl Future<Output = T>;
     //
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     // `inputs`: lowered types of arguments to the function (used to collect lifetimes)
+=======
+    // `inputs`: lowered types of parameters to the function (used to collect lifetimes)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     // `output`: unlowered output type (`T` in `-> T`)
     // `fn_def_id`: `DefId` of the parent function (used to create child impl trait definition)
     // `opaque_ty_node_id`: `NodeId` of the opaque `impl Trait` type that should be created
@@ -2230,8 +2392,19 @@ impl<'a> LoweringContext<'a> {
         output: &FunctionRetTy,
         fn_def_id: DefId,
         opaque_ty_node_id: NodeId,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         elided_lt_replacement: LtReplacement,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     ) -> hir::FunctionRetTy {
+        debug!(
+            "lower_async_fn_ret_ty(\
+             output={:?}, \
+             fn_def_id={:?}, \
+             opaque_ty_node_id={:?})",
+            output, fn_def_id, opaque_ty_node_id,
+        );
+
         let span = output.span();
 
         let opaque_ty_span = self.mark_span_with_reason(
@@ -2248,15 +2421,77 @@ impl<'a> LoweringContext<'a> {
 
         self.allocate_hir_id_counter(opaque_ty_node_id);
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let (opaque_ty_id, lifetime_params) = self.with_hir_id_owner(opaque_ty_node_id, |this| {
+=======
+        // When we create the opaque type for this async fn, it is going to have
+        // to capture all the lifetimes involved in the signature (including in the
+        // return type). This is done by introducing lifetime parameters for:
+        //
+        // - all the explicitly declared lifetimes from the impl and function itself;
+        // - all the elided lifetimes in the fn arguments;
+        // - all the elided lifetimes in the return type.
+        //
+        // So for example in this snippet:
+        //
+        // ```rust
+        // impl<'a> Foo<'a> {
+        //   async fn bar<'b>(&self, x: &'b Vec<f64>, y: &str) -> &u32 {
+        //   //               ^ '0                       ^ '1     ^ '2
+        //   // elided lifetimes used below
+        //   }
+        // }
+        // ```
+        //
+        // we would create an opaque type like:
+        //
+        // ```
+        // type Bar<'a, 'b, '0, '1, '2> = impl Future<Output = &'2 u32>;
+        // ```
+        //
+        // and we would then desugar `bar` to the equivalent of:
+        //
+        // ```rust
+        // impl<'a> Foo<'a> {
+        //   fn bar<'b, '0, '1>(&'0 self, x: &'b Vec<f64>, y: &'1 str) -> Bar<'a, 'b, '0, '1, '_>
+        // }
+        // ```
+        //
+        // Note that the final parameter to `Bar` is `'_`, not `'2` --
+        // this is because the elided lifetimes from the return type
+        // should be figured out using the ordinary elision rules, and
+        // this desugaring achieves that.
+        //
+        // The variable `input_lifetimes_count` tracks the number of
+        // lifetime parameters to the opaque type *not counting* those
+        // lifetimes elided in the return type. This includes those
+        // that are explicitly declared (`in_scope_lifetimes`) and
+        // those elided lifetimes we found in the arguments (current
+        // content of `lifetimes_to_define`). Next, we will process
+        // the return type, which will cause `lifetimes_to_define` to
+        // grow.
+        let input_lifetimes_count = self.in_scope_lifetimes.len() + self.lifetimes_to_define.len();
+
+        let (opaque_ty_id, lifetime_params) = self.with_hir_id_owner(opaque_ty_node_id, |this| {
+            // We have to be careful to get elision right here. The
+            // idea is that we create a lifetime parameter for each
+            // lifetime in the return type.  So, given a return type
+            // like `async fn foo(..) -> &[&u32]`, we lower to `impl
+            // Future<Output = &'1 [ &'2 u32 ]>`.
+            //
+            // Then, we will create `fn foo(..) -> Foo<'_, '_>`, and
+            // hence the elision takes place at the fn site.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let future_bound = this.with_anonymous_lifetime_mode(
-                AnonymousLifetimeMode::Replace(elided_lt_replacement),
+                AnonymousLifetimeMode::CreateParameter,
                 |this| this.lower_async_fn_output_type_to_future_bound(
                     output,
                     fn_def_id,
                     span,
                 ),
             );
+
+            debug!("lower_async_fn_ret_ty: future_bound={:#?}", future_bound);
 
             // Calculate all the lifetimes that should be captured
             // by the opaque type. This should include all in-scope
@@ -2267,9 +2502,13 @@ impl<'a> LoweringContext<'a> {
             let lifetime_params: Vec<(Span, ParamName)> =
                 this.in_scope_lifetimes
                     .iter().cloned()
-                    .map(|ident| (ident.span, ParamName::Plain(ident)))
+                    .map(|name| (name.ident().span, name))
                     .chain(this.lifetimes_to_define.iter().cloned())
                     .collect();
+
+            debug!("lower_async_fn_ret_ty: in_scope_lifetimes={:#?}", this.in_scope_lifetimes);
+            debug!("lower_async_fn_ret_ty: lifetimes_to_define={:#?}", this.lifetimes_to_define);
+            debug!("lower_async_fn_ret_ty: lifetime_params={:#?}", lifetime_params);
 
             let generic_params =
                 lifetime_params
@@ -2304,6 +2543,7 @@ impl<'a> LoweringContext<'a> {
             (opaque_ty_id, lifetime_params)
         });
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let generic_args =
             lifetime_params
                 .iter().cloned()
@@ -2313,10 +2553,58 @@ impl<'a> LoweringContext<'a> {
                         span,
                         name: hir::LifetimeName::Param(hir_name),
                     })
+=======
+        // As documented above on the variable
+        // `input_lifetimes_count`, we need to create the lifetime
+        // arguments to our opaque type. Continuing with our example,
+        // we're creating the type arguments for the return type:
+        //
+        // ```
+        // Bar<'a, 'b, '0, '1, '_>
+        // ```
+        //
+        // For the "input" lifetime parameters, we wish to create
+        // references to the parameters themselves, including the
+        // "implicit" ones created from parameter types (`'a`, `'b`,
+        // '`0`, `'1`).
+        //
+        // For the "output" lifetime parameters, we just want to
+        // generate `'_`.
+        let mut generic_args: Vec<_> =
+            lifetime_params[..input_lifetimes_count]
+            .iter()
+            .map(|&(span, hir_name)| {
+                // Input lifetime like `'a` or `'1`:
+                GenericArg::Lifetime(hir::Lifetime {
+                    hir_id: self.next_id(),
+                    span,
+                    name: hir::LifetimeName::Param(hir_name),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 })
-                .collect();
+            })
+            .collect();
+        generic_args.extend(
+            lifetime_params[input_lifetimes_count..]
+            .iter()
+            .map(|&(span, _)| {
+                // Output lifetime like `'_`.
+                GenericArg::Lifetime(hir::Lifetime {
+                    hir_id: self.next_id(),
+                    span,
+                    name: hir::LifetimeName::Implicit,
+                })
+            })
+        );
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let opaque_ty_ref = hir::TyKind::Def(hir::ItemId { id: opaque_ty_id }, generic_args);
+=======
+        // Create the `Foo<...>` refernece itself. Note that the `type
+        // Foo = impl Trait` is, internally, created as a child of the
+        // async fn, so the *type parameters* are inherited.  It's
+        // only the lifetime parameters that we must supply.
+        let opaque_ty_ref = hir::TyKind::Def(hir::ItemId { id: opaque_ty_id }, generic_args.into());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
         hir::FunctionRetTy::Return(P(hir::Ty {
             node: opaque_ty_ref,
@@ -2350,7 +2638,11 @@ impl<'a> LoweringContext<'a> {
         let future_params = P(hir::GenericArgs {
             args: hir_vec![],
             bindings: hir_vec![hir::TypeBinding {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 ident: Ident::with_empty_ctxt(FN_OUTPUT_NAME),
+=======
+                ident: Ident::with_dummy_span(FN_OUTPUT_NAME),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 kind: hir::TypeBindingKind::Equality {
                     ty: output_ty,
                 },
@@ -2412,11 +2704,14 @@ impl<'a> LoweringContext<'a> {
                     }
 
                     AnonymousLifetimeMode::ReportError => self.new_error_lifetime(Some(l.id), span),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
                     AnonymousLifetimeMode::Replace(replacement) => {
                         let hir_id = self.lower_node_id(l.id);
                         self.replace_elided_lifetime(hir_id, span, replacement)
                     }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 },
             ident => {
                 self.maybe_collect_in_band_lifetime(ident);
@@ -2437,39 +2732,6 @@ impl<'a> LoweringContext<'a> {
             span,
             name: name,
         }
-    }
-
-    /// Replace a return-position elided lifetime with the elided lifetime
-    /// from the arguments.
-    fn replace_elided_lifetime(
-        &mut self,
-        hir_id: hir::HirId,
-        span: Span,
-        replacement: LtReplacement,
-    ) -> hir::Lifetime {
-        let multiple_or_none = match replacement {
-            LtReplacement::Some(name) => {
-                return hir::Lifetime {
-                    hir_id,
-                    span,
-                    name: hir::LifetimeName::Param(name),
-                };
-            }
-            LtReplacement::MultipleLifetimes => "multiple",
-            LtReplacement::NoLifetimes => "none",
-        };
-
-        let mut err = crate::middle::resolve_lifetime::report_missing_lifetime_specifiers(
-            self.sess,
-            span,
-            1,
-        );
-        err.note(&format!(
-            "return-position elided lifetimes require exactly one \
-             input-position elided lifetime, found {}.", multiple_or_none));
-        err.emit();
-
-        hir::Lifetime { hir_id, span, name: hir::LifetimeName::Error }
     }
 
     fn lower_generic_params(
@@ -2507,6 +2769,12 @@ impl<'a> LoweringContext<'a> {
                     hir::LifetimeName::Implicit
                         | hir::LifetimeName::Underscore
                         | hir::LifetimeName::Static => hir::ParamName::Plain(lt.name.ident()),
+                    hir::LifetimeName::ImplicitObjectLifetimeDefault => {
+                        span_bug!(
+                            param.ident.span,
+                            "object-lifetime-default should not occur here",
+                        );
+                    }
                     hir::LifetimeName::Error => ParamName::Error,
                 };
 
@@ -2519,6 +2787,7 @@ impl<'a> LoweringContext<'a> {
                 (param_name, kind)
             }
             GenericParamKind::Type { ref default, .. } => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 // Don't expose `Self` (recovered "keyword used as ident" parse error).
                 // `rustc::ty` expects `Self` to be only used for a trait's `Self`.
                 // Instead, use `gensym("Self")` to create a distinct name that looks the same.
@@ -2528,6 +2797,8 @@ impl<'a> LoweringContext<'a> {
                     param.ident
                 };
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let add_bounds = add_bounds.get(&param.id).map_or(&[][..], |x| &x);
                 if !add_bounds.is_empty() {
                     let params = self.lower_param_bounds(add_bounds, itctx.reborrow()).into_iter();
@@ -2546,7 +2817,7 @@ impl<'a> LoweringContext<'a> {
                                           .next(),
                 };
 
-                (hir::ParamName::Plain(ident), kind)
+                (hir::ParamName::Plain(param.ident), kind)
             }
             GenericParamKind::Const { ref ty } => {
                 (hir::ParamName::Plain(param.ident), hir::GenericParamKind::Const {
@@ -2611,12 +2882,17 @@ impl<'a> LoweringContext<'a> {
         bounds.iter().map(|bound| self.lower_param_bound(bound, itctx.reborrow())).collect()
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn lower_block_with_stmts(
         &mut self,
         b: &Block,
         targeted_by_break: bool,
         mut stmts: Vec<hir::Stmt>,
     ) -> P<hir::Block> {
+=======
+    fn lower_block(&mut self, b: &Block, targeted_by_break: bool) -> P<hir::Block> {
+        let mut stmts = vec![];
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let mut expr = None;
 
         for (index, stmt) in b.stmts.iter().enumerate() {
@@ -2641,8 +2917,16 @@ impl<'a> LoweringContext<'a> {
         })
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn lower_block(&mut self, b: &Block, targeted_by_break: bool) -> P<hir::Block> {
         self.lower_block_with_stmts(b, targeted_by_break, vec![])
+=======
+    /// Lowers a block directly to an expression, presuming that it
+    /// has no attributes and is not targeted by a `break`.
+    fn lower_block_expr(&mut self, b: &Block) -> hir::Expr {
+        let block = self.lower_block(b, false);
+        self.expr_block(block, ThinVec::new())
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn lower_pat(&mut self, p: &Pat) -> P<hir::Pat> {
@@ -2663,6 +2947,12 @@ impl<'a> LoweringContext<'a> {
                 );
                 let (pats, ddpos) = self.lower_pat_tuple(pats, "tuple struct");
                 hir::PatKind::TupleStruct(qpath, pats, ddpos)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            }
+            PatKind::Or(ref pats) => {
+                hir::PatKind::Or(pats.iter().map(|x| self.lower_pat(x)).collect())
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             PatKind::Path(ref qself, ref path) => {
                 let qpath = self.lower_qpath(
@@ -2685,6 +2975,7 @@ impl<'a> LoweringContext<'a> {
 
                 let fs = fields
                     .iter()
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     .map(|f| {
                         Spanned {
                             span: f.span,
@@ -2695,6 +2986,14 @@ impl<'a> LoweringContext<'a> {
                                 is_shorthand: f.node.is_shorthand,
                             },
                         }
+=======
+                    .map(|f| hir::FieldPat {
+                        hir_id: self.next_id(),
+                        ident: f.ident,
+                        pat: self.lower_pat(&f.pat),
+                        is_shorthand: f.is_shorthand,
+                        span: f.span,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     })
                     .collect();
                 hir::PatKind::Struct(qpath, fs, etc)
@@ -2929,7 +3228,11 @@ impl<'a> LoweringContext<'a> {
             }
             StmtKind::Expr(ref e) => hir::StmtKind::Expr(P(self.lower_expr(e))),
             StmtKind::Semi(ref e) => hir::StmtKind::Semi(P(self.lower_expr(e))),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             StmtKind::Mac(..) => panic!("Shouldn't exist here"),
+=======
+            StmtKind::Mac(..) => panic!("shouldn't exist here"),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         };
         smallvec![hir::Stmt {
             hir_id: self.lower_node_id(s.id),
@@ -3117,7 +3420,11 @@ impl<'a> LoweringContext<'a> {
 
         hir::Path {
             span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             res: res.map_id(|_| panic!("unexpected node_id")),
+=======
+            res: res.map_id(|_| panic!("unexpected `NodeId`")),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             segments: segments.into(),
         }
     }
@@ -3174,10 +3481,6 @@ impl<'a> LoweringContext<'a> {
             AnonymousLifetimeMode::ReportError => self.new_error_lifetime(None, span),
 
             AnonymousLifetimeMode::PassThrough => self.new_implicit_lifetime(span),
-
-            AnonymousLifetimeMode::Replace(replacement) => {
-                self.new_replacement_lifetime(replacement, span)
-            }
         }
     }
 
@@ -3231,10 +3534,6 @@ impl<'a> LoweringContext<'a> {
             // This is the normal case.
             AnonymousLifetimeMode::PassThrough => self.new_implicit_lifetime(span),
 
-            AnonymousLifetimeMode::Replace(replacement) => {
-                self.new_replacement_lifetime(replacement, span)
-            }
-
             AnonymousLifetimeMode::ReportError => self.new_error_lifetime(None, span),
         }
     }
@@ -3266,13 +3565,9 @@ impl<'a> LoweringContext<'a> {
 
             // This is the normal case.
             AnonymousLifetimeMode::PassThrough => {}
-
-            // We don't need to do any replacement here as this lifetime
-            // doesn't refer to an elided lifetime elsewhere in the function
-            // signature.
-            AnonymousLifetimeMode::Replace(_) => {}
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.new_implicit_lifetime(span)
     }
 
@@ -3283,6 +3578,15 @@ impl<'a> LoweringContext<'a> {
     ) -> hir::Lifetime {
         let hir_id = self.next_id();
         self.replace_elided_lifetime(hir_id, span, replacement)
+=======
+        let r = hir::Lifetime {
+            hir_id: self.next_id(),
+            span,
+            name: hir::LifetimeName::ImplicitObjectLifetimeDefault,
+        };
+        debug!("elided_dyn_bound: r={:?}", r);
+        r
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn new_implicit_lifetime(&mut self, span: Span) -> hir::Lifetime {

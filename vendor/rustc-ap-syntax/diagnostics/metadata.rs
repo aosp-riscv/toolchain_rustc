@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 //! This module contains utilities for outputting metadata for diagnostic errors.
 //!
 //! Each set of errors is mapped to a metadata file by a name, which is
@@ -91,3 +92,5 @@ pub fn output_metadata(ecx: &ExtCtxt<'_>, prefix: &str, name: &str, err_map: &Er
     }
     Ok(result?)
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

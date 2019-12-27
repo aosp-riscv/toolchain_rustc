@@ -126,9 +126,16 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
             ExprKind::StaticRef { id } => block.and(Place {
                 base: PlaceBase::Static(Box::new(Static {
                     ty: expr.ty,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     kind: StaticKind::Static(id),
                 })),
                 projection: None,
+=======
+                    kind: StaticKind::Static,
+                    def_id: id,
+                })),
+                projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }),
 
             ExprKind::PlaceTypeAscription { source, user_ty } => {
@@ -146,9 +153,11 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                         Statement {
                             source_info,
                             kind: StatementKind::AscribeUserType(
-                                place.clone(),
+                                box(
+                                    place.clone(),
+                                    UserTypeProjection { base: annotation_index, projs: vec![], }
+                                ),
                                 Variance::Invariant,
-                                box UserTypeProjection { base: annotation_index, projs: vec![], },
                             ),
                         },
                     );
@@ -173,9 +182,15 @@ impl<'a, 'tcx> Builder<'a, 'tcx> {
                         Statement {
                             source_info,
                             kind: StatementKind::AscribeUserType(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                 Place::from(temp.clone()),
+=======
+                                box(
+                                    Place::from(temp.clone()),
+                                    UserTypeProjection { base: annotation_index, projs: vec![], },
+                                ),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                 Variance::Invariant,
-                                box UserTypeProjection { base: annotation_index, projs: vec![], },
                             ),
                         },
                     );

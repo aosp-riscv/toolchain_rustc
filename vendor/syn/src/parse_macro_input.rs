@@ -4,11 +4,22 @@
 /// Refer to the [`parse` module] documentation for more details about parsing
 /// in Syn.
 ///
-/// [`parse` module]: parse/index.html
+/// [`parse` module]: crate::rustdoc_workaround::parse_module
+///
+/// <br>
 ///
 /// # Intended usage
 ///
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 /// ```edition2018
+=======
+/// This macro must be called from a function that returns
+/// `proc_macro::TokenStream`. Usually this will be your proc macro entry point,
+/// the function that has the #\[proc_macro\] / #\[proc_macro_derive\] /
+/// #\[proc_macro_attribute\] attribute.
+///
+/// ```
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// extern crate proc_macro;
 ///
 /// use proc_macro::TokenStream;
@@ -54,7 +65,7 @@ macro_rules! parse_macro_input {
 ////////////////////////////////////////////////////////////////////////////////
 // Can parse any type that implements Parse.
 
-use parse::{Parse, ParseStream, Parser, Result};
+use crate::parse::{Parse, ParseStream, Parser, Result};
 use proc_macro::TokenStream;
 
 // Not public API.
@@ -79,7 +90,7 @@ impl<T: Parse> ParseMacroInput for T {
 // Any other types that we want `parse_macro_input!` to be able to parse.
 
 #[cfg(any(feature = "full", feature = "derive"))]
-use AttributeArgs;
+use crate::AttributeArgs;
 
 #[cfg(any(feature = "full", feature = "derive"))]
 impl ParseMacroInput for AttributeArgs {

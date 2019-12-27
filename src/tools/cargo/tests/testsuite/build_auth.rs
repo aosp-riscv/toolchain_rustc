@@ -6,8 +6,13 @@ use std::sync::atomic::{AtomicUsize, Ordering::SeqCst};
 use std::sync::Arc;
 use std::thread;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::support::paths;
 use crate::support::{basic_manifest, project};
+=======
+use cargo_test_support::paths;
+use cargo_test_support::{basic_manifest, project};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use git2;
 
 // Tests that HTTP auth is offered from `credential.helper`.

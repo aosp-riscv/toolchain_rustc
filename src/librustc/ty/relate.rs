@@ -8,7 +8,11 @@ use crate::hir::def_id::DefId;
 use crate::ty::subst::{Kind, UnpackedKind, SubstsRef};
 use crate::ty::{self, Ty, TyCtxt, TypeFoldable};
 use crate::ty::error::{ExpectedFound, TypeError};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::mir::interpret::{ConstValue, Scalar, GlobalId};
+=======
+use crate::mir::interpret::{ConstValue, Scalar};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::rc::Rc;
 use std::iter;
 use rustc_target::spec::abi;
@@ -551,6 +555,7 @@ pub fn super_relate_consts<R: TypeRelation<'tcx>>(
     let tcx = relation.tcx();
 
     let eagerly_eval = |x: &'tcx ty::Const<'tcx>| {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if let ConstValue::Unevaluated(def_id, substs) = x.val {
             // FIXME(eddyb) get the right param_env.
             let param_env = ty::ParamEnv::empty();
@@ -571,6 +576,10 @@ pub fn super_relate_consts<R: TypeRelation<'tcx>>(
                     }
                 }
             }
+=======
+        if !x.val.has_local_value() {
+            return x.eval(tcx, relation.param_env()).val;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
         x.val
     };

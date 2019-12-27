@@ -1897,6 +1897,7 @@ pub const NDA_PORT: ::c_ushort = 6;
 pub const NDA_VNI: ::c_ushort = 7;
 pub const NDA_IFINDEX: ::c_ushort = 8;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // linux/rtnetlink.h
 pub const TCA_UNSPEC: ::c_ushort = 0;
 pub const TCA_KIND: ::c_ushort = 1;
@@ -2121,6 +2122,294 @@ pub const FUTEX_CMD_MASK: ::c_int =
     !(FUTEX_PRIVATE_FLAG | FUTEX_CLOCK_REALTIME);
 
 f! {
+=======
+// linux/netlink.h
+pub const NLA_ALIGNTO: ::c_int = 4;
+
+pub const NETLINK_ROUTE: ::c_int = 0;
+pub const NETLINK_UNUSED: ::c_int = 1;
+pub const NETLINK_USERSOCK: ::c_int = 2;
+pub const NETLINK_FIREWALL: ::c_int = 3;
+pub const NETLINK_SOCK_DIAG: ::c_int = 4;
+pub const NETLINK_NFLOG: ::c_int = 5;
+pub const NETLINK_XFRM: ::c_int = 6;
+pub const NETLINK_SELINUX: ::c_int = 7;
+pub const NETLINK_ISCSI: ::c_int = 8;
+pub const NETLINK_AUDIT: ::c_int = 9;
+pub const NETLINK_FIB_LOOKUP: ::c_int = 10;
+pub const NETLINK_CONNECTOR: ::c_int = 11;
+pub const NETLINK_NETFILTER: ::c_int = 12;
+pub const NETLINK_IP6_FW: ::c_int = 13;
+pub const NETLINK_DNRTMSG: ::c_int = 14;
+pub const NETLINK_KOBJECT_UEVENT: ::c_int = 15;
+pub const NETLINK_GENERIC: ::c_int = 16;
+pub const NETLINK_SCSITRANSPORT: ::c_int = 18;
+pub const NETLINK_ECRYPTFS: ::c_int = 19;
+pub const NETLINK_RDMA: ::c_int = 20;
+pub const NETLINK_CRYPTO: ::c_int = 21;
+pub const NETLINK_INET_DIAG: ::c_int = NETLINK_SOCK_DIAG;
+
+pub const NLM_F_REQUEST: ::c_int = 1;
+pub const NLM_F_MULTI: ::c_int = 2;
+pub const NLM_F_ACK: ::c_int = 4;
+pub const NLM_F_ECHO: ::c_int = 8;
+pub const NLM_F_DUMP_INTR: ::c_int = 16;
+pub const NLM_F_DUMP_FILTERED: ::c_int = 32;
+
+pub const NLM_F_ROOT: ::c_int = 0x100;
+pub const NLM_F_MATCH: ::c_int = 0x200;
+pub const NLM_F_ATOMIC: ::c_int = 0x400;
+pub const NLM_F_DUMP: ::c_int = NLM_F_ROOT | NLM_F_MATCH;
+
+pub const NLM_F_REPLACE: ::c_int = 0x100;
+pub const NLM_F_EXCL: ::c_int = 0x200;
+pub const NLM_F_CREATE: ::c_int = 0x400;
+pub const NLM_F_APPEND: ::c_int = 0x800;
+
+pub const NETLINK_ADD_MEMBERSHIP: ::c_int = 1;
+pub const NETLINK_DROP_MEMBERSHIP: ::c_int = 2;
+pub const NETLINK_PKTINFO: ::c_int = 3;
+pub const NETLINK_BROADCAST_ERROR: ::c_int = 4;
+pub const NETLINK_NO_ENOBUFS: ::c_int = 5;
+pub const NETLINK_RX_RING: ::c_int = 6;
+pub const NETLINK_TX_RING: ::c_int = 7;
+pub const NETLINK_LISTEN_ALL_NSID: ::c_int = 8;
+pub const NETLINK_LIST_MEMBERSHIPS: ::c_int = 9;
+pub const NETLINK_CAP_ACK: ::c_int = 10;
+
+pub const NLA_F_NESTED: ::c_int = 1 << 15;
+pub const NLA_F_NET_BYTEORDER: ::c_int = 1 << 14;
+pub const NLA_TYPE_MASK: ::c_int = !(NLA_F_NESTED | NLA_F_NET_BYTEORDER);
+
+// linux/rtnetlink.h
+pub const TCA_UNSPEC: ::c_ushort = 0;
+pub const TCA_KIND: ::c_ushort = 1;
+pub const TCA_OPTIONS: ::c_ushort = 2;
+pub const TCA_STATS: ::c_ushort = 3;
+pub const TCA_XSTATS: ::c_ushort = 4;
+pub const TCA_RATE: ::c_ushort = 5;
+pub const TCA_FCNT: ::c_ushort = 6;
+pub const TCA_STATS2: ::c_ushort = 7;
+pub const TCA_STAB: ::c_ushort = 8;
+
+pub const RTM_NEWLINK: u16 = 16;
+pub const RTM_DELLINK: u16 = 17;
+pub const RTM_GETLINK: u16 = 18;
+pub const RTM_SETLINK: u16 = 19;
+pub const RTM_NEWADDR: u16 = 20;
+pub const RTM_DELADDR: u16 = 21;
+pub const RTM_GETADDR: u16 = 22;
+pub const RTM_NEWROUTE: u16 = 24;
+pub const RTM_DELROUTE: u16 = 25;
+pub const RTM_GETROUTE: u16 = 26;
+pub const RTM_NEWNEIGH: u16 = 28;
+pub const RTM_DELNEIGH: u16 = 29;
+pub const RTM_GETNEIGH: u16 = 30;
+pub const RTM_NEWRULE: u16 = 32;
+pub const RTM_DELRULE: u16 = 33;
+pub const RTM_GETRULE: u16 = 34;
+pub const RTM_NEWQDISC: u16 = 36;
+pub const RTM_DELQDISC: u16 = 37;
+pub const RTM_GETQDISC: u16 = 38;
+pub const RTM_NEWTCLASS: u16 = 40;
+pub const RTM_DELTCLASS: u16 = 41;
+pub const RTM_GETTCLASS: u16 = 42;
+pub const RTM_NEWTFILTER: u16 = 44;
+pub const RTM_DELTFILTER: u16 = 45;
+pub const RTM_GETTFILTER: u16 = 46;
+pub const RTM_NEWACTION: u16 = 48;
+pub const RTM_DELACTION: u16 = 49;
+pub const RTM_GETACTION: u16 = 50;
+pub const RTM_NEWPREFIX: u16 = 52;
+pub const RTM_GETMULTICAST: u16 = 58;
+pub const RTM_GETANYCAST: u16 = 62;
+pub const RTM_NEWNEIGHTBL: u16 = 64;
+pub const RTM_GETNEIGHTBL: u16 = 66;
+pub const RTM_SETNEIGHTBL: u16 = 67;
+pub const RTM_NEWNDUSEROPT: u16 = 68;
+pub const RTM_NEWADDRLABEL: u16 = 72;
+pub const RTM_DELADDRLABEL: u16 = 73;
+pub const RTM_GETADDRLABEL: u16 = 74;
+pub const RTM_GETDCB: u16 = 78;
+pub const RTM_SETDCB: u16 = 79;
+pub const RTM_NEWNETCONF: u16 = 80;
+pub const RTM_GETNETCONF: u16 = 82;
+pub const RTM_NEWMDB: u16 = 84;
+pub const RTM_DELMDB: u16 = 85;
+pub const RTM_GETMDB: u16 = 86;
+pub const RTM_NEWNSID: u16 = 88;
+pub const RTM_DELNSID: u16 = 89;
+pub const RTM_GETNSID: u16 = 90;
+
+pub const RTM_F_NOTIFY: ::c_uint = 0x100;
+pub const RTM_F_CLONED: ::c_uint = 0x200;
+pub const RTM_F_EQUALIZE: ::c_uint = 0x400;
+pub const RTM_F_PREFIX: ::c_uint = 0x800;
+
+pub const RTA_UNSPEC: ::c_ushort = 0;
+pub const RTA_DST: ::c_ushort = 1;
+pub const RTA_SRC: ::c_ushort = 2;
+pub const RTA_IIF: ::c_ushort = 3;
+pub const RTA_OIF: ::c_ushort = 4;
+pub const RTA_GATEWAY: ::c_ushort = 5;
+pub const RTA_PRIORITY: ::c_ushort = 6;
+pub const RTA_PREFSRC: ::c_ushort = 7;
+pub const RTA_METRICS: ::c_ushort = 8;
+pub const RTA_MULTIPATH: ::c_ushort = 9;
+pub const RTA_PROTOINFO: ::c_ushort = 10; // No longer used
+pub const RTA_FLOW: ::c_ushort = 11;
+pub const RTA_CACHEINFO: ::c_ushort = 12;
+pub const RTA_SESSION: ::c_ushort = 13; // No longer used
+pub const RTA_MP_ALGO: ::c_ushort = 14; // No longer used
+pub const RTA_TABLE: ::c_ushort = 15;
+pub const RTA_MARK: ::c_ushort = 16;
+pub const RTA_MFC_STATS: ::c_ushort = 17;
+
+pub const RTN_UNSPEC: ::c_uchar = 0;
+pub const RTN_UNICAST: ::c_uchar = 1;
+pub const RTN_LOCAL: ::c_uchar = 2;
+pub const RTN_BROADCAST: ::c_uchar = 3;
+pub const RTN_ANYCAST: ::c_uchar = 4;
+pub const RTN_MULTICAST: ::c_uchar = 5;
+pub const RTN_BLACKHOLE: ::c_uchar = 6;
+pub const RTN_UNREACHABLE: ::c_uchar = 7;
+pub const RTN_PROHIBIT: ::c_uchar = 8;
+pub const RTN_THROW: ::c_uchar = 9;
+pub const RTN_NAT: ::c_uchar = 10;
+pub const RTN_XRESOLVE: ::c_uchar = 11;
+
+pub const RTPROT_UNSPEC: ::c_uchar = 0;
+pub const RTPROT_REDIRECT: ::c_uchar = 1;
+pub const RTPROT_KERNEL: ::c_uchar = 2;
+pub const RTPROT_BOOT: ::c_uchar = 3;
+pub const RTPROT_STATIC: ::c_uchar = 4;
+
+pub const RT_SCOPE_UNIVERSE: ::c_uchar = 0;
+pub const RT_SCOPE_SITE: ::c_uchar = 200;
+pub const RT_SCOPE_LINK: ::c_uchar = 253;
+pub const RT_SCOPE_HOST: ::c_uchar = 254;
+pub const RT_SCOPE_NOWHERE: ::c_uchar = 255;
+
+pub const RT_TABLE_UNSPEC: ::c_uchar = 0;
+pub const RT_TABLE_COMPAT: ::c_uchar = 252;
+pub const RT_TABLE_DEFAULT: ::c_uchar = 253;
+pub const RT_TABLE_MAIN: ::c_uchar = 254;
+pub const RT_TABLE_LOCAL: ::c_uchar = 255;
+
+pub const RTMSG_OVERRUN: u32 = ::NLMSG_OVERRUN as u32;
+pub const RTMSG_NEWDEVICE: u32 = 0x11;
+pub const RTMSG_DELDEVICE: u32 = 0x12;
+pub const RTMSG_NEWROUTE: u32 = 0x21;
+pub const RTMSG_DELROUTE: u32 = 0x22;
+pub const RTMSG_NEWRULE: u32 = 0x31;
+pub const RTMSG_DELRULE: u32 = 0x32;
+pub const RTMSG_CONTROL: u32 = 0x40;
+pub const RTMSG_AR_FAILED: u32 = 0x51;
+
+pub const MAX_ADDR_LEN: usize = 7;
+pub const ARPD_UPDATE: ::c_ushort = 0x01;
+pub const ARPD_LOOKUP: ::c_ushort = 0x02;
+pub const ARPD_FLUSH: ::c_ushort = 0x03;
+pub const ATF_MAGIC: ::c_int = 0x80;
+
+#[cfg(not(target_arch = "sparc64"))]
+pub const SO_TIMESTAMPING: ::c_int = 37;
+#[cfg(target_arch = "sparc64")]
+pub const SO_TIMESTAMPING: ::c_int = 35;
+pub const SCM_TIMESTAMPING: ::c_int = SO_TIMESTAMPING;
+
+// linux/module.h
+pub const MODULE_INIT_IGNORE_MODVERSIONS: ::c_uint = 0x0001;
+pub const MODULE_INIT_IGNORE_VERMAGIC: ::c_uint = 0x0002;
+
+// linux/net_tstamp.h
+pub const SOF_TIMESTAMPING_TX_HARDWARE: ::c_uint = 1 << 0;
+pub const SOF_TIMESTAMPING_TX_SOFTWARE: ::c_uint = 1 << 1;
+pub const SOF_TIMESTAMPING_RX_HARDWARE: ::c_uint = 1 << 2;
+pub const SOF_TIMESTAMPING_RX_SOFTWARE: ::c_uint = 1 << 3;
+pub const SOF_TIMESTAMPING_SOFTWARE: ::c_uint = 1 << 4;
+pub const SOF_TIMESTAMPING_SYS_HARDWARE: ::c_uint = 1 << 5;
+pub const SOF_TIMESTAMPING_RAW_HARDWARE: ::c_uint = 1 << 6;
+
+// linux/if_alg.h
+pub const ALG_SET_KEY: ::c_int = 1;
+pub const ALG_SET_IV: ::c_int = 2;
+pub const ALG_SET_OP: ::c_int = 3;
+pub const ALG_SET_AEAD_ASSOCLEN: ::c_int = 4;
+pub const ALG_SET_AEAD_AUTHSIZE: ::c_int = 5;
+
+pub const ALG_OP_DECRYPT: ::c_int = 0;
+pub const ALG_OP_ENCRYPT: ::c_int = 1;
+
+// uapi/linux/vm_sockets.h
+pub const VMADDR_CID_ANY: ::c_uint = 0xFFFFFFFF;
+pub const VMADDR_CID_HYPERVISOR: ::c_uint = 0;
+pub const VMADDR_CID_RESERVED: ::c_uint = 1;
+pub const VMADDR_CID_HOST: ::c_uint = 2;
+pub const VMADDR_PORT_ANY: ::c_uint = 0xFFFFFFFF;
+
+// uapi/linux/inotify.h
+pub const IN_ACCESS:        u32 = 0x0000_0001;
+pub const IN_MODIFY:        u32 = 0x0000_0002;
+pub const IN_ATTRIB:        u32 = 0x0000_0004;
+pub const IN_CLOSE_WRITE:   u32 = 0x0000_0008;
+pub const IN_CLOSE_NOWRITE: u32 = 0x0000_0010;
+pub const IN_CLOSE:         u32 = (IN_CLOSE_WRITE | IN_CLOSE_NOWRITE);
+pub const IN_OPEN:          u32 = 0x0000_0020;
+pub const IN_MOVED_FROM:    u32 = 0x0000_0040;
+pub const IN_MOVED_TO:      u32 = 0x0000_0080;
+pub const IN_MOVE:          u32 = (IN_MOVED_FROM | IN_MOVED_TO);
+pub const IN_CREATE:        u32 = 0x0000_0100;
+pub const IN_DELETE:        u32 = 0x0000_0200;
+pub const IN_DELETE_SELF:   u32 = 0x0000_0400;
+pub const IN_MOVE_SELF:     u32 = 0x0000_0800;
+pub const IN_UNMOUNT:       u32 = 0x0000_2000;
+pub const IN_Q_OVERFLOW:    u32 = 0x0000_4000;
+pub const IN_IGNORED:       u32 = 0x0000_8000;
+pub const IN_ONLYDIR:       u32 = 0x0100_0000;
+pub const IN_DONT_FOLLOW:   u32 = 0x0200_0000;
+// pub const IN_EXCL_UNLINK:   u32 = 0x0400_0000;
+
+// pub const IN_MASK_CREATE:   u32 = 0x1000_0000;
+// pub const IN_MASK_ADD:      u32 = 0x2000_0000;
+pub const IN_ISDIR:         u32 = 0x4000_0000;
+pub const IN_ONESHOT:       u32 = 0x8000_0000;
+
+pub const IN_ALL_EVENTS:    u32 = (
+  IN_ACCESS | IN_MODIFY | IN_ATTRIB | IN_CLOSE_WRITE |
+  IN_CLOSE_NOWRITE | IN_OPEN | IN_MOVED_FROM |
+  IN_MOVED_TO | IN_DELETE | IN_CREATE | IN_DELETE_SELF |
+  IN_MOVE_SELF
+);
+
+pub const IN_CLOEXEC: ::c_int = O_CLOEXEC;
+pub const IN_NONBLOCK: ::c_int = O_NONBLOCK;
+
+pub const FUTEX_WAIT: ::c_int = 0;
+pub const FUTEX_WAKE: ::c_int = 1;
+pub const FUTEX_FD: ::c_int = 2;
+pub const FUTEX_REQUEUE: ::c_int = 3;
+pub const FUTEX_CMP_REQUEUE: ::c_int = 4;
+pub const FUTEX_WAKE_OP: ::c_int = 5;
+pub const FUTEX_LOCK_PI: ::c_int = 6;
+pub const FUTEX_UNLOCK_PI: ::c_int = 7;
+pub const FUTEX_TRYLOCK_PI: ::c_int = 8;
+pub const FUTEX_WAIT_BITSET: ::c_int = 9;
+pub const FUTEX_WAKE_BITSET: ::c_int = 10;
+pub const FUTEX_WAIT_REQUEUE_PI: ::c_int = 11;
+pub const FUTEX_CMP_REQUEUE_PI: ::c_int = 12;
+
+pub const FUTEX_PRIVATE_FLAG: ::c_int = 128;
+pub const FUTEX_CLOCK_REALTIME: ::c_int = 256;
+pub const FUTEX_CMD_MASK: ::c_int =
+    !(FUTEX_PRIVATE_FLAG | FUTEX_CLOCK_REALTIME);
+
+f! {
+    pub fn NLA_ALIGN(len: ::c_int) -> ::c_int {
+        return ((len) + NLA_ALIGNTO - 1) & !(NLA_ALIGNTO - 1)
+    }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     pub fn CMSG_NXTHDR(mhdr: *const msghdr,
                        cmsg: *const cmsghdr) -> *mut cmsghdr {
         if ((*cmsg).cmsg_len as usize) < ::mem::size_of::<cmsghdr>() {

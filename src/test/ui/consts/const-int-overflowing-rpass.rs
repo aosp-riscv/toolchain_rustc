@@ -18,6 +18,7 @@ const SHR_B: (u32, bool) = 0x10u32.overflowing_shr(132);
 const NEG_A: (u32, bool) = 0u32.overflowing_neg();
 const NEG_B: (u32, bool) = core::u32::MAX.overflowing_neg();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 fn main() {
     assert_eq!(ADD_A, (7, false));
     assert_eq!(ADD_B, (0, true));
@@ -36,4 +37,32 @@ fn main() {
 
     assert_eq!(NEG_A, (0, false));
     assert_eq!(NEG_B, (1, true));
+=======
+const ABS_POS: (i32, bool) = 10i32.overflowing_abs();
+const ABS_NEG: (i32, bool) = (-10i32).overflowing_abs();
+const ABS_MIN: (i32, bool) = i32::min_value().overflowing_abs();
+
+fn main() {
+    assert_eq!(ADD_A, (7, false));
+    assert_eq!(ADD_B, (0, true));
+
+    assert_eq!(SUB_A, (3, false));
+    assert_eq!(SUB_B, (u32::max_value(), true));
+
+    assert_eq!(MUL_A, (10, false));
+    assert_eq!(MUL_B, (1410065408, true));
+
+    assert_eq!(SHL_A, (0x10, false));
+    assert_eq!(SHL_B, (0x10, true));
+
+    assert_eq!(SHR_A, (0x1, false));
+    assert_eq!(SHR_B, (0x1, true));
+
+    assert_eq!(NEG_A, (0, false));
+    assert_eq!(NEG_B, (1, true));
+
+    assert_eq!(ABS_POS, (10, false));
+    assert_eq!(ABS_NEG, (10, false));
+    assert_eq!(ABS_MIN, (i32::min_value(), true));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }

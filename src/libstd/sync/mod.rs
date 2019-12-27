@@ -163,7 +163,10 @@ pub use self::condvar::{Condvar, WaitTimeoutResult};
 #[stable(feature = "rust1", since = "1.0.0")]
 pub use self::mutex::{Mutex, MutexGuard};
 #[stable(feature = "rust1", since = "1.0.0")]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[cfg_attr(bootstrap, allow(deprecated_in_future))]
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[allow(deprecated)]
 pub use self::once::{Once, OnceState, ONCE_INIT};
 #[stable(feature = "rust1", since = "1.0.0")]

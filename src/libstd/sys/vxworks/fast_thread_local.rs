@@ -1,6 +1,7 @@
 #![cfg(target_thread_local)]
 #![unstable(feature = "thread_local_internals", issue = "0")]
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // Since what appears to be glibc 2.18 this symbol has been shipped which
 // GCC and clang both use to invoke destructors in thread_local globals, so
 // let's do the same!
@@ -28,6 +29,10 @@ pub unsafe fn register_dtor(t: *mut u8, dtor: unsafe extern fn(*mut u8)) {
             (dtor, t, &__dso_handle as *const _ as *mut _);
         return
     }
+=======
+pub unsafe fn register_dtor(t: *mut u8, dtor: unsafe extern fn(*mut u8)) {
+    use crate::sys_common::thread_local::register_dtor_fallback;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     register_dtor_fallback(t, dtor);
 }
 

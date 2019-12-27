@@ -728,7 +728,11 @@ def generate_property_module(mod, grouped_categories, category_subset):
 
     yield "pub(crate) mod %s {\n" % mod
     for cat in sorted(category_subset):
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if cat in ("Cc", "White_Space", "Pattern_White_Space"):
+=======
+        if cat in ("Cc", "White_Space"):
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             generator = generate_small_bool_trie("%s_table" % cat, grouped_categories[cat])
         else:
             generator = generate_bool_trie("%s_table" % cat, grouped_categories[cat])
@@ -841,6 +845,7 @@ def main():
     unicode_data = load_unicode_data(get_path(UnicodeFiles.UNICODE_DATA))
     load_special_casing(get_path(UnicodeFiles.SPECIAL_CASING), unicode_data)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     want_derived = {"XID_Start", "XID_Continue", "Alphabetic", "Lowercase", "Uppercase",
                     "Cased", "Case_Ignorable", "Grapheme_Extend"}
     derived = load_properties(get_path(UnicodeFiles.DERIVED_CORE_PROPERTIES), want_derived)
@@ -854,6 +859,20 @@ def main():
             ("general_category", unicode_data.general_categories, ["N", "Cc"]),
             ("derived_property", derived, want_derived),
             ("property", props, ["White_Space", "Pattern_White_Space"])
+=======
+    want_derived = {"Alphabetic", "Lowercase", "Uppercase",
+                    "Cased", "Case_Ignorable", "Grapheme_Extend"}
+    derived = load_properties(get_path(UnicodeFiles.DERIVED_CORE_PROPERTIES), want_derived)
+
+    props = load_properties(get_path(UnicodeFiles.PROPS),
+                            {"White_Space", "Join_Control", "Noncharacter_Code_Point"})
+
+    # Category tables
+    for (name, categories, category_subset) in (
+            ("general_category", unicode_data.general_categories, ["N", "Cc"]),
+            ("derived_property", derived, want_derived),
+            ("property", props, ["White_Space"])
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     ):
         for fragment in generate_property_module(name, categories, category_subset):
             buf.write(fragment)

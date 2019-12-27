@@ -1,6 +1,5 @@
 use std::fmt::{self, Debug};
-
-use self::thread_id::ThreadId;
+use std::thread::{self, ThreadId};
 
 /// ThreadBound is a Sync-maker and Send-maker that allows accessing a value
 /// of type T only from the original thread on which the ThreadBound was
@@ -18,13 +17,13 @@ unsafe impl<T: Copy> Send for ThreadBound<T> {}
 impl<T> ThreadBound<T> {
     pub fn new(value: T) -> Self {
         ThreadBound {
-            value: value,
-            thread_id: thread_id::current(),
+            value,
+            thread_id: thread::current().id(),
         }
     }
 
     pub fn get(&self) -> Option<&T> {
-        if thread_id::current() == self.thread_id {
+        if thread::current().id() == self.thread_id {
             Some(&self.value)
         } else {
             None
@@ -40,6 +39,7 @@ impl<T: Debug> Debug for ThreadBound<T> {
         }
     }
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 #[cfg(syn_can_use_thread_id)]
 mod thread_id {
@@ -81,3 +81,5 @@ mod thread_id {
         THREAD_ID.with(|id| *id)
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

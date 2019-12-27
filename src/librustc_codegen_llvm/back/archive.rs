@@ -12,6 +12,7 @@ use crate::llvm::{self, ArchiveKind};
 use rustc_codegen_ssa::{METADATA_FILENAME, RLIB_BYTECODE_EXTENSION};
 use rustc_codegen_ssa::back::archive::{ArchiveBuilder, find_library};
 use rustc::session::Session;
+use syntax::symbol::Symbol;
 
 struct ArchiveConfig<'a> {
     pub sess: &'a Session,
@@ -109,7 +110,11 @@ impl<'a> ArchiveBuilder<'a> for LlvmArchiveBuilder<'a> {
 
     /// Adds all of the contents of a native library to this archive. This will
     /// search in the relevant locations for a library named `name`.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn add_native_library(&mut self, name: &str) {
+=======
+    fn add_native_library(&mut self, name: Symbol) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let location = find_library(name, &self.config.lib_search_paths,
                                     self.config.sess);
         self.add_archive(&location, |_| false).unwrap_or_else(|e| {

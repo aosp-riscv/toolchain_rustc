@@ -340,7 +340,11 @@ impl Rewrite for ast::Attribute {
 
                         let literal_str = literal.as_str();
                         let doc_comment_formatter =
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             DocCommentFormatter::new(literal_str.get(), comment_style);
+=======
+                            DocCommentFormatter::new(&*literal_str, comment_style);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         let doc_comment = format!("{}", doc_comment_formatter);
                         return rewrite_doc_comment(
                             &doc_comment,

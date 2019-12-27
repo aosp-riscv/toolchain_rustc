@@ -586,10 +586,14 @@ where
                 BorrowKind::Mut { allow_two_phase_borrow: false },
                 Place {
                     base: PlaceBase::Local(cur),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     projection: Some(Box::new(Projection {
                         base: None,
                         elem: ProjectionElem::Deref,
                     })),
+=======
+                    projection: Box::new([ProjectionElem::Deref]),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
              ),
              Rvalue::BinaryOp(BinOp::Offset, move_(&Place::from(cur)), one))
@@ -897,7 +901,14 @@ where
     ) -> BasicBlock {
         let tcx = self.tcx();
         let unit_temp = Place::from(self.new_temp(tcx.mk_unit()));
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let free_func = tcx.require_lang_item(lang_items::BoxFreeFnLangItem);
+=======
+        let free_func = tcx.require_lang_item(
+            lang_items::BoxFreeFnLangItem,
+            Some(self.source_info.span)
+        );
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let args = adt.variants[VariantIdx::new(0)].fields.iter().enumerate().map(|(i, f)| {
             let field = Field::new(i);
             let field_ty = f.ty(self.tcx(), substs);
@@ -970,7 +981,6 @@ where
     fn constant_usize(&self, val: u16) -> Operand<'tcx> {
         Operand::Constant(box Constant {
             span: self.source_info.span,
-            ty: self.tcx().types.usize,
             user_ty: None,
             literal: ty::Const::from_usize(self.tcx(), val.into()),
         })
@@ -979,7 +989,7 @@ where
     fn assign(&self, lhs: &Place<'tcx>, rhs: Rvalue<'tcx>) -> Statement<'tcx> {
         Statement {
             source_info: self.source_info,
-            kind: StatementKind::Assign(lhs.clone(), box rhs)
+            kind: StatementKind::Assign(box(lhs.clone(), rhs))
         }
     }
 }

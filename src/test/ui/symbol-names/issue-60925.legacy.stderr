@@ -4,6 +4,7 @@ error: symbol-name(_ZN11issue_609253foo37Foo$LT$issue_60925..llv$u6d$..Foo$GT$3f
 LL |         #[rustc_symbol_name]
    |         ^^^^^^^^^^^^^^^^^^^^
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: demangling(issue_60925::foo::Foo<issue_60925::llv$u6d$..Foo$GT$::foo::h059a991a004536ad)
   --> $DIR/issue-60925.rs:21:9
    |
@@ -11,6 +12,15 @@ LL |         #[rustc_symbol_name]
    |         ^^^^^^^^^^^^^^^^^^^^
 
 error: demangling-alt(issue_60925::foo::Foo<issue_60925::llv$u6d$..Foo$GT$::foo)
+=======
+error: demangling(issue_60925::foo::Foo<issue_60925::llvm::Foo>::foo::h059a991a004536ad)
+  --> $DIR/issue-60925.rs:21:9
+   |
+LL |         #[rustc_symbol_name]
+   |         ^^^^^^^^^^^^^^^^^^^^
+
+error: demangling-alt(issue_60925::foo::Foo<issue_60925::llvm::Foo>::foo)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/issue-60925.rs:21:9
    |
 LL |         #[rustc_symbol_name]

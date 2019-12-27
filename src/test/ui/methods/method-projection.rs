@@ -2,6 +2,7 @@
 // Test that we can use method notation to call methods based on a
 // projection bound from a trait. Issue #20469.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 ///////////////////////////////////////////////////////////////////////////
 
 
@@ -48,6 +49,45 @@ impl Foo for SomeStruct {
 }
 
 ///////////////////////////////////////////////////////////////////////////
+=======
+trait MakeString {
+    fn make_string(&self) -> String;
+}
+
+impl MakeString for isize {
+    fn make_string(&self) -> String {
+        format!("{}", *self)
+    }
+}
+
+impl MakeString for usize {
+    fn make_string(&self) -> String {
+        format!("{}", *self)
+    }
+}
+
+trait Foo {
+    type F: MakeString;
+
+    fn get(&self) -> &Self::F;
+}
+
+fn foo<F:Foo>(f: &F) -> String {
+    f.get().make_string()
+}
+
+struct SomeStruct {
+    field: isize,
+}
+
+impl Foo for SomeStruct {
+    type F = isize;
+
+    fn get(&self) -> &isize {
+        &self.field
+    }
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 struct SomeOtherStruct {
     field: usize,

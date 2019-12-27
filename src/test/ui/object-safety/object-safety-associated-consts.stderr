@@ -1,10 +1,18 @@
 error[E0038]: the trait `Bar` cannot be made into an object
   --> $DIR/object-safety-associated-consts.rs:9:1
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL | fn make_bar<T:Bar>(t: &T) -> &dyn Bar {
    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Bar` cannot be made into an object
    |
    = note: the trait cannot contain associated consts like `X`
+=======
+LL |     const X: usize;
+   |           - the trait cannot contain associated consts like `X`
+...
+LL | fn make_bar<T:Bar>(t: &T) -> &dyn Bar {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Bar` cannot be made into an object
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

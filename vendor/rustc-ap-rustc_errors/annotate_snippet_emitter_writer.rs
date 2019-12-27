@@ -30,6 +30,7 @@ pub struct AnnotateSnippetEmitterWriter {
 impl Emitter for AnnotateSnippetEmitterWriter {
     /// The entry point for the diagnostics generation
     fn emit_diagnostic(&mut self, db: &DiagnosticBuilder<'_>) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let primary_span = db.span.clone();
         let children = db.children.clone();
         // FIXME(#59346): Collect suggestions (see emitter.rs)
@@ -149,6 +150,129 @@ impl<'a>  DiagnosticConverter<'a> {
     fn annotation_type_for_level(level: Level) -> AnnotationType {
         match level {
             Level::Bug | Level::Fatal | Level::PhaseFatal | Level::Error => AnnotationType::Error,
+=======
+        let mut children = db.children.clone();
+        let (mut primary_span, suggestions) = self.primary_span_formatted(&db);
+
+        self.fix_multispans_in_std_macros(&self.source_map,
+                                          &mut primary_span,
+                                          &mut children,
+                                          &db.level,
+                                          db.handler.flags.external_macro_backtrace);
+
+        self.emit_messages_default(&db.level,
+                                   db.message(),
+                                   &db.code,
+                                   &primary_span,
+                                   &children,
+                                   &suggestions);
+    }
+
+    fn should_show_explain(&self) -> bool {
+        !self.short_message
+    }
+}
+
+/// Collects all the data needed to generate the data structures needed for the
+/// `annotate-snippets` library.
+struct DiagnosticConverter<'a> {
+    source_map: Option<Lrc<SourceMapperDyn>>,
+    level: Level,
+    message: String,
+    code: Option<DiagnosticId>,
+    msp: MultiSpan,
+    #[allow(dead_code)]
+    children: &'a [SubDiagnostic],
+    #[allow(dead_code)]
+    suggestions: &'a [CodeSuggestion]
+}
+
+impl<'a>  DiagnosticConverter<'a> {
+    /// Turns rustc Diagnostic information into a `annotate_snippets::snippet::Snippet`.
+    fn to_annotation_snippet(&self) -> Option<Snippet> {
+        if let Some(source_map) = &self.source_map {
+            // Make sure our primary file comes first
+            let primary_lo = if let Some(ref primary_span) =
+                self.msp.primary_span().as_ref() {
+                source_map.lookup_char_pos(primary_span.lo())
+            } else {
+                // FIXME(#59346): Not sure when this is the case and what
+                // should be done if it happens
+                return None
+            };
+            let annotated_files = FileWithAnnotatedLines::collect_annotations(
+                &self.msp,
+                &self.source_map
+            );
+            let slices = self.slices_for_files(annotated_files, primary_lo);
+
+            Some(Snippet {
+                title: Some(Annotation {
+                    label: Some(self.message.to_string()),
+                    id: self.code.clone().map(|c| {
+                        match c {
+                            DiagnosticId::Error(val) | DiagnosticId::Lint(val) => val
+                        }
+                    }),
+                    annotation_type: Self::annotation_type_for_level(self.level),
+                }),
+                footer: vec![],
+                slices,
+            })
+        } else {
+            // FIXME(#59346): Is it ok to return None if there's no source_map?
+            None
+        }
+    }
+
+    fn slices_for_files(
+        &self,
+        annotated_files: Vec<FileWithAnnotatedLines>,
+        primary_lo: Loc
+    ) -> Vec<Slice> {
+        // FIXME(#64205): Provide a test case where `annotated_files` is > 1
+        annotated_files.iter().flat_map(|annotated_file| {
+            annotated_file.lines.iter().map(|line| {
+                let line_source = Self::source_string(annotated_file.file.clone(), &line);
+                Slice {
+                    source: line_source,
+                    line_start: line.line_index,
+                    origin: Some(primary_lo.file.name.to_string()),
+                    // FIXME(#59346): Not really sure when `fold` should be true or false
+                    fold: false,
+                    annotations: line.annotations.iter().map(|a| {
+                        self.annotation_to_source_annotation(a.clone())
+                    }).collect(),
+                }
+            }).collect::<Vec<Slice>>()
+        }).collect::<Vec<Slice>>()
+    }
+
+    /// Turns a `crate::snippet::Annotation` into a `SourceAnnotation`
+    fn annotation_to_source_annotation(
+        &self,
+        annotation: crate::snippet::Annotation
+    ) -> SourceAnnotation {
+        SourceAnnotation {
+            range: (annotation.start_col, annotation.end_col),
+            label: annotation.label.unwrap_or("".to_string()),
+            annotation_type: Self::annotation_type_for_level(self.level)
+        }
+    }
+
+    /// Provides the source string for the given `line` of `file`
+    fn source_string(
+        file: Lrc<SourceFile>,
+        line: &Line
+    ) -> String {
+        file.get_line(line.line_index - 1).map(|a| a.to_string()).unwrap_or(String::new())
+    }
+
+    /// Maps `Diagnostic::Level` to `snippet::AnnotationType`
+    fn annotation_type_for_level(level: Level) -> AnnotationType {
+        match level {
+            Level::Bug | Level::Fatal | Level::Error => AnnotationType::Error,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             Level::Warning => AnnotationType::Warning,
             Level::Note => AnnotationType::Note,
             Level::Help => AnnotationType::Help,

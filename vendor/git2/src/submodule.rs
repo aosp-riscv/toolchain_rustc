@@ -281,7 +281,11 @@ impl<'cb> Default for SubmoduleUpdateOptions<'cb> {
 mod tests {
     use std::fs;
     use std::path::Path;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     use tempdir::TempDir;
+=======
+    use tempfile::TempDir;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     use url::Url;
 
     use crate::Repository;
@@ -289,7 +293,7 @@ mod tests {
 
     #[test]
     fn smoke() {
-        let td = TempDir::new("test").unwrap();
+        let td = TempDir::new().unwrap();
         let repo = Repository::init(td.path()).unwrap();
         let mut s1 = repo
             .submodule("/path/to/nowhere", Path::new("foo"), true)

@@ -5,8 +5,11 @@
 // Test that we don't allow mutating the value being matched on in a way that
 // changes which patterns it matches, until we have chosen an arm.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(bind_by_move_pattern_guards)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 fn ok_mutation_in_guard(mut q: i32) {
     match q {
         // OK, mutation doesn't change which patterns g matches

@@ -1,5 +1,9 @@
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:9:5
+=======
+  --> $DIR/implicit_return.rs:12:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     true
    |     ^^^^ help: add `return` as shown: `return true`
@@ -7,61 +11,101 @@ LL |     true
    = note: `-D clippy::implicit-return` implied by `-D warnings`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:15:9
+=======
+  --> $DIR/implicit_return.rs:18:9
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |         true
    |         ^^^^ help: add `return` as shown: `return true`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:17:9
+=======
+  --> $DIR/implicit_return.rs:20:9
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |         false
    |         ^^^^^ help: add `return` as shown: `return false`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:25:17
+=======
+  --> $DIR/implicit_return.rs:28:17
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |         true => false,
    |                 ^^^^^ help: add `return` as shown: `return false`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:26:20
+=======
+  --> $DIR/implicit_return.rs:29:20
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |         false => { true },
    |                    ^^^^ help: add `return` as shown: `return true`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:41:9
+=======
+  --> $DIR/implicit_return.rs:44:9
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |         break true;
    |         ^^^^^^^^^^ help: change `break` to `return` as shown: `return true`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:49:13
+=======
+  --> $DIR/implicit_return.rs:52:13
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |             break true;
    |             ^^^^^^^^^^ help: change `break` to `return` as shown: `return true`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:58:13
+=======
+  --> $DIR/implicit_return.rs:61:13
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |             break true;
    |             ^^^^^^^^^^ help: change `break` to `return` as shown: `return true`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:76:18
+=======
+  --> $DIR/implicit_return.rs:79:18
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     let _ = || { true };
    |                  ^^^^ help: add `return` as shown: `return true`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:77:16
+=======
+  --> $DIR/implicit_return.rs:80:16
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     let _ = || true;
    |                ^^^^ help: add `return` as shown: `return true`
 
 error: missing return statement
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
   --> $DIR/implicit_return.rs:85:5
+=======
+  --> $DIR/implicit_return.rs:88:5
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
 LL |     format!("test {}", "test")
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ help: add `return` as shown: `return format!("test {}", "test")`

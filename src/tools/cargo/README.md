@@ -6,7 +6,11 @@ Learn more at https://doc.rust-lang.org/cargo/
 
 ## Code Status
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 [![Build Status](https://dev.azure.com/rust-lang/cargo/_apis/build/status/rust-lang.cargo?branchName=master)](https://dev.azure.com/rust-lang/cargo/_build/latest?definitionId=18&branchName=master)
+=======
+[![Build Status](https://dev.azure.com/rust-lang/cargo/_apis/build/status/rust-lang.cargo?branchName=auto-cargo)](https://dev.azure.com/rust-lang/cargo/_build?definitionId=18)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 Code documentation: https://docs.rs/cargo/
 

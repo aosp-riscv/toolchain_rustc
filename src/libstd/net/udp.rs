@@ -1026,7 +1026,12 @@ mod tests {
 
     // FIXME: re-enabled openbsd/netbsd tests once their socket timeout code
     //        no longer has rounding errors.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     #[cfg_attr(any(target_os = "netbsd", target_os = "openbsd"), ignore)]
+=======
+    // VxWorks ignores SO_SNDTIMEO.
+    #[cfg_attr(any(target_os = "netbsd", target_os = "openbsd", target_os = "vxworks"), ignore)]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     #[test]
     fn timeouts() {
         let addr = next_test_ip4();

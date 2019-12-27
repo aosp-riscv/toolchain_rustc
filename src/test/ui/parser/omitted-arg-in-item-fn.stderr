@@ -1,8 +1,12 @@
-error: expected one of `:` or `@`, found `)`
+error: expected one of `:`, `@`, or `|`, found `)`
   --> $DIR/omitted-arg-in-item-fn.rs:1:9
    |
 LL | fn foo(x) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |         ^ expected one of `:` or `@` here
+=======
+   |         ^ expected one of `:`, `@`, or `|` here
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
    |
    = note: anonymous parameters are removed in the 2018 edition (see RFC 1685)
 help: if this was a parameter name, give it a type

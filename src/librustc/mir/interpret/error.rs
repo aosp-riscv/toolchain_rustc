@@ -1,23 +1,31 @@
-use std::{fmt, env};
+use super::{RawConst, Pointer, CheckInAllocMsg, ScalarMaybeUndef};
 
 use crate::hir;
 use crate::hir::map::definitions::DefPathData;
 use crate::mir;
 use crate::ty::{self, Ty, layout};
 use crate::ty::layout::{Size, Align, LayoutError};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use rustc_target::spec::abi::Abi;
 use rustc_macros::HashStable;
 
 use super::{RawConst, Pointer, CheckInAllocMsg, ScalarMaybeUndef};
+=======
+use crate::ty::query::TyCtxtAt;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 use backtrace::Backtrace;
-
-use crate::ty::query::TyCtxtAt;
 use errors::DiagnosticBuilder;
-
+use rustc_macros::HashStable;
+use rustc_target::spec::abi::Abi;
 use syntax_pos::{Pos, Span};
 use syntax::symbol::Symbol;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use std::{fmt, env};
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[derive(Debug, Copy, Clone, PartialEq, Eq, HashStable, RustcEncodable, RustcDecodable)]
 pub enum ErrorHandled {
     /// Already reported a lint or an error for this evaluation.
@@ -215,6 +223,18 @@ fn print_backtrace(backtrace: &mut Backtrace) {
     eprintln!("\n\nAn error occurred in miri:\n{:?}", backtrace);
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+impl From<ErrorHandled> for InterpErrorInfo<'tcx> {
+    fn from(err: ErrorHandled) -> Self {
+        match err {
+            ErrorHandled::Reported => err_inval!(ReferencedConstant),
+            ErrorHandled::TooGeneric => err_inval!(TooGeneric),
+        }.into()
+    }
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 impl<'tcx> From<InterpError<'tcx>> for InterpErrorInfo<'tcx> {
     fn from(kind: InterpError<'tcx>) -> Self {
         let backtrace = match env::var("RUSTC_CTFE_BACKTRACE") {
@@ -239,6 +259,7 @@ impl<'tcx> From<InterpError<'tcx>> for InterpErrorInfo<'tcx> {
     }
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[derive(Clone, RustcEncodable, RustcDecodable, HashStable)]
 pub enum PanicInfo<O> {
     Panic {
@@ -315,7 +336,10 @@ impl<O: fmt::Debug> fmt::Debug for PanicInfo<O> {
     }
 }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #[derive(Clone, RustcEncodable, RustcDecodable, HashStable)]
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 pub enum InvalidProgramInfo<'tcx> {
     /// Resolution can fail if we are in a too generic context.
     TooGeneric,
@@ -326,8 +350,28 @@ pub enum InvalidProgramInfo<'tcx> {
     TypeckError,
     /// An error occurred during layout computation.
     Layout(layout::LayoutError<'tcx>),
+=======
+pub enum PanicInfo<O> {
+    Panic {
+        msg: Symbol,
+        line: u32,
+        col: u32,
+        file: Symbol,
+    },
+    BoundsCheck {
+        len: O,
+        index: O,
+    },
+    Overflow(mir::BinOp),
+    OverflowNeg,
+    DivisionByZero,
+    RemainderByZero,
+    GeneratorResumedAfterReturn,
+    GeneratorResumedAfterPanic,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl fmt::Debug for InvalidProgramInfo<'tcx> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use InvalidProgramInfo::*;
@@ -372,6 +416,132 @@ pub enum UnsupportedOpInfo<'tcx> {
     Unsupported(String),
 
     // -- Everything below is not classified yet --
+=======
+/// Type for MIR `Assert` terminator error messages.
+pub type AssertMessage<'tcx> = PanicInfo<mir::Operand<'tcx>>;
+
+impl<O> PanicInfo<O> {
+    /// Getting a description does not require `O` to be printable, and does not
+    /// require allocation.
+    /// The caller is expected to handle `Panic` and `BoundsCheck` separately.
+    pub fn description(&self) -> &'static str {
+        use PanicInfo::*;
+        match self {
+            Overflow(mir::BinOp::Add) =>
+                "attempt to add with overflow",
+            Overflow(mir::BinOp::Sub) =>
+                "attempt to subtract with overflow",
+            Overflow(mir::BinOp::Mul) =>
+                "attempt to multiply with overflow",
+            Overflow(mir::BinOp::Div) =>
+                "attempt to divide with overflow",
+            Overflow(mir::BinOp::Rem) =>
+                "attempt to calculate the remainder with overflow",
+            OverflowNeg =>
+                "attempt to negate with overflow",
+            Overflow(mir::BinOp::Shr) =>
+                "attempt to shift right with overflow",
+            Overflow(mir::BinOp::Shl) =>
+                "attempt to shift left with overflow",
+            Overflow(op) =>
+                bug!("{:?} cannot overflow", op),
+            DivisionByZero =>
+                "attempt to divide by zero",
+            RemainderByZero =>
+                "attempt to calculate the remainder with a divisor of zero",
+            GeneratorResumedAfterReturn =>
+                "generator resumed after completion",
+            GeneratorResumedAfterPanic =>
+                "generator resumed after panicking",
+            Panic { .. } | BoundsCheck { .. } =>
+                bug!("Unexpected PanicInfo"),
+        }
+    }
+}
+
+impl<O: fmt::Debug> fmt::Debug for PanicInfo<O> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use PanicInfo::*;
+        match self {
+            Panic { ref msg, line, col, ref file } =>
+                write!(f, "the evaluated program panicked at '{}', {}:{}:{}", msg, file, line, col),
+            BoundsCheck { ref len, ref index } =>
+                write!(f, "index out of bounds: the len is {:?} but the index is {:?}", len, index),
+            _ =>
+                write!(f, "{}", self.description()),
+        }
+    }
+}
+
+/// Error information for when the program we executed turned out not to actually be a valid
+/// program. This cannot happen in stand-alone Miri, but it can happen during CTFE/ConstProp
+/// where we work on generic code or execution does not have all information available.
+#[derive(Clone, RustcEncodable, RustcDecodable, HashStable)]
+pub enum InvalidProgramInfo<'tcx> {
+    /// Resolution can fail if we are in a too generic context.
+    TooGeneric,
+    /// Cannot compute this constant because it depends on another one
+    /// which already produced an error.
+    ReferencedConstant,
+    /// Abort in case type errors are reached.
+    TypeckError,
+    /// An error occurred during layout computation.
+    Layout(layout::LayoutError<'tcx>),
+}
+
+impl fmt::Debug for InvalidProgramInfo<'tcx> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use InvalidProgramInfo::*;
+        match self {
+            TooGeneric =>
+                write!(f, "encountered overly generic constant"),
+            ReferencedConstant =>
+                write!(f, "referenced constant has errors"),
+            TypeckError =>
+                write!(f, "encountered constants with type errors, stopping evaluation"),
+            Layout(ref err) =>
+                write!(f, "{}", err),
+        }
+    }
+}
+
+/// Error information for when the program caused Undefined Behavior.
+#[derive(Clone, RustcEncodable, RustcDecodable, HashStable)]
+pub enum UndefinedBehaviorInfo {
+    /// Free-form case. Only for errors that are never caught!
+    Ub(String),
+    /// Free-form case for experimental UB. Only for errors that are never caught!
+    UbExperimental(String),
+    /// Unreachable code was executed.
+    Unreachable,
+}
+
+impl fmt::Debug for UndefinedBehaviorInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use UndefinedBehaviorInfo::*;
+        match self {
+            Ub(msg) | UbExperimental(msg) =>
+                write!(f, "{}", msg),
+            Unreachable =>
+                write!(f, "entered unreachable code"),
+        }
+    }
+}
+
+/// Error information for when the program did something that might (or might not) be correct
+/// to do according to the Rust spec, but due to limitations in the interpreter, the
+/// operation could not be carried out. These limitations can differ between CTFE and the
+/// Miri engine, e.g., CTFE does not support casting pointers to "real" integers.
+///
+/// Currently, we also use this as fall-back error kind for errors that have not been
+/// categorized yet.
+#[derive(Clone, RustcEncodable, RustcDecodable, HashStable)]
+pub enum UnsupportedOpInfo<'tcx> {
+    /// Free-form case. Only for errors that are never caught!
+    Unsupported(String),
+
+    // -- Everything below is not categorized yet --
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     FunctionAbiMismatch(Abi, Abi),
     FunctionArgMismatch(Ty<'tcx>, Ty<'tcx>),
     FunctionRetMismatch(Ty<'tcx>, Ty<'tcx>),
@@ -430,13 +600,17 @@ impl fmt::Debug for UnsupportedOpInfo<'tcx> {
         match self {
             PointerOutOfBounds { ptr, msg, allocation_size } => {
                 write!(f, "{} failed: pointer must be in-bounds at offset {}, \
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                           but is outside bounds of allocation {} which has size {}",
+=======
+                           but is outside bounds of allocation {} which has size {}",
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     msg, ptr.offset.bytes(), ptr.alloc_id, allocation_size.bytes())
             },
             ValidationFailure(ref err) => {
                 write!(f, "type validation failed: {}", err)
             }
-            NoMirFor(ref func) => write!(f, "no mir for `{}`", func),
+            NoMirFor(ref func) => write!(f, "no MIR for `{}`", func),
             FunctionAbiMismatch(caller_abi, callee_abi) =>
                 write!(f, "tried to call a function with ABI {:?} using caller ABI {:?}",
                     callee_abi, caller_abi),
@@ -451,9 +625,13 @@ impl fmt::Debug for UnsupportedOpInfo<'tcx> {
             FunctionArgCountMismatch =>
                 write!(f, "tried to call a function with incorrect number of arguments"),
             ReallocatedWrongMemoryKind(ref old, ref new) =>
-                write!(f, "tried to reallocate memory from {} to {}", old, new),
+                write!(f, "tried to reallocate memory from `{}` to `{}`", old, new),
             DeallocatedWrongMemoryKind(ref old, ref new) =>
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 write!(f, "tried to deallocate {} memory but gave {} as the kind", old, new),
+=======
+                write!(f, "tried to deallocate `{}` memory but gave `{}` as the kind", old, new),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             InvalidChar(c) =>
                 write!(f, "tried to interpret an invalid 32-bit value as a char: {}", c),
             AlignmentCheckFailed { required, has } =>
@@ -462,7 +640,11 @@ impl fmt::Debug for UnsupportedOpInfo<'tcx> {
             TypeNotPrimitive(ty) =>
                 write!(f, "expected primitive type, got {}", ty),
             PathNotFound(ref path) =>
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 write!(f, "Cannot find path {:?}", path),
+=======
+                write!(f, "cannot find path {:?}", path),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             IncorrectAllocationInformation(size, size2, align, align2) =>
                 write!(f, "incorrect alloc info: expected size {} and align {}, \
                            got size {} and align {}",
@@ -525,6 +707,7 @@ impl fmt::Debug for UnsupportedOpInfo<'tcx> {
             InvalidBoolOp(_) =>
                 write!(f, "invalid boolean operation"),
             UnterminatedCString(_) =>
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 write!(f, "attempted to get length of a null terminated string, but no null \
                     found before end of allocation"),
             ReadUndefBytes(_) =>
@@ -583,6 +766,68 @@ pub type InterpResult<'tcx, T = ()> = Result<T, InterpErrorInfo<'tcx>>;
 impl fmt::Display for InterpError<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         // Forward `Display` to `Debug`
+=======
+                write!(f, "attempted to get length of a null-terminated string, but no null \
+                    found before end of allocation"),
+            ReadUndefBytes(_) =>
+                write!(f, "attempted to read undefined bytes"),
+            HeapAllocNonPowerOfTwoAlignment(_) =>
+                write!(f, "tried to re-, de-, or allocate heap memory with alignment that is \
+                    not a power of two"),
+            Unsupported(ref msg) =>
+                write!(f, "{}", msg),
+        }
+    }
+}
+
+/// Error information for when the program exhausted the resources granted to it
+/// by the interpreter.
+#[derive(Clone, RustcEncodable, RustcDecodable, HashStable)]
+pub enum ResourceExhaustionInfo {
+    /// The stack grew too big.
+    StackFrameLimitReached,
+    /// The program ran into an infinite loop.
+    InfiniteLoop,
+}
+
+impl fmt::Debug for ResourceExhaustionInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        use ResourceExhaustionInfo::*;
+        match self {
+            StackFrameLimitReached =>
+                write!(f, "reached the configured maximum number of stack frames"),
+            InfiniteLoop =>
+                write!(f, "duplicate interpreter state observed here, const evaluation will never \
+                    terminate"),
+        }
+    }
+}
+
+#[derive(Clone, RustcEncodable, RustcDecodable, HashStable)]
+pub enum InterpError<'tcx> {
+    /// The program panicked.
+    Panic(PanicInfo<u64>),
+    /// The program caused undefined behavior.
+    UndefinedBehavior(UndefinedBehaviorInfo),
+    /// The program did something the interpreter does not support (some of these *might* be UB
+    /// but the interpreter is not sure).
+    Unsupported(UnsupportedOpInfo<'tcx>),
+    /// The program was invalid (ill-typed, not sufficiently monomorphized, ...).
+    InvalidProgram(InvalidProgramInfo<'tcx>),
+    /// The program exhausted the interpreter's resources (stack/heap too big,
+    /// execution takes too long, ..).
+    ResourceExhaustion(ResourceExhaustionInfo),
+    /// Not actually an interpreter error -- used to signal that execution has exited
+    /// with the given status code.  Used by Miri, but not by CTFE.
+    Exit(i32),
+}
+
+pub type InterpResult<'tcx, T = ()> = Result<T, InterpErrorInfo<'tcx>>;
+
+impl fmt::Display for InterpError<'_> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // Forward `Display` to `Debug`.
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         write!(f, "{:?}", self)
     }
 }

@@ -1,6 +1,7 @@
 // compile-flags: --cfg something
 // edition:2018
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await, async_closure, param_attrs)]
 #![deny(unused_variables)]
 
@@ -41,6 +42,63 @@ trait RefTrait {
 impl RefTrait for RefStruct {
     fn bar(
         &self,
+=======
+#![feature(async_closure)]
+#![deny(unused_variables)]
+
+async fn foo_async(
+    a: i32,
+    //~^ ERROR unused variable: `a`
+    #[allow(unused_variables)] b: i32,
+) {}
+fn foo(
+    #[allow(unused_variables)] a: i32,
+    b: i32,
+    //~^ ERROR unused variable: `b`
+) {}
+
+struct RefStruct {}
+impl RefStruct {
+    async fn bar_async(
+        &self,
+        a: i32,
+        //~^ ERROR unused variable: `a`
+        #[allow(unused_variables)] b: i32,
+    ) {}
+    fn bar(
+        &self,
+        #[allow(unused_variables)] a: i32,
+        b: i32,
+        //~^ ERROR unused variable: `b`
+    ) {}
+    fn issue_64682_associated_fn(
+        #[allow(unused_variables)] a: i32,
+        b: i32,
+        //~^ ERROR unused variable: `b`
+    ) {}
+}
+trait RefTrait {
+    fn bar(
+        &self,
+        #[allow(unused_variables)] a: i32,
+        b: i32,
+        //~^ ERROR unused variable: `b`
+    ) {}
+    fn issue_64682_associated_fn(
+        #[allow(unused_variables)] a: i32,
+        b: i32,
+        //~^ ERROR unused variable: `b`
+    ) {}
+}
+impl RefTrait for RefStruct {
+    fn bar(
+        &self,
+        #[allow(unused_variables)] a: i32,
+        b: i32,
+        //~^ ERROR unused variable: `b`
+    ) {}
+    fn issue_64682_associated_fn(
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         #[allow(unused_variables)] a: i32,
         b: i32,
         //~^ ERROR unused variable: `b`

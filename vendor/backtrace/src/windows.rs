@@ -28,6 +28,7 @@ cfg_if::cfg_if! {
             pub use winapi::um::winnt::*;
             pub use winapi::um::fileapi::*;
             pub use winapi::um::minwinbase::*;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         }
     } else {
         pub use core::ffi::c_void;
@@ -363,6 +364,356 @@ ffi! {
             dwFlagsAndAttributes: DWORD,
             hTemplateFile: HANDLE,
         ) -> HANDLE;
+=======
+            pub use winapi::um::synchapi::*;
+        }
+    } else {
+        pub use core::ffi::c_void;
+        pub type HINSTANCE = *mut c_void;
+        pub type FARPROC = *mut c_void;
+        pub type LPSECURITY_ATTRIBUTES = *mut c_void;
+    }
+}
+
+macro_rules! ffi {
+	() => ();
+
+    (#[repr($($r:tt)*)] pub struct $name:ident { $(pub $field:ident: $ty:ty,)* } $($rest:tt)*) => (
+        #[repr($($r)*)]
+        #[cfg(not(feature = "verify-winapi"))]
+        #[derive(Copy, Clone)]
+        pub struct $name {
+            $(pub $field: $ty,)*
+        }
+
+        #[cfg(feature = "verify-winapi")]
+        pub use self::winapi::$name;
+
+        #[test]
+        #[cfg(feature = "verify-winapi")]
+        fn $name() {
+            use core::mem;
+
+            #[repr($($r)*)]
+            pub struct $name {
+                $(pub $field: $ty,)*
+            }
+
+            assert_eq!(
+                mem::size_of::<$name>(),
+                mem::size_of::<winapi::$name>(),
+                concat!("size of ", stringify!($name), " is wrong"),
+            );
+            assert_eq!(
+                mem::align_of::<$name>(),
+                mem::align_of::<winapi::$name>(),
+                concat!("align of ", stringify!($name), " is wrong"),
+            );
+
+            type Winapi = winapi::$name;
+
+            fn assert_same<T>(_: T, _: T) {}
+
+            unsafe {
+                let a = &*(mem::align_of::<$name>() as *const $name);
+                let b = &*(mem::align_of::<Winapi>() as *const Winapi);
+
+                $(
+                    ffi!(@test_fields a b $field $ty);
+                )*
+            }
+        }
+
+        ffi!($($rest)*);
+    );
+
+    // Handling verification against unions in winapi requires some special care
+    (@test_fields $a:ident $b:ident FltSave $ty:ty) => (
+        // Skip this field on x86_64 `CONTEXT` since it's a union and a bit funny
+    );
+    (@test_fields $a:ident $b:ident D $ty:ty) => ({
+        let a = &$a.D;
+        let b = $b.D();
+        assert_same(a, b);
+        assert_eq!(a as *const $ty, b as *const $ty, "misplaced field D");
+    });
+    (@test_fields $a:ident $b:ident s $ty:ty) => ({
+        let a = &$a.s;
+        let b = $b.s();
+        assert_same(a, b);
+        assert_eq!(a as *const $ty, b as *const $ty, "misplaced field s");
+    });
+
+    // Otherwise test all fields normally.
+    (@test_fields $a:ident $b:ident $field:ident $ty:ty) => ({
+        let a = &$a.$field;
+        let b = &$b.$field;
+        assert_same(a, b);
+        assert_eq!(a as *const $ty, b as *const $ty,
+                   concat!("misplaced field ", stringify!($field)));
+    });
+
+    (pub type $name:ident = $ty:ty; $($rest:tt)*) => (
+        pub type $name = $ty;
+
+        #[cfg(feature = "verify-winapi")]
+        #[allow(dead_code)]
+        const $name: () = {
+            fn _foo() {
+                trait SameType {}
+                impl<T> SameType for (T, T) {}
+                fn assert_same<T: SameType>() {}
+
+                assert_same::<($name, winapi::$name)>();
+            }
+        };
+
+        ffi!($($rest)*);
+    );
+
+    (pub const $name:ident: $ty:ty = $val:expr; $($rest:tt)*) => (
+        pub const $name: $ty = $val;
+
+        #[cfg(feature = "verify-winapi")]
+        #[allow(unused_imports)]
+        mod $name {
+            use super::*;
+            #[test]
+            fn assert_valid() {
+                let x: $ty = winapi::$name;
+                assert_eq!(x, $val);
+            }
+        }
+
+
+        ffi!($($rest)*);
+    );
+
+    (extern "system" { $(pub fn $name:ident($($args:tt)*) -> $ret:ty;)* } $($rest:tt)*) => (
+        extern "system" {
+            $(pub fn $name($($args)*) -> $ret;)*
+        }
+
+        $(
+            #[cfg(feature = "verify-winapi")]
+            mod $name {
+                #[test]
+                fn assert_same() {
+                    use super::*;
+
+                    assert_eq!($name as usize, winapi::$name as usize);
+                    let mut x: unsafe extern "system" fn($($args)*) -> $ret;
+                    x = $name;
+                    drop(x);
+                    x = winapi::$name;
+                    drop(x);
+                }
+            }
+        )*
+
+        ffi!($($rest)*);
+    );
+
+    (impl $name:ident { $($i:tt)* } $($rest:tt)*) => (
+        #[cfg(not(feature = "verify-winapi"))]
+        impl $name {
+            $($i)*
+        }
+
+        ffi!($($rest)*);
+    );
+}
+
+ffi! {
+    #[repr(C)]
+    pub struct STACKFRAME64 {
+        pub AddrPC: ADDRESS64,
+        pub AddrReturn: ADDRESS64,
+        pub AddrFrame: ADDRESS64,
+        pub AddrStack: ADDRESS64,
+        pub AddrBStore: ADDRESS64,
+        pub FuncTableEntry: PVOID,
+        pub Params: [DWORD64; 4],
+        pub Far: BOOL,
+        pub Virtual: BOOL,
+        pub Reserved: [DWORD64; 3],
+        pub KdHelp: KDHELP64,
+    }
+
+    pub type LPSTACKFRAME64 = *mut STACKFRAME64;
+
+    #[repr(C)]
+    pub struct STACKFRAME_EX {
+        pub AddrPC: ADDRESS64,
+        pub AddrReturn: ADDRESS64,
+        pub AddrFrame: ADDRESS64,
+        pub AddrStack: ADDRESS64,
+        pub AddrBStore: ADDRESS64,
+        pub FuncTableEntry: PVOID,
+        pub Params: [DWORD64; 4],
+        pub Far: BOOL,
+        pub Virtual: BOOL,
+        pub Reserved: [DWORD64; 3],
+        pub KdHelp: KDHELP64,
+        pub StackFrameSize: DWORD,
+        pub InlineFrameContext: DWORD,
+    }
+
+    pub type LPSTACKFRAME_EX = *mut STACKFRAME_EX;
+
+    #[repr(C)]
+    pub struct IMAGEHLP_LINEW64 {
+        pub SizeOfStruct: DWORD,
+        pub Key: PVOID,
+        pub LineNumber: DWORD,
+        pub FileName: PWSTR,
+        pub Address: DWORD64,
+    }
+
+    pub type PIMAGEHLP_LINEW64 = *mut IMAGEHLP_LINEW64;
+
+    #[repr(C)]
+    pub struct SYMBOL_INFOW {
+        pub SizeOfStruct: ULONG,
+        pub TypeIndex: ULONG,
+        pub Reserved: [ULONG64; 2],
+        pub Index: ULONG,
+        pub Size: ULONG,
+        pub ModBase: ULONG64,
+        pub Flags: ULONG,
+        pub Value: ULONG64,
+        pub Address: ULONG64,
+        pub Register: ULONG,
+        pub Scope: ULONG,
+        pub Tag: ULONG,
+        pub NameLen: ULONG,
+        pub MaxNameLen: ULONG,
+        pub Name: [WCHAR; 1],
+    }
+
+    pub type PSYMBOL_INFOW = *mut SYMBOL_INFOW;
+
+    pub type PTRANSLATE_ADDRESS_ROUTINE64 = Option<
+        unsafe extern "system" fn(hProcess: HANDLE, hThread: HANDLE, lpaddr: LPADDRESS64) -> DWORD64,
+    >;
+    pub type PGET_MODULE_BASE_ROUTINE64 =
+        Option<unsafe extern "system" fn(hProcess: HANDLE, Address: DWORD64) -> DWORD64>;
+    pub type PFUNCTION_TABLE_ACCESS_ROUTINE64 =
+        Option<unsafe extern "system" fn(ahProcess: HANDLE, AddrBase: DWORD64) -> PVOID>;
+    pub type PREAD_PROCESS_MEMORY_ROUTINE64 = Option<
+        unsafe extern "system" fn(
+            hProcess: HANDLE,
+            qwBaseAddress: DWORD64,
+            lpBuffer: PVOID,
+            nSize: DWORD,
+            lpNumberOfBytesRead: LPDWORD,
+        ) -> BOOL,
+    >;
+
+    #[repr(C)]
+    pub struct ADDRESS64 {
+        pub Offset: DWORD64,
+        pub Segment: WORD,
+        pub Mode: ADDRESS_MODE,
+    }
+
+    pub type LPADDRESS64 = *mut ADDRESS64;
+
+    pub type ADDRESS_MODE = u32;
+
+    #[repr(C)]
+    pub struct KDHELP64 {
+        pub Thread: DWORD64,
+        pub ThCallbackStack: DWORD,
+        pub ThCallbackBStore: DWORD,
+        pub NextCallback: DWORD,
+        pub FramePointer: DWORD,
+        pub KiCallUserMode: DWORD64,
+        pub KeUserCallbackDispatcher: DWORD64,
+        pub SystemRangeStart: DWORD64,
+        pub KiUserExceptionDispatcher: DWORD64,
+        pub StackBase: DWORD64,
+        pub StackLimit: DWORD64,
+        pub BuildVersion: DWORD,
+        pub Reserved0: DWORD,
+        pub Reserved1: [DWORD64; 4],
+    }
+
+    pub const MAX_SYM_NAME: usize = 2000;
+    pub const AddrModeFlat: ADDRESS_MODE = 3;
+    pub const TRUE: BOOL = 1;
+    pub const FALSE: BOOL = 0;
+    pub const PROCESS_QUERY_INFORMATION: DWORD = 0x400;
+    pub const IMAGE_FILE_MACHINE_ARM64: u16 = 43620;
+    pub const IMAGE_FILE_MACHINE_AMD64: u16 = 34404;
+    pub const IMAGE_FILE_MACHINE_I386: u16 = 332;
+    pub const IMAGE_FILE_MACHINE_ARMNT: u16 = 452;
+    pub const FILE_SHARE_READ: DWORD = 0x1;
+    pub const FILE_SHARE_WRITE: DWORD = 0x2;
+    pub const OPEN_EXISTING: DWORD = 0x3;
+    pub const GENERIC_READ: DWORD = 0x80000000;
+    pub const INFINITE: DWORD = !0;
+
+    pub type DWORD = u32;
+    pub type PDWORD = *mut u32;
+    pub type BOOL = i32;
+    pub type DWORD64 = u64;
+    pub type PDWORD64 = *mut u64;
+    pub type HANDLE = *mut c_void;
+    pub type PVOID = HANDLE;
+    pub type PCWSTR = *const u16;
+    pub type LPSTR = *mut i8;
+    pub type LPCSTR = *const i8;
+    pub type PWSTR = *mut u16;
+    pub type WORD = u16;
+    pub type ULONG = u32;
+    pub type ULONG64 = u64;
+    pub type WCHAR = u16;
+    pub type PCONTEXT = *mut CONTEXT;
+    pub type LPDWORD = *mut DWORD;
+    pub type DWORDLONG = u64;
+    pub type HMODULE = HINSTANCE;
+
+    extern "system" {
+        pub fn GetCurrentProcess() -> HANDLE;
+        pub fn GetCurrentThread() -> HANDLE;
+        pub fn RtlCaptureContext(ContextRecord: PCONTEXT) -> ();
+        pub fn LoadLibraryA(a: *const i8) -> HMODULE;
+        pub fn GetProcAddress(h: HMODULE, name: *const i8) -> FARPROC;
+        pub fn OpenProcess(
+            dwDesiredAccess: DWORD,
+            bInheitHandle: BOOL,
+            dwProcessId: DWORD,
+        ) -> HANDLE;
+        pub fn GetCurrentProcessId() -> DWORD;
+        pub fn CloseHandle(h: HANDLE) -> BOOL;
+        pub fn QueryFullProcessImageNameA(
+            hProcess: HANDLE,
+            dwFlags: DWORD,
+            lpExeName: LPSTR,
+            lpdwSize: PDWORD,
+        ) -> BOOL;
+        pub fn CreateFileA(
+            lpFileName: LPCSTR,
+            dwDesiredAccess: DWORD,
+            dwShareMode: DWORD,
+            lpSecurityAttributes: LPSECURITY_ATTRIBUTES,
+            dwCreationDisposition: DWORD,
+            dwFlagsAndAttributes: DWORD,
+            hTemplateFile: HANDLE,
+        ) -> HANDLE;
+        pub fn CreateMutexA(
+            attrs: LPSECURITY_ATTRIBUTES,
+            initial: BOOL,
+            name: LPCSTR,
+        ) -> HANDLE;
+        pub fn ReleaseMutex(hMutex: HANDLE) -> BOOL;
+        pub fn WaitForSingleObjectEx(
+            hHandle: HANDLE,
+            dwMilliseconds: DWORD,
+            bAlertable: BOOL,
+        ) -> DWORD;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }
 

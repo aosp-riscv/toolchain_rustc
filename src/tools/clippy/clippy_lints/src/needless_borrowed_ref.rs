@@ -2,7 +2,11 @@
 //!
 //! This lint is **warn** by default
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::utils::{in_macro_or_desugar, snippet, span_lint_and_then};
+=======
+use crate::utils::{snippet, span_lint_and_then};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use if_chain::if_chain;
 use rustc::hir::{BindingAnnotation, MutImmutable, Pat, PatKind};
 use rustc::lint::{LateContext, LateLintPass, LintArray, LintPass};
@@ -54,7 +58,11 @@ declare_lint_pass!(NeedlessBorrowedRef => [NEEDLESS_BORROWED_REFERENCE]);
 
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for NeedlessBorrowedRef {
     fn check_pat(&mut self, cx: &LateContext<'a, 'tcx>, pat: &'tcx Pat) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(pat.span) {
+=======
+        if pat.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             // OK, simple enough, lints doesn't check in macro.
             return;
         }

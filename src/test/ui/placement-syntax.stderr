@@ -1,10 +1,22 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: expected `{`, found `<-`
+=======
+error: unexpected token: `<-`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/placement-syntax.rs:3:9
    |
 LL |     if x<-1 {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
    |     --  ^^ expected `{`
    |     |
    |     this `if` statement has a condition, but no block
+=======
+   |         ^^
+help: if you meant to write a comparison against a negative value, add a space in between `<` and `-`
+   |
+LL |     if x< -1 {
+   |         ^^^
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to previous error
 

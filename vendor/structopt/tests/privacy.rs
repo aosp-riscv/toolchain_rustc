@@ -6,6 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[macro_use]
 extern crate structopt;
 
@@ -18,6 +19,23 @@ mod options {
 }
 
 mod subcommands {
+=======
+use structopt::StructOpt;
+
+mod options {
+    use super::StructOpt;
+
+    #[derive(Debug, StructOpt)]
+    pub struct Options {
+        #[structopt(subcommand)]
+        pub subcommand: super::subcommands::SubCommand,
+    }
+}
+
+mod subcommands {
+    use super::StructOpt;
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     #[derive(Debug, StructOpt)]
     pub enum SubCommand {
         #[structopt(name = "foo", about = "foo")]

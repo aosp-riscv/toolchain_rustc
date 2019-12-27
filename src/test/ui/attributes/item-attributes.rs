@@ -11,8 +11,11 @@
 #![rustc_dummy]
 #![rustc_dummy(attr5)]
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![crate_id="foobar#0.1"]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 // These are attributes of the following mod
 #[rustc_dummy = "val"]
 #[rustc_dummy = "val"]

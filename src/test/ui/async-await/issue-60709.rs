@@ -4,9 +4,12 @@
 
 // run-pass
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await)]
 #![allow(unused)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::future::Future;
 use std::task::Poll;
 use std::task::Context;

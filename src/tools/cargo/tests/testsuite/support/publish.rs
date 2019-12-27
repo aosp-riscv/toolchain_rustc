@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io::{self, prelude::*, SeekFrom};
@@ -130,3 +131,5 @@ pub fn validate_crate_contents(
         }
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

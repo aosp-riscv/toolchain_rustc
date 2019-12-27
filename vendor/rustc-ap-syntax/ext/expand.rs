@@ -1,11 +1,21 @@
 use crate::ast::{self, Block, Ident, LitKind, NodeId, PatKind, Path};
 use crate::ast::{MacStmtStyle, StmtKind, ItemKind};
 use crate::attr::{self, HasAttrs};
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::source_map::{dummy_spanned, respan};
+=======
+use crate::source_map::respan;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::config::StripUnconfigured;
 use crate::ext::base::*;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::ext::proc_macro::{add_derived_markers, collect_derives};
 use crate::ext::hygiene::{ExpnId, SyntaxContext, ExpnInfo, ExpnKind};
+=======
+use crate::ext::proc_macro::{collect_derives, MarkAttrs};
+use crate::ext::hygiene::{ExpnId, SyntaxContext, ExpnData, ExpnKind};
+use crate::ext::tt::macro_rules::annotate_err_with_kind;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::ext::placeholders::{placeholder, PlaceholderExpander};
 use crate::feature_gate::{self, Features, GateIssue, is_builtin_attr, emit_feature_err};
 use crate::mut_visit::*;
@@ -24,7 +34,6 @@ use syntax_pos::{Span, DUMMY_SP, FileName};
 
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::sync::Lrc;
-use std::fs;
 use std::io::ErrorKind;
 use std::{iter, mem};
 use std::ops::DerefMut;
@@ -115,6 +124,7 @@ macro_rules! ast_fragments {
             }
         }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         impl<'a, 'b> MutVisitor for MacroExpander<'a, 'b> {
             fn filter_map_expr(&mut self, expr: P<ast::Expr>) -> Option<P<ast::Expr>> {
                 self.expand_fragment(AstFragment::OptExpr(Some(expr))).make_opt_expr()
@@ -127,6 +137,8 @@ macro_rules! ast_fragments {
             })?)*
         }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         impl<'a> MacResult for crate::ext::tt::macro_rules::ParserAnyMacro<'a> {
             $(fn $make_ast(self: Box<crate::ext::tt::macro_rules::ParserAnyMacro<'a>>)
                            -> Option<$AstTy> {
@@ -218,6 +230,13 @@ pub enum InvocationKind {
         derives: Vec<Path>,
         item: Annotatable,
     },
+    /// "Invocation" that contains all derives from an item,
+    /// broken into multiple `Derive` invocations when expanded.
+    /// FIXME: Find a way to remove it.
+    DeriveContainer {
+        derives: Vec<Path>,
+        item: Annotatable,
+    },
 }
 
 impl Invocation {
@@ -265,7 +284,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
             tokens: None,
         })]);
 
-        match self.expand_fragment(krate_item).make_items().pop().map(P::into_inner) {
+        match self.fully_expand_fragment(krate_item).make_items().pop().map(P::into_inner) {
             Some(ast::Item { attrs, node: ast::ItemKind::Mod(module), .. }) => {
                 krate.attrs = attrs;
                 krate.module = module;
@@ -285,8 +304,8 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         krate
     }
 
-    // Fully expand all macro invocations in this AST fragment.
-    fn expand_fragment(&mut self, input_fragment: AstFragment) -> AstFragment {
+    // Recursively expand all macro invocations in this AST fragment.
+    pub fn fully_expand_fragment(&mut self, input_fragment: AstFragment) -> AstFragment {
         let orig_expansion_data = self.cx.current_expansion.clone();
         self.cx.current_expansion.depth = 0;
 
@@ -304,7 +323,11 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         // Unresolved macros produce dummy outputs as a recovery measure.
         invocations.reverse();
         let mut expanded_fragments = Vec::new();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut derives: FxHashMap<ExpnId, Vec<_>> = FxHashMap::default();
+=======
+        let mut all_derive_placeholders: FxHashMap<ExpnId, Vec<_>> = FxHashMap::default();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         let mut undetermined_invocations = Vec::new();
         let (mut progress, mut force) = (false, !self.monotonic);
         loop {
@@ -318,10 +341,19 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                 continue
             };
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let scope =
                 if self.monotonic { invoc.expansion_data.id } else { orig_expansion_data.id };
             let ext = match self.cx.resolver.resolve_macro_invocation(&invoc, scope, force) {
                 Ok(ext) => ext,
+=======
+            let eager_expansion_root =
+                if self.monotonic { invoc.expansion_data.id } else { orig_expansion_data.id };
+            let res = match self.cx.resolver.resolve_macro_invocation(
+                &invoc, eager_expansion_root, force
+            ) {
+                Ok(res) => res,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 Err(Indeterminate) => {
                     undetermined_invocations.push(invoc);
                     continue
@@ -334,6 +366,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
             self.cx.current_expansion.id = scope;
 
             // FIXME(jseyfried): Refactor out the following logic
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let (expanded_fragment, new_invocations) = if let Some(ext) = ext {
                 let fragment = self.expand_invoc(invoc, &ext.kind);
                 self.collect_invocations(fragment, &[])
@@ -354,9 +387,79 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                             // We don't 𝑘𝑛𝑜𝑤 that the following item is an ADT
                             Applicability::MaybeIncorrect
                         );
-                    }
-                    err.emit();
+=======
+            let (expanded_fragment, new_invocations) = match res {
+                InvocationRes::Single(ext) => {
+                    let fragment = self.expand_invoc(invoc, &ext.kind);
+                    self.collect_invocations(fragment, &[])
                 }
+                InvocationRes::DeriveContainer(exts) => {
+                    let (derives, item) = match invoc.kind {
+                        InvocationKind::DeriveContainer { derives, item } => (derives, item),
+                        _ => unreachable!(),
+                    };
+                    if !item.derive_allowed() {
+                        let attr = attr::find_by_name(item.attrs(), sym::derive)
+                            .expect("`derive` attribute should exist");
+                        let span = attr.span;
+                        let mut err = self.cx.mut_span_err(span,
+                            "`derive` may only be applied to structs, enums and unions");
+                        if let ast::AttrStyle::Inner = attr.style {
+                            let trait_list = derives.iter()
+                                .map(|t| t.to_string()).collect::<Vec<_>>();
+                            let suggestion = format!("#[derive({})]", trait_list.join(", "));
+                            err.span_suggestion(
+                                span, "try an outer attribute", suggestion,
+                                // We don't 𝑘𝑛𝑜𝑤 that the following item is an ADT
+                                Applicability::MaybeIncorrect
+                            );
+                        }
+                        err.emit();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+                    }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+                    err.emit();
+=======
+
+                    let mut item = self.fully_configure(item);
+                    item.visit_attrs(|attrs| attrs.retain(|a| a.path != sym::derive));
+                    let mut helper_attrs = Vec::new();
+                    let mut has_copy = false;
+                    for ext in exts {
+                        helper_attrs.extend(&ext.helper_attrs);
+                        has_copy |= ext.is_derive_copy;
+                    }
+                    // Mark derive helpers inside this item as known and used.
+                    // FIXME: This is a hack, derive helpers should be integrated with regular name
+                    // resolution instead. For example, helpers introduced by a derive container
+                    // can be in scope for all code produced by that container's expansion.
+                    item.visit_with(&mut MarkAttrs(&helper_attrs));
+                    if has_copy {
+                        self.cx.resolver.add_derives(invoc.expansion_data.id, SpecialDerives::COPY);
+                    }
+
+                    let derive_placeholders =
+                        all_derive_placeholders.entry(invoc.expansion_data.id).or_default();
+                    derive_placeholders.reserve(derives.len());
+                    invocations.reserve(derives.len());
+                    for path in derives {
+                        let expn_id = ExpnId::fresh(None);
+                        derive_placeholders.push(NodeId::placeholder_from_expn_id(expn_id));
+                        invocations.push(Invocation {
+                            kind: InvocationKind::Derive { path, item: item.clone() },
+                            fragment_kind: invoc.fragment_kind,
+                            expansion_data: ExpansionData {
+                                id: expn_id,
+                                ..invoc.expansion_data.clone()
+                            },
+                        });
+                    }
+                    let fragment = invoc.fragment_kind
+                        .expect_from_annotatables(::std::iter::once(item));
+                    self.collect_invocations(fragment, derive_placeholders)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+                }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
                 let mut item = self.fully_configure(item);
                 item.visit_attrs(|attrs| attrs.retain(|a| a.path != sym::derive));
@@ -387,6 +490,8 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                 self.collect_invocations(fragment, derives)
             } else {
                 unreachable!()
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             };
 
             if expanded_fragments.len() < depth {
@@ -403,10 +508,18 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         // Finally incorporate all the expanded macros into the input AST fragment.
         let mut placeholder_expander = PlaceholderExpander::new(self.cx, self.monotonic);
         while let Some(expanded_fragments) = expanded_fragments.pop() {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             for (mark, expanded_fragment) in expanded_fragments.into_iter().rev() {
                 let derives = derives.remove(&mark).unwrap_or_else(Vec::new);
                 placeholder_expander.add(NodeId::placeholder_from_expn_id(mark),
                                          expanded_fragment, derives);
+=======
+            for (expn_id, expanded_fragment) in expanded_fragments.into_iter().rev() {
+                let derive_placeholders =
+                    all_derive_placeholders.remove(&expn_id).unwrap_or_else(Vec::new);
+                placeholder_expander.add(NodeId::placeholder_from_expn_id(expn_id),
+                                         expanded_fragment, derive_placeholders);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
         fragment_with_placeholders.mut_visit_with(&mut placeholder_expander);
@@ -423,7 +536,11 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
     /// them with "placeholders" - dummy macro invocations with specially crafted `NodeId`s.
     /// Then call into resolver that builds a skeleton ("reduced graph") of the fragment and
     /// prepares data for resolving paths of macro invocations.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn collect_invocations(&mut self, mut fragment: AstFragment, derives: &[ExpnId])
+=======
+    fn collect_invocations(&mut self, mut fragment: AstFragment, extra_placeholders: &[NodeId])
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                            -> (AstFragment, Vec<Invocation>) {
         // Resolve `$crate`s in the fragment for pretty-printing.
         self.cx.resolver.resolve_dollar_crates();
@@ -442,9 +559,14 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
             collector.invocations
         };
 
+        // FIXME: Merge `extra_placeholders` into the `fragment` as regular placeholders.
         if self.monotonic {
             self.cx.resolver.visit_ast_fragment_with_placeholders(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 self.cx.current_expansion.id, &fragment, derives);
+=======
+                self.cx.current_expansion.id, &fragment, extra_placeholders);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
 
         (fragment, invocations)
@@ -493,11 +615,19 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         }
 
         if self.cx.current_expansion.depth > self.cx.ecfg.recursion_limit {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let info = self.cx.current_expansion.id.expn_info().unwrap();
+=======
+            let expn_data = self.cx.current_expansion.id.expn_data();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let suggested_limit = self.cx.ecfg.recursion_limit * 2;
-            let mut err = self.cx.struct_span_err(info.call_site,
+            let mut err = self.cx.struct_span_err(expn_data.call_site,
                 &format!("recursion limit reached while expanding the macro `{}`",
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                          info.kind.descr()));
+=======
+                         expn_data.kind.descr()));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             err.help(&format!(
                 "consider adding a `#![recursion_limit=\"{}\"]` attribute to your crate",
                 suggested_limit));
@@ -510,6 +640,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
             InvocationKind::Bang { mac, .. } => match ext {
                 SyntaxExtensionKind::Bang(expander) => {
                     self.gate_proc_macro_expansion_kind(span, fragment_kind);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let tok_result = expander.expand(self.cx, span, mac.node.stream());
                     let result =
                         self.parse_ast_fragment(tok_result, fragment_kind, &mac.node.path, span);
@@ -527,6 +658,29 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                         self.cx.trace_macros_diag();
                         fragment_kind.dummy(span)
                     }
+=======
+                    let tok_result = expander.expand(self.cx, span, mac.stream());
+                    let result =
+                        self.parse_ast_fragment(tok_result, fragment_kind, &mac.path, span);
+                    self.gate_proc_macro_expansion(span, &result);
+                    result
+                }
+                SyntaxExtensionKind::LegacyBang(expander) => {
+                    let prev = self.cx.current_expansion.prior_type_ascription;
+                    self.cx.current_expansion.prior_type_ascription = mac.prior_type_ascription;
+                    let tok_result = expander.expand(self.cx, span, mac.stream());
+                    let result = if let Some(result) = fragment_kind.make_from(tok_result) {
+                        result
+                    } else {
+                        let msg = format!("non-{kind} macro in {kind} position: {path}",
+                                          kind = fragment_kind.name(), path = mac.path);
+                        self.cx.span_err(span, &msg);
+                        self.cx.trace_macros_diag();
+                        fragment_kind.dummy(span)
+                    };
+                    self.cx.current_expansion.prior_type_ascription = prev;
+                    result
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
                 _ => unreachable!()
             }
@@ -569,6 +723,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                 }
                 _ => unreachable!()
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             InvocationKind::Derive { path, item, item_with_markers } => match ext {
                 SyntaxExtensionKind::Derive(expander) |
                 SyntaxExtensionKind::LegacyDerive(expander) => {
@@ -581,6 +736,15 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                     }
                     let meta = ast::MetaItem { node: ast::MetaItemKind::Word, span, path };
                     let span = span.with_ctxt(self.cx.backtrace());
+=======
+            InvocationKind::Derive { path, item } => match ext {
+                SyntaxExtensionKind::Derive(expander) |
+                SyntaxExtensionKind::LegacyDerive(expander) => {
+                    if !item.derive_allowed() {
+                        return fragment_kind.dummy(span);
+                    }
+                    let meta = ast::MetaItem { node: ast::MetaItemKind::Word, span, path };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     let items = expander.expand(self.cx, span, &meta, item);
                     fragment_kind.expect_from_annotatables(items)
                 }
@@ -692,6 +856,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
         );
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn parse_ast_fragment(&mut self,
                           toks: TokenStream,
                           kind: AstFragmentKind,
@@ -699,6 +864,16 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
                           span: Span)
                           -> AstFragment {
         let mut parser = self.cx.new_parser_from_tts(&toks.into_trees().collect::<Vec<_>>());
+=======
+    fn parse_ast_fragment(
+        &mut self,
+        toks: TokenStream,
+        kind: AstFragmentKind,
+        path: &Path,
+        span: Span,
+    ) -> AstFragment {
+        let mut parser = self.cx.new_parser_from_tts(toks);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         match parser.parse_ast_fragment(kind, false) {
             Ok(fragment) => {
                 parser.ensure_complete_parse(path, kind.name(), span);
@@ -706,6 +881,7 @@ impl<'a, 'b> MacroExpander<'a, 'b> {
             }
             Err(mut err) => {
                 err.set_span(span);
+                annotate_err_with_kind(&mut err, kind, span);
                 err.emit();
                 self.cx.trace_macros_diag();
                 kind.dummy(span)
@@ -775,7 +951,11 @@ impl<'a> Parser<'a> {
             let msg = format!("macro expansion ignores token `{}` and any following",
                               self.this_token_to_string());
             // Avoid emitting backtrace info twice.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let def_site_span = self.token.span.with_ctxt(SyntaxContext::empty());
+=======
+            let def_site_span = self.token.span.with_ctxt(SyntaxContext::root());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let mut err = self.diagnostic().struct_span_err(def_site_span, &msg);
             err.span_label(span, "caused by the macro expansion here");
             let msg = format!(
@@ -812,6 +992,7 @@ struct InvocationCollector<'a, 'b> {
 
 impl<'a, 'b> InvocationCollector<'a, 'b> {
     fn collect(&mut self, fragment_kind: AstFragmentKind, kind: InvocationKind) -> AstFragment {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         // Expansion info for all the collected invocations is set upon their resolution,
         // with exception of the derive container case which is not resolved and can get
         // its expansion info immediately.
@@ -823,6 +1004,22 @@ impl<'a, 'b> InvocationCollector<'a, 'b> {
             _ => None,
         };
         let expn_id = ExpnId::fresh(self.cx.current_expansion.id, expn_info);
+=======
+        // Expansion data for all the collected invocations is set upon their resolution,
+        // with exception of the derive container case which is not resolved and can get
+        // its expansion data immediately.
+        let expn_data = match &kind {
+            InvocationKind::DeriveContainer { item, .. } => Some(ExpnData {
+                parent: self.cx.current_expansion.id,
+                ..ExpnData::default(
+                    ExpnKind::Macro(MacroKind::Attr, sym::derive),
+                    item.span(), self.cx.parse_sess.edition,
+                )
+            }),
+            _ => None,
+        };
+        let expn_id = ExpnId::fresh(expn_data);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.invocations.push(Invocation {
             kind,
             fragment_kind,
@@ -1220,9 +1417,19 @@ impl<'a, 'b> MutVisitor for InvocationCollector<'a, 'b> {
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn visit_generic_params(&mut self, params: &mut Vec<ast::GenericParam>) {
         self.cfg.configure_generic_params(params);
         noop_visit_generic_params(params, self);
+=======
+   fn flat_map_generic_param(
+       &mut self,
+       param: ast::GenericParam
+    ) -> SmallVec<[ast::GenericParam; 1]>
+    {
+        let param = configure!(self, param);
+        noop_flat_map_generic_param(param, self)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn visit_attribute(&mut self, at: &mut ast::Attribute) {
@@ -1254,6 +1461,7 @@ impl<'a, 'b> MutVisitor for InvocationCollector<'a, 'b> {
                     }
 
                     let filename = self.cx.resolve_path(&*file.as_str(), it.span());
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     match fs::read_to_string(&filename) {
                         Ok(src) => {
                             let src_interned = Symbol::intern(&src);
@@ -1261,24 +1469,48 @@ impl<'a, 'b> MutVisitor for InvocationCollector<'a, 'b> {
                             // Add this input file to the code map to make it available as
                             // dependency information
                             self.cx.source_map().new_source_file(filename.into(), src);
+=======
+                    match self.cx.source_map().load_file(&filename) {
+                        Ok(source_file) => {
+                            let src = source_file.src.as_ref()
+                                .expect("freshly loaded file should have a source");
+                            let src_interned = Symbol::intern(src.as_str());
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                             let include_info = vec![
                                 ast::NestedMetaItem::MetaItem(
                                     attr::mk_name_value_item_str(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                         Ident::with_empty_ctxt(sym::file),
                                         dummy_spanned(file),
+=======
+                                        Ident::with_dummy_span(sym::file),
+                                        file,
+                                        DUMMY_SP,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                     ),
                                 ),
                                 ast::NestedMetaItem::MetaItem(
                                     attr::mk_name_value_item_str(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                         Ident::with_empty_ctxt(sym::contents),
                                         dummy_spanned(src_interned),
+=======
+                                        Ident::with_dummy_span(sym::contents),
+                                        src_interned,
+                                        DUMMY_SP,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                     ),
                                 ),
                             ];
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             let include_ident = Ident::with_empty_ctxt(sym::include);
                             let item = attr::mk_list_item(DUMMY_SP, include_ident, include_info);
+=======
+                            let include_ident = Ident::with_dummy_span(sym::include);
+                            let item = attr::mk_list_item(include_ident, include_info);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             items.push(ast::NestedMetaItem::MetaItem(item));
                         }
                         Err(e) => {
@@ -1339,11 +1571,23 @@ impl<'a, 'b> MutVisitor for InvocationCollector<'a, 'b> {
                 }
             }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let meta = attr::mk_list_item(DUMMY_SP, Ident::with_empty_ctxt(sym::doc), items);
             match at.style {
                 ast::AttrStyle::Inner => *at = attr::mk_spanned_attr_inner(at.span, at.id, meta),
                 ast::AttrStyle::Outer => *at = attr::mk_spanned_attr_outer(at.span, at.id, meta),
             }
+=======
+            let meta = attr::mk_list_item(Ident::with_dummy_span(sym::doc), items);
+            *at = attr::Attribute {
+                span: at.span,
+                id: at.id,
+                style: at.style,
+                path: meta.path,
+                tokens: meta.node.tokens(meta.span),
+                is_sugared_doc: false,
+            };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         } else {
             noop_visit_attribute(at, self)
         }
@@ -1390,10 +1634,14 @@ impl<'feat> ExpansionConfig<'feat> {
     }
     fn proc_macro_hygiene(&self) -> bool {
         self.features.map_or(false, |features| features.proc_macro_hygiene)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     }
     fn custom_inner_attributes(&self) -> bool {
         self.features.map_or(false, |features| features.custom_inner_attributes)
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 }
 
 // A Marker adds the given mark to the syntax context.
@@ -1407,5 +1655,9 @@ impl MutVisitor for Marker {
 
     fn visit_mac(&mut self, mac: &mut ast::Mac) {
         noop_visit_mac(mac, self)
+=======
+    fn custom_inner_attributes(&self) -> bool {
+        self.features.map_or(false, |features| features.custom_inner_attributes)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 }

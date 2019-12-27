@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0381]: assign to part of possibly uninitialized variable: `t`
   --> $DIR/partial-initialization-across-yield.rs:12:9
    |
@@ -15,6 +16,25 @@ error[E0381]: assign to part of possibly uninitialized variable: `t`
    |
 LL |         t.x = 42;
    |         ^^^^^^^^ use of possibly uninitialized `t`
+=======
+error[E0381]: assign to part of possibly-uninitialized variable: `t`
+  --> $DIR/partial-initialization-across-yield.rs:12:9
+   |
+LL |         t.0 = 42;
+   |         ^^^^^^^^ use of possibly-uninitialized `t`
+
+error[E0381]: assign to part of possibly-uninitialized variable: `t`
+  --> $DIR/partial-initialization-across-yield.rs:23:9
+   |
+LL |         t.0 = 42;
+   |         ^^^^^^^^ use of possibly-uninitialized `t`
+
+error[E0381]: assign to part of possibly-uninitialized variable: `t`
+  --> $DIR/partial-initialization-across-yield.rs:34:9
+   |
+LL |         t.x = 42;
+   |         ^^^^^^^^ use of possibly-uninitialized `t`
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: aborting due to 3 previous errors
 

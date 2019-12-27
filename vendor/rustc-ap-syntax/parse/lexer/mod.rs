@@ -3,17 +3,27 @@ use crate::parse::token::{self, Token, TokenKind};
 use crate::symbol::{sym, Symbol};
 use crate::parse::unescape_error_reporting::{emit_unescape_error, push_escaped_char};
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use errors::{FatalError, Diagnostic, DiagnosticBuilder};
 use syntax_pos::{BytePos, Pos, Span, NO_EXPANSION};
+=======
+use errors::{FatalError, DiagnosticBuilder};
+use syntax_pos::{BytePos, Pos, Span};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use rustc_lexer::Base;
 use rustc_lexer::unescape;
 
-use std::borrow::Cow;
 use std::char;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::iter;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::convert::TryInto;
 use rustc_data_structures::sync::Lrc;
 use log::debug;
+
+#[cfg(test)]
+mod tests;
 
 pub mod comments;
 mod tokentrees;
@@ -36,7 +46,10 @@ pub struct StringReader<'a> {
     pos: BytePos,
     /// Stop reading src at this index.
     end_src_index: usize,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fatal_errs: Vec<DiagnosticBuilder<'a>>,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Source text to tokenize.
     src: Lrc<String>,
     override_span: Option<Span>,
@@ -59,6 +72,7 @@ impl<'a> StringReader<'a> {
             pos: source_file.start_pos,
             end_src_index: src.len(),
             src,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             fatal_errs: Vec::new(),
             override_span,
         }
@@ -169,6 +183,76 @@ impl<'a> StringReader<'a> {
         }
 
         buffer
+=======
+            override_span,
+        }
+    }
+
+    pub fn retokenize(sess: &'a ParseSess, mut span: Span) -> Self {
+        let begin = sess.source_map().lookup_byte_offset(span.lo());
+        let end = sess.source_map().lookup_byte_offset(span.hi());
+
+        // Make the range zero-length if the span is invalid.
+        if span.lo() > span.hi() || begin.sf.start_pos != end.sf.start_pos {
+            span = span.shrink_to_lo();
+        }
+
+        let mut sr = StringReader::new(sess, begin.sf, None);
+
+        // Seek the lexer to the right byte range.
+        sr.end_src_index = sr.src_index(span.hi());
+
+        sr
+    }
+
+
+    fn mk_sp(&self, lo: BytePos, hi: BytePos) -> Span {
+        self.override_span.unwrap_or_else(|| Span::with_root_ctxt(lo, hi))
+    }
+
+    /// Returns the next token, including trivia like whitespace or comments.
+    ///
+    /// `Err(())` means that some errors were encountered, which can be
+    /// retrieved using `buffer_fatal_errors`.
+    pub fn next_token(&mut self) -> Token {
+        let start_src_index = self.src_index(self.pos);
+        let text: &str = &self.src[start_src_index..self.end_src_index];
+
+        if text.is_empty() {
+            let span = self.mk_sp(self.pos, self.pos);
+            return Token::new(token::Eof, span);
+        }
+
+        {
+            let is_beginning_of_file = self.pos == self.start_pos;
+            if is_beginning_of_file {
+                if let Some(shebang_len) = rustc_lexer::strip_shebang(text) {
+                    let start = self.pos;
+                    self.pos = self.pos + BytePos::from_usize(shebang_len);
+
+                    let sym = self.symbol_from(start + BytePos::from_usize("#!".len()));
+                    let kind = token::Shebang(sym);
+
+                    let span = self.mk_sp(start, self.pos);
+                    return Token::new(kind, span);
+                }
+            }
+        }
+
+        let token = rustc_lexer::first_token(text);
+
+        let start = self.pos;
+        self.pos = self.pos + BytePos::from_usize(token.len);
+
+        debug!("try_next_token: {:?}({:?})", token.kind, self.str_from(start));
+
+        // This could use `?`, but that makes code significantly (10-20%) slower.
+        // https://github.com/rust-lang/rust/issues/37939
+        let kind = self.cook_lexer_token(token.kind, start);
+
+        let span = self.mk_sp(start, self.pos);
+        Token::new(kind, span)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     /// Report a fatal lexical error with a given span.
@@ -215,6 +299,7 @@ impl<'a> StringReader<'a> {
         &self,
         token: rustc_lexer::TokenKind,
         start: BytePos,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     ) -> Result<TokenKind, DiagnosticBuilder<'a>> {
         let kind = match token {
             rustc_lexer::TokenKind::LineComment => {
@@ -233,11 +318,157 @@ impl<'a> StringReader<'a> {
                                             "bare CR not allowed in doc-comment");
                         }
                     }
+=======
+    ) -> TokenKind {
+        match token {
+            rustc_lexer::TokenKind::LineComment => {
+                let string = self.str_from(start);
+                // comments with only more "/"s are not doc comments
+                let tok = if is_doc_comment(string) {
+                    self.forbid_bare_cr(start, string, "bare CR not allowed in doc-comment");
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+                    token::DocComment(Symbol::intern(string))
+                } else {
+                    token::Comment
+                };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+                tok
+            }
+            rustc_lexer::TokenKind::BlockComment { terminated } => {
+                let string = self.str_from(start);
+                // block comments starting with "/**" or "/*!" are doc-comments
+                // but comments with only "*"s between two "/"s are not
+                let is_doc_comment = is_block_doc_comment(string);
+
+                if !terminated {
+                    let msg = if is_doc_comment {
+                        "unterminated block doc-comment"
+                    } else {
+                        "unterminated block comment"
+                    };
+                    let last_bpos = self.pos;
+                    self.fatal_span_(start, last_bpos, msg).raise();
+                }
+
+                let tok = if is_doc_comment {
+                    self.forbid_bare_cr(start,
+                                        string,
+                                        "bare CR not allowed in block doc-comment");
                     token::DocComment(Symbol::intern(string))
                 } else {
                     token::Comment
                 };
 
+                tok
+            }
+            rustc_lexer::TokenKind::Whitespace => token::Whitespace,
+            rustc_lexer::TokenKind::Ident | rustc_lexer::TokenKind::RawIdent => {
+                let is_raw_ident = token == rustc_lexer::TokenKind::RawIdent;
+                let mut ident_start = start;
+                if is_raw_ident {
+                    ident_start = ident_start + BytePos(2);
+                }
+                // FIXME: perform NFKC normalization here. (Issue #2253)
+                let sym = self.symbol_from(ident_start);
+                if is_raw_ident {
+                    let span = self.mk_sp(start, self.pos);
+                    if !sym.can_be_raw() {
+                        self.err_span(span, &format!("`{}` cannot be a raw identifier", sym));
+                    }
+                    self.sess.raw_identifier_spans.borrow_mut().push(span);
+                }
+                token::Ident(sym, is_raw_ident)
+            }
+            rustc_lexer::TokenKind::Literal { kind, suffix_start } => {
+                let suffix_start = start + BytePos(suffix_start as u32);
+                let (kind, symbol) = self.cook_lexer_literal(start, suffix_start, kind);
+                let suffix = if suffix_start < self.pos {
+                    let string = self.str_from(suffix_start);
+                    if string == "_" {
+                        self.sess.span_diagnostic
+                            .struct_span_warn(self.mk_sp(suffix_start, self.pos),
+                                              "underscore literal suffix is not allowed")
+                            .warn("this was previously accepted by the compiler but is \
+                                   being phased out; it will become a hard error in \
+                                   a future release!")
+                            .note("for more information, see issue #42326 \
+                                   <https://github.com/rust-lang/rust/issues/42326>")
+                            .emit();
+                        None
+                    } else {
+                        Some(Symbol::intern(string))
+                    }
+                } else {
+                    None
+                };
+                token::Literal(token::Lit { kind, symbol, suffix })
+            }
+            rustc_lexer::TokenKind::Lifetime { starts_with_number } => {
+                // Include the leading `'` in the real identifier, for macro
+                // expansion purposes. See #12512 for the gory details of why
+                // this is necessary.
+                let lifetime_name = self.str_from(start);
+                if starts_with_number {
+                    self.err_span_(
+                        start,
+                        self.pos,
+                        "lifetimes cannot start with a number",
+                    );
+                }
+                let ident = Symbol::intern(lifetime_name);
+                token::Lifetime(ident)
+            }
+            rustc_lexer::TokenKind::Semi => token::Semi,
+            rustc_lexer::TokenKind::Comma => token::Comma,
+            rustc_lexer::TokenKind::Dot => token::Dot,
+            rustc_lexer::TokenKind::OpenParen => token::OpenDelim(token::Paren),
+            rustc_lexer::TokenKind::CloseParen => token::CloseDelim(token::Paren),
+            rustc_lexer::TokenKind::OpenBrace => token::OpenDelim(token::Brace),
+            rustc_lexer::TokenKind::CloseBrace => token::CloseDelim(token::Brace),
+            rustc_lexer::TokenKind::OpenBracket => token::OpenDelim(token::Bracket),
+            rustc_lexer::TokenKind::CloseBracket => token::CloseDelim(token::Bracket),
+            rustc_lexer::TokenKind::At => token::At,
+            rustc_lexer::TokenKind::Pound => token::Pound,
+            rustc_lexer::TokenKind::Tilde => token::Tilde,
+            rustc_lexer::TokenKind::Question => token::Question,
+            rustc_lexer::TokenKind::Colon => token::Colon,
+            rustc_lexer::TokenKind::Dollar => token::Dollar,
+            rustc_lexer::TokenKind::Eq => token::Eq,
+            rustc_lexer::TokenKind::Not => token::Not,
+            rustc_lexer::TokenKind::Lt => token::Lt,
+            rustc_lexer::TokenKind::Gt => token::Gt,
+            rustc_lexer::TokenKind::Minus => token::BinOp(token::Minus),
+            rustc_lexer::TokenKind::And => token::BinOp(token::And),
+            rustc_lexer::TokenKind::Or => token::BinOp(token::Or),
+            rustc_lexer::TokenKind::Plus => token::BinOp(token::Plus),
+            rustc_lexer::TokenKind::Star => token::BinOp(token::Star),
+            rustc_lexer::TokenKind::Slash => token::BinOp(token::Slash),
+            rustc_lexer::TokenKind::Caret => token::BinOp(token::Caret),
+            rustc_lexer::TokenKind::Percent => token::BinOp(token::Percent),
+
+            rustc_lexer::TokenKind::Unknown => {
+                let c = self.str_from(start).chars().next().unwrap();
+                let mut err = self.struct_fatal_span_char(start,
+                                                          self.pos,
+                                                          "unknown start of token",
+                                                          c);
+                // FIXME: the lexer could be used to turn the ASCII version of unicode homoglyphs,
+                // instead of keeping a table in `check_for_substitution`into the token. Ideally,
+                // this should be inside `rustc_lexer`. However, we should first remove compound
+                // tokens like `<<` from `rustc_lexer`, and then add fancier error recovery to it,
+                // as there will be less overall work to do this way.
+                let token = unicode_chars::check_for_substitution(self, start, c, &mut err)
+                    .unwrap_or_else(|| token::Unknown(self.symbol_from(start)));
+                err.emit();
+                token
+            }
+        }
+    }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 tok
             }
             rustc_lexer::TokenKind::BlockComment { terminated } => {
@@ -405,6 +636,8 @@ impl<'a> StringReader<'a> {
         Ok(kind)
     }
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn cook_lexer_literal(
         &self,
         start: BytePos,
@@ -560,6 +793,7 @@ impl<'a> StringReader<'a> {
         &self.src[self.src_index(start)..self.src_index(end)]
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     /// Converts CRLF to LF in the given string, raising an error on bare CR.
     fn translate_crlf<'b>(&self, start: BytePos, s: &'b str, errmsg: &'b str) -> Cow<'b, str> {
         let mut chars = s.char_indices().peekable();
@@ -698,6 +932,97 @@ impl<'a> StringReader<'a> {
     fn validate_raw_str_escape(&self, content_start: BytePos, content_end: BytePos) {
         let lit = self.str_from_to(content_start, content_end);
         unescape::unescape_raw_str(lit, &mut |range, c| {
+=======
+    fn forbid_bare_cr(&self, start: BytePos, s: &str, errmsg: &str) {
+        let mut idx = 0;
+        loop {
+            idx = match s[idx..].find('\r') {
+                None => break,
+                Some(it) => idx + it + 1
+            };
+            self.err_span_(start + BytePos(idx as u32 - 1),
+                           start + BytePos(idx as u32),
+                           errmsg);
+        }
+    }
+
+    fn report_non_started_raw_string(&self, start: BytePos) -> ! {
+        let bad_char = self.str_from(start).chars().last().unwrap();
+        self
+            .struct_fatal_span_char(
+                start,
+                self.pos,
+                "found invalid character; only `#` is allowed \
+                 in raw string delimitation",
+                bad_char,
+            )
+            .emit();
+        FatalError.raise()
+    }
+
+    fn report_unterminated_raw_string(&self, start: BytePos, n_hashes: usize) -> ! {
+        let mut err = self.struct_span_fatal(
+            start, start,
+            "unterminated raw string",
+        );
+        err.span_label(
+            self.mk_sp(start, start),
+            "unterminated raw string",
+        );
+
+        if n_hashes > 0 {
+            err.note(&format!("this raw string should be terminated with `\"{}`",
+                                "#".repeat(n_hashes as usize)));
+        }
+
+        err.emit();
+        FatalError.raise()
+    }
+
+    fn restrict_n_hashes(&self, start: BytePos, n_hashes: usize) -> u16 {
+        match n_hashes.try_into() {
+            Ok(n_hashes) => n_hashes,
+            Err(_) => {
+                self.fatal_span_(start,
+                                 self.pos,
+                                 "too many `#` symbols: raw strings may be \
+                                  delimited by up to 65535 `#` symbols").raise();
+            }
+        }
+    }
+
+    fn validate_char_escape(&self, content_start: BytePos, content_end: BytePos) {
+        let lit = self.str_from_to(content_start, content_end);
+        if let Err((off, err)) = unescape::unescape_char(lit) {
+            emit_unescape_error(
+                &self.sess.span_diagnostic,
+                lit,
+                self.mk_sp(content_start - BytePos(1), content_end + BytePos(1)),
+                unescape::Mode::Char,
+                0..off,
+                err,
+            )
+        }
+    }
+
+    fn validate_byte_escape(&self, content_start: BytePos, content_end: BytePos) {
+        let lit = self.str_from_to(content_start, content_end);
+        if let Err((off, err)) = unescape::unescape_byte(lit) {
+            emit_unescape_error(
+                &self.sess.span_diagnostic,
+                lit,
+                self.mk_sp(content_start - BytePos(1), content_end + BytePos(1)),
+                unescape::Mode::Byte,
+                0..off,
+                err,
+            )
+        }
+    }
+
+    fn validate_str_escape(&self, content_start: BytePos, content_end: BytePos) {
+        let lit = self.str_from_to(content_start, content_end);
+        unescape::unescape_str(lit, &mut |range, c| {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             if let Err(err) = c {
                 emit_unescape_error(
                     &self.sess.span_diagnostic,
@@ -711,9 +1036,43 @@ impl<'a> StringReader<'a> {
         })
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn validate_raw_byte_str_escape(&self, content_start: BytePos, content_end: BytePos) {
         let lit = self.str_from_to(content_start, content_end);
         unescape::unescape_raw_byte_str(lit, &mut |range, c| {
+            if let Err(err) = c {
+                emit_unescape_error(
+                    &self.sess.span_diagnostic,
+                    lit,
+                    self.mk_sp(content_start - BytePos(1), content_end + BytePos(1)),
+                    unescape::Mode::ByteStr,
+=======
+    fn validate_raw_str_escape(&self, content_start: BytePos, content_end: BytePos) {
+        let lit = self.str_from_to(content_start, content_end);
+        unescape::unescape_raw_str(lit, &mut |range, c| {
+            if let Err(err) = c {
+                emit_unescape_error(
+                    &self.sess.span_diagnostic,
+                    lit,
+                    self.mk_sp(content_start - BytePos(1), content_end + BytePos(1)),
+                    unescape::Mode::Str,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+                    range,
+                    err,
+                )
+            }
+        })
+    }
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+    fn validate_byte_str_escape(&self, content_start: BytePos, content_end: BytePos) {
+        let lit = self.str_from_to(content_start, content_end);
+        unescape::unescape_byte_str(lit, &mut |range, c| {
+=======
+    fn validate_raw_byte_str_escape(&self, content_start: BytePos, content_end: BytePos) {
+        let lit = self.str_from_to(content_start, content_end);
+        unescape::unescape_raw_byte_str(lit, &mut |range, c| {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             if let Err(err) = c {
                 emit_unescape_error(
                     &self.sess.span_diagnostic,
@@ -727,6 +1086,8 @@ impl<'a> StringReader<'a> {
         })
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
     fn validate_byte_str_escape(&self, content_start: BytePos, content_end: BytePos) {
         let lit = self.str_from_to(content_start, content_end);
         unescape::unescape_byte_str(lit, &mut |range, c| {
@@ -743,6 +1104,7 @@ impl<'a> StringReader<'a> {
         })
     }
 
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     fn validate_int_literal(&self, base: Base, content_start: BytePos, content_end: BytePos) {
         let base = match base {
             Base::Binary => 2,
@@ -777,6 +1139,7 @@ fn is_block_doc_comment(s: &str) -> bool {
     debug!("is {:?} a doc comment? {}", s, res);
     res
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
 #[cfg(test)]
 mod tests {
@@ -1036,3 +1399,5 @@ mod tests {
         })
     }
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

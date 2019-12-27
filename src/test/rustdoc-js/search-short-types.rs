@@ -66,3 +66,12 @@ imp!(Dp, Ep, Fp, Gp, Hp, Ip, Jp, Kp, Lp, Mp, Np, Op, Pp, Qp, Rp, Sp, Tp, Up, Vp,
 en!(Place, Plac, Plae, Plce, Pace, Scalar, Scalr, Scaar, Sclar, Salar);
 
 pub struct P;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+pub struct VeryLongTypeName;
+impl VeryLongTypeName {
+    pub fn p() {}
+    pub fn ap() {}
+}
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

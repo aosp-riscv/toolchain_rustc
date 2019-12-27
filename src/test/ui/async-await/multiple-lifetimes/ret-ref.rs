@@ -4,8 +4,11 @@
 // function (which takes multiple lifetimes) only returns data from
 // one of them.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await)]
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 async fn multiple_named_lifetimes<'a, 'b>(a: &'a u8, _: &'b u8) -> &'a u8 {
     a
 }

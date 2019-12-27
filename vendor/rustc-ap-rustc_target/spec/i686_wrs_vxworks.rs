@@ -16,7 +16,11 @@ pub fn target() -> TargetResult {
         arch: "x86".to_string(),
         target_os: "vxworks".to_string(),
         target_env: "gnu".to_string(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         target_vendor: "unknown".to_string(),
+=======
+        target_vendor: "wrs".to_string(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         linker_flavor: LinkerFlavor::Gcc,
         options: base,
     })

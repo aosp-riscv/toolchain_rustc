@@ -112,6 +112,10 @@ pub(crate) fn type_check<'tcx>(
     infcx: &InferCtxt<'_, 'tcx>,
     param_env: ty::ParamEnv<'tcx>,
     body: &Body<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    promoted: &IndexVec<Promoted, Body<'tcx>>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     mir_def_id: DefId,
     universal_regions: &Rc<UniversalRegions<'tcx>>,
     location_table: &LocationTable,
@@ -157,6 +161,10 @@ pub(crate) fn type_check<'tcx>(
         mir_def_id,
         param_env,
         body,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        promoted,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         &region_bound_pairs,
         implicit_region_bound,
         &mut borrowck_context,
@@ -180,6 +188,10 @@ fn type_check_internal<'a, 'tcx, R>(
     mir_def_id: DefId,
     param_env: ty::ParamEnv<'tcx>,
     body: &'a Body<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    promoted: &'a IndexVec<Promoted, Body<'tcx>>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     region_bound_pairs: &'a RegionBoundPairs<'tcx>,
     implicit_region_bound: ty::Region<'tcx>,
     borrowck_context: &'a mut BorrowCheckContext<'a, 'tcx>,
@@ -197,7 +209,11 @@ fn type_check_internal<'a, 'tcx, R>(
         universal_region_relations,
     );
     let errors_reported = {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut verifier = TypeVerifier::new(&mut checker, body);
+=======
+        let mut verifier = TypeVerifier::new(&mut checker, body, promoted);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         verifier.visit_body(body);
         verifier.errors_reported
     };
@@ -254,6 +270,10 @@ enum FieldAccessError {
 struct TypeVerifier<'a, 'b, 'tcx> {
     cx: &'a mut TypeChecker<'b, 'tcx>,
     body: &'b Body<'tcx>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    promoted: &'b IndexVec<Promoted, Body<'tcx>>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     last_span: Span,
     mir_def_id: DefId,
     errors_reported: bool,
@@ -272,12 +292,11 @@ impl<'a, 'b, 'tcx> Visitor<'tcx> for TypeVerifier<'a, 'b, 'tcx> {
 
     fn visit_constant(&mut self, constant: &Constant<'tcx>, location: Location) {
         self.super_constant(constant, location);
-        self.sanitize_constant(constant, location);
-        self.sanitize_type(constant, constant.ty);
+        self.sanitize_type(constant, constant.literal.ty);
 
         if let Some(annotation_index) = constant.user_ty {
             if let Err(terr) = self.cx.relate_type_and_user_type(
-                constant.ty,
+                constant.literal.ty,
                 ty::Variance::Invariant,
                 &UserTypeProjection { base: annotation_index, projs: vec![], },
                 location.to_locations(),
@@ -289,7 +308,7 @@ impl<'a, 'b, 'tcx> Visitor<'tcx> for TypeVerifier<'a, 'b, 'tcx> {
                     constant,
                     "bad constant user type {:?} vs {:?}: {:?}",
                     annotation,
-                    constant.ty,
+                    constant.literal.ty,
                     terr,
                 );
             }
@@ -299,7 +318,7 @@ impl<'a, 'b, 'tcx> Visitor<'tcx> for TypeVerifier<'a, 'b, 'tcx> {
                     location.to_locations(),
                     ConstraintCategory::Boring,
                     self.cx.param_env.and(type_op::ascribe_user_type::AscribeUserType::new(
-                        constant.ty, def_id, UserSubsts { substs, user_self_ty: None },
+                        constant.literal.ty, def_id, UserSubsts { substs, user_self_ty: None },
                     )),
                 ) {
                     span_mirbug!(
@@ -381,9 +400,21 @@ impl<'a, 'b, 'tcx> Visitor<'tcx> for TypeVerifier<'a, 'b, 'tcx> {
 }
 
 impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn new(cx: &'a mut TypeChecker<'b, 'tcx>, body: &'b Body<'tcx>) -> Self {
+=======
+    fn new(
+        cx: &'a mut TypeChecker<'b, 'tcx>,
+        body: &'b Body<'tcx>,
+        promoted: &'b IndexVec<Promoted, Body<'tcx>>,
+    ) -> Self {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         TypeVerifier {
             body,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            promoted,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             mir_def_id: cx.mir_def_id,
             cx,
             last_span: body.span,
@@ -403,41 +434,6 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
         }
     }
 
-    /// Checks that the constant's `ty` field matches up with what would be
-    /// expected from its literal. Unevaluated constants and well-formed
-    /// constraints are checked by `visit_constant`.
-    fn sanitize_constant(&mut self, constant: &Constant<'tcx>, location: Location) {
-        debug!(
-            "sanitize_constant(constant={:?}, location={:?})",
-            constant, location
-        );
-
-        let literal = constant.literal;
-
-        if let ConstValue::Unevaluated(..) = literal.val {
-            return;
-        }
-
-        debug!("sanitize_constant: expected_ty={:?}", literal.ty);
-
-        if let Err(terr) = self.cx.eq_types(
-            literal.ty,
-            constant.ty,
-            location.to_locations(),
-            ConstraintCategory::Boring,
-        ) {
-            span_mirbug!(
-                self,
-                constant,
-                "constant {:?} should have type {:?} but has {:?} ({:?})",
-                constant,
-                literal.ty,
-                constant.ty,
-                terr,
-            );
-        }
-    }
-
     /// Checks that the types internal to the `place` match up with
     /// what would be expected.
     fn sanitize_place(
@@ -447,7 +443,43 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
         context: PlaceContext,
     ) -> PlaceTy<'tcx> {
         debug!("sanitize_place: {:?}", place);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 
+        let mut place_ty = match &place.base {
+            PlaceBase::Local(index) =>
+                PlaceTy::from_ty(self.body.local_decls[*index].ty),
+            PlaceBase::Static(box Static { kind, ty: sty, def_id }) => {
+                let sty = self.sanitize_type(place, sty);
+                let check_err =
+                    |verifier: &mut TypeVerifier<'a, 'b, 'tcx>,
+                     place: &Place<'tcx>,
+                     ty,
+                     sty| {
+                        if let Err(terr) = verifier.cx.eq_types(
+                            sty,
+                            ty,
+                            location.to_locations(),
+                            ConstraintCategory::Boring,
+                        ) {
+                            span_mirbug!(
+                            verifier,
+                            place,
+                            "bad promoted type ({:?}: {:?}): {:?}",
+                            ty,
+                            sty,
+                            terr
+                        );
+                        };
+                    };
+                match kind {
+                    StaticKind::Promoted(promoted, _) => {
+                        if !self.errors_reported {
+                            let promoted_body = &self.promoted[*promoted];
+                            self.sanitize_promoted(promoted_body, location);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         place.iterate(|place_base, place_projection| {
             let mut place_ty = match place_base {
                 PlaceBase::Local(index) =>
@@ -490,11 +522,21 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
                             let ty = self.cx.normalize(ty, location);
 
                             check_err(self, place, ty, sty);
+=======
+                            let promoted_ty = promoted_body.return_ty();
+                            check_err(self, place, promoted_ty, sty);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         }
                     }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     PlaceTy::from_ty(sty)
                 }
             };
+=======
+                    StaticKind::Static => {
+                        let ty = self.tcx().type_of(*def_id);
+                        let ty = self.cx.normalize(ty, location);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
             // FIXME use place_projection.is_empty() when is available
             if place.projection.is_none() {
@@ -536,6 +578,7 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
                     }
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
             for proj in place_projection {
                 if place_ty.variant_index.is_none() {
@@ -546,9 +589,66 @@ impl<'a, 'b, 'tcx> TypeVerifier<'a, 'b, 'tcx> {
                 }
                 place_ty = self.sanitize_projection(place_ty, &proj.elem, place, location)
             }
+=======
+        };
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             place_ty
         })
+=======
+        if place.projection.is_empty() {
+            if let PlaceContext::NonMutatingUse(NonMutatingUseContext::Copy) = context {
+                let is_promoted = match place {
+                    Place {
+                        base: PlaceBase::Static(box Static {
+                            kind: StaticKind::Promoted(..),
+                            ..
+                        }),
+                        projection: box [],
+                    } => true,
+                    _ => false,
+                };
+
+                if !is_promoted {
+                    let tcx = self.tcx();
+                    let trait_ref = ty::TraitRef {
+                        def_id: tcx.lang_items().copy_trait().unwrap(),
+                        substs: tcx.mk_substs_trait(place_ty.ty, &[]),
+                    };
+
+                    // To have a `Copy` operand, the type `T` of the
+                    // value must be `Copy`. Note that we prove that `T: Copy`,
+                    // rather than using the `is_copy_modulo_regions`
+                    // test. This is important because
+                    // `is_copy_modulo_regions` ignores the resulting region
+                    // obligations and assumes they pass. This can result in
+                    // bounds from `Copy` impls being unsoundly ignored (e.g.,
+                    // #29149). Note that we decide to use `Copy` before knowing
+                    // whether the bounds fully apply: in effect, the rule is
+                    // that if a value of some type could implement `Copy`, then
+                    // it must.
+                    self.cx.prove_trait_ref(
+                        trait_ref,
+                        location.to_locations(),
+                        ConstraintCategory::CopyBound,
+                    );
+                }
+            }
+        }
+
+        for elem in place.projection.iter() {
+            if place_ty.variant_index.is_none() {
+                if place_ty.ty.references_error() {
+                    assert!(self.errors_reported);
+                    return PlaceTy::from_ty(self.tcx().types.err);
+                }
+            }
+            place_ty = self.sanitize_projection(place_ty, elem, place, location)
+        }
+
+        place_ty
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn sanitize_promoted(&mut self, promoted_body: &'b Body<'tcx>, location: Location) {
@@ -1373,7 +1473,7 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
         debug!("check_stmt: {:?}", stmt);
         let tcx = self.tcx();
         match stmt.kind {
-            StatementKind::Assign(ref place, ref rv) => {
+            StatementKind::Assign(box(ref place, ref rv)) => {
                 // Assignments to temporaries are not "interesting";
                 // they are not caused by the user, but rather artifacts
                 // of lowering. Assignments to other sorts of places *are* interesting
@@ -1381,7 +1481,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                 let category = match *place {
                     Place {
                         base: PlaceBase::Local(RETURN_PLACE),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         projection: None,
+=======
+                        projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     } => if let BorrowCheckContext {
                         universal_regions:
                             UniversalRegions {
@@ -1400,7 +1504,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     },
                     Place {
                         base: PlaceBase::Local(l),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         projection: None,
+=======
+                        projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     } if !body.local_decls[l].is_user_variable.is_some() => {
                         ConstraintCategory::Boring
                     }
@@ -1480,7 +1588,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     );
                 };
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             StatementKind::AscribeUserType(ref place, variance, box ref projection) => {
+=======
+            StatementKind::AscribeUserType(box(ref place, ref projection), variance) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let place_ty = place.ty(body, tcx).ty;
                 if let Err(terr) = self.relate_type_and_user_type(
                     place_ty,
@@ -1687,7 +1799,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                 let category = match *dest {
                     Place {
                         base: PlaceBase::Local(RETURN_PLACE),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         projection: None,
+=======
+                        projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     } => {
                         if let BorrowCheckContext {
                             universal_regions:
@@ -1709,7 +1825,11 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     }
                     Place {
                         base: PlaceBase::Local(l),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         projection: None,
+=======
+                        projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     } if !body.local_decls[l].is_user_variable.is_some() => {
                         ConstraintCategory::Boring
                     }
@@ -2029,6 +2149,10 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                             ),
                             &traits::SelectionError::Unimplemented,
                             false,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+                            false,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         );
                     }
                 }
@@ -2443,19 +2567,39 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
         // *p`, where the `p` has type `&'b mut Foo`, for example, we
         // need to ensure that `'b: 'a`.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let mut borrowed_projection = &borrowed_place.projection;
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         debug!(
             "add_reborrow_constraint({:?}, {:?}, {:?})",
             location, borrow_region, borrowed_place
         );
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         while let Some(box proj) = borrowed_projection {
             debug!("add_reborrow_constraint - iteration {:?}", borrowed_projection);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             match proj.elem {
+=======
+        let mut cursor = &*borrowed_place.projection;
+        while let [proj_base @ .., elem] = cursor {
+            cursor = proj_base;
+
+            debug!("add_reborrow_constraint - iteration {:?}", elem);
+
+            match elem {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ProjectionElem::Deref => {
                     let tcx = self.infcx.tcx;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let base_ty = Place::ty_from(&borrowed_place.base, &proj.base, body, tcx).ty;
+=======
+                    let base_ty = Place::ty_from(&borrowed_place.base, proj_base, body, tcx).ty;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
                     debug!("add_reborrow_constraint - base_ty = {:?}", base_ty);
                     match base_ty.sty {
@@ -2517,10 +2661,13 @@ impl<'a, 'tcx> TypeChecker<'a, 'tcx> {
                     // other field access
                 }
             }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
             // The "propagate" case. We need to check that our base is valid
             // for the borrow's lifetime.
             borrowed_projection = &proj.base;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 

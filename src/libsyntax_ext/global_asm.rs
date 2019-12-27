@@ -16,12 +16,16 @@ use syntax::ext::base::{self, *};
 use syntax::parse::token;
 use syntax::ptr::P;
 use syntax_pos::Span;
-use syntax::tokenstream;
+use syntax::tokenstream::TokenStream;
 use smallvec::smallvec;
 
 pub fn expand_global_asm<'cx>(cx: &'cx mut ExtCtxt<'_>,
                               sp: Span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                               tts: &[tokenstream::TokenTree]) -> Box<dyn base::MacResult + 'cx> {
+=======
+                              tts: TokenStream) -> Box<dyn base::MacResult + 'cx> {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     match parse_global_asm(cx, sp, tts) {
         Ok(Some(global_asm)) => {
             MacEager::items(smallvec![P(ast::Item {
@@ -30,7 +34,7 @@ pub fn expand_global_asm<'cx>(cx: &'cx mut ExtCtxt<'_>,
                 id: ast::DUMMY_NODE_ID,
                 node: ast::ItemKind::GlobalAsm(P(global_asm)),
                 vis: respan(sp.shrink_to_lo(), ast::VisibilityKind::Inherited),
-                span: sp,
+                span: cx.with_def_site_ctxt(sp),
                 tokens: None,
             })])
         }
@@ -45,7 +49,7 @@ pub fn expand_global_asm<'cx>(cx: &'cx mut ExtCtxt<'_>,
 fn parse_global_asm<'a>(
     cx: &mut ExtCtxt<'a>,
     sp: Span,
-    tts: &[tokenstream::TokenTree]
+    tts: TokenStream
 ) -> Result<Option<ast::GlobalAsm>, DiagnosticBuilder<'a>> {
     let mut p = cx.new_parser_from_tts(tts);
 
@@ -61,8 +65,5 @@ fn parse_global_asm<'a>(
         None => return Ok(None),
     };
 
-    Ok(Some(ast::GlobalAsm {
-        asm,
-        ctxt: cx.backtrace(),
-    }))
+    Ok(Some(ast::GlobalAsm { asm }))
 }

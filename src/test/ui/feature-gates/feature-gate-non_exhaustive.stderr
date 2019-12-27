@@ -1,4 +1,8 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error[E0658]: non exhaustive is an experimental feature
+=======
+error[E0658]: the `#[non_exhaustive]` attribute is an experimental feature
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
   --> $DIR/feature-gate-non_exhaustive.rs:3:1
    |
 LL | #[non_exhaustive]

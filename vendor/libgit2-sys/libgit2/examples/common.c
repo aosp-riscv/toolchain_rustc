@@ -14,6 +14,17 @@
 
 #include <assert.h>
 #include <stdio.h>
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+#include <sys/types.h>
+#include <sys/stat.h>
+#ifdef _WIN32
+# include <io.h>
+#else
+# include <fcntl.h>
+# include <unistd.h>
+#endif
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #include <string.h>
 #include <errno.h>
 
@@ -391,3 +402,40 @@ out:
 	free(pubkey);
 	return error;
 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+
+char *read_file(const char *path)
+{
+	ssize_t total = 0;
+	char *buf = NULL;
+	struct stat st;
+	int fd = -1;
+
+	if ((fd = open(path, O_RDONLY)) < 0 || fstat(fd, &st) < 0)
+		goto out;
+
+	if ((buf = malloc(st.st_size + 1)) == NULL)
+		goto out;
+
+	while (total < st.st_size) {
+		ssize_t bytes = read(fd, buf + total, st.st_size - total);
+		if (bytes <= 0) {
+			if (errno == EAGAIN || errno == EINTR)
+				 continue;
+			free(buf);
+			buf = NULL;
+			goto out;
+		}
+		total += bytes;
+	}
+
+	buf[total] = '\0';
+
+out:
+	if (fd >= 0)
+		close(fd);
+	return buf;
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

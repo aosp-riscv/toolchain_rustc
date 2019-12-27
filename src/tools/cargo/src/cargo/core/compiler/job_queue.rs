@@ -2,10 +2,16 @@ use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
 use std::io;
 use std::marker;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use std::mem;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
+use std::time::Duration;
 
 use crossbeam_utils::thread::Scope;
+use failure::format_err;
 use jobserver::{Acquired, HelperThread};
 use log::{debug, info, trace};
 
@@ -14,6 +20,10 @@ use super::job::{
     Freshness::{self, Dirty, Fresh},
     Job,
 };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+use super::timings::Timings;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use super::{BuildContext, BuildPlan, CompileMode, Context, Unit};
 use crate::core::{PackageId, TargetKind};
 use crate::handle_error;
@@ -39,6 +49,10 @@ pub struct JobQueue<'a, 'cfg> {
     is_release: bool,
     progress: Progress<'cfg>,
     next_id: u32,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    timings: Timings<'a, 'cfg>,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 pub struct JobState<'a> {
@@ -80,7 +94,11 @@ enum Artifact {
 }
 
 enum Message {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     Run(String),
+=======
+    Run(u32, String),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     BuildPlanMsg(String, ProcessBuilder, Arc<Vec<OutputFile>>),
     Stdout(String),
     Stderr(String),
@@ -91,7 +109,7 @@ enum Message {
 
 impl<'a> JobState<'a> {
     pub fn running(&self, cmd: &ProcessBuilder) {
-        let _ = self.tx.send(Message::Run(cmd.to_string()));
+        let _ = self.tx.send(Message::Run(self.id, cmd.to_string()));
     }
 
     pub fn build_plan(
@@ -119,7 +137,10 @@ impl<'a> JobState<'a> {
     /// This should only be called once because a metadata file can only be
     /// produced once!
     pub fn rmeta_produced(&self) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         assert!(self.rmeta_required.get());
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         self.rmeta_required.set(false);
         let _ = self
             .tx
@@ -128,9 +149,10 @@ impl<'a> JobState<'a> {
 }
 
 impl<'a, 'cfg> JobQueue<'a, 'cfg> {
-    pub fn new(bcx: &BuildContext<'a, 'cfg>) -> JobQueue<'a, 'cfg> {
+    pub fn new(bcx: &BuildContext<'a, 'cfg>, root_units: &[Unit<'a>]) -> JobQueue<'a, 'cfg> {
         let (tx, rx) = channel();
         let progress = Progress::with_style("Building", ProgressStyle::Ratio, bcx.config);
+        let timings = Timings::new(bcx, root_units);
         JobQueue {
             queue: DependencyQueue::new(),
             tx,
@@ -142,6 +164,10 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
             is_release: bcx.build_config.release,
             progress,
             next_id: 0,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+            timings,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
@@ -158,7 +184,11 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
             .filter(|unit| {
                 // Binaries aren't actually needed to *compile* tests, just to run
                 // them, so we don't include this dependency edge in the job graph.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 !unit.target.is_test() || !unit.target.is_bin()
+=======
+                !unit.target.is_test() && !unit.target.is_bin()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             })
             .map(|dep| {
                 // Handle the case here where our `unit -> dep` dependency may
@@ -316,30 +346,48 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
             // to the jobserver itself.
             tokens.truncate(self.active.len() - 1);
 
+            // Record some timing information if `-Ztimings` is enabled, and
+            // this'll end up being a noop if we're not recording this
+            // information.
+            self.timings
+                .mark_concurrency(self.active.len(), queue.len(), self.queue.len());
+            self.timings.record_cpu();
+
             // Drain all events at once to avoid displaying the progress bar
-            // unnecessarily.
+            // unnecessarily. If there's no events we actually block waiting for
+            // an event, but we keep a "heartbeat" going to allow `record_cpu`
+            // to run above to calculate CPU usage over time. To do this we
+            // listen for a message with a timeout, and on timeout we run the
+            // previous parts of the loop again.
             let events: Vec<_> = self.rx.try_iter().collect();
             let events = if events.is_empty() {
                 self.show_progress(finished, total);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 vec![self.rx.recv().unwrap()]
+=======
+                match self.rx.recv_timeout(Duration::from_millis(500)) {
+                    Ok(message) => vec![message],
+                    Err(_) => continue,
+                }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             } else {
                 events
             };
 
             for event in events {
                 match event {
-                    Message::Run(cmd) => {
+                    Message::Run(id, cmd) => {
                         cx.bcx
                             .config
                             .shell()
                             .verbose(|c| c.status("Running", &cmd))?;
+                        self.timings.unit_start(id, self.active[&id]);
                     }
                     Message::BuildPlanMsg(module_name, cmd, filenames) => {
                         plan.update(&module_name, &cmd, &filenames)?;
                     }
                     Message::Stdout(out) => {
-                        self.progress.clear();
-                        println!("{}", out);
+                        cx.bcx.config.shell().stdout_println(out);
                     }
                     Message::Stderr(err) => {
                         let mut shell = cx.bcx.config.shell();
@@ -367,7 +415,11 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
                         };
                         info!("end ({:?}): {:?}", unit, result);
                         match result {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             Ok(()) => self.finish(&unit, artifact, cx)?,
+=======
+                            Ok(()) => self.finish(id, &unit, artifact, cx)?,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             Err(e) => {
                                 let msg = "The following warnings were emitted during compilation:";
                                 self.emit_warnings(Some(msg), &unit, cx)?;
@@ -425,6 +477,7 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
             if !cx.bcx.build_config.build_plan {
                 cx.bcx.config.shell().status("Finished", message)?;
             }
+            self.timings.finished()?;
             Ok(())
         } else {
             debug!("queue: {:#?}", self.queue);
@@ -490,6 +543,7 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
                 rmeta_required: Cell::new(rmeta_required),
                 _marker: marker::PhantomData,
             };
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             let res = job.run(&state);
 
             // If the `rmeta_required` wasn't consumed but it was set
@@ -511,6 +565,50 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
             }
 
             my_tx.send(Message::Finish(id, Artifact::All, res)).unwrap();
+=======
+
+            let mut sender = FinishOnDrop {
+                tx: &my_tx,
+                id,
+                result: Err(format_err!("worker panicked")),
+            };
+            sender.result = job.run(&state);
+
+            // If the `rmeta_required` wasn't consumed but it was set
+            // previously, then we either have:
+            //
+            // 1. The `job` didn't do anything because it was "fresh".
+            // 2. The `job` returned an error and didn't reach the point where
+            //    it called `rmeta_produced`.
+            // 3. We forgot to call `rmeta_produced` and there's a bug in Cargo.
+            //
+            // Ruling out the third, the other two are pretty common for 2
+            // we'll just naturally abort the compilation operation but for 1
+            // we need to make sure that the metadata is flagged as produced so
+            // send a synthetic message here.
+            if state.rmeta_required.get() && sender.result.is_ok() {
+                my_tx
+                    .send(Message::Finish(id, Artifact::Metadata, Ok(())))
+                    .unwrap();
+            }
+
+            // Use a helper struct with a `Drop` implementation to guarantee
+            // that a `Finish` message is sent even if our job panics. We
+            // shouldn't panic unless there's a bug in Cargo, so we just need
+            // to make sure nothing hangs by accident.
+            struct FinishOnDrop<'a> {
+                tx: &'a Sender<Message>,
+                id: u32,
+                result: CargoResult<()>,
+            }
+
+            impl Drop for FinishOnDrop<'_> {
+                fn drop(&mut self) {
+                    let msg = mem::replace(&mut self.result, Ok(()));
+                    drop(self.tx.send(Message::Finish(self.id, Artifact::All, msg)));
+                }
+            }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         };
 
         if !cx.bcx.build_config.build_plan {
@@ -519,8 +617,12 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
         }
 
         match fresh {
-            Freshness::Fresh => doit(),
+            Freshness::Fresh => {
+                self.timings.add_fresh();
+                doit()
+            }
             Freshness::Dirty => {
+                self.timings.add_dirty();
                 scope.spawn(move |_| doit());
             }
         }
@@ -558,6 +660,10 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
 
     fn finish(
         &mut self,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+        id: u32,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         unit: &Unit<'a>,
         artifact: Artifact,
         cx: &mut Context<'_, '_>,
@@ -565,7 +671,15 @@ impl<'a, 'cfg> JobQueue<'a, 'cfg> {
         if unit.mode.is_run_custom_build() && cx.bcx.show_warnings(unit.pkg.package_id()) {
             self.emit_warnings(None, unit, cx)?;
         }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         self.queue.finish(unit, &artifact);
+=======
+        let unlocked = self.queue.finish(unit, &artifact);
+        match artifact {
+            Artifact::All => self.timings.unit_finished(id, unlocked),
+            Artifact::Metadata => self.timings.unit_rmeta_finished(id, unlocked),
+        }
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         Ok(())
     }
 

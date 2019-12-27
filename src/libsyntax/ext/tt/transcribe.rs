@@ -1,18 +1,56 @@
-use crate::ast::Ident;
+use crate::ast::{Ident, Mac};
 use crate::ext::base::ExtCtxt;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::ext::expand::Marker;
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::ext::tt::macro_parser::{MatchedNonterminal, MatchedSeq, NamedMatch};
 use crate::ext::tt::quoted;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use crate::mut_visit::noop_visit_tt;
+=======
+use crate::mut_visit::{self, MutVisitor};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use crate::parse::token::{self, NtTT, Token};
 use crate::tokenstream::{DelimSpan, TokenStream, TokenTree, TreeAndJoint};
 
 use smallvec::{smallvec, SmallVec};
 
+use errors::pluralise;
 use rustc_data_structures::fx::FxHashMap;
 use rustc_data_structures::sync::Lrc;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+use std::mem;
+=======
+use syntax_pos::hygiene::{ExpnId, Transparency};
+use syntax_pos::Span;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
+
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
 use std::mem;
 
+// A Marker adds the given mark to the syntax context.
+struct Marker(ExpnId, Transparency);
+
+impl MutVisitor for Marker {
+    fn visit_span(&mut self, span: &mut Span) {
+        *span = span.apply_mark(self.0, self.1)
+    }
+
+    fn visit_mac(&mut self, mac: &mut Mac) {
+        mut_visit::noop_visit_mac(mac, self)
+    }
+}
+
+impl Marker {
+    fn visit_delim_span(&mut self, dspan: &mut DelimSpan) {
+        self.visit_span(&mut dspan.open);
+        self.visit_span(&mut dspan.close);
+    }
+}
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 /// An iterator over the token trees in a delimited token tree (`{ ... }`) or a sequence (`$(...)`).
 enum Frame {
     Delimited { forest: Lrc<quoted::Delimited>, idx: usize, span: DelimSpan },
@@ -68,6 +106,10 @@ pub(super) fn transcribe(
     cx: &ExtCtxt<'_>,
     interp: &FxHashMap<Ident, NamedMatch>,
     src: Vec<quoted::TokenTree>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    transparency: Transparency,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 ) -> TokenStream {
     // Nothing for us to transcribe...
     if src.is_empty() {
@@ -96,6 +138,7 @@ pub(super) fn transcribe(
     // again, and we are done transcribing.
     let mut result: Vec<TreeAndJoint> = Vec::new();
     let mut result_stack = Vec::new();
+    let mut marker = Marker(cx.current_expansion.id, transparency);
 
     loop {
         // Look at the last frame on the stack.
@@ -207,7 +250,11 @@ pub(super) fn transcribe(
             }
 
             // Replace the meta-var with the matched token tree from the invocation.
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             quoted::TokenTree::MetaVar(mut sp, ident) => {
+=======
+            quoted::TokenTree::MetaVar(mut sp, mut ident) => {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 // Find the matched nonterminal from the macro invocation, and use it to replace
                 // the meta-var.
                 if let Some(cur_matched) = lookup_cur_matched(ident, interp, &repeats) {
@@ -218,7 +265,11 @@ pub(super) fn transcribe(
                         if let NtTT(ref tt) = **nt {
                             result.push(tt.clone().into());
                         } else {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             sp = sp.apply_mark(cx.current_expansion.id);
+=======
+                            marker.visit_span(&mut sp);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                             let token = TokenTree::token(token::Interpolated(nt.clone()), sp);
                             result.push(token.into());
                         }
@@ -232,9 +283,14 @@ pub(super) fn transcribe(
                 } else {
                     // If we aren't able to match the meta-var, we push it back into the result but
                     // with modified syntax context. (I believe this supports nested macros).
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     let ident =
                         Ident::new(ident.name, ident.span.apply_mark(cx.current_expansion.id));
                     sp = sp.apply_mark(cx.current_expansion.id);
+=======
+                    marker.visit_span(&mut sp);
+                    marker.visit_ident(&mut ident);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     result.push(TokenTree::token(token::Dollar, sp).into());
                     result.push(TokenTree::Token(Token::from_ast_ident(ident)).into());
                 }
@@ -246,7 +302,11 @@ pub(super) fn transcribe(
             // jump back out of the Delimited, pop the result_stack and add the new results back to
             // the previous results (from outside the Delimited).
             quoted::TokenTree::Delimited(mut span, delimited) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 span = span.apply_mark(cx.current_expansion.id);
+=======
+                marker.visit_delim_span(&mut span);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 stack.push(Frame::Delimited { forest: delimited, idx: 0, span });
                 result_stack.push(mem::take(&mut result));
             }
@@ -254,9 +314,14 @@ pub(super) fn transcribe(
             // Nothing much to do here. Just push the token to the result, being careful to
             // preserve syntax context.
             quoted::TokenTree::Token(token) => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let mut marker = Marker(cx.current_expansion.id);
                 let mut tt = TokenTree::Token(token);
                 noop_visit_tt(&mut tt, &mut marker);
+=======
+                let mut tt = TokenTree::Token(token);
+                marker.visit_tt(&mut tt);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 result.push(tt.into());
             }
 
@@ -323,8 +388,18 @@ impl LockstepIterSize {
                 LockstepIterSize::Constraint(r_len, _) if l_len == r_len => self,
                 LockstepIterSize::Constraint(r_len, r_id) => {
                     let msg = format!(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         "meta-variable `{}` repeats {} times, but `{}` repeats {} times",
                         l_id, l_len, r_id, r_len
+=======
+                        "meta-variable `{}` repeats {} time{}, but `{}` repeats {} time{}",
+                        l_id,
+                        l_len,
+                        pluralise!(l_len),
+                        r_id,
+                        r_len,
+                        pluralise!(r_len),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     );
                     LockstepIterSize::Contradiction(msg)
                 }

@@ -15,7 +15,11 @@
 //! > **NOTE**: At this time this crate likely does not support a `git push`
 //! >           operation, only clones.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![doc(html_root_url = "https://docs.rs/git2-curl/0.10")]
+=======
+#![doc(html_root_url = "https://docs.rs/git2-curl/0.11")]
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
 #![cfg_attr(test, deny(warnings))]

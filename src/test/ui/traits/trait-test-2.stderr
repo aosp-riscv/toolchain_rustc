@@ -13,20 +13,36 @@ LL |     10.blah::<i32, i32>();
 error[E0038]: the trait `bar` cannot be made into an object
   --> $DIR/trait-test-2.rs:11:16
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 LL |     (box 10 as Box<dyn bar>).dup();
    |                ^^^^^^^^^^^^ the trait `bar` cannot be made into an object
    |
    = note: method `dup` references the `Self` type in its arguments or return type
    = note: method `blah` has generic type parameters
+=======
+LL | trait bar { fn dup(&self) -> Self; fn blah<X>(&self); }
+   |                ---                    ---- method `blah` has generic type parameters
+   |                |
+   |                method `dup` references the `Self` type in its parameters or return type
+...
+LL |     (box 10 as Box<dyn bar>).dup();
+   |                ^^^^^^^^^^^^ the trait `bar` cannot be made into an object
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error[E0038]: the trait `bar` cannot be made into an object
   --> $DIR/trait-test-2.rs:11:6
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+LL | trait bar { fn dup(&self) -> Self; fn blah<X>(&self); }
+   |                ---                    ---- method `blah` has generic type parameters
+   |                |
+   |                method `dup` references the `Self` type in its parameters or return type
+...
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 LL |     (box 10 as Box<dyn bar>).dup();
    |      ^^^^^^ the trait `bar` cannot be made into an object
    |
-   = note: method `dup` references the `Self` type in its arguments or return type
-   = note: method `blah` has generic type parameters
    = note: required because of the requirements on the impl of `std::ops::CoerceUnsized<std::boxed::Box<dyn bar>>` for `std::boxed::Box<{integer}>`
 
 error: aborting due to 4 previous errors

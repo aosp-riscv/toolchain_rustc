@@ -8,7 +8,11 @@ use rustc::mir::{
     AggregateKind, Constant, Location, Place, PlaceBase, Body, Operand, Rvalue,
     Local, NullOp, UnOp, StatementKind, Statement, LocalKind, Static, StaticKind,
     TerminatorKind, Terminator,  ClearCrossCrate, SourceInfo, BinOp, ProjectionElem,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     SourceScope, SourceScopeLocalData, LocalDecl, Promoted,
+=======
+    SourceScope, SourceScopeLocalData, LocalDecl,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
 use rustc::mir::visit::{
     Visitor, PlaceContext, MutatingUseContext, MutVisitor, NonMutatingUseContext,
@@ -19,7 +23,11 @@ use syntax_pos::{Span, DUMMY_SP};
 use rustc::ty::subst::InternalSubsts;
 use rustc_data_structures::indexed_vec::IndexVec;
 use rustc::ty::layout::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     LayoutOf, TyLayout, LayoutError, HasTyCtxt, TargetDataLayout, HasDataLayout, Size,
+=======
+    LayoutOf, TyLayout, LayoutError, HasTyCtxt, TargetDataLayout, HasDataLayout,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
 
 use crate::interpret::{
@@ -27,14 +35,19 @@ use crate::interpret::{
     ImmTy, MemoryKind, StackPopCleanup, LocalValue, LocalState,
 };
 use crate::const_eval::{
-    CompileTimeInterpreter, error_to_const_error, eval_promoted, mk_eval_cx,
+    CompileTimeInterpreter, error_to_const_error, mk_eval_cx,
 };
 use crate::transform::{MirPass, MirSource};
 
 pub struct ConstProp;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for ConstProp {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, source: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for ConstProp {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, source: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         // will be evaluated by miri and produce its errors there
         if source.promoted.is_some() {
             return;
@@ -64,6 +77,7 @@ impl MirPass for ConstProp {
             &mut body.source_scope_local_data,
             ClearCrossCrate::Clear
         );
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let promoted = std::mem::replace(
             &mut body.promoted,
             IndexVec::new()
@@ -75,6 +89,14 @@ impl MirPass for ConstProp {
                 Default::default(),
                 ClearCrossCrate::Clear,
                 Default::default(),
+=======
+
+        let dummy_body =
+            &Body::new(
+                body.basic_blocks().clone(),
+                Default::default(),
+                ClearCrossCrate::Clear,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 None,
                 body.local_decls.clone(),
                 Default::default(),
@@ -92,6 +114,7 @@ impl MirPass for ConstProp {
             body,
             dummy_body,
             source_scope_local_data,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             promoted,
             tcx,
             source
@@ -107,6 +130,18 @@ impl MirPass for ConstProp {
         std::mem::replace(
             &mut body.promoted,
             promoted
+=======
+            tcx,
+            source
+        );
+        optimization_finder.visit_body(body);
+
+        // put back the data we stole from `mir`
+        let source_scope_local_data = optimization_finder.release_stolen_data();
+        std::mem::replace(
+            &mut body.source_scope_local_data,
+            source_scope_local_data
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         );
 
         trace!("ConstProp done for {:?}", source.def_id());
@@ -124,7 +159,10 @@ struct ConstPropagator<'mir, 'tcx> {
     param_env: ParamEnv<'tcx>,
     source_scope_local_data: ClearCrossCrate<IndexVec<SourceScope, SourceScopeLocalData>>,
     local_decls: IndexVec<Local, LocalDecl<'tcx>>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     promoted: IndexVec<Promoted, Body<'tcx>>,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 impl<'mir, 'tcx> LayoutOf for ConstPropagator<'mir, 'tcx> {
@@ -155,7 +193,10 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
         body: &Body<'tcx>,
         dummy_body: &'mir Body<'tcx>,
         source_scope_local_data: ClearCrossCrate<IndexVec<SourceScope, SourceScopeLocalData>>,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         promoted: IndexVec<Promoted, Body<'tcx>>,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         tcx: TyCtxt<'tcx>,
         source: MirSource<'tcx>,
     ) -> ConstPropagator<'mir, 'tcx> {
@@ -184,10 +225,14 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
             source_scope_local_data,
             //FIXME(wesleywiser) we can't steal this because `Visitor::super_visit_body()` needs it
             local_decls: body.local_decls.clone(),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
             promoted,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     fn release_stolen_data(
         self,
     ) -> (
@@ -195,6 +240,10 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
         IndexVec<Promoted, Body<'tcx>>,
     ) {
         (self.source_scope_local_data, self.promoted)
+=======
+    fn release_stolen_data(self) -> ClearCrossCrate<IndexVec<SourceScope, SourceScopeLocalData>> {
+        self.source_scope_local_data
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn get_const(&self, local: Local) -> Option<Const<'tcx>> {
@@ -255,8 +304,8 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
         let r = match f(self) {
             Ok(val) => Some(val),
             Err(error) => {
-                let diagnostic = error_to_const_error(&self.ecx, error);
                 use rustc::mir::interpret::InterpError::*;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 match diagnostic.error {
                     Exit(_) => bug!("the CTFE program cannot exit"),
                     Unsupported(_)
@@ -266,6 +315,18 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                         // Ignore these errors.
                     }
                     Panic(_) => {
+=======
+                match error.kind {
+                    Exit(_) => bug!("the CTFE program cannot exit"),
+                    Unsupported(_)
+                    | UndefinedBehavior(_)
+                    | InvalidProgram(_)
+                    | ResourceExhaustion(_) => {
+                        // Ignore these errors.
+                    }
+                    Panic(_) => {
+                        let diagnostic = error_to_const_error(&self.ecx, error);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         diagnostic.report_as_lint(
                             self.ecx.tcx,
                             "this expression will panic at runtime",
@@ -300,6 +361,7 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
 
     fn eval_place(&mut self, place: &Place<'tcx>, source_info: SourceInfo) -> Option<Const<'tcx>> {
         trace!("eval_place(place={:?})", place);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         place.iterate(|place_base, place_projection| {
             let mut eval = match place_base {
                 PlaceBase::Local(loc) => self.get_const(*loc).clone()?,
@@ -323,7 +385,17 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                     })?;
                     trace!("evaluated promoted {:?} to {:?}", promoted, res);
                     res.into()
+=======
+        let mut eval = match place.base {
+            PlaceBase::Local(loc) => self.get_const(loc).clone()?,
+            PlaceBase::Static(box Static {kind: StaticKind::Promoted(promoted, _), ..}) => {
+                let generics = self.tcx.generics_of(self.source.def_id());
+                if generics.requires_monomorphization(self.tcx) {
+                    // FIXME: can't handle code with generics
+                    return None;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 }
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 _ => return None,
             };
 
@@ -350,6 +422,47 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
 
             Some(eval)
         })
+=======
+                let substs = InternalSubsts::identity_for_item(self.tcx, self.source.def_id());
+                let instance = Instance::new(self.source.def_id(), substs);
+                let cid = GlobalId {
+                    instance,
+                    promoted: Some(promoted),
+                };
+                let res = self.use_ecx(source_info, |this| {
+                    this.ecx.const_eval_raw(cid)
+                })?;
+                trace!("evaluated promoted {:?} to {:?}", promoted, res);
+                res.into()
+            }
+            _ => return None,
+        };
+
+        for (i, elem) in place.projection.iter().enumerate() {
+            let proj_base = &place.projection[..i];
+
+            match elem {
+                ProjectionElem::Field(field, _) => {
+                    trace!("field proj on {:?}", proj_base);
+                    eval = self.use_ecx(source_info, |this| {
+                        this.ecx.operand_field(eval, field.index() as u64)
+                    })?;
+                },
+                ProjectionElem::Deref => {
+                    trace!("processing deref");
+                    eval = self.use_ecx(source_info, |this| {
+                        this.ecx.deref_operand(eval)
+                    })?.into();
+                }
+                // We could get more projections by using e.g., `operand_projection`,
+                // but we do not even have the stack frame set up properly so
+                // an `Index` projection would throw us off-track.
+                _ => return None,
+            }
+        }
+
+        Some(eval)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     }
 
     fn eval_operand(&mut self, op: &Operand<'tcx>, source_info: SourceInfo) -> Option<Const<'tcx>> {
@@ -396,6 +509,7 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                 if let ty::Slice(_) = mplace.layout.ty.sty {
                     let len = mplace.meta.unwrap().to_usize(&self.ecx).unwrap();
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Some(ImmTy {
                         imm: Immediate::Scalar(
                             Scalar::from_uint(
@@ -420,6 +534,23 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                         ),
                         layout: self.tcx.layout_of(self.param_env.and(self.tcx.types.usize)).ok()?,
                     }.into()
+=======
+                    Some(ImmTy::from_uint(
+                        len,
+                        self.tcx.layout_of(self.param_env.and(self.tcx.types.usize)).ok()?,
+                    ).into())
+                } else {
+                    trace!("not slice: {:?}", mplace.layout.ty.sty);
+                    None
+                }
+            },
+            Rvalue::NullaryOp(NullOp::SizeOf, ty) => {
+                type_size_of(self.tcx, self.param_env, ty).and_then(|n| Some(
+                    ImmTy::from_uint(
+                        n,
+                        self.tcx.layout_of(self.param_env.and(self.tcx.types.usize)).ok()?,
+                    ).into()
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 ))
             }
             Rvalue::UnaryOp(op, ref arg) => {
@@ -435,13 +566,25 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                 }
 
                 let arg = self.eval_operand(arg, source_info)?;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+                let oflo_check = self.tcx.sess.overflow_checks();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 let val = self.use_ecx(source_info, |this| {
                     let prim = this.ecx.read_immediate(arg)?;
                     match op {
                         UnOp::Neg => {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                             // Need to do overflow check here: For actual CTFE, MIR
                             // generation emits code that does this before calling the op.
                             if prim.to_bits()? == (1 << (prim.layout.size.bits() - 1)) {
+=======
+                            // We check overflow in debug mode already
+                            // so should only check in release mode.
+                            if !oflo_check
+                            && prim.layout.ty.is_signed()
+                            && prim.to_bits()? == (1 << (prim.layout.size.bits() - 1)) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                                 throw_panic!(OverflowNeg)
                             }
                         }
@@ -452,11 +595,15 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                     // Now run the actual operation.
                     this.ecx.unary_op(op, prim)
                 })?;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 let res = ImmTy {
                     imm: Immediate::Scalar(val.into()),
                     layout: place_layout,
                 };
                 Some(res.into())
+=======
+                Some(val.into())
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
             Rvalue::CheckedBinaryOp(op, ref left, ref right) |
             Rvalue::BinaryOp(op, ref left, ref right) => {
@@ -510,8 +657,8 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                     this.ecx.read_immediate(left)
                 })?;
                 trace!("const evaluating {:?} for {:?} and {:?}", op, left, right);
-                let (val, overflow) = self.use_ecx(source_info, |this| {
-                    this.ecx.binary_op(op, l, r)
+                let (val, overflow, _ty) = self.use_ecx(source_info, |this| {
+                    this.ecx.overflowing_binary_op(op, l, r)
                 })?;
                 let val = if let Rvalue::CheckedBinaryOp(..) = *rvalue {
                     Immediate::ScalarPair(
@@ -519,7 +666,13 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
                         Scalar::from_bool(overflow).into(),
                     )
                 } else {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     if overflow {
+=======
+                    // We check overflow in debug mode already
+                    // so should only check in release mode.
+                    if !self.tcx.sess.overflow_checks() && overflow {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                         let err = err_panic!(Overflow(op)).into();
                         let _: Option<()> = self.use_ecx(source_info, |_| Err(err));
                         return None;
@@ -539,7 +692,10 @@ impl<'mir, 'tcx> ConstPropagator<'mir, 'tcx> {
         Operand::Constant(Box::new(
             Constant {
                 span,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 ty,
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 user_ty: None,
                 literal: self.tcx.mk_const(*ty::Const::from_scalar(
                     self.tcx,
@@ -695,7 +851,11 @@ impl<'mir, 'tcx> MutVisitor<'tcx> for ConstPropagator<'mir, 'tcx> {
         location: Location,
     ) {
         trace!("visit_statement: {:?}", statement);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if let StatementKind::Assign(ref place, ref mut rval) = statement.kind {
+=======
+        if let StatementKind::Assign(box(ref place, ref mut rval)) = statement.kind {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             let place_ty: Ty<'tcx> = place
                 .ty(&self.local_decls, self.tcx)
                 .ty;
@@ -703,7 +863,11 @@ impl<'mir, 'tcx> MutVisitor<'tcx> for ConstPropagator<'mir, 'tcx> {
                 if let Some(value) = self.const_prop(rval, place_layout, statement.source_info) {
                     if let Place {
                         base: PlaceBase::Local(local),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                         projection: None,
+=======
+                        projection: box [],
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     } = *place {
                         trace!("checking whether {:?} can be stored to {:?}", value, local);
                         if self.can_const_prop[local] {

@@ -112,7 +112,7 @@ fn make_shim<'tcx>(tcx: TyCtxt<'tcx>, instance: ty::InstanceDef<'tcx>) -> &'tcx 
     };
     debug!("make_shim({:?}) = untransformed {:?}", instance, result);
 
-    run_passes(tcx, &mut result, instance, MirPhase::Const, &[
+    run_passes(tcx, &mut result, instance, None, MirPhase::Const, &[
         &add_moves_for_packed_drops::AddMovesForPackedDrops,
         &no_landing_pads::NoLandingPads,
         &remove_noop_landing_pads::RemoveNoopLandingPads,
@@ -201,7 +201,6 @@ fn build_drop_shim<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, ty: Option<Ty<'tcx>>)
             SourceScopeData { span: span, parent_scope: None }, 1
         ),
         ClearCrossCrate::Clear,
-        IndexVec::new(),
         None,
         local_decls_for_sig(&sig, span),
         IndexVec::new(),
@@ -218,7 +217,7 @@ fn build_drop_shim<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, ty: Option<Ty<'tcx>>)
             // Function arguments should be retagged, and we make this one raw.
             body.basic_blocks_mut()[START_BLOCK].statements.insert(0, Statement {
                 source_info,
-                kind: StatementKind::Retag(RetagKind::Raw, dropee_ptr.clone()),
+                kind: StatementKind::Retag(RetagKind::Raw, box(dropee_ptr.clone())),
             });
         }
         let patch = {
@@ -305,11 +304,21 @@ fn build_clone_shim<'tcx>(tcx: TyCtxt<'tcx>, def_id: DefId, self_ty: Ty<'tcx>) -
     debug!("build_clone_shim(def_id={:?})", def_id);
 
     let param_env = tcx.param_env(def_id);
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 
     let mut builder = CloneShimBuilder::new(tcx, def_id, self_ty);
     let is_copy = self_ty.is_copy_modulo_regions(tcx, param_env, builder.span);
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     let dest = Place::RETURN_PLACE;
+=======
+    let mut builder = CloneShimBuilder::new(tcx, def_id, self_ty);
+    let is_copy = self_ty.is_copy_modulo_regions(tcx, param_env, builder.span);
+
+    let dest = Place::return_place();
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let src = Place::from(Local::new(1+0)).deref();
 
     match self_ty.sty {
@@ -369,7 +378,6 @@ impl CloneShimBuilder<'tcx> {
                 SourceScopeData { span: self.span, parent_scope: None }, 1
             ),
             ClearCrossCrate::Clear,
-            IndexVec::new(),
             None,
             self.local_decls,
             IndexVec::new(),
@@ -417,8 +425,10 @@ impl CloneShimBuilder<'tcx> {
         let rcvr = Place::from(Local::new(1+0)).deref();
         let ret_statement = self.make_statement(
             StatementKind::Assign(
-                Place::RETURN_PLACE,
-                box Rvalue::Use(Operand::Copy(rcvr))
+                box(
+                    Place::return_place(),
+                    Rvalue::Use(Operand::Copy(rcvr))
+                )
             )
         );
         self.block(vec![ret_statement], TerminatorKind::Return, false);
@@ -445,7 +455,6 @@ impl CloneShimBuilder<'tcx> {
         let func_ty = tcx.mk_fn_def(self.def_id, substs);
         let func = Operand::Constant(box Constant {
             span: self.span,
-            ty: func_ty,
             user_ty: None,
             literal: ty::Const::zero_sized(tcx, func_ty),
         });
@@ -461,8 +470,15 @@ impl CloneShimBuilder<'tcx> {
         // `let ref_loc: &ty = &src;`
         let statement = self.make_statement(
             StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 ref_loc.clone(),
                 box Rvalue::Ref(tcx.lifetimes.re_erased, BorrowKind::Shared, src)
+=======
+                box(
+                    ref_loc.clone(),
+                    Rvalue::Ref(tcx.lifetimes.re_erased, BorrowKind::Shared, src)
+                )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             )
         );
 
@@ -489,8 +505,10 @@ impl CloneShimBuilder<'tcx> {
         let cond = self.make_place(Mutability::Mut, tcx.types.bool);
         let compute_cond = self.make_statement(
             StatementKind::Assign(
-                cond.clone(),
-                box Rvalue::BinaryOp(BinOp::Ne, Operand::Copy(end), Operand::Copy(beg))
+                box(
+                    cond.clone(),
+                    Rvalue::BinaryOp(BinOp::Ne, Operand::Copy(end), Operand::Copy(beg))
+                )
             )
         );
 
@@ -505,7 +523,6 @@ impl CloneShimBuilder<'tcx> {
     fn make_usize(&self, value: u64) -> Box<Constant<'tcx>> {
         box Constant {
             span: self.span,
-            ty: self.tcx.types.usize,
             user_ty: None,
             literal: ty::Const::from_usize(self.tcx, value),
         }
@@ -525,14 +542,23 @@ impl CloneShimBuilder<'tcx> {
         let inits = vec![
             self.make_statement(
                 StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Place::from(beg),
                     box Rvalue::Use(Operand::Constant(self.make_usize(0)))
+=======
+                    box(
+                        Place::from(beg),
+                        Rvalue::Use(Operand::Constant(self.make_usize(0)))
+                    )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )
             ),
             self.make_statement(
                 StatementKind::Assign(
-                    end.clone(),
-                    box Rvalue::Use(Operand::Constant(self.make_usize(len)))
+                    box(
+                        end.clone(),
+                        Rvalue::Use(Operand::Constant(self.make_usize(len)))
+                    )
                 )
             )
         ];
@@ -563,11 +589,21 @@ impl CloneShimBuilder<'tcx> {
         let statements = vec![
             self.make_statement(
                 StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Place::from(beg),
                     box Rvalue::BinaryOp(
                         BinOp::Add,
                         Operand::Copy(Place::from(beg)),
                         Operand::Constant(self.make_usize(1))
+=======
+                    box(
+                        Place::from(beg),
+                        Rvalue::BinaryOp(
+                            BinOp::Add,
+                            Operand::Copy(Place::from(beg)),
+                            Operand::Constant(self.make_usize(1))
+                        )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                     )
                 )
             )
@@ -586,8 +622,15 @@ impl CloneShimBuilder<'tcx> {
         let beg = self.local_decls.push(temp_decl(Mutability::Mut, tcx.types.usize, span));
         let init = self.make_statement(
             StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 Place::from(beg),
                 box Rvalue::Use(Operand::Constant(self.make_usize(0)))
+=======
+                box(
+                    Place::from(beg),
+                    Rvalue::Use(Operand::Constant(self.make_usize(0)))
+                )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             )
         );
         self.block(vec![init], TerminatorKind::Goto { target: BasicBlock::new(6) }, true);
@@ -613,11 +656,21 @@ impl CloneShimBuilder<'tcx> {
         // `goto #6;`
         let statement = self.make_statement(
             StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 Place::from(beg),
                 box Rvalue::BinaryOp(
                     BinOp::Add,
                     Operand::Copy(Place::from(beg)),
                     Operand::Constant(self.make_usize(1))
+=======
+                box(
+                    Place::from(beg),
+                    Rvalue::BinaryOp(
+                        BinOp::Add,
+                        Operand::Copy(Place::from(beg)),
+                        Operand::Constant(self.make_usize(1))
+                    )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )
             )
         );
@@ -710,7 +763,7 @@ fn build_call_shim<'tcx>(
         Adjustment::DerefMove => {
             // fn(Self, ...) -> fn(*mut Self, ...)
             let arg_ty = local_decls[rcvr_arg].ty;
-            assert!(arg_ty.is_self());
+            debug_assert!(tcx.generics_of(def_id).has_self && arg_ty == tcx.types.self_param);
             local_decls[rcvr_arg].ty = tcx.mk_mut_ptr(arg_ty);
 
             Operand::Move(rcvr_l.deref())
@@ -731,8 +784,15 @@ fn build_call_shim<'tcx>(
             statements.push(Statement {
                 source_info,
                 kind: StatementKind::Assign(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                     Place::from(ref_rcvr),
                     box Rvalue::Ref(tcx.lifetimes.re_erased, borrow_kind, rcvr_l)
+=======
+                    box(
+                        Place::from(ref_rcvr),
+                        Rvalue::Ref(tcx.lifetimes.re_erased, borrow_kind, rcvr_l)
+                    )
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
                 )
             });
             Operand::Move(Place::from(ref_rcvr))
@@ -745,7 +805,6 @@ fn build_call_shim<'tcx>(
             let ty = tcx.type_of(def_id);
             (Operand::Constant(box Constant {
                 span,
-                ty,
                 user_ty: None,
                 literal: ty::Const::zero_sized(tcx, ty),
              }),
@@ -778,7 +837,7 @@ fn build_call_shim<'tcx>(
     block(&mut blocks, statements, TerminatorKind::Call {
         func: callee,
         args,
-        destination: Some((Place::RETURN_PLACE,
+        destination: Some((Place::return_place(),
                            BasicBlock::new(1))),
         cleanup: if let Adjustment::RefMut = rcvr_adjustment {
             Some(BasicBlock::new(3))
@@ -816,7 +875,6 @@ fn build_call_shim<'tcx>(
             SourceScopeData { span: span, parent_scope: None }, 1
         ),
         ClearCrossCrate::Clear,
-        IndexVec::new(),
         None,
         local_decls,
         IndexVec::new(),
@@ -874,7 +932,11 @@ pub fn build_adt_ctor(tcx: TyCtxt<'_>, ctor_id: DefId) -> &Body<'_> {
     debug!("build_ctor: variant_index={:?}", variant_index);
 
     let statements = expand_aggregate(
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         Place::RETURN_PLACE,
+=======
+        Place::return_place(),
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         adt_def
             .variants[variant_index]
             .fields
@@ -903,7 +965,6 @@ pub fn build_adt_ctor(tcx: TyCtxt<'_>, ctor_id: DefId) -> &Body<'_> {
             SourceScopeData { span: span, parent_scope: None }, 1
         ),
         ClearCrossCrate::Clear,
-        IndexVec::new(),
         None,
         local_decls,
         IndexVec::new(),

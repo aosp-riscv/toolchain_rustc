@@ -1,15 +1,16 @@
 error[E0277]: the trait bound `T: std::marker::Copy` is not satisfied
   --> $DIR/wf-in-obj-type-trait.rs:11:5
    |
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+LL | struct MustBeCopy<T:Copy> {
+   | ------------------------- required by `MustBeCopy`
+...
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 LL |     x: dyn Object<MustBeCopy<T>>
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `std::marker::Copy` is not implemented for `T`
    |
    = help: consider adding a `where T: std::marker::Copy` bound
-note: required by `MustBeCopy`
-  --> $DIR/wf-in-obj-type-trait.rs:5:1
-   |
-LL | struct MustBeCopy<T:Copy> {
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: aborting due to previous error
 

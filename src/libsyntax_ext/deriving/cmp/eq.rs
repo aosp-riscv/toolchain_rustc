@@ -2,7 +2,11 @@ use crate::deriving::path_std;
 use crate::deriving::generic::*;
 use crate::deriving::generic::ty::*;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use syntax::ast::{self, Expr, MetaItem, GenericArg};
+=======
+use syntax::ast::{self, Ident, Expr, MetaItem, GenericArg};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use syntax::ext::base::{Annotatable, ExtCtxt, SpecialDerives};
 use syntax::ptr::P;
 use syntax::symbol::{sym, Symbol};
@@ -13,11 +17,19 @@ pub fn expand_deriving_eq(cx: &mut ExtCtxt<'_>,
                           mitem: &MetaItem,
                           item: &Annotatable,
                           push: &mut dyn FnMut(Annotatable)) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     cx.resolver.add_derives(cx.current_expansion.id.parent(), SpecialDerives::EQ);
 
     let inline = cx.meta_word(span, sym::inline);
     let hidden = cx.meta_list_item_word(span, sym::hidden);
     let doc = cx.meta_list(span, sym::doc, vec![hidden]);
+=======
+    cx.resolver.add_derives(cx.current_expansion.id.expn_data().parent, SpecialDerives::EQ);
+
+    let inline = cx.meta_word(span, sym::inline);
+    let hidden = syntax::attr::mk_nested_word_item(Ident::new(sym::hidden, span));
+    let doc = syntax::attr::mk_list_item(Ident::new(sym::doc, span), vec![hidden]);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     let attrs = vec![cx.attribute(inline), cx.attribute(doc)];
     let trait_def = TraitDef {
         span,
@@ -53,10 +65,14 @@ fn cs_total_eq_assert(cx: &mut ExtCtxt<'_>,
                         ty: P<ast::Ty>, span: Span, helper_name: &str) {
         // Generate statement `let _: helper_name<ty>;`,
         // set the expn ID so we can use the unstable struct.
-        let span = span.with_ctxt(cx.backtrace());
+        let span = cx.with_def_site_ctxt(span);
         let assert_path = cx.path_all(span, true,
                                         cx.std_path(&[sym::cmp, Symbol::intern(helper_name)]),
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                                         vec![GenericArg::Type(ty)], vec![]);
+=======
+                                        vec![GenericArg::Type(ty)]);
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         stmts.push(cx.stmt_let_type_only(span, cx.ty_path(assert_path)));
     }
     fn process_variant(cx: &mut ExtCtxt<'_>,
@@ -75,7 +91,7 @@ fn cs_total_eq_assert(cx: &mut ExtCtxt<'_>,
         }
         StaticEnum(enum_def, ..) => {
             for variant in &enum_def.variants {
-                process_variant(cx, &mut stmts, &variant.node.data);
+                process_variant(cx, &mut stmts, &variant.data);
             }
         }
         _ => cx.span_bug(trait_span, "unexpected substructure in `derive(Eq)`")

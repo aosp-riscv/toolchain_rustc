@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // edition:2015
 
 async fn foo() {} //~ ERROR `async fn` is not permitted in the 2015 edition
@@ -7,3 +8,5 @@ fn main() {
     let _ = async {}; //~ ERROR cannot find struct, variant or union type `async`
     let _ = async || { true }; //~ ERROR cannot find value `async` in this scope
 }
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

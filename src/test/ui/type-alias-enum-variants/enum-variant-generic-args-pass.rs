@@ -9,6 +9,7 @@
 
 #![allow(irrefutable_let_patterns)]
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 enum Enum<T> { TSVariant(T), SVariant { v: T }, UVariant }
 type Alias<T> = Enum<T>;
 type AliasFixed = Enum<()>;
@@ -45,6 +46,44 @@ fn main() {
     is_variant!(SVariant, Alias::<()>::SVariant { v: () });
 
     is_variant!(SVariant, AliasFixed::SVariant { v: () });
+=======
+enum Enum<T> { TSVariant(T), SVariant { _v: T }, UVariant }
+type Alias<T> = Enum<T>;
+type AliasFixed = Enum<()>;
+
+macro_rules! is_variant {
+    (TSVariant, $expr:expr) => (is_variant!(@check TSVariant, (_), $expr));
+    (SVariant, $expr:expr) => (is_variant!(@check SVariant, { _v: _ }, $expr));
+    (UVariant, $expr:expr) => (is_variant!(@check UVariant, {}, $expr));
+    (@check $variant:ident, $matcher:tt, $expr:expr) => (
+        assert!(if let Enum::$variant::<()> $matcher = $expr { true } else { false },
+                "expr does not have correct type");
+    );
+}
+
+fn main() {
+    // Tuple struct variant
+
+    is_variant!(TSVariant, Enum::TSVariant(()));
+    is_variant!(TSVariant, Enum::TSVariant::<()>(()));
+    is_variant!(TSVariant, Enum::<()>::TSVariant(()));
+
+    is_variant!(TSVariant, Alias::TSVariant(()));
+    is_variant!(TSVariant, Alias::<()>::TSVariant(()));
+
+    is_variant!(TSVariant, AliasFixed::TSVariant(()));
+
+    // Struct variant
+
+    is_variant!(SVariant, Enum::SVariant { _v: () });
+    is_variant!(SVariant, Enum::SVariant::<()> { _v: () });
+    is_variant!(SVariant, Enum::<()>::SVariant { _v: () });
+
+    is_variant!(SVariant, Alias::SVariant { _v: () });
+    is_variant!(SVariant, Alias::<()>::SVariant { _v: () });
+
+    is_variant!(SVariant, AliasFixed::SVariant { _v: () });
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
     // Unit variant
 

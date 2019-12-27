@@ -6,6 +6,7 @@
 // edition:2018
 // ignore-tidy-linelength
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #![feature(async_await)]
 
 fn main() {}
@@ -41,6 +42,40 @@ fn no_break_in_async_block_even_with_outer_loop() {
     loop {
         async {
             break 0u8; //~ ERROR `break` inside of a closure
+=======
+fn main() {}
+
+use core::future::Future;
+
+fn return_targets_async_block_not_fn() -> u8 {
+    //~^ ERROR mismatched types
+    let block = async {
+        return 0u8;
+    };
+    let _: &dyn Future<Output = ()> = &block;
+    //~^ ERROR type mismatch resolving `<impl std::future::Future as std::future::Future>::Output == ()`
+}
+
+async fn return_targets_async_block_not_async_fn() -> u8 {
+    //~^ ERROR type mismatch resolving
+    let block = async {
+        return 0u8;
+    };
+    let _: &dyn Future<Output = ()> = &block;
+    //~^ ERROR type mismatch resolving `<impl std::future::Future as std::future::Future>::Output == ()`
+}
+
+fn no_break_in_async_block() {
+    async {
+        break 0u8; //~ ERROR `break` inside of an `async` block
+    };
+}
+
+fn no_break_in_async_block_even_with_outer_loop() {
+    loop {
+        async {
+            break 0u8; //~ ERROR `break` inside of an `async` block
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         };
     }
 }

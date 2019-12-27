@@ -1,8 +1,8 @@
 use std::fs::File;
 use std::io::prelude::*;
 
-use crate::support::registry::Package;
-use crate::support::{basic_manifest, project};
+use cargo_test_support::registry::Package;
+use cargo_test_support::{basic_manifest, project};
 
 #[cargo_test]
 fn minor_update_two_places() {
@@ -447,6 +447,7 @@ fn update_precise_first_run() {
       "links": null,
       "manifest_path": "[..]/home/.cargo/registry/src/-[..]/serde-0.2.0/Cargo.toml",
       "metadata": null,
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
       "name": "serde",
       "readme": null,
       "repository": null,
@@ -494,6 +495,57 @@ fn update_precise_first_run() {
       "links": null,
       "manifest_path": "[..]/foo/Cargo.toml",
       "metadata": null,
+=======
+      "publish": null,
+      "name": "serde",
+      "readme": null,
+      "repository": null,
+      "source": "registry+https://github.com/rust-lang/crates.io-index",
+      "targets": [
+        {
+          "crate_types": [
+            "lib"
+          ],
+          "doctest": true,
+          "edition": "2015",
+          "kind": [
+            "lib"
+          ],
+          "name": "serde",
+          "src_path": "[..]/home/.cargo/registry/src/-[..]/serde-0.2.0/src/lib.rs"
+        }
+      ],
+      "version": "0.2.0"
+    },
+    {
+      "authors": [],
+      "categories": [],
+      "dependencies": [
+        {
+          "features": [],
+          "kind": null,
+          "name": "serde",
+          "optional": false,
+          "registry": null,
+          "rename": null,
+          "req": "^0.2",
+          "source": "registry+https://github.com/rust-lang/crates.io-index",
+          "target": null,
+          "uses_default_features": true
+        }
+      ],
+      "description": null,
+      "edition": "2015",
+      "features": {},
+      "id": "bar 0.0.1 (path+file://[..]/foo)",
+      "keywords": [],
+      "license": null,
+      "license_file": null,
+      "links": null,
+      "manifest_path": "[..]/foo/Cargo.toml",
+      "metadata": null,
+      "publish": null,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
       "name": "bar",
       "readme": null,
       "repository": null,

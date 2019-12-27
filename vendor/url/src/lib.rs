@@ -124,7 +124,11 @@ use std::error::Error;
 use std::fmt::{self, Write};
 use std::hash;
 use std::mem;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 use std::net::IpAddr;
+=======
+use std::net::{IpAddr, SocketAddr, ToSocketAddrs};
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use std::ops::{Range, RangeFrom, RangeTo};
 use std::path::{Path, PathBuf};
 use std::str;
@@ -945,6 +949,64 @@ impl Url {
         self.port.or_else(|| parser::default_port(self.scheme()))
     }
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    /// Resolve a URL’s host and port number to `SocketAddr`.
+    ///
+    /// If the URL has the default port number of a scheme that is unknown to this library,
+    /// `default_port_number` provides an opportunity to provide the actual port number.
+    /// In non-example code this should be implemented either simply as `|| None`,
+    /// or by matching on the URL’s `.scheme()`.
+    ///
+    /// If the host is a domain, it is resolved using the standard library’s DNS support.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// let url = url::Url::parse("https://example.net/").unwrap();
+    /// let addrs = url.socket_addrs(|| None).unwrap();
+    /// std::net::TcpStream::connect(&*addrs)
+    /// # ;
+    /// ```
+    ///
+    /// ```
+    /// /// With application-specific known default port numbers
+    /// fn socket_addrs(url: url::Url) -> std::io::Result<Vec<std::net::SocketAddr>> {
+    ///     url.socket_addrs(|| match url.scheme() {
+    ///         "socks5" | "socks5h" => Some(1080),
+    ///         _ => None,
+    ///     })
+    /// }
+    /// ```
+    pub fn socket_addrs(
+        &self,
+        default_port_number: impl Fn() -> Option<u16>,
+    ) -> io::Result<Vec<SocketAddr>> {
+        // Note: trying to avoid the Vec allocation by returning `impl AsRef<[SocketAddr]>`
+        // causes borrowck issues because the return value borrows `default_port_number`:
+        //
+        // https://github.com/rust-lang/rfcs/blob/master/text/1951-expand-impl-trait.md#scoping-for-type-and-lifetime-parameters
+        //
+        // > This RFC proposes that *all* type parameters are considered in scope
+        // > for `impl Trait` in return position
+
+        fn io_result<T>(opt: Option<T>, message: &str) -> io::Result<T> {
+            opt.ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, message))
+        }
+
+        let host = io_result(self.host(), "No host name in the URL")?;
+        let port = io_result(
+            self.port_or_known_default().or_else(default_port_number),
+            "No port number in the URL",
+        )?;
+        Ok(match host {
+            Host::Domain(domain) => (domain, port).to_socket_addrs()?.collect(),
+            Host::Ipv4(ip) => vec![(ip, port).into()],
+            Host::Ipv6(ip) => vec![(ip, port).into()],
+        })
+    }
+
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
     /// Return the path for this URL, as a percent-encoded ASCII string.
     /// For cannot-be-a-base URLs, this is an arbitrary string that doesn’t start with '/'.
     /// For other URLs, this starts with a '/' slash
@@ -2296,9 +2358,14 @@ impl<'de> serde::Deserialize<'de> for Url {
             where
                 E: Error,
             {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
                 Url::parse(s).map_err(|err| {
                     Error::invalid_value(Unexpected::Str(s), &err.description())
                 })
+=======
+                Url::parse(s)
+                    .map_err(|err| Error::invalid_value(Unexpected::Str(s), &err.description()))
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             }
         }
 

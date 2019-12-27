@@ -127,6 +127,10 @@ impl IntegerExt for Integer {
 
 pub trait PrimitiveExt {
     fn to_ty<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx>;
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+    fn to_int_ty<'tcx>(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx>;
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 }
 
 impl PrimitiveExt for Primitive {
@@ -136,6 +140,16 @@ impl PrimitiveExt for Primitive {
             Float(FloatTy::F32) => tcx.types.f32,
             Float(FloatTy::F64) => tcx.types.f64,
             Pointer => tcx.mk_mut_ptr(tcx.mk_unit()),
+        }
+    }
+
+    /// Return an *integer* type matching this primitive.
+    /// Useful in particular when dealing with enum discriminants.
+    fn to_int_ty(&self, tcx: TyCtxt<'tcx>) -> Ty<'tcx> {
+        match *self {
+            Int(i, signed) => i.to_ty(tcx, signed),
+            Pointer => tcx.types.usize,
+            Float(..) => bug!("floats do not have an int type"),
         }
     }
 }
@@ -273,6 +287,7 @@ impl<'tcx> LayoutCx<'tcx, TyCtxt<'tcx>> {
                              repr: &ReprOptions,
                              kind: StructKind) -> Result<LayoutDetails, LayoutError<'tcx>> {
         let dl = self.data_layout();
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         let packed = repr.packed();
         if packed && repr.align > 0 {
             bug!("struct cannot be packed and aligned");
@@ -383,6 +398,114 @@ impl<'tcx> LayoutCx<'tcx, TyCtxt<'tcx>> {
             let repr_align = repr.align as u64;
             align = align.max(AbiAndPrefAlign::new(Align::from_bytes(repr_align).unwrap()));
             debug!("univariant repr_align: {:?}", repr_align);
+=======
+        let pack = repr.pack;
+        if pack.is_some() && repr.align.is_some() {
+            bug!("struct cannot be packed and aligned");
+        }
+
+        let mut align = if pack.is_some() {
+            dl.i8_align
+        } else {
+            dl.aggregate_align
+        };
+
+        let mut sized = true;
+        let mut offsets = vec![Size::ZERO; fields.len()];
+        let mut inverse_memory_index: Vec<u32> = (0..fields.len() as u32).collect();
+
+        let mut optimize = !repr.inhibit_struct_field_reordering_opt();
+        if let StructKind::Prefixed(_, align) = kind {
+            optimize &= align.bytes() == 1;
+        }
+
+        if optimize {
+            let end = if let StructKind::MaybeUnsized = kind {
+                fields.len() - 1
+            } else {
+                fields.len()
+            };
+            let optimizing = &mut inverse_memory_index[..end];
+            let field_align = |f: &TyLayout<'_>| {
+                if let Some(pack) = pack { f.align.abi.min(pack) } else { f.align.abi }
+            };
+            match kind {
+                StructKind::AlwaysSized |
+                StructKind::MaybeUnsized => {
+                    optimizing.sort_by_key(|&x| {
+                        // Place ZSTs first to avoid "interesting offsets",
+                        // especially with only one or two non-ZST fields.
+                        let f = &fields[x as usize];
+                        (!f.is_zst(), cmp::Reverse(field_align(f)))
+                    });
+                }
+                StructKind::Prefixed(..) => {
+                    optimizing.sort_by_key(|&x| field_align(&fields[x as usize]));
+                }
+            }
+        }
+
+        // inverse_memory_index holds field indices by increasing memory offset.
+        // That is, if field 5 has offset 0, the first element of inverse_memory_index is 5.
+        // We now write field offsets to the corresponding offset slot;
+        // field 5 with offset 0 puts 0 in offsets[5].
+        // At the bottom of this function, we invert `inverse_memory_index` to
+        // produce `memory_index` (see `invert_mapping`).
+
+
+        let mut offset = Size::ZERO;
+        let mut largest_niche = None;
+        let mut largest_niche_available = 0;
+
+        if let StructKind::Prefixed(prefix_size, prefix_align) = kind {
+            let prefix_align = if let Some(pack) = pack {
+                prefix_align.min(pack)
+            } else {
+                prefix_align
+            };
+            align = align.max(AbiAndPrefAlign::new(prefix_align));
+            offset = prefix_size.align_to(prefix_align);
+        }
+
+        for &i in &inverse_memory_index {
+            let field = fields[i as usize];
+            if !sized {
+                bug!("univariant: field #{} of `{}` comes after unsized field",
+                     offsets.len(), ty);
+            }
+
+            if field.is_unsized() {
+                sized = false;
+            }
+
+            // Invariant: offset < dl.obj_size_bound() <= 1<<61
+            let field_align = if let Some(pack) = pack {
+                field.align.min(AbiAndPrefAlign::new(pack))
+            } else {
+                field.align
+            };
+            offset = offset.align_to(field_align.abi);
+            align = align.max(field_align);
+
+            debug!("univariant offset: {:?} field: {:#?}", offset, field);
+            offsets[i as usize] = offset;
+
+            if let Some(mut niche) = field.largest_niche.clone() {
+                let available = niche.available(dl);
+                if available > largest_niche_available {
+                    largest_niche_available = available;
+                    niche.offset += offset;
+                    largest_niche = Some(niche);
+                }
+            }
+
+            offset = offset.checked_add(field.size, dl)
+                .ok_or(LayoutError::SizeOverflow(ty))?;
+        }
+
+        if let Some(repr_align) = repr.align {
+            align = align.max(AbiAndPrefAlign::new(repr_align));
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         }
 
         debug!("univariant min_size: {:?}", offset);
@@ -730,23 +853,18 @@ impl<'tcx> LayoutCx<'tcx, TyCtxt<'tcx>> {
                 }).collect::<Result<IndexVec<VariantIdx, _>, _>>()?;
 
                 if def.is_union() {
-                    let packed = def.repr.packed();
-                    if packed && def.repr.align > 0 {
-                        bug!("Union cannot be packed and aligned");
+                    if def.repr.pack.is_some() && def.repr.align.is_some() {
+                        bug!("union cannot be packed and aligned");
                     }
 
-                    let pack = Align::from_bytes(def.repr.pack as u64).unwrap();
-
-                    let mut align = if packed {
+                    let mut align = if def.repr.pack.is_some() {
                         dl.i8_align
                     } else {
                         dl.aggregate_align
                     };
 
-                    if def.repr.align > 0 {
-                        let repr_align = def.repr.align as u64;
-                        align = align.max(
-                            AbiAndPrefAlign::new(Align::from_bytes(repr_align).unwrap()));
+                    if let Some(repr_align) = def.repr.align {
+                        align = align.max(AbiAndPrefAlign::new(repr_align));
                     }
 
                     let optimize = !def.repr.inhibit_union_abi_opt();
@@ -755,13 +873,7 @@ impl<'tcx> LayoutCx<'tcx, TyCtxt<'tcx>> {
                     let index = VariantIdx::new(0);
                     for field in &variants[index] {
                         assert!(!field.is_unsized());
-
-                        let field_align = if packed {
-                            field.align.min(AbiAndPrefAlign::new(pack))
-                        } else {
-                            field.align
-                        };
-                        align = align.max(field_align);
+                        align = align.max(field.align);
 
                         // If all non-ZST fields have the same ABI, forward this ABI
                         if optimize && !field.is_zst() {
@@ -794,6 +906,10 @@ impl<'tcx> LayoutCx<'tcx, TyCtxt<'tcx>> {
                         }
 
                         size = cmp::max(size, field.size);
+                    }
+
+                    if let Some(pack) = def.repr.pack {
+                        align = align.min(AbiAndPrefAlign::new(pack));
                     }
 
                     return Ok(tcx.intern_layout(LayoutDetails {
@@ -1601,7 +1717,6 @@ impl<'tcx> LayoutCx<'tcx, TyCtxt<'tcx>> {
         // resulting from the final codegen session.
         if
             layout.ty.has_param_types() ||
-            layout.ty.has_self_ty() ||
             !self.param_env.caller_bounds.is_empty()
         {
             return;
@@ -1638,7 +1753,7 @@ impl<'tcx> LayoutCx<'tcx, TyCtxt<'tcx>> {
         };
 
         let adt_kind = adt_def.adt_kind();
-        let adt_packed = adt_def.repr.packed();
+        let adt_packed = adt_def.repr.pack.is_some();
 
         let build_variant_info = |n: Option<Ident>,
                                   flds: &[ast::Name],
@@ -1767,7 +1882,7 @@ impl<'tcx> SizeSkeleton<'tcx> {
                 let tail = tcx.struct_tail_erasing_lifetimes(pointee, param_env);
                 match tail.sty {
                     ty::Param(_) | ty::Projection(_) => {
-                        debug_assert!(tail.has_param_types() || tail.has_self_ty());
+                        debug_assert!(tail.has_param_types());
                         Ok(SizeSkeleton::Pointer {
                             non_zero,
                             tail: tcx.erase_regions(&tail)

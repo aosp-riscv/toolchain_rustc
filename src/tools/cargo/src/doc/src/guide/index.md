@@ -11,4 +11,8 @@ develop Rust packages.
 * [Cargo.toml vs Cargo.lock](cargo-toml-vs-cargo-lock.md)
 * [Tests](tests.md)
 * [Continuous Integration](continuous-integration.md)
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
+=======
+* [Cargo Home](cargo-home.md)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 * [Build Cache](build-cache.md)

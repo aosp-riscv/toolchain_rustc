@@ -3,9 +3,12 @@
 //! Documentation can be added either through doc comments or the
 //! `about` attribute.
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 #[macro_use]
 extern crate structopt;
 
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 // Check that pattern-guards with move-bound variables is only allowed
 // with the appropriate set of feature gates. (Note that we require
 // the code to opt into MIR-borrowck in *some* way before the feature
@@ -38,3 +39,5 @@ fn main() {
 }
 //[gate_and_2015]~^^^ ERROR compilation successful
 //[gate_and_2018]~^^^^ ERROR compilation successful
+=======
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)

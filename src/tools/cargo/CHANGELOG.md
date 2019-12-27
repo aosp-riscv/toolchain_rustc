@@ -1,5 +1,6 @@
 # Changelog
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 ## Cargo 1.38 (2019-09-26)
 [4c1fa54d...HEAD](https://github.com/rust-lang/cargo/compare/4c1fa54d...HEAD)
 
@@ -98,6 +99,214 @@
 - Fixed `cargo doc` with an example configured with `doc = true` to document
   correctly.
   [#7023](https://github.com/rust-lang/cargo/pull/7023)
+=======
+## Cargo 1.39 (2019-11-07)
+[e853aa97...HEAD](https://github.com/rust-lang/cargo/compare/e853aa97...HEAD)
+
+### Added
+
+### Changed
+- Display more information if parsing the output from `rustc` fails.
+  [#7236](https://github.com/rust-lang/cargo/pull/7236)
+- TOML errors now show the column number.
+  [#7248](https://github.com/rust-lang/cargo/pull/7248)
+- `cargo vendor` no longer deletes files in the `vendor` directory that starts
+  with a `.`.
+  [#7242](https://github.com/rust-lang/cargo/pull/7242)
+- `cargo fetch` will now show manifest warnings.
+  [#7243](https://github.com/rust-lang/cargo/pull/7243)
+- `cargo publish` will now check git submodules if they contain any
+  uncommitted changes.
+  [#7245](https://github.com/rust-lang/cargo/pull/7245)
+- In a build script, `cargo:rustc-flags` now allows `-l` and `-L` flags
+  without spaces.
+  [#7257](https://github.com/rust-lang/cargo/pull/7257)
+- When `cargo install` replaces an older version of a package it will now
+  delete any installed binaries that are no longer present in the newly
+  installed version.
+  [#7246](https://github.com/rust-lang/cargo/pull/7246)
+- A git dependency may now also specify a `version` key when published. The
+  `git` value will be stripped from the uploaded crate, matching the behavior
+  of `path` dependencies.
+  [#7237](https://github.com/rust-lang/cargo/pull/7237)
+
+### Fixed
+- Git dependencies with submodules with shorthand SSH URLs (like
+  `git@github.com/user/repo.git`) should now work.
+  [#7238](https://github.com/rust-lang/cargo/pull/7238)
+
+## Cargo 1.38 (2019-09-26)
+[4c1fa54d...e853aa97](https://github.com/rust-lang/cargo/compare/4c1fa54d...e853aa97)
+
+### Added
+
+- 🔥 Cargo build pipelining has been enabled by default to leverage more idle CPU
+  parallelism during builds.
+  [#7143](https://github.com/rust-lang/cargo/pull/7143)
+- The `--message-format` option to Cargo can now be specified multiple times and
+  accepts a comma-separated list of values. In addition to the previous values
+  it also now accepts `json-diagnostic-short` and
+  `json-diagnostic-rendered-ansi` which configures the output coming from rustc
+  in `json` message mode.
+  [#7214](https://github.com/rust-lang/cargo/pull/7214)
+- Cirrus CI badges are now supported on crates.io.
+  [#7119](https://github.com/rust-lang/cargo/pull/7119)
+- (Nightly only): Added `cargo fix --clippy` which will apply
+  machine-applicable fixes from Clippy.
+  [#7069](https://github.com/rust-lang/cargo/pull/7069)
+- A new format for `Cargo.lock` has been introduced. This new format is
+  intended to avoid source-control merge conflicts more often, and to
+  generally make it safer to merge changes. This new format is *not* enabled
+  at this time, though Cargo will use it if it sees it. At some point in the
+  future, it is intended that this will become the default.
+  [#7070](https://github.com/rust-lang/cargo/pull/7070)
+- Progress bar support added for FreeBSD.
+  [#7222](https://github.com/rust-lang/cargo/pull/7222)
+- (Nightly only): Added `-Z binary-dep-depinfo` flag to add change tracking
+  for binary dependencies like the standard library.
+  [#7137](https://github.com/rust-lang/cargo/pull/7137)
+  [#7219](https://github.com/rust-lang/cargo/pull/7219)
+
+### Changed
+- The `-q` flag will no longer suppress the root error message for an error
+  from Cargo itself.
+  [#7116](https://github.com/rust-lang/cargo/pull/7116)
+- The Cargo Book is now published with mdbook 0.3 providing a number of
+  formatting fixes and improvements.
+  [#7140](https://github.com/rust-lang/cargo/pull/7140)
+- The `--features` command-line flag can now be specified multiple times.
+  The list of features from all the flags are joined together.
+  [#7084](https://github.com/rust-lang/cargo/pull/7084)
+- (Nightly only): `cargo clippy-preview` will always run, even if no changes
+  have been made.
+  [#7157](https://github.com/rust-lang/cargo/pull/7157)
+- Package include/exclude glob-vs-gitignore warnings have been removed.
+  Packages may now use gitignore-style matching without producing any
+  warnings.
+  [#7170](https://github.com/rust-lang/cargo/pull/7170)
+- Cargo now shows the command and output when parsing `rustc` output fails
+  when querying `rustc` for information like `cfg` values.
+  [#7185](https://github.com/rust-lang/cargo/pull/7185)
+- `cargo package`/`cargo publish` now allows a symbolic link to a git
+  submodule to include that submodule.
+  [#6817](https://github.com/rust-lang/cargo/pull/6817)
+- Improved the error message when a version requirement does not
+  match any versions, but there are pre-release versions available.
+  [#7191](https://github.com/rust-lang/cargo/pull/7191)
+
+### Fixed
+- (Nightly only): Fixed exponential blowup when using `CARGO_BUILD_PIPELINING`.
+  [#7062](https://github.com/rust-lang/cargo/pull/7062)
+- Fixed using the wrong directory when updating git repositories when using
+  the `git-fetch-with-cli` config option, and the `GIT_DIR` environment
+  variable is set. This may happen when running cargo from git callbacks.
+  [#7082](https://github.com/rust-lang/cargo/pull/7082)
+- Fixed dep-info files being overwritten for targets that have separate debug
+  outputs. For example, binaries on `-apple-` targets with `.dSYM` directories
+  would overwrite the `.d` file.
+  [#7057](https://github.com/rust-lang/cargo/pull/7057)
+- Fix `[patch]` table not preserving "one major version per source" rule.
+  [#7118](https://github.com/rust-lang/cargo/pull/7118)
+- Ignore `--remap-path-prefix` flags for the metadata hash in the `cargo
+  rustc` command. This was causing the remap settings to inadvertently affect
+  symbol names.
+  [#7134](https://github.com/rust-lang/cargo/pull/7134)
+- Fixed cycle detection in `[patch]` dependencies.
+  [#7174](https://github.com/rust-lang/cargo/pull/7174)
+- Fixed `cargo new` leaving behind a symlink on Windows when `core.symlinks`
+  git config is true. Also adds a number of fixes and updates from upstream
+  libgit2.
+  [#7176](https://github.com/rust-lang/cargo/pull/7176)
+- macOS: Fixed setting the flag to mark the `target` directory to be excluded
+  from backups.
+  [#7192](https://github.com/rust-lang/cargo/pull/7192)
+- Fixed `cargo fix` panicking under some situations involving multi-byte
+  characters.
+  [#7221](https://github.com/rust-lang/cargo/pull/7221)
+- (Nightly only): Fixed passing args to clippy in `cargo clippy-preview`.
+  [#7162](https://github.com/rust-lang/cargo/pull/7162)
+
+## Cargo 1.37 (2019-08-15)
+[c4fcfb72...4c1fa54d](https://github.com/rust-lang/cargo/compare/c4fcfb72...4c1fa54d)
+
+### Added
+- Added `doctest` field to `cargo metadata` to determine if a target's
+  documentation is tested.
+  [#6953](https://github.com/rust-lang/cargo/pull/6953)
+  [#6965](https://github.com/rust-lang/cargo/pull/6965)
+- (Nightly only): Added [compiler message
+  caching](https://doc.rust-lang.org/nightly/cargo/reference/unstable.html#cache-messages).
+  The `-Z cache-messages` flag makes cargo cache the compiler output so that
+  future runs can redisplay previous warnings.
+  [#6933](https://github.com/rust-lang/cargo/pull/6933)
+- 🔥 The [`cargo
+  vendor`](https://doc.rust-lang.org/nightly/cargo/commands/cargo-vendor.html)
+  command is now built-in to Cargo. This command may be used to create a local
+  copy of the sources of all dependencies.
+  [#6869](https://github.com/rust-lang/cargo/pull/6869)
+- 🔥 The "publish lockfile" feature is now stable. This feature will
+  automatically include the `Cargo.lock` file when a package is published if
+  it contains a binary executable target. By default, Cargo will ignore
+  `Cargo.lock` when installing a package. To force Cargo to use the
+  `Cargo.lock` file included in the published package, use `cargo install
+  --locked`. This may be useful to ensure that `cargo install` consistently
+  reproduces the same result. It may also be useful when a semver-incompatible
+  change is accidentally published to a dependency, providing a way to fall
+  back to a version that is known to work.
+  [#7026](https://github.com/rust-lang/cargo/pull/7026)
+- 🔥 The `default-run` feature has been stabilized. This feature allows you to
+  specify which binary executable to run by default with `cargo run` when a
+  package includes multiple binaries. Set the `default-run` key in the
+  `[package]` table in `Cargo.toml` to the name of the binary to use by
+  default.
+  [#7056](https://github.com/rust-lang/cargo/pull/7056)
+
+### Changed
+- `cargo package` now verifies that build scripts do not create empty
+  directories.
+  [#6973](https://github.com/rust-lang/cargo/pull/6973)
+- A warning is now issued if `cargo doc` generates duplicate outputs, which
+  causes files to be randomly stomped on. This may happen for a variety of
+  reasons (renamed dependencies, multiple versions of the same package,
+  packages with renamed libraries, etc.). This is a known bug, which needs
+  more work to handle correctly.
+  [#6998](https://github.com/rust-lang/cargo/pull/6998)
+- Enabling a dependency's feature with `--features foo/bar` will no longer
+  compile the current crate with the `foo` feature if `foo` is not an optional
+  dependency.
+  [#7010](https://github.com/rust-lang/cargo/pull/7010)
+- If `--remap-path-prefix` is passed via RUSTFLAGS, it will no longer affect
+  the filename metadata hash.
+  [#6966](https://github.com/rust-lang/cargo/pull/6966)
+- libgit2 has been updated to 0.28.2, which Cargo uses to access git
+  repositories. This brings in hundreds of changes and fixes since it was last
+  updated in November.
+  [#7018](https://github.com/rust-lang/cargo/pull/7018)
+- Cargo now supports absolute paths in the dep-info files generated by rustc.
+  This is laying the groundwork for [tracking
+  binaries](https://github.com/rust-lang/rust/pull/61727), such as libstd, for
+  rebuild detection. (Note: this contains a known bug.)
+  [#7030](https://github.com/rust-lang/cargo/pull/7030)
+- (Nightly only): `-Z mtime-on-use` no longer touches intermediate artifacts.
+  [#7050](https://github.com/rust-lang/cargo/pull/7050)
+
+### Fixed
+- Fixed how zsh completions fetch the list of commands.
+  [#6956](https://github.com/rust-lang/cargo/pull/6956)
+- "+ debuginfo" is no longer printed in the build summary when `debug` is set
+  to 0.
+  [#6971](https://github.com/rust-lang/cargo/pull/6971)
+- Fixed `cargo doc` with an example configured with `doc = true` to document
+  correctly.
+  [#7023](https://github.com/rust-lang/cargo/pull/7023)
+- Don't fail if a read-only lock cannot be acquired in CARGO_HOME. This helps
+  when CARGO_HOME doesn't exist, but `--locked` is used which means CARGO_HOME
+  is not needed.
+  [#7149](https://github.com/rust-lang/cargo/pull/7149)
+- Reverted a change in 1.35 which released jobserver tokens when Cargo blocked
+  on a lock file. It caused a deadlock in some situations.
+  [#7204](https://github.com/rust-lang/cargo/pull/7204)
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 ## Cargo 1.36 (2019-07-04)
 [6f3e9c36...c4fcfb72](https://github.com/rust-lang/cargo/compare/6f3e9c36...c4fcfb72)

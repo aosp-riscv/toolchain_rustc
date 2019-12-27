@@ -8,8 +8,13 @@ use crate::transform::{MirPass, MirSource};
 
 pub struct NoLandingPads;
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 impl MirPass for NoLandingPads {
     fn run_pass<'tcx>(&self, tcx: TyCtxt<'tcx>, _: MirSource<'tcx>, body: &mut Body<'tcx>) {
+=======
+impl<'tcx> MirPass<'tcx> for NoLandingPads {
+    fn run_pass(&self, tcx: TyCtxt<'tcx>, _: MirSource<'tcx>, body: &mut Body<'tcx>) {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
         no_landing_pads(tcx, body)
     }
 }

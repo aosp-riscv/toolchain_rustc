@@ -1,7 +1,11 @@
 use crate::utils::paths;
 use crate::utils::{
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
     in_macro_or_desugar, is_copy, match_trait_method, match_type, remove_blocks, snippet_with_applicability,
     span_lint_and_sugg,
+=======
+    is_copy, match_trait_method, match_type, remove_blocks, snippet_with_applicability, span_lint_and_sugg,
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 };
 use if_chain::if_chain;
 use rustc::hir;
@@ -44,7 +48,11 @@ declare_lint_pass!(MapClone => [MAP_CLONE]);
 
 impl<'a, 'tcx> LateLintPass<'a, 'tcx> for MapClone {
     fn check_expr(&mut self, cx: &LateContext<'_, '_>, e: &hir::Expr) {
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
         if in_macro_or_desugar(e.span) {
+=======
+        if e.span.from_expansion() {
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
             return;
         }
 
@@ -58,7 +66,7 @@ impl<'a, 'tcx> LateLintPass<'a, 'tcx> for MapClone {
             let closure_body = cx.tcx.hir().body(body_id);
             let closure_expr = remove_blocks(&closure_body.value);
             then {
-                match closure_body.arguments[0].pat.node {
+                match closure_body.params[0].pat.node {
                     hir::PatKind::Ref(ref inner, _) => if let hir::PatKind::Binding(
                         hir::BindingAnnotation::Unannotated, .., name, None
                     ) = inner.node {

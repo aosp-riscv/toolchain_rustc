@@ -13,7 +13,11 @@ test = false
 flate2 = "1.0"
 log = "0.4"
 punycode = "0.4.0"
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 rustc-demangle = "0.1.15"
+=======
+rustc-demangle = "0.1.16"
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 syntax = { path = "../libsyntax" }
 syntax_pos = { path = "../libsyntax_pos" }

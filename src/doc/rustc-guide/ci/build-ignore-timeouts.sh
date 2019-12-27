@@ -2,7 +2,16 @@
 
 output=$(mktemp)
 
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 RUST_LOG=mdbook_linkcheck=debug mdbook build 2>&1 | tee $output
+=======
+mkdir -p book/
+cp -r $HOME/linkcheck/ book/
+RUST_LOG=mdbook_linkcheck=debug mdbook-linkcheck -s 2>&1 | tee -a $output
+cp -r book/linkcheck $HOME/
+
+mdbook build
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 result=${PIPESTATUS[0]}
 

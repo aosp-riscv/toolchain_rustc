@@ -1,8 +1,20 @@
+<<<<<<< HEAD   (086005 Importing rustc-1.38.0)
 error: expected one of `!`, `.`, `::`, `;`, `?`, `{`, `}`, or an operator, found `<-`
   --> $DIR/bad.rs:5:7
    |
 LL |     x <- y;
    |       ^^ expected one of 8 possible tokens here
+=======
+error: unexpected token: `<-`
+  --> $DIR/bad.rs:5:7
+   |
+LL |     x <- y;
+   |       ^^
+help: if you meant to write a comparison against a negative value, add a space in between `<` and `-`
+   |
+LL |     x < - y;
+   |       ^^^
+>>>>>>> BRANCH (8cd2c9 Importing rustc-1.39.0)
 
 error: expected expression, found keyword `in`
   --> $DIR/bad.rs:10:5
