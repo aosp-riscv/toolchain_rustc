@@ -956,7 +956,7 @@ pub fn add_to_sysroot(
 
 pub fn run_cargo(builder: &Builder<'_>,
                  cargo: Cargo,
-                 tail_args: Vec<String>,
+                 mut tail_args: Vec<String>,
                  stamp: &Path,
                  additional_target_deps: Vec<PathBuf>,
                  is_check: bool)
@@ -974,6 +974,8 @@ pub fn run_cargo(builder: &Builder<'_>,
     let host_root_dir = target_root_dir.parent().unwrap() // chop off `release`
                                        .parent().unwrap() // chop off `$target`
                                        .join(target_root_dir.file_name().unwrap());
+
+    tail_args.push(format!("-v"));
 
     // Spawn Cargo slurping up its JSON output. We'll start building up the
     // `deps` array of all files it generated along with a `toplevel` array of
