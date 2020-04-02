@@ -1,0 +1,1852 @@
+{
+  "comments": [
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "9fc8350c_8a274871",
+          "description": "Change to \"src/librustc/infer/error_reporting/mod.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc/infer/error_reporting/mod.rs",
+              "range": {
+                "startLine": 1791,
+                "startChar": 19,
+                "endLine": 1791,
+                "endChar": 30
+              },
+              "replacement": "Explicitly"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "d9bb2674_e2842cf7",
+        "filename": "src/librustc/infer/error_reporting/mod.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 1791,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"Explicitely\" -- should it be \"Explicitly\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 1791,
+        "startChar": 19,
+        "endLine": 1791,
+        "endChar": 30
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "4fe6df3b_9762c989",
+          "description": "Change to \"src/librustc_codegen_llvm/back/lto.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_codegen_llvm/back/lto.rs",
+              "range": {
+                "startLine": 509,
+                "startChar": 32,
+                "endLine": 509,
+                "endChar": 38
+              },
+              "replacement": "current"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "b38fe6c8_e644b1dc",
+        "filename": "src/librustc_codegen_llvm/back/lto.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 509,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"curent\" -- should it be \"current\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 509,
+        "startChar": 32,
+        "endLine": 509,
+        "endChar": 38
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "d949623a_e3bf58e2",
+          "description": "Change to \"src/librustc_codegen_llvm/back/lto.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_codegen_llvm/back/lto.rs",
+              "range": {
+                "startLine": 543,
+                "startChar": 20,
+                "endLine": 543,
+                "endChar": 26
+              },
+              "replacement": "current"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "308249da_de5cf6c6",
+        "filename": "src/librustc_codegen_llvm/back/lto.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 543,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"curent\" -- should it be \"current\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 543,
+        "startChar": 20,
+        "endLine": 543,
+        "endChar": 26
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "ec56f84d_87fd867e",
+          "description": "Change to \"src/librustc_codegen_utils/symbol_names.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_codegen_utils/symbol_names.rs",
+              "range": {
+                "startLine": 188,
+                "startChar": 19,
+                "endLine": 188,
+                "endChar": 29
+              },
+              "replacement": "incorrectly"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "fc3b353a_84db1a6d",
+        "filename": "src/librustc_codegen_utils/symbol_names.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 188,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"incorectly\" -- should it be \"incorrectly\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 188,
+        "startChar": 19,
+        "endLine": 188,
+        "endChar": 29
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "d99f56ce_f801a63c",
+          "description": "Change to \"src/librustc_expand/mbe.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_expand/mbe.rs",
+              "range": {
+                "startLine": 72,
+                "startChar": 46,
+                "endLine": 72,
+                "endChar": 56
+              },
+              "replacement": "repetitions"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "a42efeb8_b5f21322",
+        "filename": "src/librustc_expand/mbe.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"reptitions\" -- should it be \"repetitions\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 72,
+        "startChar": 46,
+        "endLine": 72,
+        "endChar": 56
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "6fb14ac9_f87a0098",
+          "description": "Change to \"src/librustc_expand/mbe/macro_rules.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_expand/mbe/macro_rules.rs",
+              "range": {
+                "startLine": 737,
+                "startChar": 65,
+                "endLine": 737,
+                "endChar": 69
+              },
+              "replacement": "empty"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "998a1365_cbe0e8c9",
+        "filename": "src/librustc_expand/mbe/macro_rules.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 737,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"empy\" -- should it be \"empty\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 737,
+        "startChar": 65,
+        "endLine": 737,
+        "endChar": 69
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "c31179e9_063d48bb",
+          "description": "Change to \"src/librustc_expand/mbe/transcribe.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_expand/mbe/transcribe.rs",
+              "range": {
+                "startLine": 210,
+                "startChar": 54,
+                "endLine": 210,
+                "endChar": 64
+              },
+              "replacement": "repetitions"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "fdea0edf_b936220b",
+        "filename": "src/librustc_expand/mbe/transcribe.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"reptitions\" -- should it be \"repetitions\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 210,
+        "startChar": 54,
+        "endLine": 210,
+        "endChar": 64
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "e4743d53_4084785d",
+          "description": "Change to \"src/librustc_metadata/locator.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_metadata/locator.rs",
+              "range": {
+                "startLine": 714,
+                "startChar": 14,
+                "endLine": 714,
+                "endChar": 22
+              },
+              "replacement": "currently"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "541db2fe_b8bd0f88",
+        "filename": "src/librustc_metadata/locator.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 714,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"currenty\" -- should it be \"currently\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 714,
+        "startChar": 14,
+        "endLine": 714,
+        "endChar": 22
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "157dbf12_5c9bf938",
+          "description": "Change to \"src/librustc_mir/borrow_check/diagnostics/mutability_errors.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_mir/borrow_check/diagnostics/mutability_errors.rs",
+              "range": {
+                "startLine": 228,
+                "startChar": 76,
+                "endLine": 228,
+                "endChar": 83
+              },
+              "replacement": "keyword"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "9e25ec0c_331e9629",
+        "filename": "src/librustc_mir/borrow_check/diagnostics/mutability_errors.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"kewyord\" -- should it be \"keyword\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 228,
+        "startChar": 76,
+        "endLine": 228,
+        "endChar": 83
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "0622d14e_0e51032f",
+          "description": "Change to \"src/librustc_mir_build/hair/pattern/_match.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_mir_build/hair/pattern/_match.rs",
+              "range": {
+                "startLine": 841,
+                "startChar": 41,
+                "endLine": 841,
+                "endChar": 52
+              },
+              "replacement": "explicitly"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "bd2e902f_17d9a153",
+        "filename": "src/librustc_mir_build/hair/pattern/_match.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 841,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"explicitely\" -- should it be \"explicitly\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 841,
+        "startChar": 41,
+        "endLine": 841,
+        "endChar": 52
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "db34ea42_26ec61cf",
+          "description": "Change to \"src/librustc_parse/parser/ty.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_parse/parser/ty.rs",
+              "range": {
+                "startLine": 56,
+                "startChar": 41,
+                "endLine": 56,
+                "endChar": 48
+              },
+              "replacement": "the"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "9490ea81_bafd282b",
+        "filename": "src/librustc_parse/parser/ty.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"the the\" -- should it be \"the\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 56,
+        "startChar": 41,
+        "endLine": 56,
+        "endChar": 48
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "3250d2fa_d5777924",
+          "description": "Change to \"src/librustc_passes/region.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_passes/region.rs",
+              "range": {
+                "startLine": 288,
+                "startChar": 49,
+                "endLine": 288,
+                "endChar": 56
+              },
+              "replacement": "compound"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "0f34226c_5db94eaa",
+        "filename": "src/librustc_passes/region.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"compund\" -- should it be \"compound\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 288,
+        "startChar": 49,
+        "endLine": 288,
+        "endChar": 56
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "e4575062_6ad642c6",
+          "description": "Change to \"src/librustc_span/symbol.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_span/symbol.rs",
+              "range": {
+                "startLine": 108,
+                "startChar": 60,
+                "endLine": 108,
+                "endChar": 67
+              },
+              "replacement": "the"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "1c475f63_61c8a92b",
+        "filename": "src/librustc_span/symbol.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"the the\" -- should it be \"the\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 108,
+        "startChar": 60,
+        "endLine": 108,
+        "endChar": 67
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "f2b7a86e_15a3150b",
+          "description": "Change to \"src/librustc_typeck/collect.rs\"",
+          "replacements": [
+            {
+              "path": "src/librustc_typeck/collect.rs",
+              "range": {
+                "startLine": 2481,
+                "startChar": 31,
+                "endLine": 2481,
+                "endChar": 38
+              },
+              "replacement": "the"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "ddaf1b34_9dfa1273",
+        "filename": "src/librustc_typeck/collect.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 2481,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"the the\" -- should it be \"the\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 2481,
+        "startChar": 31,
+        "endLine": 2481,
+        "endChar": 38
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "eecfb6a7_0a613945",
+          "description": "Change to \"src/libstd/sys/cloudabi/abi/cloudabi.rs\"",
+          "replacements": [
+            {
+              "path": "src/libstd/sys/cloudabi/abi/cloudabi.rs",
+              "range": {
+                "startLine": 277,
+                "startChar": 4,
+                "endLine": 277,
+                "endChar": 9
+              },
+              "replacement": "ACCESS"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "18aac97f_43a95e27",
+        "filename": "src/libstd/sys/cloudabi/abi/cloudabi.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"ACCES\" -- should it be \"ACCESS\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 277,
+        "startChar": 4,
+        "endLine": 277,
+        "endChar": 9
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "c83777fc_41a59d89",
+          "description": "Change to \"src/test/incremental/thinlto/cgu_invalidated_when_import_removed.rs\"",
+          "replacements": [
+            {
+              "path": "src/test/incremental/thinlto/cgu_invalidated_when_import_removed.rs",
+              "range": {
+                "startLine": 44,
+                "startChar": 62,
+                "endLine": 44,
+                "endChar": 70
+              },
+              "replacement": "existent"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "5f42368b_56436b33",
+        "filename": "src/test/incremental/thinlto/cgu_invalidated_when_import_removed.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"existant\" -- should it be \"existent\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 44,
+        "startChar": 62,
+        "endLine": 44,
+        "endChar": 70
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "59c1305b_1cad10c2",
+          "description": "Change to \"src/test/ui/type-alias-impl-trait/issue-65918.rs\"",
+          "replacements": [
+            {
+              "path": "src/test/ui/type-alias-impl-trait/issue-65918.rs",
+              "range": {
+                "startLine": 7,
+                "startChar": 32,
+                "endLine": 7,
+                "endChar": 43
+              },
+              "replacement": "convenience"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "39cff010_b000428f",
+        "filename": "src/test/ui/type-alias-impl-trait/issue-65918.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"convinience\" -- should it be \"convenience\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 7,
+        "startChar": 32,
+        "endLine": 7,
+        "endChar": 43
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "22918896_57d1654f",
+          "description": "Change to \"src/test/ui/type/type-check/assignment-in-if.rs\"",
+          "replacements": [
+            {
+              "path": "src/test/ui/type/type-check/assignment-in-if.rs",
+              "range": {
+                "startLine": 29,
+                "startChar": 55,
+                "endLine": 29,
+                "endChar": 64
+              },
+              "replacement": "suppressed"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "46965f12_590ecc8d",
+        "filename": "src/test/ui/type/type-check/assignment-in-if.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"suppresed\" -- should it be \"suppressed\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 29,
+        "startChar": 55,
+        "endLine": 29,
+        "endChar": 64
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "da1ed8d5_bbab66b5",
+          "description": "Change to \"src/tools/cargo/src/cargo/core/resolver/context.rs\"",
+          "replacements": [
+            {
+              "path": "src/tools/cargo/src/cargo/core/resolver/context.rs",
+              "range": {
+                "startLine": 401,
+                "startChar": 54,
+                "endLine": 401,
+                "endChar": 63
+              },
+              "replacement": "more than"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "19781593_6cde0697",
+        "filename": "src/tools/cargo/src/cargo/core/resolver/context.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"more then\" -- should it be \"more than\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 401,
+        "startChar": 54,
+        "endLine": 401,
+        "endChar": 63
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "6935b423_05407341",
+          "description": "Change to \"src/tools/miri/src/shims/fs.rs\"",
+          "replacements": [
+            {
+              "path": "src/tools/miri/src/shims/fs.rs",
+              "range": {
+                "startLine": 472,
+                "startChar": 26,
+                "endLine": 472,
+                "endChar": 34
+              },
+              "replacement": "parameter"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "6d90b333_f385c7e3",
+        "filename": "src/tools/miri/src/shims/fs.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"paramter\" -- should it be \"parameter\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 472,
+        "startChar": 26,
+        "endLine": 472,
+        "endChar": 34
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "da052eed_c4267534",
+          "description": "Change to \"src/tools/tidy/src/pal.rs\"",
+          "replacements": [
+            {
+              "path": "src/tools/tidy/src/pal.rs",
+              "range": {
+                "startLine": 162,
+                "startChar": 11,
+                "endLine": 162,
+                "endChar": 20
+              },
+              "replacement": "preceded"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "522ca6d1_f9bd6489",
+        "filename": "src/tools/tidy/src/pal.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"preceeded\" -- should it be \"preceded\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 162,
+        "startChar": 11,
+        "endLine": 162,
+        "endChar": 20
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "d45594dd_e4fac36f",
+          "description": "Change to \"src/tools/tidy/src/pal.rs\"",
+          "replacements": [
+            {
+              "path": "src/tools/tidy/src/pal.rs",
+              "range": {
+                "startLine": 209,
+                "startChar": 12,
+                "endLine": 209,
+                "endChar": 20
+              },
+              "replacement": "precedes"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "d92000f5_2e1d841d",
+        "filename": "src/tools/tidy/src/pal.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"preceeds\" -- should it be \"precedes\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 209,
+        "startChar": 12,
+        "endLine": 209,
+        "endChar": 20
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "b95ad078_58ed52e7",
+          "description": "Change to \"vendor/curl-sys/curl/src/tool_cb_hdr.c\"",
+          "replacements": [
+            {
+              "path": "vendor/curl-sys/curl/src/tool_cb_hdr.c",
+              "range": {
+                "startLine": 112,
+                "startChar": 24,
+                "endLine": 112,
+                "endChar": 33
+              },
+              "replacement": "occurrence"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "eb1b6172_15328005",
+        "filename": "vendor/curl-sys/curl/src/tool_cb_hdr.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"occurence\" -- should it be \"occurrence\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 112,
+        "startChar": 24,
+        "endLine": 112,
+        "endChar": 33
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "1faaca63_867af7d4",
+          "description": "Change to \"vendor/curl-sys/curl/src/tool_cb_hdr.c\"",
+          "replacements": [
+            {
+              "path": "vendor/curl-sys/curl/src/tool_cb_hdr.c",
+              "range": {
+                "startLine": 131,
+                "startChar": 23,
+                "endLine": 131,
+                "endChar": 32
+              },
+              "replacement": "occurrence"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "51e53e39_becaa73a",
+        "filename": "vendor/curl-sys/curl/src/tool_cb_hdr.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"occurence\" -- should it be \"occurrence\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 131,
+        "startChar": 23,
+        "endLine": 131,
+        "endChar": 32
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "a3257c5a_3bf92273",
+          "description": "Change to \"vendor/humantime-1.3.0/README.md\"",
+          "replacements": [
+            {
+              "path": "vendor/humantime-1.3.0/README.md",
+              "range": {
+                "startLine": 7,
+                "startChar": 1,
+                "endLine": 7,
+                "endChar": 7
+              },
+              "replacement": "GitHub"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "cf01528f_3551963b",
+        "filename": "vendor/humantime-1.3.0/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"Github\" -- should it be \"GitHub\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 7,
+        "startChar": 1,
+        "endLine": 7,
+        "endChar": 7
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "9b728075_a66c51a9",
+          "description": "Change to \"vendor/libgit2-sys/libgit2/include/git2/transport.h\"",
+          "replacements": [
+            {
+              "path": "vendor/libgit2-sys/libgit2/include/git2/transport.h",
+              "range": {
+                "startLine": 26,
+                "startChar": 25,
+                "endLine": 26,
+                "endChar": 33
+              },
+              "replacement": "received"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "a2fed349_680ac06e",
+        "filename": "vendor/libgit2-sys/libgit2/include/git2/transport.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"recieved\" -- should it be \"received\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 26,
+        "startChar": 25,
+        "endLine": 26,
+        "endChar": 33
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "ef1941da_047da558",
+          "description": "Change to \"vendor/libgit2-sys/libgit2/src/regexp.c\"",
+          "replacements": [
+            {
+              "path": "vendor/libgit2-sys/libgit2/src/regexp.c",
+              "range": {
+                "startLine": 48,
+                "startChar": 40,
+                "endLine": 48,
+                "endChar": 47
+              },
+              "replacement": "multiple"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "f52ba5d8_536936a6",
+        "filename": "vendor/libgit2-sys/libgit2/src/regexp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"mutiple\" -- should it be \"multiple\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 48,
+        "startChar": 40,
+        "endLine": 48,
+        "endChar": 47
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "efb62d3c_62dce33c",
+          "description": "Change to \"vendor/libnghttp2-sys/nghttp2/third-party/llhttp/include/llhttp.h\"",
+          "replacements": [
+            {
+              "path": "vendor/libnghttp2-sys/nghttp2/third-party/llhttp/include/llhttp.h",
+              "range": {
+                "startLine": 300,
+                "startChar": 3,
+                "endLine": 300,
+                "endChar": 14
+              },
+              "replacement": "successfully"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "6976a991_cd5c661d",
+        "filename": "vendor/libnghttp2-sys/nghttp2/third-party/llhttp/include/llhttp.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"successfuly\" -- should it be \"successfully\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 300,
+        "startChar": 3,
+        "endLine": 300,
+        "endChar": 14
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "fc870851_0c0b5b80",
+          "description": "Change to \"vendor/libnghttp2-sys/nghttp2/third-party/mruby/mrbgems/mruby-compiler/core/codegen.c\"",
+          "replacements": [
+            {
+              "path": "vendor/libnghttp2-sys/nghttp2/third-party/mruby/mrbgems/mruby-compiler/core/codegen.c",
+              "range": {
+                "startLine": 758,
+                "startChar": 17,
+                "endLine": 758,
+                "endChar": 26
+              },
+              "replacement": "arguments"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "d3c86970_25d8747f",
+        "filename": "vendor/libnghttp2-sys/nghttp2/third-party/mruby/mrbgems/mruby-compiler/core/codegen.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 758,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"arugments\" -- should it be \"arguments\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 758,
+        "startChar": 17,
+        "endLine": 758,
+        "endChar": 26
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "13265359_c07e717a",
+          "description": "Change to \"vendor/libnghttp2-sys/nghttp2/third-party/mruby/src/vm.c\"",
+          "replacements": [
+            {
+              "path": "vendor/libnghttp2-sys/nghttp2/third-party/mruby/src/vm.c",
+              "range": {
+                "startLine": 1851,
+                "startChar": 11,
+                "endLine": 1851,
+                "endChar": 20
+              },
+              "replacement": "initialize"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "8b390c02_c5a81fed",
+        "filename": "vendor/libnghttp2-sys/nghttp2/third-party/mruby/src/vm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1851,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"initalize\" -- should it be \"initialize\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 1851,
+        "startChar": 11,
+        "endLine": 1851,
+        "endChar": 20
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "f47ecc4d_6870662b",
+          "description": "Change to \"vendor/libnghttp2-sys/nghttp2/third-party/mruby/src/vm.c\"",
+          "replacements": [
+            {
+              "path": "vendor/libnghttp2-sys/nghttp2/third-party/mruby/src/vm.c",
+              "range": {
+                "startLine": 1855,
+                "startChar": 16,
+                "endLine": 1855,
+                "endChar": 27
+              },
+              "replacement": "initializer"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "d28e2a6b_45138d23",
+        "filename": "vendor/libnghttp2-sys/nghttp2/third-party/mruby/src/vm.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1855,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"initailizer\" -- should it be \"initializer\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 1855,
+        "startChar": 16,
+        "endLine": 1855,
+        "endChar": 27
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "9472db85_acd3ab9f",
+          "description": "Change to \"vendor/libnghttp2-sys/nghttp2/third-party/url-parser/url_parser.c\"",
+          "replacements": [
+            {
+              "path": "vendor/libnghttp2-sys/nghttp2/third-party/url-parser/url_parser.c",
+              "range": {
+                "startLine": 607,
+                "startChar": 13,
+                "endLine": 607,
+                "endChar": 21
+              },
+              "replacement": "http://"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "e7e8235e_d5c9c03a",
+        "filename": "vendor/libnghttp2-sys/nghttp2/third-party/url-parser/url_parser.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 607,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"http:///\" -- should it be \"http://\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 607,
+        "startChar": 13,
+        "endLine": 607,
+        "endChar": 21
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "160f3431_35867965",
+          "description": "Change to \"vendor/libssh2-sys/libssh2/src/wincng.c\"",
+          "replacements": [
+            {
+              "path": "vendor/libssh2-sys/libssh2/src/wincng.c",
+              "range": {
+                "startLine": 2405,
+                "startChar": 8,
+                "endLine": 2405,
+                "endChar": 13
+              },
+              "replacement": " */"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "15006d84_f2724e29",
+        "filename": "vendor/libssh2-sys/libssh2/src/wincng.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2405,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \" * */\" -- should it be \" */\"?\nMalformatted comment.\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 2405,
+        "startChar": 8,
+        "endLine": 2405,
+        "endChar": 13
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "75e0510e_9902bb7d",
+          "description": "Change to \"vendor/measureme/src/event_id.rs\"",
+          "replacements": [
+            {
+              "path": "vendor/measureme/src/event_id.rs",
+              "range": {
+                "startLine": 75,
+                "startChar": 15,
+                "endLine": 75,
+                "endChar": 24
+              },
+              "replacement": "Separator"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "568866fa_b843c953",
+        "filename": "vendor/measureme/src/event_id.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"Seperator\" -- should it be \"Separator\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 75,
+        "startChar": 15,
+        "endLine": 75,
+        "endChar": 24
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "3eeded0a_12c42c3f",
+          "description": "Change to \"vendor/pkg-config/src/lib.rs\"",
+          "replacements": [
+            {
+              "path": "vendor/pkg-config/src/lib.rs",
+              "range": {
+                "startLine": 347,
+                "startChar": 19,
+                "endLine": 347,
+                "endChar": 28
+              },
+              "replacement": "targeted"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "dc329e3e_b336628a",
+        "filename": "vendor/pkg-config/src/lib.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"targetted\" -- should it be \"targeted\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 347,
+        "startChar": 19,
+        "endLine": 347,
+        "endChar": 28
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "263ad85f_e8d8c28a",
+          "description": "Change to \"vendor/pkg-config/src/lib.rs\"",
+          "replacements": [
+            {
+              "path": "vendor/pkg-config/src/lib.rs",
+              "range": {
+                "startLine": 354,
+                "startChar": 21,
+                "endLine": 354,
+                "endChar": 30
+              },
+              "replacement": "targeted"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "dec67799_4eab8527",
+        "filename": "vendor/pkg-config/src/lib.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"targetted\" -- should it be \"targeted\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 354,
+        "startChar": 21,
+        "endLine": 354,
+        "endChar": 30
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "20c31398_e8cfb0af",
+          "description": "Change to \"vendor/pkg-config/src/lib.rs\"",
+          "replacements": [
+            {
+              "path": "vendor/pkg-config/src/lib.rs",
+              "range": {
+                "startLine": 355,
+                "startChar": 28,
+                "endLine": 355,
+                "endChar": 37
+              },
+              "replacement": "targeted"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "435ada72_e77d676b",
+        "filename": "vendor/pkg-config/src/lib.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"targetted\" -- should it be \"targeted\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 355,
+        "startChar": 28,
+        "endLine": 355,
+        "endChar": 37
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "18300658_6596b654",
+          "description": "Change to \"vendor/tokio-sync/src/lock.rs\"",
+          "replacements": [
+            {
+              "path": "vendor/tokio-sync/src/lock.rs",
+              "range": {
+                "startLine": 134,
+                "startChar": 55,
+                "endLine": 134,
+                "endChar": 63
+              },
+              "replacement": "panicking"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "055c18df_d7b5cb31",
+        "filename": "vendor/tokio-sync/src/lock.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"panicing\" -- should it be \"panicking\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 134,
+        "startChar": 55,
+        "endLine": 134,
+        "endChar": 63
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "758e3f54_1d5d9527",
+          "description": "Change to \"vendor/tokio-sync/src/mpsc/block.rs\"",
+          "replacements": [
+            {
+              "path": "vendor/tokio-sync/src/mpsc/block.rs",
+              "range": {
+                "startLine": 191,
+                "startChar": 56,
+                "endLine": 191,
+                "endChar": 66
+              },
+              "replacement": "targeting"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "848daed6_d44fdcc3",
+        "filename": "vendor/tokio-sync/src/mpsc/block.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"targetting\" -- should it be \"targeting\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 191,
+        "startChar": 56,
+        "endLine": 191,
+        "endChar": 66
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "4c11710d_7836e666",
+          "description": "Change to \"vendor/tokio-sync/src/semaphore.rs\"",
+          "replacements": [
+            {
+              "path": "vendor/tokio-sync/src/semaphore.rs",
+              "range": {
+                "startLine": 648,
+                "startChar": 17,
+                "endLine": 648,
+                "endChar": 26
+              },
+              "replacement": "semaphore"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "507de3f8_ead42290",
+        "filename": "vendor/tokio-sync/src/semaphore.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 648,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"sempahore\" -- should it be \"semaphore\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 648,
+        "startChar": 17,
+        "endLine": 648,
+        "endChar": 26
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "c77eaa4b_b0c79e6b",
+          "description": "Change to \"vendor/tokio-sync/src/task/atomic_task.rs\"",
+          "replacements": [
+            {
+              "path": "vendor/tokio-sync/src/task/atomic_task.rs",
+              "range": {
+                "startLine": 87,
+                "startChar": 6,
+                "endLine": 87,
+                "endChar": 10
+              },
+              "replacement": "the "
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "b82bd545_ae0c1919",
+        "filename": "vendor/tokio-sync/src/task/atomic_task.rs",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"teh \" -- should it be \"the \"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 87,
+        "startChar": 6,
+        "endLine": 87,
+        "endChar": 10
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "robotId": "ayeaye",
+      "robotRunId": "AR00000000000002251257",
+      "url": "https://android-build.googleplex.com/builds/treetop/android-review/1277173?revision\u003d1",
+      "fixSuggestions": [
+        {
+          "fixId": "8e26d0c0_549365be",
+          "description": "Change to \"vendor/unicode-script/scripts/unicode.py\"",
+          "replacements": [
+            {
+              "path": "vendor/unicode-script/scripts/unicode.py",
+              "range": {
+                "startLine": 108,
+                "startChar": 6,
+                "endLine": 108,
+                "endChar": 12
+              },
+              "replacement": "because"
+            }
+          ]
+        }
+      ],
+      "key": {
+        "uuid": "ca948b89_2578e8e6",
+        "filename": "vendor/unicode-script/scripts/unicode.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1550585
+      },
+      "writtenOn": "2020-04-02T01:44:12Z",
+      "side": 1,
+      "message": "Common typo found: \"becase\" -- should it be \"because\"?\nNote: a line containing \"common_typos_disable\" or \"common_typos_enable\" will turn off or on (respectively) the linter for subsequent lines in the file. Alternatively include the token \"NOTYPO\" within a line to skip typo linting that line.",
+      "range": {
+        "startLine": 108,
+        "startChar": 6,
+        "endLine": 108,
+        "endChar": 12
+      },
+      "revId": "859223d571ac76195f46ef610ad1f7fe42a915c1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
