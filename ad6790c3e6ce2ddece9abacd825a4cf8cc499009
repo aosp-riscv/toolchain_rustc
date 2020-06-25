@@ -1,0 +1,8 @@
+Code-Review+2: Matthew Maurer <mmaurer@google.com>
+Lint+1: Lint 🤖 <android-build-prod-ayeaye@system.gserviceaccount.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Jeffrey Vander Stoep <jeffv@google.com>
+Submitted-at: Thu, 25 Jun 2020 10:17:57 +0000
+Reviewed-on: https://android-review.googlesource.com/c/toolchain/rustc/+/1349544
+Project: toolchain/rustc
+Branch: refs/heads/master
