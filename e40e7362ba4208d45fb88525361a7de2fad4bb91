@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "29c1b8c7_e0c8648d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1561651
+      },
+      "writtenOn": "2020-11-02T12:14:11Z",
+      "side": 1,
+      "message": "The darwin_mac target also builds successfully. See L74900000732731616.",
+      "revId": "e40e7362ba4208d45fb88525361a7de2fad4bb91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
