@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "59baa39b_fcd04251",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2021-07-20T21:18:26Z",
+      "side": 1,
+      "message": "Please wait to merge this until the 1.52.1 is in and working for everyone else.",
+      "revId": "c42f0c2f7978bcea77f721aab5a9c73712a3aabb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889"
+    }
+  ]
+}
